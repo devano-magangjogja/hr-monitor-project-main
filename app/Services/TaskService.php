@@ -42,7 +42,7 @@ class TaskService
         if ($role === 'admin') {
             // Admin bisa assign ke semua role kecuali admin itu sendiri
             return $query
-                ->whereIn('role', ['hr_staff', 'hr_assistant', 'cs', 'ob'])
+                ->whereIn('role', ['hr_staff', 'hr_assistant', 'cs', 'ob', 'programmer', 'dg', 'vg', 'pm'])
                 ->where('is_active', 1)
                 ->orderBy('role')
                 ->orderBy('name')

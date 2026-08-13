@@ -12,7 +12,7 @@ class NotificationController extends Controller
 {
     public function index()
     {
-        $users = User::whereIn('role', ['hr_staff', 'hr_assistant', 'cs', 'ob'])
+        $users = User::where('role', '!=', 'admin')
             ->where('is_active', 1)
             ->orderBy('role')
             ->orderBy('name')
@@ -37,7 +37,7 @@ class NotificationController extends Controller
         $validated = $request->validate([
             'title'      => ['required', 'string', 'max:100'],
             'message'    => ['required', 'string', 'max:500'],
-            'recipients' => ['required', 'in:all,hr_staff,hr_assistant,cs,ob,specific'],
+            'recipients' => ['required', 'in:all,hr_staff,hr_assistant,cs,ob,programmer,dg,vg,pm,specific'],
             'user_ids'   => ['required_if:recipients,specific', 'array'],
             'user_ids.*' => ['integer', 'exists:users,id'],
         ]);
@@ -47,7 +47,7 @@ class NotificationController extends Controller
         // Tentukan penerima
         if ($validated['recipients'] === 'specific') {
             $users = User::whereIn('id', $validated['user_ids'])
-                ->whereIn('role', ['hr_staff', 'hr_assistant', 'cs', 'ob'])
+                ->where('role', '!=', 'admin')
                 ->where('is_active', 1)
                 ->get();
         } else {
@@ -56,7 +56,7 @@ class NotificationController extends Controller
             if ($validated['recipients'] !== 'all') {
                 $query->where('role', $validated['recipients']);
             } else {
-                $query->whereIn('role', ['hr_staff', 'hr_assistant', 'cs', 'ob']);
+                $query->where('role', '!=', 'admin');
             }
 
             $users = $query->get();

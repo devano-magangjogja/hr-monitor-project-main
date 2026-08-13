@@ -26,7 +26,7 @@ class UserController extends Controller
             'name'      => ['required', 'string', 'max:100'],
             'email'     => ['required', 'email', 'max:100'],
             'password'  => ['required', 'string', 'min:8', 'confirmed'],
-            'role'      => ['required', 'in:hr_staff,hr_assistant,cs,ob'],
+            'role'      => ['required', 'in:hr_staff,hr_assistant,cs,ob,programmer,dg,vg,pm'],
             'is_active' => ['nullable', 'boolean'],
         ]);
 
@@ -44,7 +44,7 @@ class UserController extends Controller
         $validated = $request->validate([
             'name'         => ['required', 'string', 'max:100'],
             'email'        => ['required', 'email', 'max:100'],
-            'role'         => ['required', 'in:hr_staff,hr_assistant,cs,ob'],
+            'role'         => ['required', 'in:hr_staff,hr_assistant,cs,ob,programmer,dg,vg,pm'],
             'is_active'    => ['nullable', 'boolean'],
             'image'        => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
             'remove_image' => ['nullable', 'in:0,1'],
