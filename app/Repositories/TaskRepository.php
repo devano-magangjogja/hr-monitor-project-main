@@ -432,7 +432,7 @@ class TaskRepository
     public function getDailyStatsPerUser(): Collection
     {
         return \App\Models\User::query()
-            ->whereIn('role', ['hr_staff', 'hr_assistant', 'cs', 'ob'])
+            ->where('role', '!=', 'admin')
             ->where('is_active', 1)
             ->withCount([
                 'taskAssignments as total_tasks' => function ($q) {
@@ -632,7 +632,7 @@ class TaskRepository
     public function getProductivityByRange(string $dateFrom, string $dateTo): \Illuminate\Support\Collection
     {
         $users = \App\Models\User::query()
-            ->whereIn('role', ['hr_staff', 'hr_assistant', 'cs', 'ob'])
+            ->where('role', '!=', 'admin')
             ->where('is_active', 1)
             ->orderBy('role')
             ->orderBy('name')

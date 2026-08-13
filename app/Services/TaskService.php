@@ -210,7 +210,7 @@ class TaskService
         $role = Auth::user()->role;
 
         $allowedRoles = $role === 'admin'
-            ? ['hr_staff', 'hr_assistant', 'cs', 'ob']
+            ? ['hr_staff', 'hr_assistant', 'cs', 'ob', 'programmer', 'dg', 'vg', 'pm']
             : ['hr_assistant']; // hr_staff hanya bisa assign ke hr_assistant
 
         /** @var Builder $query */

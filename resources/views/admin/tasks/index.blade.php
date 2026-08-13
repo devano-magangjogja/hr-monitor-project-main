@@ -133,7 +133,17 @@
                                         note: null,
                                         assignees: {{ json_encode($task->assignedUsers->map(fn($u) => [
                                             'name'   => $u->name,
-                                            'role'   => $u->role === 'hr_staff' ? 'HR Staff' : 'HR Assistant',
+                                            'role'   => match($u->role) {
+                                                'hr_staff'     => 'HR Staff',
+                                                'hr_assistant' => 'HR Assistant',
+                                                'cs'           => 'CS',
+                                                'ob'           => 'OB',
+                                                'programmer'   => 'Programmer',
+                                                'dg'           => 'DG',
+                                                'vg'           => 'VG',
+                                                'pm'           => 'PM',
+                                                default        => strtoupper($u->role),
+                                            },
                                             'status' => $task->assignments->firstWhere('user_id', $u->id)?->is_completed ?? 'pending',
                                         ])) }}
                                     })"
@@ -213,6 +223,10 @@
                                         'hr_assistant' => 'HR Assistant',
                                         'cs'           => 'CS',
                                         'ob'           => 'OB',
+                                        'programmer'   => 'Programmer',
+                                        'dg'           => 'DG',
+                                        'vg'           => 'VG',
+                                        'pm'           => 'PM',
                                         default        => strtoupper($user->role),
                                     } }}
                                 </p>
@@ -291,6 +305,10 @@
                                         'hr_assistant' => 'HR Assistant',
                                         'cs'           => 'CS',
                                         'ob'           => 'OB',
+                                        'programmer'   => 'Programmer',
+                                        'dg'           => 'DG',
+                                        'vg'           => 'VG',
+                                        'pm'           => 'PM',
                                         default        => strtoupper($user->role),
                                     } }}
                                 </p>
