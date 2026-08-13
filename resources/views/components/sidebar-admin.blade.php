@@ -97,6 +97,50 @@
             </svg>
             Pantau OB
         </a>
+
+        {{-- Pantau Programmer --}}
+        <a href="{{ route('admin.tasks.programmer') }}"
+           class="flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-all
+                  {{ request()->routeIs('admin.tasks.programmer') ? 'text-white bg-white/10' : 'text-slate-400 hover:text-white hover:bg-white/5' }}">
+            <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/>
+            </svg>
+            Pantau Programmer
+        </a>
+
+        {{-- Pantau DG --}}
+        <a href="{{ route('admin.tasks.dg') }}"
+           class="flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-all
+                  {{ request()->routeIs('admin.tasks.dg') ? 'text-white bg-white/10' : 'text-slate-400 hover:text-white hover:bg-white/5' }}">
+            <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+            </svg>
+            Pantau DG
+        </a>
+
+        {{-- Pantau VG --}}
+        <a href="{{ route('admin.tasks.vg') }}"
+           class="flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-all
+                  {{ request()->routeIs('admin.tasks.vg') ? 'text-white bg-white/10' : 'text-slate-400 hover:text-white hover:bg-white/5' }}">
+            <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+            </svg>
+            Pantau VG
+        </a>
+
+        {{-- Pantau PM --}}
+        <a href="{{ route('admin.tasks.pm') }}"
+           class="flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-all
+                  {{ request()->routeIs('admin.tasks.pm') ? 'text-white bg-white/10' : 'text-slate-400 hover:text-white hover:bg-white/5' }}">
+            <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2h-2a2 2 0 00-2 2"/>
+            </svg>
+            Pantau PM
+        </a>
     </div>
 </div>
 

@@ -105,28 +105,28 @@ class TaskController extends Controller
     // ── Halaman 6: Pantau Programmer ─────────────────────
     public function programmerTasks()
     {
-        $tasks = $this->taskService->getAllTaskForRole('programmer');
+        $tasks = $this->taskService->getAllTasksForRole('programmer');
         return view('admin.tasks.programmer', compact('tasks'));
     }
 
     // ── Halaman 7: Pantau DG ─────────────────────
     public function dgTasks()
     {
-        $tasks = $this->taskService->getAllTaskForRole('dg');
+        $tasks = $this->taskService->getAllTasksForRole('dg');
         return view('admin.tasks.dg', compact('tasks'));
     }
 
     // ── Halaman 8: Pantau VG ─────────────────────
     public function vgTasks()
     {
-        $tasks = $this->taskService->getAllTaskForRole('vg');
+        $tasks = $this->taskService->getAllTasksForRole('vg');
         return view('admin.tasks.vg', compact('tasks'));
     }
 
     // ── Halaman 9: Pantau PM ─────────────────────
     public function pmTasks()
     {
-        $tasks = $this->taskService->getAllTaskForRole('pm');
+        $tasks = $this->taskService->getAllTasksForRole('pm');
         return view('admin.tasks.pm', compact('tasks'));
     }
 

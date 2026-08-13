@@ -45,6 +45,10 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin'])->grou
     Route::get('/tasks/assistant', [AdminTaskController::class, 'assistantTasks'])->name('tasks.assistant');
     Route::get('/tasks/cs', [AdminTaskController::class, 'csTasks'])->name('tasks.cs');
     Route::get('/tasks/ob', [AdminTaskController::class, 'obTasks'])->name('tasks.ob');
+    Route::get('/tasks/programmer', [AdminTaskController::class, 'programmerTasks'])->name('tasks.programmer');
+    Route::get('/tasks/dg', [AdminTaskController::class, 'dgTasks'])->name('tasks.dg');
+    Route::get('/tasks/vg', [AdminTaskController::class, 'vgTasks'])->name('tasks.vg');
+    Route::get('/tasks/pm', [AdminTaskController::class, 'pmTasks'])->name('tasks.pm');
     Route::delete('/tasks/{task}/force', [AdminTaskController::class, 'forceDestroy'])->name('tasks.force-destroy');
 
     Route::prefix('reports')->name('reports.')->group(function () {
