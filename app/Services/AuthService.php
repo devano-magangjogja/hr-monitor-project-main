@@ -49,6 +49,10 @@ class AuthService
             'hr_assistant' => route('assistant.dashboard'),
             'cs'           => route('cs.dashboard'),
             'ob'           => route('ob.dashboard'),
+            'programmer'   => route('programmer.dashboard'),
+            'dg'           => route('dg.dashboard'),
+            'vg'           => route('vg.dashboard'),
+            'pm'           => route('pm.dashboard'),
             default        => route('login'),
         };
     }

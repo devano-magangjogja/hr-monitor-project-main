@@ -19,6 +19,14 @@ use App\Http\Controllers\Ob\DashboardController as ObDashboard;
 use App\Http\Controllers\Ob\TaskController as ObTaskController;
 use App\Http\Controllers\Assistant\DashboardController as AssistantDashboard;
 use App\Http\Controllers\Assistant\TaskController as AssistantTaskController;
+use App\Http\Controllers\Programmer\DashboardController as ProgrammerDashboard;
+use App\Http\Controllers\Programmer\TaskController as ProgrammerTaskController;
+use App\Http\Controllers\DG\DashboardController as DGDashboard;
+use App\Http\Controllers\DG\TaskController as DGTaskController;
+use App\Http\Controllers\VG\DashboardController as VGDashboard;
+use App\Http\Controllers\VG\TaskController as VGTaskController;
+use App\Http\Controllers\PM\DashboardController as PMDashboard;
+use App\Http\Controllers\PM\TaskController as PMTaskController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\ProfileController;
 
@@ -144,6 +152,62 @@ Route::prefix('assistant')->name('assistant.')->middleware(['auth', 'role:hr_ass
     Route::delete('/tasks/{task}', [AssistantTaskController::class, 'destroy'])->name('tasks.destroy');
     Route::patch('/tasks/{task}/complete', [AssistantTaskController::class, 'complete'])->name('tasks.complete');
     Route::get('/history', [AssistantTaskController::class, 'history'])->name('tasks.history');
+});
+
+// ── Programmer ───────────────────────────────────────────────────────────────
+Route::prefix('programmer')->name('programmer.')->middleware(['auth', 'role:programmer'])->group(function () {
+    Route::get('/dashboard', [ProgrammerDashboard::class, 'index'])->name('dashboard');
+    Route::resource('tasks', ProgrammerTaskController::class)->only(['index', 'store', 'update', 'destroy']);
+    Route::patch('/tasks/{task}/complete', [ProgrammerTaskController::class, 'complete'])->name('tasks.complete');
+    Route::get('/tasks/daily', [ProgrammerTaskController::class, 'dailyIndex'])->name('tasks.daily');
+    Route::patch('/tasks/daily/{task}/complete', [ProgrammerTaskController::class, 'dailyComplete'])->name('tasks.daily.complete');
+    Route::get('/tasks/assigned', [ProgrammerTaskController::class, 'assignedIndex'])->name('tasks.assigned');
+    Route::patch('/tasks/assigned/{task}/complete', [ProgrammerTaskController::class, 'assignedComplete'])->name('tasks.assigned.complete');
+    Route::get('/tasks/all', [ProgrammerTaskController::class, 'allIndex'])->name('tasks.all');
+    Route::patch('/tasks/all/{task}/complete', [ProgrammerTaskController::class, 'allComplete'])->name('tasks.all.complete');
+    Route::get('/history', [ProgrammerTaskController::class, 'history'])->name('tasks.history');
+});
+
+// ── DG (Desain Grafis) ───────────────────────────────────────────────────────
+Route::prefix('dg')->name('dg.')->middleware(['auth', 'role:dg'])->group(function () {
+    Route::get('/dashboard', [DGDashboard::class, 'index'])->name('dashboard');
+    Route::resource('tasks', DGTaskController::class)->only(['index', 'store', 'update', 'destroy']);
+    Route::patch('/tasks/{task}/complete', [DGTaskController::class, 'complete'])->name('tasks.complete');
+    Route::get('/tasks/daily', [DGTaskController::class, 'dailyIndex'])->name('tasks.daily');
+    Route::patch('/tasks/daily/{task}/complete', [DGTaskController::class, 'dailyComplete'])->name('tasks.daily.complete');
+    Route::get('/tasks/assigned', [DGTaskController::class, 'assignedIndex'])->name('tasks.assigned');
+    Route::patch('/tasks/assigned/{task}/complete', [DGTaskController::class, 'assignedComplete'])->name('tasks.assigned.complete');
+    Route::get('/tasks/all', [DGTaskController::class, 'allIndex'])->name('tasks.all');
+    Route::patch('/tasks/all/{task}/complete', [DGTaskController::class, 'allComplete'])->name('tasks.all.complete');
+    Route::get('/history', [DGTaskController::class, 'history'])->name('tasks.history');
+});
+
+// ── VG (Video Grafis) ────────────────────────────────────────────────────────
+Route::prefix('vg')->name('vg.')->middleware(['auth', 'role:vg'])->group(function () {
+    Route::get('/dashboard', [VGDashboard::class, 'index'])->name('dashboard');
+    Route::resource('tasks', VGTaskController::class)->only(['index', 'store', 'update', 'destroy']);
+    Route::patch('/tasks/{task}/complete', [VGTaskController::class, 'complete'])->name('tasks.complete');
+    Route::get('/tasks/daily', [VGTaskController::class, 'dailyIndex'])->name('tasks.daily');
+    Route::patch('/tasks/daily/{task}/complete', [VGTaskController::class, 'dailyComplete'])->name('tasks.daily.complete');
+    Route::get('/tasks/assigned', [VGTaskController::class, 'assignedIndex'])->name('tasks.assigned');
+    Route::patch('/tasks/assigned/{task}/complete', [VGTaskController::class, 'assignedComplete'])->name('tasks.assigned.complete');
+    Route::get('/tasks/all', [VGTaskController::class, 'allIndex'])->name('tasks.all');
+    Route::patch('/tasks/all/{task}/complete', [VGTaskController::class, 'allComplete'])->name('tasks.all.complete');
+    Route::get('/history', [VGTaskController::class, 'history'])->name('tasks.history');
+});
+
+// ── PM (Project Manager) ─────────────────────────────────────────────────────
+Route::prefix('pm')->name('pm.')->middleware(['auth', 'role:pm'])->group(function () {
+    Route::get('/dashboard', [PMDashboard::class, 'index'])->name('dashboard');
+    Route::resource('tasks', PMTaskController::class)->only(['index', 'store', 'update', 'destroy']);
+    Route::patch('/tasks/{task}/complete', [PMTaskController::class, 'complete'])->name('tasks.complete');
+    Route::get('/tasks/daily', [PMTaskController::class, 'dailyIndex'])->name('tasks.daily');
+    Route::patch('/tasks/daily/{task}/complete', [PMTaskController::class, 'dailyComplete'])->name('tasks.daily.complete');
+    Route::get('/tasks/assigned', [PMTaskController::class, 'assignedIndex'])->name('tasks.assigned');
+    Route::patch('/tasks/assigned/{task}/complete', [PMTaskController::class, 'assignedComplete'])->name('tasks.assigned.complete');
+    Route::get('/tasks/all', [PMTaskController::class, 'allIndex'])->name('tasks.all');
+    Route::patch('/tasks/all/{task}/complete', [PMTaskController::class, 'allComplete'])->name('tasks.all.complete');
+    Route::get('/history', [PMTaskController::class, 'history'])->name('tasks.history');
 });
 
 // ── Notifications (All Roles) ────────────────────────────────────────────────
