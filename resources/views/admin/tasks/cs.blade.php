@@ -1,7 +1,7 @@
-﻿@extends('layouts.app')
+@extends('layouts.app')
 
-@section('title', 'Pantau CS')
-@section('page-title', 'Pantau CS')
+@section('title', 'Pantau CS (Customer Service)')
+@section('page-title', 'Pantau CS (Customer Service)')
 @section('page-subtitle', 'Pantau seluruh tugas yang masuk ke CS (Customer Service) hari ini')
 
 @section('sidebar')
@@ -105,6 +105,35 @@
                 {{-- Aksi --}}
                 <td class="px-3 sm:px-6 py-3 sm:py-4 w-16 sm:w-20">
                     <div class="flex items-center justify-end whitespace-nowrap gap-0.5 sm:gap-1">
+                        {{-- Tombol Detail: Selalu Ada --}}
+                        <button
+                            type="button"
+                            onclick="openDetailModal(JSON.parse(this.dataset.detail))"
+                            data-detail="{{ json_encode([
+                                'title'       => $task->title,
+                                'description' => $task->description ?? '',
+                                'type'        => $task->type,
+                                'date'        => $task->task_date->translatedFormat('d M Y'),
+                                'source'      => $task->creator?->name ?? 'Sistem',
+                                'status'      => 'multiple',
+                                'note'        => null,
+                                'assignees'   => $task->assignedUsers->map(fn($u) => [
+                                    'name'   => $u->name,
+                                    'role'   => $u->role_label,
+                                    'status' => $task->assignments->firstWhere('user_id', $u->id)?->is_completed ?? 'pending',
+                                ]),
+                            ]) }}"
+                            class="p-1 sm:p-1.5 text-gray-400 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition"
+                            title="Lihat Detail">
+                            <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                            </svg>
+                        </button>
+
+                        {{-- Tombol Hapus: Hanya jika belum dikerjakan --}}
                         @if(!$hasCompleted && !$hasNotDone)
                             <button
                                 onclick="openDeleteModal({{ $task->id }}, '{{ addslashes($task->title) }}')"
@@ -115,34 +144,6 @@
                                           d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
                                 </svg>
                             </button>
-                            <button
-                                onclick="openDetailModal({
-                                    title: '{{ addslashes($task->title) }}',
-                                    description: '{{ addslashes($task->description ?? '') }}',
-                                    type: '{{ $task->type }}',
-                                    date: '{{ $task->task_date->translatedFormat('d M Y') }}',
-                                    source: '{{ addslashes($task->creator?->name ?? 'Sistem') }}',
-                                    status: 'multiple',
-                                    note: null,
-                                    assignees: {{ json_encode($task->assignedUsers->map(fn($u) => [
-                                        'name'   => $u->name,
-                                        'role'   => $u->role === 'hr_staff' ? 'HR Staff' : 'HR Assistant',
-                                        'status' => $task->assignments->firstWhere('user_id', $u->id)?->is_completed ?? 'pending',
-                                    ])) }}
-                                })"
-                                class="p-1 sm:p-1.5 text-gray-400 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition"
-                                title="Lihat Detail">
-                                <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M2.458 12C3.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
-                                </svg>
-                            </button>
-                        @elseif($hasCompleted)
-                            <span class="text-xs text-gray-400 italic">Terkunci</span>
-                        @else
-                            <span class="text-xs text-red-400 italic">Tidak Dikerjakan</span>
                         @endif
                     </div>
                 </td>

@@ -77,12 +77,12 @@
                                                 {{ match ($task->target_role) {
                             'hr_staff' => 'HR Staff',
                             'hr_assistant' => 'HR Assistant',
-                            'cs' => 'CS',
-                            'ob' => 'OB',
+                            'cs' => 'CS (Customer Service)',
+                            'ob' => 'OB (Office Boy)',
                             'programmer' => 'Programmer',
-                            'dg' => 'DG',
-                            'vg' => 'VG',
-                            'pm' => 'PM',
+                            'dg' => 'DG (Design Graphics)',
+                            'vg' => 'VG (Videografer)',
+                            'pm' => 'PM (Project Manager)',
                             default => strtoupper($task->target_role),
                         } }}
                                             </span>
@@ -178,9 +178,9 @@
                     <option value="cs">CS (Customer Service)</option>
                     <option value="ob">OB (Office Boy)</option>
                     <option value="programmer">Programmer</option>
-                    <option value="dg">DG</option>
-                    <option value="vg">VG</option>
-                    <option value="pm">PM</option>
+                    <option value="dg">DG (Design Graphics)</option>
+                    <option value="vg">VG (Videografer)</option>
+                    <option value="pm">PM (Project Manager)</option>
                 </select>
             </div>
             <div>
@@ -238,9 +238,9 @@
                     <option value="cs">CS (Customer Service)</option>
                     <option value="ob">OB (Office Boy)</option>
                     <option value="programmer">Programmer</option>
-                    <option value="dg">DG</option>
-                    <option value="vg">VG</option>
-                    <option value="pm">PM</option>
+                    <option value="dg">DG (Design Graphics)</option>
+                    <option value="vg">VG (Videografer)</option>
+                    <option value="pm">PM (Project Manager)</option>
                 </select>
             </div>
             <div>

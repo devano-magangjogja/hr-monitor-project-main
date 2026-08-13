@@ -86,14 +86,7 @@
                         {{ Auth::user()->name }}
                     </a>
                     <p class="text-[11px] sm:text-xs text-slate-400 truncate">
-                        {{ match(Auth::user()->role) {
-                            'admin'        => 'Administrator',
-                            'hr_staff'     => 'HR Staff',
-                            'hr_assistant' => 'HR Assistant',
-                            'cs'           => 'Customer Service',
-                            'ob'           => 'Office Boy',
-                            default        => strtoupper(Auth::user()->role),
-                        } }}
+                        {{ Auth::user()->role_label }}
                     </p>
                 </div>
                 <form method="POST" action="{{ route('logout') }}">
@@ -190,12 +183,7 @@
                             {{ Auth::user()->name }}
                         </p>
                         <p class="text-xs text-gray-400 truncate">
-                            {{ match(Auth::user()->role) {
-                                'admin'        => 'Administrator',
-                                'hr_staff'     => 'HR Staff',
-                                'hr_assistant' => 'HR Assistant',
-                                default        => Auth::user()->role,
-                            } }}
+                            {{ Auth::user()->role_label }}
                         </p>
                     </div>
                 </a>

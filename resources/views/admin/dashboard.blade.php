@@ -120,7 +120,7 @@
                                 {{ $item['user']->name }}
                             </p>
                             <p class="text-xs text-gray-400">
-                                {{ $item['user']->role === 'hr_staff' ? 'HR Staff' : 'HR Assistant' }}
+                                {{ $item['user']->role_label }}
                             </p>
                         </div>
                     </div>
@@ -142,7 +142,7 @@
             <thead>
                 <tr class="bg-gray-50 border-b border-gray-200">
                     <th class="text-left px-3 sm:px-6 py-2.5 sm:py-3.5 font-semibold text-gray-600 text-xs sm:text-sm">Nama</th>
-                    <th class="text-left px-3 sm:px-6 py-2.5 sm:py-3.5 font-semibold text-gray-600 text-xs sm:text-sm w-20 sm:w-28">Role</th>
+                    <th class="text-left px-3 sm:px-6 py-2.5 sm:py-3.5 font-semibold text-gray-600 text-xs sm:text-sm w-28 sm:w-36">Role</th>
                     <th class="text-left px-3 sm:px-6 py-2.5 sm:py-3.5 font-semibold text-gray-600 text-xs sm:text-sm w-16 sm:w-24">Selesai</th>
                     <th class="text-left px-3 sm:px-6 py-2.5 sm:py-3.5 font-semibold text-gray-600 text-xs sm:text-sm w-16 sm:w-24">Total</th>
                     <th class="text-left px-3 sm:px-6 py-2.5 sm:py-3.5 font-semibold text-gray-600 text-xs sm:text-sm">Progress</th>
@@ -171,10 +171,9 @@
                                 <span class="text-xs sm:text-sm font-medium text-gray-800 truncate">{{ $user->name }}</span>
                             </div>
                         </td>
-                        <td class="px-3 sm:px-6 py-3 sm:py-4 w-20 sm:w-28">
-                            <span class="inline-flex px-1.5 sm:px-2.5 py-0.5 sm:py-1 rounded-full text-xs font-medium
-                                {{ $user->role === 'hr_staff' ? 'bg-blue-50 text-blue-700' : 'bg-purple-50 text-purple-700' }}">
-                                {{ $user->role === 'hr_staff' ? 'Staff' : 'Asst' }}
+                        <td class="px-3 sm:px-6 py-3 sm:py-4 w-28 sm:w-36">
+                            <span class="inline-flex px-1.5 sm:px-2.5 py-0.5 sm:py-1 rounded-full text-xs font-medium {{ $user->role_badge_class }}">
+                                {{ $user->role_label }}
                             </span>
                         </td>
                         <td class="px-3 sm:px-6 py-3 sm:py-4 w-16 sm:w-24">

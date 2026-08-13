@@ -82,12 +82,12 @@
                                                 {{ match ($user->role) {
                             'hr_staff' => 'HR Staff',
                             'hr_assistant' => 'HR Assistant',
-                            'cs' => 'CS',
-                            'ob' => 'OB',
+                            'cs' => 'CS (Customer Service)',
+                            'ob' => 'OB (Office Boy)',
                             'programmer' => 'Programmer',
-                            'dg' => 'DG',
-                            'vg' => 'VG',
-                            'pm' => 'PM',
+                            'dg' => 'DG (Design Graphics)',
+                            'vg' => 'VG (Videografer)',
+                            'pm' => 'PM (Project Manager)',
                             default => strtoupper($user->role),
                         } }}
                                             </span>
@@ -134,7 +134,8 @@
                                                 </button>
 
                                                 {{-- Hapus --}}
-                                                <button onclick="openDeleteModal({{ $user->id }}, '{{ $user->name }}')"
+                                                <button
+                                                    onclick="openDeleteModal({{ $user->id }}, '{{ addslashes($user->name) }}')"
                                                     class="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition"
                                                     title="Hapus">
                                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -148,17 +149,19 @@
                     @empty
                         <tr>
                             <td colspan="5" class="px-6 py-12 text-center text-gray-400 text-sm">
-                                Belum ada pengguna. Tambahkan pengguna baru.
+                                Belum ada pengguna. Tambahkan pengguna pertama.
                             </td>
                         </tr>
                     @endforelse
                 </tbody>
             </table>
         </div>
-    </div>{{-- ── MODAL TAMBAH ───────────────────────────────────── --}}
-    <x-responsive-modal id="modal-create">
-        <div class="flex items-center justify-between px-3 sm:px-6 py-4 border-b border-gray-200">
-            <h3 class="text-base font-semibold text-gray-800">Tambah Pengguna</h3>
+    </div>
+
+    {{-- ── MODAL TAMBAH ───────────────────────────────────── --}}
+    <x-responsive-modal id="modal-create" class="flex flex-col max-h-[90vh]">
+        <div class="flex items-center justify-between px-3 sm:px-6 py-4 border-b border-gray-200 flex-shrink-0">
+            <h3 class="text-base font-semibold text-gray-800">Tambah Pengguna Baru</h3>
             <button onclick="document.getElementById('modal-create').classList.add('hidden')"
                 class="text-gray-400 hover:text-gray-600">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -166,27 +169,23 @@
                 </svg>
             </button>
         </div>
-        <form action="{{ route('admin.users.store') }}" method="POST" class="px-3 sm:px-6 py-5 space-y-4">
+        <form action="{{ route('admin.users.store') }}" method="POST" enctype="multipart/form-data"
+            class="px-3 sm:px-6 py-5 space-y-4 overflow-y-auto flex-1">
             @csrf
             <div>
                 <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-1">Nama Lengkap</label>
-                <input type="text" name="name" value="{{ old('name') }}" required
-                    class="w-full px-3 sm:px-4 py-2 sm:py-2.5 border border-gray-300 rounded-lg text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-primary-500">
+                <input type="text" name="name" value="{{ old('name') }}" required maxlength="100" class="w-full px-3 sm:px-4 py-2 sm:py-2.5 border border-gray-300 rounded-lg text-xs sm:text-sm
+                                              focus:outline-none focus:ring-2 focus:ring-primary-500">
             </div>
             <div>
                 <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-1">Email</label>
-                <input type="email" name="email" value="{{ old('email') }}" required
-                    class="w-full px-3 sm:px-4 py-2 sm:py-2.5 border border-gray-300 rounded-lg text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-primary-500">
+                <input type="email" name="email" value="{{ old('email') }}" required maxlength="100" class="w-full px-3 sm:px-4 py-2 sm:py-2.5 border border-gray-300 rounded-lg text-xs sm:text-sm
+                                              focus:outline-none focus:ring-2 focus:ring-primary-500">
             </div>
             <div>
                 <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-1">Password</label>
-                <input type="password" name="password" required minlength="8"
-                    class="w-full px-3 sm:px-4 py-2 sm:py-2.5 border border-gray-300 rounded-lg text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-primary-500">
-            </div>
-            <div>
-                <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-1">Konfirmasi Password</label>
-                <input type="password" name="password_confirmation" required
-                    class="w-full px-3 sm:px-4 py-2 sm:py-2.5 border border-gray-300 rounded-lg text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-primary-500">
+                <input type="password" name="password" required minlength="8" class="w-full px-3 sm:px-4 py-2 sm:py-2.5 border border-gray-300 rounded-lg text-xs sm:text-sm
+                                              focus:outline-none focus:ring-2 focus:ring-primary-500">
             </div>
             <div>
                 <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-1">Role</label>
@@ -198,9 +197,9 @@
                     <option value="cs">CS (Customer Service)</option>
                     <option value="ob">OB (Office Boy)</option>
                     <option value="programmer">Programmer</option>
-                    <option value="dg">DG</option>
-                    <option value="vg">VG</option>
-                    <option value="pm">PM</option>
+                    <option value="dg">DG (Design Graphics)</option>
+                    <option value="vg">VG (Videografer)</option>
+                    <option value="pm">PM (Project Manager)</option>
                 </select>
             </div>
             <div>
@@ -263,9 +262,9 @@
                     <option value="cs">CS (Customer Service)</option>
                     <option value="ob">OB (Office Boy)</option>
                     <option value="programmer">Programmer</option>
-                    <option value="dg">DG</option>
-                    <option value="vg">VG</option>
-                    <option value="pm">PM</option>
+                    <option value="dg">DG (Design Graphics)</option>
+                    <option value="vg">VG (Videografer)</option>
+                    <option value="pm">PM (Project Manager)</option>
                 </select>
             </div>
 

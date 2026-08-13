@@ -77,12 +77,9 @@
                             <span class="font-medium text-gray-800">{{ $item['user']->name }}</span>
                         </div>
                     </td>
-                    <td class="px-6 py-4 w-28">
-                        <span class="inline-flex px-2.5 py-1 rounded-full text-xs font-medium
-                            {{ $item['user']->role === 'hr_staff'
-                                ? 'bg-blue-50 text-blue-700'
-                                : 'bg-purple-50 text-purple-700' }}">
-                            {{ $item['user']->role === 'hr_staff' ? 'HR Staff' : 'HR Assistant' }}
+                    <td class="px-6 py-4 w-36">
+                        <span class="inline-flex px-2.5 py-1 rounded-full text-xs font-medium {{ $item['user']->role_badge_class }}">
+                            {{ $item['user']->role_label }}
                         </span>
                     </td>
                     <td class="px-6 py-4 w-32">

@@ -59,9 +59,9 @@
                             <option value="cs">Semua CS (Customer Service)</option>
                             <option value="ob">Semua OB (Office Boy)</option>
                             <option value="programmer">Semua Programmer</option>
-                            <option value="dg">Semua DG (---)</option>
-                            <option value="vg">Semua VG (---)</option>
-                            <option value="pm">Semua PM (---)</option>
+                            <option value="dg">Semua DG (Design Graphics)</option>
+                            <option value="vg">Semua VG (Videografer)</option>
+                            <option value="pm">Semua PM (Project Manager)</option>
                             <option value="specific">Pilih Pengguna Tertentu</option>
                         </select>
                     </div>
@@ -79,8 +79,12 @@
                                         <p class="text-xs text-gray-400" x-text="{
                                                hr_staff:     'HR Staff',
                                                hr_assistant: 'HR Assistant',
-                                               cs:           'Customer Service',
-                                               ob:           'Office Boy',
+                                               cs:           'CS (Customer Service)',
+                                               ob:           'OB (Office Boy)',
+                                               programmer:   'Programmer',
+                                               dg:           'DG (Design Graphics)',
+                                               vg:           'VG (Videografer)',
+                                               pm:           'PM (Project Manager)',
                                            }[user.role] ?? user.role"></p>
                                     </div>
                                 </label>
@@ -149,9 +153,8 @@
                                         <span class="text-xs text-gray-400">Ke:</span>
                                         @if($recipient)
                                             <span
-                                                class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium
-                                                        {{ $recipient->role === 'hr_staff' ? 'bg-blue-50 text-blue-700' : 'bg-purple-50 text-purple-700' }}">
-                                                {{ $recipient->name }}
+                                                class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium {{ $recipient->role_badge_class }}">
+                                                {{ $recipient->name }} ({{ $recipient->role_label }})
                                             </span>
                                         @else
                                             <span class="text-xs text-gray-400 italic">Pengguna dihapus</span>

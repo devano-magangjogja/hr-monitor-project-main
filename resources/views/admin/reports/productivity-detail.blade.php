@@ -11,13 +11,8 @@
 @section('content')
 
 @php
-    $roleLabel = $user->role === 'hr_staff' ? 'HR Staff' : 'HR Assistant';
-    $roleAvatar = $user->role === 'hr_staff'
-        ? 'bg-blue-100 text-blue-600'
-        : 'bg-purple-100 text-purple-600';
-    $roleBadge = $user->role === 'hr_staff'
-        ? 'bg-blue-50 text-blue-700'
-        : 'bg-purple-50 text-purple-700';
+    $roleLabel = $user->role_label;
+    $roleBadge = $user->role_badge_class;
 @endphp
 
 {{-- Back button --}}
@@ -32,7 +27,7 @@
 
     {{-- Profile card --}}
     <div class="bg-white rounded-xl border border-gray-200 p-4 sm:p-5 flex items-center gap-4">
-        <div class="w-12 h-12 rounded-full {{ $roleAvatar }} flex items-center justify-center flex-shrink-0">
+        <div class="w-12 h-12 rounded-full bg-primary-100 text-primary-600 flex items-center justify-center flex-shrink-0">
             @if($user->image)
                 <img src="{{ asset('storage/' . $user->image) }}"
                      alt="{{ $user->name }}"

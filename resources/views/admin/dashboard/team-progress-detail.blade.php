@@ -11,14 +11,8 @@
 @section('content')
 
 @php
-    $roleLabel = match($user->role) {
-        'hr_staff'      => 'HR Staff',
-        'hr_assistant'  => 'HR Assistant',
-        default         => $user->role,
-    };
-    $roleColor = $user->role === 'hr_staff'
-        ? ['bg' => 'bg-blue-100',   'text' => 'text-blue-700',   'avatar' => 'bg-blue-100 text-blue-600']
-        : ['bg' => 'bg-purple-100', 'text' => 'text-purple-700', 'avatar' => 'bg-purple-100 text-purple-600'];
+    $roleLabel = $user->role_label;
+    $roleBadgeClass = $user->role_badge_class;
 
     $total     = $tasks->count();
     $completed = 0;
@@ -45,7 +39,7 @@
 
     {{-- Profile card --}}
     <div class="bg-white rounded-xl border border-gray-200 p-4 sm:p-5 flex items-center gap-4">
-        <div class="w-12 h-12 rounded-full {{ $roleColor['avatar'] }} flex items-center justify-center flex-shrink-0">
+        <div class="w-12 h-12 rounded-full bg-primary-100 text-primary-600 flex items-center justify-center flex-shrink-0">
             @if($user->image)
                 <img src="{{ asset('storage/' . $user->image) }}"
                      alt="{{ $user->name }}"
@@ -59,8 +53,7 @@
         <div class="flex-1 min-w-0">
             <div class="flex items-center gap-2 flex-wrap">
                 <h2 class="text-base font-bold text-gray-800">{{ $user->name }}</h2>
-                <span class="inline-flex px-2 py-0.5 rounded-full text-xs font-medium
-                             {{ $roleColor['bg'] }} {{ $roleColor['text'] }}">
+                <span class="inline-flex px-2.5 py-0.5 rounded-full text-xs font-medium {{ $roleBadgeClass }}">
                     {{ $roleLabel }}
                 </span>
             </div>
@@ -168,6 +161,7 @@
                     <th class="text-left px-4 sm:px-6 py-3.5 font-semibold text-gray-600 w-28">Sumber</th>
                     <th class="text-left px-4 sm:px-6 py-3.5 font-semibold text-gray-600 w-36">Status</th>
                     <th class="text-left px-4 sm:px-6 py-3.5 font-semibold text-gray-600 w-28">Catatan</th>
+                    <th class="text-right px-4 sm:px-6 py-3.5 font-semibold text-gray-600 w-16">Aksi</th>
                 </tr>
             </thead>
             <tbody class="divide-y divide-gray-100">
@@ -176,7 +170,16 @@
                         $assignment = $task->assignments->first();
                         $status     = $assignment?->is_completed ?? 'pending';
                     @endphp
-                    <tr class="hover:bg-gray-50 transition">
+                    <tr class="hover:bg-gray-50 transition" data-task="{{ json_encode([
+                        'title'       => $task->title,
+                        'description' => $task->description ?? '',
+                        'type'        => $task->type,
+                        'date'        => $task->task_date->translatedFormat('d M Y'),
+                        'source'      => $task->creator?->name ?? 'Sistem',
+                        'status'      => $status,
+                        'note'        => $assignment?->note ?? '',
+                        'assignees'   => [],
+                    ]) }}">
 
                         {{-- Judul --}}
                         <td class="px-4 sm:px-6 py-4 w-44">
@@ -232,10 +235,24 @@
                                 <span class="text-xs text-gray-300">—</span>
                             @endif
                         </td>
+
+                        {{-- Aksi --}}
+                        <td class="px-4 sm:px-6 py-4 w-16 text-right">
+                            <button onclick="openDetailModal(JSON.parse(this.closest('tr').dataset.task))"
+                                class="p-1.5 text-gray-400 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition"
+                                title="Lihat Detail">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                </svg>
+                            </button>
+                        </td>
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="5" class="px-6 py-14 text-center">
+                        <td colspan="6" class="px-4 sm:px-6 py-14 text-center">
                             <div class="flex flex-col items-center gap-2">
                                 <svg class="w-10 h-10 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"

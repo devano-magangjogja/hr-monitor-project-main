@@ -2,7 +2,7 @@
 
 @section('title', 'Buat Tugas')
 @section('page-title', 'Buat Tugas')
-@section('page-subtitle', 'Distribusikan tugas harian kepada HR Staff dan HR Assistant')
+@section('page-subtitle', 'Distribusikan tugas harian kepada seluruh anggota tim')
 
 @section('sidebar')
     @include('components.sidebar-admin')
@@ -98,6 +98,35 @@
                     {{-- Aksi --}}
                     <td class="px-3 sm:px-6 py-4 w-16 sm:w-20">
                         <div class="flex items-center justify-end gap-1 whitespace-nowrap">
+                            {{-- Tombol Detail: Selalu Ada --}}
+                            <button
+                                type="button"
+                                onclick="openDetailModal(JSON.parse(this.dataset.detail))"
+                                data-detail="{{ json_encode([
+                                    'title'       => $task->title,
+                                    'description' => $task->description ?? '',
+                                    'type'        => $task->type,
+                                    'date'        => $task->task_date->translatedFormat('d M Y'),
+                                    'source'      => $task->creator?->name ?? 'Sistem',
+                                    'status'      => 'multiple',
+                                    'note'        => null,
+                                    'assignees'   => $task->assignedUsers->map(fn($u) => [
+                                        'name'   => $u->name,
+                                        'role'   => $u->role_label,
+                                        'status' => $task->assignments->firstWhere('user_id', $u->id)?->is_completed ?? 'pending',
+                                    ]),
+                                ]) }}"
+                                class="p-1.5 text-gray-400 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition"
+                                title="Lihat Detail">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                                </svg>
+                            </button>
+
+                            {{-- Tombol Edit & Hapus: Hanya jika belum dikerjakan --}}
                             @if(!$hasCompleted && !$hasNotDone)
                                 <button
                                     onclick="openEditModal(
@@ -122,44 +151,6 @@
                                               d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
                                     </svg>
                                 </button>
-                                <button
-                                    onclick="openDetailModal({
-                                        title: '{{ addslashes($task->title) }}',
-                                        description: '{{ addslashes($task->description ?? '') }}',
-                                        type: '{{ $task->type }}',
-                                        date: '{{ $task->task_date->translatedFormat('d M Y') }}',
-                                        source: '{{ addslashes($task->creator?->name ?? 'Sistem') }}',
-                                        status: 'multiple',
-                                        note: null,
-                                        assignees: {{ json_encode($task->assignedUsers->map(fn($u) => [
-                                            'name'   => $u->name,
-                                            'role'   => match($u->role) {
-                                                'hr_staff'     => 'HR Staff',
-                                                'hr_assistant' => 'HR Assistant',
-                                                'cs'           => 'CS',
-                                                'ob'           => 'OB',
-                                                'programmer'   => 'Programmer',
-                                                'dg'           => 'DG',
-                                                'vg'           => 'VG',
-                                                'pm'           => 'PM',
-                                                default        => strtoupper($u->role),
-                                            },
-                                            'status' => $task->assignments->firstWhere('user_id', $u->id)?->is_completed ?? 'pending',
-                                        ])) }}
-                                    })"
-                                    class="p-1.5 text-gray-400 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition"
-                                    title="Lihat Detail">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M2.458 12C3.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
-                                    </svg>
-                                </button>
-                            @elseif($hasCompleted)
-                                <span class="text-xs text-gray-400 italic">Terkunci</span>
-                            @else
-                                <span class="text-xs text-red-400 italic">Tidak Dikerjakan</span>
                             @endif
                         </div>
                     </td>
@@ -217,19 +208,9 @@
                                class="create-recipient-checkbox h-4 w-4 text-primary-600 border-gray-300 rounded">
                         <div>
                             <p class="text-xs sm:text-sm font-medium text-gray-700">{{ $user->name }}</p>
-                                <p class="text-xs text-gray-400">
-                                    {{ match($user->role) {
-                                        'hr_staff'     => 'HR Staff',
-                                        'hr_assistant' => 'HR Assistant',
-                                        'cs'           => 'CS',
-                                        'ob'           => 'OB',
-                                        'programmer'   => 'Programmer',
-                                        'dg'           => 'DG',
-                                        'vg'           => 'VG',
-                                        'pm'           => 'PM',
-                                        default        => strtoupper($user->role),
-                                    } }}
-                                </p>
+                            <p class="text-xs text-gray-400">
+                                {{ $user->role_label }}
+                            </p>
                         </div>
                     </label>
                 @endforeach
@@ -299,19 +280,9 @@
                                class="edit-user-checkbox h-4 w-4 text-primary-600 border-gray-300 rounded">
                         <div>
                             <p class="text-xs sm:text-sm font-medium text-gray-700">{{ $user->name }}</p>
-                                <p class="text-xs text-gray-400">
-                                    {{ match($user->role) {
-                                        'hr_staff'     => 'HR Staff',
-                                        'hr_assistant' => 'HR Assistant',
-                                        'cs'           => 'CS',
-                                        'ob'           => 'OB',
-                                        'programmer'   => 'Programmer',
-                                        'dg'           => 'DG',
-                                        'vg'           => 'VG',
-                                        'pm'           => 'PM',
-                                        default        => strtoupper($user->role),
-                                    } }}
-                                </p>
+                            <p class="text-xs text-gray-400">
+                                {{ $user->role_label }}
+                            </p>
                         </div>
                     </label>
                 @endforeach

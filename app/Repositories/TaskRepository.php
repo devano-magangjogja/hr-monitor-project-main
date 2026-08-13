@@ -115,21 +115,28 @@ class TaskRepository
 
     public function getSelfTasksToday(int $userId): Collection
     {
+        $today = Carbon::today()->toDateString();
         /** @var Builder $query */
         $query = $this->model->newQuery();
 
-        // Tampilkan tugas mandiri hari ini ATAU tugas mandiri lama yang masih pending
+        // Tampilkan tugas mandiri hari ini ATAU tugas mandiri lama yang masih pending ATAU diselesaikan hari ini
         return $query
             ->with(['assignments' => function ($q) use ($userId) {
                 $q->where('user_id', $userId);
             }])
             ->where('created_by', $userId)
             ->where('type', 'self')
-            ->where(function ($q) use ($userId) {
-                $q->whereDate('task_date', Carbon::today())
-                  ->orWhereHas('assignments', function ($q2) use ($userId) {
+            ->where(function ($q) use ($userId, $today) {
+                $q->whereDate('task_date', $today)
+                  ->orWhereHas('assignments', function ($q2) use ($userId, $today) {
                       $q2->where('user_id', $userId)
-                         ->where('is_completed', 'pending');
+                         ->where(function ($q3) use ($today) {
+                             $q3->where('is_completed', 'pending')
+                                ->orWhere(function ($q4) use ($today) {
+                                    $q4->where('is_completed', 'completed')
+                                       ->whereDate('completed_at', $today);
+                                });
+                         });
                   });
             })
             ->whereDate('task_date', '<=', Carbon::today())
@@ -160,6 +167,7 @@ class TaskRepository
 
     public function getAllTasksForUserToday(int $userId): Collection
     {
+        $today = Carbon::today()->toDateString();
         /** @var Builder $query */
         $query = $this->model->newQuery();
 
@@ -171,22 +179,27 @@ class TaskRepository
                 $q->where('user_id', $userId);
             })
             // default: hanya hari ini
-            // assigned + self: hari ini ATAU masih pending dari hari sebelumnya
-            ->where(function ($q) use ($userId) {
-                $q->where(function ($q2) {
+            // assigned + self: hari ini ATAU masih pending ATAU diselesaikan hari ini
+            ->where(function ($q) use ($userId, $today) {
+                $q->where(function ($q2) use ($today) {
                       // default task: hanya hari ini
                       $q2->where('type', 'default')
-                         ->whereDate('task_date', Carbon::today());
+                         ->whereDate('task_date', $today);
                   })
-                  ->orWhere(function ($q2) use ($userId) {
-                      // assigned / self: tampilkan selama masih pending atau hari ini
+                  ->orWhere(function ($q2) use ($userId, $today) {
                       $q2->whereIn('type', ['assigned', 'self'])
-                         ->whereDate('task_date', '<=', Carbon::today())
-                         ->where(function ($q3) use ($userId) {
-                             $q3->whereDate('task_date', Carbon::today())
-                                ->orWhereHas('assignments', function ($q4) use ($userId) {
+                         ->whereDate('task_date', '<=', $today)
+                         ->where(function ($q3) use ($userId, $today) {
+                             $q3->whereDate('task_date', $today)
+                                ->orWhereHas('assignments', function ($q4) use ($userId, $today) {
                                     $q4->where('user_id', $userId)
-                                       ->where('is_completed', 'pending');
+                                       ->where(function ($q5) use ($today) {
+                                           $q5->where('is_completed', 'pending')
+                                              ->orWhere(function ($q6) use ($today) {
+                                                  $q6->where('is_completed', 'completed')
+                                                     ->whereDate('completed_at', $today);
+                                              });
+                                       });
                                 });
                          });
                   });
@@ -305,10 +318,11 @@ class TaskRepository
 
     public function getAllTasksForAssistant(): Collection
     {
+        $today = Carbon::today()->toDateString();
         /** @var Builder $query */
         $query = $this->model->newQuery();
 
-        // default: hanya hari ini | assigned: hari ini + pending lama
+        // default: hanya hari ini | assigned/self: hari ini + pending lama + selesai hari ini
         return $query
             ->with(['creator:id,name', 'assignments', 'assignedUsers:id,name,role'])
             ->whereHas('assignments', function ($q) {
@@ -316,21 +330,27 @@ class TaskRepository
                     $q->where('role', 'hr_assistant');
                 });
             })
-            ->where(function ($q) {
-                $q->where(function ($q2) {
+            ->where(function ($q) use ($today) {
+                $q->where(function ($q2) use ($today) {
                       $q2->where('type', 'default')
-                         ->whereDate('task_date', Carbon::today());
+                         ->whereDate('task_date', $today);
                   })
-                  ->orWhere(function ($q2) {
+                  ->orWhere(function ($q2) use ($today) {
                       $q2->whereIn('type', ['assigned', 'self'])
-                         ->whereDate('task_date', '<=', Carbon::today())
-                         ->where(function ($q3) {
-                             $q3->whereDate('task_date', Carbon::today())
-                                ->orWhereHas('assignments', function ($q4) {
+                         ->whereDate('task_date', '<=', $today)
+                         ->where(function ($q3) use ($today) {
+                             $q3->whereDate('task_date', $today)
+                                ->orWhereHas('assignments', function ($q4) use ($today) {
                                     $q4->whereHas('user', function ($q5) {
                                         $q5->where('role', 'hr_assistant');
                                     })
-                                    ->where('is_completed', 'pending');
+                                    ->where(function ($q6) use ($today) {
+                                        $q6->where('is_completed', 'pending')
+                                           ->orWhere(function ($q7) use ($today) {
+                                               $q7->where('is_completed', 'completed')
+                                                  ->whereDate('completed_at', $today);
+                                           });
+                                    });
                                 });
                          });
                   });
@@ -341,11 +361,12 @@ class TaskRepository
     }
 
     /**
-     * Ambil semua tugas yang masuk ke role tertentu (cs, ob, dst.)
+     * Ambil semua tugas yang masuk ke role tertentu (cs, ob, programmer, vg, dg, pm, dst.)
      * dengan pola yang sama seperti getAllTasksForAssistant.
      */
     public function getAllTasksForRole(string $role): Collection
     {
+        $today = Carbon::today()->toDateString();
         /** @var Builder $query */
         $query = $this->model->newQuery();
 
@@ -356,21 +377,27 @@ class TaskRepository
                     $q->where('role', $role);
                 });
             })
-            ->where(function ($q) use ($role) {
-                $q->where(function ($q2) {
+            ->where(function ($q) use ($role, $today) {
+                $q->where(function ($q2) use ($today) {
                       $q2->where('type', 'default')
-                         ->whereDate('task_date', Carbon::today());
+                         ->whereDate('task_date', $today);
                   })
-                  ->orWhere(function ($q2) use ($role) {
+                  ->orWhere(function ($q2) use ($role, $today) {
                       $q2->whereIn('type', ['assigned', 'self'])
-                         ->whereDate('task_date', '<=', Carbon::today())
-                         ->where(function ($q3) use ($role) {
-                             $q3->whereDate('task_date', Carbon::today())
-                                ->orWhereHas('assignments', function ($q4) use ($role) {
+                         ->whereDate('task_date', '<=', $today)
+                         ->where(function ($q3) use ($role, $today) {
+                             $q3->whereDate('task_date', $today)
+                                ->orWhereHas('assignments', function ($q4) use ($role, $today) {
                                     $q4->whereHas('user', function ($q5) use ($role) {
                                         $q5->where('role', $role);
                                     })
-                                    ->where('is_completed', 'pending');
+                                    ->where(function ($q6) use ($today) {
+                                        $q6->where('is_completed', 'pending')
+                                           ->orWhere(function ($q7) use ($today) {
+                                               $q7->where('is_completed', 'completed')
+                                                  ->whereDate('completed_at', $today);
+                                           });
+                                    });
                                 });
                          });
                   });
@@ -400,55 +427,95 @@ class TaskRepository
 
     public function getDailyStats(): array
     {
-        /** @var Builder $query */
-        $query = TaskAssignment::query();
-    
-        $total = $query->whereHas('task', function ($q) {
-            $q->whereDate('task_date', Carbon::today());
-        })->count();
-    
-        $completed = TaskAssignment::query()
-            ->whereHas('task', function ($q) {
-                $q->whereDate('task_date', Carbon::today());
-            })
-            ->where('is_completed', 'completed')
-            ->count();
-    
-        $notDone = TaskAssignment::query()
-            ->whereHas('task', function ($q) {
-                $q->whereDate('task_date', Carbon::today());
-            })
+        $today = Carbon::today()->toDateString();
+
+        // Assignment yang aktif/berlaku hari ini:
+        // 1. Task hari ini (task_date == today)
+        // 2. Task lama yang masih pending (task_date < today and is_completed == pending)
+        // 3. Task lama yang diselesaikan HARI INI (is_completed == completed and DATE(completed_at) == today)
+        $activeAssignmentFilter = function ($q) use ($today) {
+            $q->where(function ($q2) use ($today) {
+                $q2->whereHas('task', function ($t) use ($today) {
+                    $t->whereDate('task_date', $today);
+                });
+            })->orWhere(function ($q2) use ($today) {
+                $q2->whereHas('task', function ($t) use ($today) {
+                    $t->whereDate('task_date', '<', $today);
+                })->where(function ($q3) use ($today) {
+                    $q3->where('is_completed', 'pending')
+                       ->orWhere(function ($q4) use ($today) {
+                           $q4->where('is_completed', 'completed')
+                              ->whereDate('completed_at', $today);
+                       });
+                });
+            });
+        };
+
+        $total = TaskAssignment::query()->whereHas('task')->where($activeAssignmentFilter)->count();
+
+        $completed = TaskAssignment::query()->whereHas('task')->where('is_completed', 'completed')
+            ->where(function ($q) use ($today) {
+                $q->whereDate('completed_at', $today)
+                  ->orWhere(function ($q2) use ($today) {
+                      $q2->whereNull('completed_at')
+                         ->whereHas('task', fn($t) => $t->whereDate('task_date', $today));
+                  });
+            })->count();
+
+        $notDone = TaskAssignment::query()->whereHas('task', fn($t) => $t->whereDate('task_date', $today))
             ->where('is_completed', 'not_done')
             ->count();
-    
+
+        $pending = max(0, $total - $completed - $notDone);
+
         return [
             'total'     => $total,
             'completed' => $completed,
-            'pending'   => $total - $completed - $notDone,
+            'pending'   => $pending,
             'not_done'  => $notDone,
         ];
     }
 
     public function getDailyStatsPerUser(): Collection
     {
+        $today = Carbon::today()->toDateString();
+
         return \App\Models\User::query()
             ->where('role', '!=', 'admin')
             ->where('is_active', 1)
             ->withCount([
-                'taskAssignments as total_tasks' => function ($q) {
-                    $q->whereHas('task', function ($q) {
-                        $q->whereDate('task_date', Carbon::today());
+                'taskAssignments as total_tasks' => function ($q) use ($today) {
+                    $q->where(function ($q2) use ($today) {
+                        $q2->whereHas('task', function ($t) use ($today) {
+                            $t->whereDate('task_date', $today);
+                        });
+                    })->orWhere(function ($q2) use ($today) {
+                        $q2->whereHas('task', function ($t) use ($today) {
+                            $t->whereDate('task_date', '<', $today);
+                        })->where(function ($q3) use ($today) {
+                            $q3->where('is_completed', 'pending')
+                               ->orWhere(function ($q4) use ($today) {
+                                   $q4->where('is_completed', 'completed')
+                                      ->whereDate('completed_at', $today);
+                               });
+                        });
                     });
                 },
-                'taskAssignments as completed_tasks' => function ($q) {
-                    $q->whereHas('task', function ($q) {
-                        $q->whereDate('task_date', Carbon::today());
-                    })->where('is_completed', 'completed');
+                'taskAssignments as completed_tasks' => function ($q) use ($today) {
+                    $q->where('is_completed', 'completed')
+                      ->where(function ($q2) use ($today) {
+                          $q2->whereDate('completed_at', $today)
+                             ->orWhere(function ($q3) use ($today) {
+                                 $q3->whereNull('completed_at')
+                                    ->whereHas('task', fn($t) => $t->whereDate('task_date', $today));
+                             });
+                      });
                 },
-                'taskAssignments as not_done_tasks' => function ($q) {
-                    $q->whereHas('task', function ($q) {
-                        $q->whereDate('task_date', Carbon::today());
-                    })->where('is_completed', 'not_done');
+                'taskAssignments as not_done_tasks' => function ($q) use ($today) {
+                    $q->where('is_completed', 'not_done')
+                      ->whereHas('task', function ($t) use ($today) {
+                          $t->whereDate('task_date', $today);
+                      });
                 },
             ])
             ->orderBy('role')
@@ -465,16 +532,31 @@ class TaskRepository
             ->where('is_completed', 'completed');
 
         if ($period === 'week') {
-            $query->whereHas('task', function ($q) {
-                $q->whereBetween('task_date', [
-                    Carbon::now()->startOfWeek(),
-                    Carbon::now()->endOfWeek(),
-                ]);
+            $start = Carbon::now()->startOfWeek();
+            $end   = Carbon::now()->endOfWeek();
+            $query->where(function ($q) use ($start, $end) {
+                $q->whereBetween('completed_at', [$start, $end])
+                  ->orWhere(function ($q2) use ($start, $end) {
+                      $q2->whereNull('completed_at')
+                         ->whereHas('task', function ($t) use ($start, $end) {
+                             $t->whereBetween('task_date', [$start, $end]);
+                         });
+                  });
             });
         } elseif ($period === 'month') {
-            $query->whereHas('task', function ($q) {
-                $q->whereMonth('task_date', Carbon::now()->month)
-                ->whereYear('task_date', Carbon::now()->year);
+            $month = Carbon::now()->month;
+            $year  = Carbon::now()->year;
+            $query->where(function ($q) use ($month, $year) {
+                $q->where(function ($q2) use ($month, $year) {
+                    $q2->whereMonth('completed_at', $month)
+                       ->whereYear('completed_at', $year);
+                })->orWhere(function ($q2) use ($month, $year) {
+                    $q2->whereNull('completed_at')
+                       ->whereHas('task', function ($t) use ($month, $year) {
+                           $t->whereMonth('task_date', $month)
+                             ->whereYear('task_date', $year);
+                       });
+                });
             });
         }
         return $query->count();
@@ -500,10 +582,11 @@ class TaskRepository
     
     public function getAssignedTasksFromAdmin(int $userId): Collection
     {
+        $today = Carbon::today()->toDateString();
         /** @var Builder $query */
         $query = $this->model->newQuery();
 
-        // Tampilkan tugas dari admin: hari ini ATAU masih pending dari hari sebelumnya
+        // Tampilkan tugas dari admin: hari ini ATAU masih pending dari hari sebelumnya ATAU diselesaikan hari ini
         return $query
             ->with(['assignments' => function ($q) use ($userId) {
                 $q->where('user_id', $userId);
@@ -516,11 +599,17 @@ class TaskRepository
             })
             ->where('type', 'assigned')
             ->whereDate('task_date', '<=', Carbon::today())
-            ->where(function ($q) use ($userId) {
-                $q->whereDate('task_date', Carbon::today())
-                  ->orWhereHas('assignments', function ($q2) use ($userId) {
+            ->where(function ($q) use ($userId, $today) {
+                $q->whereDate('task_date', $today)
+                  ->orWhereHas('assignments', function ($q2) use ($userId, $today) {
                       $q2->where('user_id', $userId)
-                         ->where('is_completed', 'pending');
+                         ->where(function ($q3) use ($today) {
+                             $q3->where('is_completed', 'pending')
+                                ->orWhere(function ($q4) use ($today) {
+                                    $q4->where('is_completed', 'completed')
+                                       ->whereDate('completed_at', $today);
+                                });
+                         });
                   });
             })
             ->orderByDesc('task_date')
@@ -548,10 +637,11 @@ class TaskRepository
     
     public function getAllAssignedTasksForAssistant(int $userId): Collection
     {
+        $today = Carbon::today()->toDateString();
         /** @var Builder $query */
         $query = $this->model->newQuery();
 
-        // Tampilkan tugas dari admin/staff: hari ini ATAU masih pending dari hari sebelumnya
+        // Tampilkan tugas dari admin/staff: hari ini ATAU masih pending dari hari sebelumnya ATAU diselesaikan hari ini
         return $query
             ->with(['assignments' => function ($q) use ($userId) {
                 $q->where('user_id', $userId);
@@ -561,11 +651,17 @@ class TaskRepository
             })
             ->where('type', 'assigned')
             ->whereDate('task_date', '<=', Carbon::today())
-            ->where(function ($q) use ($userId) {
-                $q->whereDate('task_date', Carbon::today())
-                  ->orWhereHas('assignments', function ($q2) use ($userId) {
+            ->where(function ($q) use ($userId, $today) {
+                $q->whereDate('task_date', $today)
+                  ->orWhereHas('assignments', function ($q2) use ($userId, $today) {
                       $q2->where('user_id', $userId)
-                         ->where('is_completed', 'pending');
+                         ->where(function ($q3) use ($today) {
+                             $q3->where('is_completed', 'pending')
+                                ->orWhere(function ($q4) use ($today) {
+                                    $q4->where('is_completed', 'completed')
+                                       ->whereDate('completed_at', $today);
+                                });
+                         });
                   });
             })
             ->orderByDesc('task_date')
@@ -575,24 +671,44 @@ class TaskRepository
 
     public function getDailyStatsForAssistants(): Collection
     {
+        $today = Carbon::today()->toDateString();
+
         return \App\Models\User::query()
             ->where('role', 'hr_assistant')
             ->where('is_active', 1)
             ->withCount([
-                'taskAssignments as total_tasks' => function ($q) {
-                    $q->whereHas('task', function ($q) {
-                        $q->whereDate('task_date', Carbon::today());
+                'taskAssignments as total_tasks' => function ($q) use ($today) {
+                    $q->where(function ($q2) use ($today) {
+                        $q2->whereHas('task', function ($t) use ($today) {
+                            $t->whereDate('task_date', $today);
+                        });
+                    })->orWhere(function ($q2) use ($today) {
+                        $q2->whereHas('task', function ($t) use ($today) {
+                            $t->whereDate('task_date', '<', $today);
+                        })->where(function ($q3) use ($today) {
+                            $q3->where('is_completed', 'pending')
+                               ->orWhere(function ($q4) use ($today) {
+                                   $q4->where('is_completed', 'completed')
+                                      ->whereDate('completed_at', $today);
+                               });
+                        });
                     });
                 },
-                'taskAssignments as completed_tasks' => function ($q) {
-                    $q->whereHas('task', function ($q) {
-                        $q->whereDate('task_date', Carbon::today());
-                    })->where('is_completed', 'completed');
+                'taskAssignments as completed_tasks' => function ($q) use ($today) {
+                    $q->where('is_completed', 'completed')
+                      ->where(function ($q2) use ($today) {
+                          $q2->whereDate('completed_at', $today)
+                             ->orWhere(function ($q3) use ($today) {
+                                 $q3->whereNull('completed_at')
+                                    ->whereHas('task', fn($t) => $t->whereDate('task_date', $today));
+                             });
+                      });
                 },
-                'taskAssignments as not_done_tasks' => function ($q) {
-                    $q->whereHas('task', function ($q) {
-                        $q->whereDate('task_date', Carbon::today());
-                    })->where('is_completed', 'not_done');
+                'taskAssignments as not_done_tasks' => function ($q) use ($today) {
+                    $q->where('is_completed', 'not_done')
+                      ->whereHas('task', function ($t) use ($today) {
+                          $t->whereDate('task_date', $today);
+                      });
                 },
             ])
             ->orderBy('name')

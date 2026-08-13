@@ -5,14 +5,14 @@
 @section('page-subtitle', 'Rekap seluruh tugas harian kamu')
 
 @section('sidebar')
-    @include('components.sidebar-programmer')
+    @include('components.sidebar-vg')
 @endsection
 
 @section('content')
 
     {{-- Filter Tanggal & Pencarian --}}
     <div class="bg-white rounded-xl border border-gray-200 p-4 mb-6">
-        <form method="GET" action="{{ route('programmer.tasks.history') }}" class="flex flex-wrap items-center gap-3">
+        <form method="GET" action="{{ route('vg.tasks.history') }}" class="flex flex-wrap items-center gap-3">
 
             <div class="flex flex-col gap-1">
                 <label class="text-xs font-medium text-gray-500">Cari Tugas:</label>
@@ -37,7 +37,7 @@
             </button>
 
             @if($date || $search)
-                <a href="{{ route('programmer.tasks.history') }}" class="px-4 py-2 text-sm text-gray-600 hover:text-gray-800
+                <a href="{{ route('vg.tasks.history') }}" class="px-4 py-2 text-sm text-gray-600 hover:text-gray-800
                                               border border-gray-300 rounded-lg transition mt-auto">
                     Reset
                 </a>
@@ -51,19 +51,12 @@
             <table class="w-full text-xs sm:text-sm min-w-full">
                 <thead>
                     <tr class="bg-gray-50 border-b border-gray-200">
-                        <th class="text-left px-3 sm:px-6 py-2.5 sm:py-3.5 font-semibold text-gray-600 w-20 sm:w-32">Tanggal
-                        </th>
-                        <th class="text-left px-3 sm:px-6 py-2.5 sm:py-3.5 font-semibold text-gray-600 w-32 sm:w-48">Judul
-                        </th>
-                        <th class="text-left px-3 sm:px-6 py-2.5 sm:py-3.5 font-semibold text-gray-600 w-20 sm:w-32">Sumber
-                        </th>
-                        <th
-                            class="text-left px-3 sm:px-6 py-2.5 sm:py-3.5 font-semibold text-gray-600 hidden sm:table-cell">
-                            Catatan</th>
-                        <th class="text-left px-3 sm:px-6 py-2.5 sm:py-3.5 font-semibold text-gray-600 w-20 sm:w-28">Status
-                        </th>
-                        <th class="text-right px-3 sm:px-6 py-2.5 sm:py-3.5 font-semibold text-gray-600 w-12 sm:w-16">Detail
-                        </th>
+                        <th class="text-left px-3 sm:px-6 py-2.5 sm:py-3.5 font-semibold text-gray-600 w-20 sm:w-32">Tanggal</th>
+                        <th class="text-left px-3 sm:px-6 py-2.5 sm:py-3.5 font-semibold text-gray-600 w-32 sm:w-48">Judul</th>
+                        <th class="text-left px-3 sm:px-6 py-2.5 sm:py-3.5 font-semibold text-gray-600 w-20 sm:w-32">Sumber</th>
+                        <th class="text-left px-3 sm:px-6 py-2.5 sm:py-3.5 font-semibold text-gray-600 hidden sm:table-cell">Catatan</th>
+                        <th class="text-left px-3 sm:px-6 py-2.5 sm:py-3.5 font-semibold text-gray-600 w-20 sm:w-28">Status</th>
+                        <th class="text-right px-3 sm:px-6 py-2.5 sm:py-3.5 font-semibold text-gray-600 w-12 sm:w-16">Detail</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-100">
@@ -90,19 +83,19 @@
                             <td class="px-3 sm:px-6 py-3 sm:py-4 w-20 sm:w-32">
                                 @if($task->type === 'self')
                                     <span class="inline-flex items-center px-1.5 sm:px-2.5 py-0.5 sm:py-1 rounded-full
-                                                                             text-xs font-medium bg-gray-100 text-gray-600">
+                                                 text-xs font-medium bg-gray-100 text-gray-600">
                                         Mandiri
                                     </span>
                                 @elseif($task->type === 'assigned')
                                     <span class="inline-flex items-center px-1.5 sm:px-2.5 py-0.5 sm:py-1 rounded-full
-                                                                             text-xs font-medium bg-blue-50 text-blue-700"
+                                                 text-xs font-medium bg-blue-50 text-blue-700"
                                         title="Dari: {{ $task->creator?->name ?? 'Admin' }}">
                                         <span class="hidden sm:inline">{{ $task->creator?->name ?? 'Admin' }}</span>
                                         <span class="sm:hidden">Tugas</span>
                                     </span>
                                 @elseif($task->type === 'default')
                                     <span class="inline-flex items-center px-1.5 sm:px-2.5 py-0.5 sm:py-1 rounded-full
-                                                                             text-xs font-medium bg-purple-50 text-purple-700">
+                                                 text-xs font-medium bg-purple-50 text-purple-700">
                                         Rutin
                                     </span>
                                 @endif
@@ -121,6 +114,7 @@
                                 <x-task-status-badge :status="$assignment?->is_completed ?? 'pending'"
                                     :completedAt="$assignment?->completed_at" />
                             </td>
+
                             {{-- Detail --}}
                             <td class="px-3 sm:px-6 py-3 sm:py-4 w-12 sm:w-16">
                                 <div class="flex justify-end">
@@ -138,8 +132,7 @@
                                         ]) }}"
                                         class="p-1 sm:p-1.5 text-gray-400 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition"
                                         title="Lihat Detail">
-                                        <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor"
-                                            viewBox="0 0 24 24">
+                                        <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                 d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"

@@ -5,7 +5,7 @@
 @section('page-subtitle', 'Tugas rutin yang di-generate otomatis hari ini')
 
 @section('sidebar')
-    @include('components.sidebar-programmer')
+    @include('components.sidebar-vg')
 @endsection
 
 @section('content')
@@ -29,11 +29,11 @@
                 </thead>
                 <tbody class="divide-y divide-gray-100">
                     @forelse($tasks as $task)
-                                    @php
-                                        $assignment = $task->assignments->first();
-                                        $status = $assignment?->is_completed ?? 'pending';
-                                    @endphp
-                                    <tr class="hover:bg-gray-50 transition" data-task="{{ json_encode([
+                        @php
+                            $assignment = $task->assignments->first();
+                            $status = $assignment?->is_completed ?? 'pending';
+                        @endphp
+                        <tr class="hover:bg-gray-50 transition" data-task="{{ json_encode([
                             'title' => $task->title,
                             'description' => $task->description ?? '',
                             'type' => $task->type,
@@ -43,51 +43,51 @@
                             'note' => $assignment?->note ?? '',
                             'assignees' => [],
                         ]) }}">
-                                        <td class="px-6 py-4 w-48">
-                                            <div class="truncate max-w-[170px] font-medium text-gray-800" title="{{ $task->title }}">
-                                                {{ $task->title }}
-                                            </div>
-                                        </td>
-                                        <td class="px-6 py-4">
-                                            <div class="truncate max-w-[280px] text-gray-500" title="{{ $task->description ?? '-' }}">
-                                                @if($task->description)
-                                                    {!! linkify(e($task->description)) !!}
-                                                @else
-                                                    -
-                                                @endif
-                                            </div>
-                                        </td>
-                                        <td class="px-6 py-4 w-28">
-                                            <x-task-status-badge :status="$status" :completedAt="$assignment?->completed_at" />
-                                        </td>
-                                        <td class="px-6 py-4 w-28">
-                                            <div class="flex items-center justify-end gap-1.5 whitespace-nowrap">
-                                                {{-- Tombol Detail --}}
-                                                <button onclick="openDetailModal(JSON.parse(this.closest('tr').dataset.task))"
-                                                    class="p-1.5 text-gray-400 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition"
-                                                    title="Lihat Detail">
-                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                            d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                            d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                                                    </svg>
-                                                </button>
+                            <td class="px-6 py-4 w-48">
+                                <div class="truncate max-w-[170px] font-medium text-gray-800" title="{{ $task->title }}">
+                                    {{ $task->title }}
+                                </div>
+                            </td>
+                            <td class="px-6 py-4">
+                                <div class="truncate max-w-[280px] text-gray-500" title="{{ $task->description ?? '-' }}">
+                                    @if($task->description)
+                                        {!! linkify(e($task->description)) !!}
+                                    @else
+                                        -
+                                    @endif
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 w-28">
+                                <x-task-status-badge :status="$status" :completedAt="$assignment?->completed_at" />
+                            </td>
+                            <td class="px-6 py-4 w-28">
+                                <div class="flex items-center justify-end gap-1.5 whitespace-nowrap">
+                                    {{-- Tombol Detail --}}
+                                    <button onclick="openDetailModal(JSON.parse(this.closest('tr').dataset.task))"
+                                        class="p-1.5 text-gray-400 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition"
+                                        title="Lihat Detail">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                        </svg>
+                                    </button>
 
-                                                {{-- Tombol Selesai --}}
-                                                @if($status === 'pending')
-                                                    <button onclick="openCompleteModal({{ $task->id }}, '{{ addslashes($task->title) }}')"
-                                                        class="p-1.5 text-gray-400 hover:text-green-600 hover:bg-green-50 rounded-lg transition"
-                                                        title="Tandai Selesai">
-                                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                                d="M5 13l4 4L19 7" />
-                                                        </svg>
-                                                    </button>
-                                                @endif
-                                            </div>
-                                        </td>
-                                    </tr>
+                                    {{-- Tombol Selesai --}}
+                                    @if($status === 'pending')
+                                        <button onclick="openCompleteModal({{ $task->id }}, '{{ addslashes($task->title) }}')"
+                                            class="p-1.5 text-gray-400 hover:text-green-600 hover:bg-green-50 rounded-lg transition"
+                                            title="Tandai Selesai">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M5 13l4 4L19 7" />
+                                            </svg>
+                                        </button>
+                                    @endif
+                                </div>
+                            </td>
+                        </tr>
                     @empty
                         <tr>
                             <td colspan="4" class="px-6 py-12 text-center text-gray-400 text-sm">
@@ -100,8 +100,7 @@
         </div>
     </div>
 
-    {{-- â”€â”€ Modal Checklist Selesai â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-    --}}
+    {{-- Modal Checklist Selesai --}}
     <div id="modal-complete" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/50">
         <div class="bg-white rounded-2xl shadow-xl w-full max-w-md mx-4">
             <div class="flex items-center justify-between px-6 py-4 border-b border-gray-200">
@@ -151,7 +150,7 @@
     <script>
         function openCompleteModal(id, title) {
             document.getElementById('complete-task-title').textContent = title;
-            document.getElementById('form-complete').action = `/programmer/tasks/daily/${id}/complete`;
+            document.getElementById('form-complete').action = `/vg/tasks/daily/${id}/complete`;
             document.getElementById('modal-complete').classList.remove('hidden');
         }
     </script>

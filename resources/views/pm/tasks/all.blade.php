@@ -5,7 +5,7 @@
 @section('page-subtitle', 'Gabungan seluruh tugas yang harus kamu selesaikan hari ini')
 
 @section('sidebar')
-    @include('components.sidebar-programmer')
+    @include('components.sidebar-pm')
 @endsection
 
 @section('content')
@@ -91,11 +91,11 @@
                 </thead>
                 <tbody class="divide-y divide-gray-100">
                     @forelse($tasks as $task)
-                                    @php
-                                        $assignment = $task->assignments->first();
-                                        $status = $assignment?->is_completed ?? 'pending';
-                                    @endphp
-                                    <tr class="hover:bg-gray-50 transition" data-task="{{ json_encode([
+                        @php
+                            $assignment = $task->assignments->first();
+                            $status = $assignment?->is_completed ?? 'pending';
+                        @endphp
+                        <tr class="hover:bg-gray-50 transition" data-task="{{ json_encode([
                             'title' => $task->title,
                             'description' => $task->description ?? '',
                             'type' => $task->type,
@@ -106,97 +106,93 @@
                             'assignees' => [],
                         ]) }}">
 
-                                        {{-- Judul --}}
-                                        <td class="px-6 py-4 w-44">
-                                            <div class="truncate max-w-[160px] font-medium text-gray-800" title="{{ $task->title }}">
-                                                {{ $task->title }}
-                                            </div>
-                                        </td>
+                            {{-- Judul --}}
+                            <td class="px-6 py-4 w-44">
+                                <div class="truncate max-w-[160px] font-medium text-gray-800" title="{{ $task->title }}">
+                                    {{ $task->title }}
+                                </div>
+                            </td>
 
-                                        {{-- Deskripsi --}}
-                                        <td class="px-6 py-4">
-                                            <div class="truncate max-w-[220px] text-gray-500" title="{{ $task->description ?? '-' }}">
-                                                @if($task->description)
-                                                    {!! linkify(e($task->description)) !!}
-                                                @else
-                                                    -
-                                                @endif
-                                            </div>
-                                        </td>
+                            {{-- Deskripsi --}}
+                            <td class="px-6 py-4">
+                                <div class="truncate max-w-[220px] text-gray-500" title="{{ $task->description ?? '-' }}">
+                                    @if($task->description)
+                                        {!! linkify(e($task->description)) !!}
+                                    @else
+                                        -
+                                    @endif
+                                </div>
+                            </td>
 
-                                        {{-- Sumber --}}
-                                        <td class="px-6 py-4 w-28">
-                                            @if($task->type === 'default')
-                                                <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full
-                                                                                         text-xs font-medium bg-purple-50 text-purple-700">
-                                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                            d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                                                    </svg>
-                                                    Rutin
-                                                </span>
-                                            @elseif($task->type === 'self')
-                                                <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full
-                                                                                         text-xs font-medium bg-gray-100 text-gray-600">
-                                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                            d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                                                    </svg>
-                                                    Mandiri
-                                                </span>
-                                            @else
-                                                <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full
-                                                                                         text-xs font-medium bg-blue-50 text-blue-700"
-                                                    title="{{ $task->creator?->name ?? 'Admin' }}">
-                                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                            d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                                                    </svg>
-                                                    {{ Str::limit($task->creator?->name ?? 'Admin', 10) }}
-                                                </span>
-                                            @endif
-                                        </td>
+                            {{-- Sumber --}}
+                            <td class="px-6 py-4 w-28">
+                                @if($task->type === 'default')
+                                    <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-purple-50 text-purple-700">
+                                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                                        </svg>
+                                        Rutin
+                                    </span>
+                                @elseif($task->type === 'self')
+                                    <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-600">
+                                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                        </svg>
+                                        Mandiri
+                                    </span>
+                                @else
+                                    <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-blue-50 text-blue-700"
+                                        title="{{ $task->creator?->name ?? 'Admin' }}">
+                                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                                        </svg>
+                                        {{ Str::limit($task->creator?->name ?? 'Admin', 10) }}
+                                    </span>
+                                @endif
+                            </td>
 
-                                        {{-- Status --}}
-                                        <td class="px-6 py-4 w-32">
-                                            <x-task-status-badge :status="$status" :completedAt="$assignment?->completed_at" />
-                                        </td>
+                            {{-- Status --}}
+                            <td class="px-6 py-4 w-32">
+                                <x-task-status-badge :status="$status" :completedAt="$assignment?->completed_at" />
+                            </td>
 
-                                        {{-- Aksi --}}
-                                        <td class="px-6 py-4 w-20">
-                                            <div class="flex items-center justify-end gap-1.5 whitespace-nowrap">
-                                                {{-- Tombol Detail --}}
-                                                <button onclick="openDetailModal(JSON.parse(this.closest('tr').dataset.task))"
-                                                    class="p-1.5 text-gray-400 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition"
-                                                    title="Lihat Detail">
-                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                            d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                            d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                                                    </svg>
-                                                </button>
+                            {{-- Aksi --}}
+                            <td class="px-6 py-4 w-20">
+                                <div class="flex items-center justify-end gap-1.5 whitespace-nowrap">
+                                    {{-- Tombol Detail --}}
+                                    <button onclick="openDetailModal(JSON.parse(this.closest('tr').dataset.task))"
+                                        class="p-1.5 text-gray-400 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition"
+                                        title="Lihat Detail">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                        </svg>
+                                    </button>
 
-                                                @if($status === 'pending')
-                                                    <button onclick="openCompleteModal({{ $task->id }}, '{{ addslashes($task->title) }}')"
-                                                        class="p-1.5 text-gray-400 hover:text-green-600 hover:bg-green-50 rounded-lg transition"
-                                                        title="Tandai Selesai">
-                                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                                d="M5 13l4 4L19 7" />
-                                                        </svg>
-                                                    </button>
-                                                @endif
-                                            </div>
-                                        </td>
-                                    </tr>
+                                    @if($status === 'pending')
+                                        <button onclick="openCompleteModal({{ $task->id }}, '{{ addslashes($task->title) }}')"
+                                            class="p-1.5 text-gray-400 hover:text-green-600 hover:bg-green-50 rounded-lg transition"
+                                            title="Tandai Selesai">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                                            </svg>
+                                        </button>
+                                    @endif
+                                </div>
+                            </td>
+                        </tr>
                     @empty
                         <tr>
                             <td colspan="5" class="px-6 py-14 text-center">
                                 <div class="flex flex-col items-center gap-2">
                                     <svg class="w-10 h-10 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-                                            d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+                                            d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2m-6 9l2 2 4-4" />
                                     </svg>
                                     <p class="text-sm font-medium text-gray-500">Tidak ada tugas hari ini.</p>
                                     <p class="text-xs text-gray-400">Tugas akan muncul setelah diberikan atau dibuat.</p>
@@ -257,7 +253,7 @@
     <script>
         function openCompleteModal(id, title) {
             document.getElementById('complete-task-title').textContent = title;
-            document.getElementById('form-complete').action = `/programmer/tasks/all/${id}/complete`;
+            document.getElementById('form-complete').action = `/pm/tasks/all/${id}/complete`;
             document.getElementById('modal-complete').classList.remove('hidden');
         }
     </script>

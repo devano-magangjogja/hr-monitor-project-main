@@ -31,8 +31,7 @@
                 <option value="">Semua</option>
                 @foreach($users as $user)
                     <option value="{{ $user->id }}" {{ $userId == $user->id ? 'selected' : '' }}>
-                        {{ $user->name }}
-                        ({{ $user->role === 'hr_staff' ? 'HR Staff' : 'HR Assistant' }})
+                        {{ $user->name }} ({{ $user->role_label }})
                     </option>
                 @endforeach
             </select>
@@ -115,7 +114,7 @@
                                 {{ $assignee->name }}
                             </div>
                             <p class="text-xs text-gray-400 hidden sm:block">
-                                {{ $assignee->role === 'hr_staff' ? 'HR Staff' : 'HR Assistant' }}
+                                {{ $assignee->role_label }}
                             </p>
                         </td>
 
@@ -168,7 +167,7 @@
                                         note: '{{ addslashes($assignment?->note ?? '') }}',
                                         assignees: {{ json_encode($task->assignedUsers->map(fn($u) => [
                                             'name'   => $u->name,
-                                            'role'   => $u->role === 'hr_staff' ? 'HR Staff' : 'HR Assistant',
+                                            'role'   => $u->role_label,
                                             'status' => $task->assignments->firstWhere('user_id', $u->id)?->is_completed ?? 'pending',
                                         ])) }}
                                     })"

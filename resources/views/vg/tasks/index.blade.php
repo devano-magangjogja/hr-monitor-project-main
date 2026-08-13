@@ -5,7 +5,7 @@
 @section('page-subtitle', 'Catat pekerjaan yang kamu inisiasi sendiri hari ini')
 
 @section('sidebar')
-    @include('components.sidebar-programmer')
+    @include('components.sidebar-vg')
 @endsection
 
 @section('content')
@@ -38,11 +38,11 @@
                 </thead>
                 <tbody class="divide-y divide-gray-100">
                     @forelse($tasks as $task)
-                                    @php
-                                        $assignment = $task->assignments->first();
-                                        $status = $assignment?->is_completed ?? 'pending';
-                                    @endphp
-                                    <tr class="hover:bg-gray-50 transition" data-task="{{ json_encode([
+                        @php
+                            $assignment = $task->assignments->first();
+                            $status = $assignment?->is_completed ?? 'pending';
+                        @endphp
+                        <tr class="hover:bg-gray-50 transition" data-task="{{ json_encode([
                             'title' => $task->title,
                             'description' => $task->description ?? '',
                             'type' => $task->type,
@@ -53,100 +53,97 @@
                             'assignees' => [],
                         ]) }}" data-edit-title="{{ $task->title }}" data-edit-desc="{{ $task->description ?? '' }}">
 
-                                        {{-- Judul --}}
-                                        <td class="px-6 py-4 w-48">
-                                            <div class="truncate max-w-[170px] font-medium text-gray-800" title="{{ $task->title }}">
-                                                {{ $task->title }}
-                                            </div>
-                                        </td>
+                            {{-- Judul --}}
+                            <td class="px-6 py-4 w-48">
+                                <div class="truncate max-w-[170px] font-medium text-gray-800" title="{{ $task->title }}">
+                                    {{ $task->title }}
+                                </div>
+                            </td>
 
-                                        {{-- Deskripsi --}}
-                                        <td class="px-6 py-4">
-                                            <div class="truncate max-w-[220px] text-gray-500" title="{{ $task->description ?? '-' }}">
-                                                @if($task->description)
-                                                    {!! linkify(e($task->description)) !!}
-                                                @else
-                                                    -
-                                                @endif
-                                            </div>
-                                        </td>
+                            {{-- Deskripsi --}}
+                            <td class="px-6 py-4">
+                                <div class="truncate max-w-[220px] text-gray-500" title="{{ $task->description ?? '-' }}">
+                                    @if($task->description)
+                                        {!! linkify(e($task->description)) !!}
+                                    @else
+                                        -
+                                    @endif
+                                </div>
+                            </td>
 
-                                        {{-- Sumber --}}
-                                        <td class="px-6 py-4 w-32">
-                                            @if($task->type === 'self')
-                                                <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium
-                                                                                                                bg-gray-100 text-gray-600">
-                                                    Mandiri
-                                                </span>
-                                            @elseif($task->type === 'assigned')
-                                                <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium
-                                                                                                                bg-blue-50 text-blue-700"
-                                                    title="Dari: {{ $task->creator?->name ?? 'Admin' }}">
-                                                    {{ $task->creator?->name ?? 'Admin' }}
-                                                </span>
-                                            @elseif($task->type === 'default')
-                                                <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium
-                                                                                                                bg-purple-50 text-purple-700">
-                                                    Rutin
-                                                </span>
-                                            @endif
-                                        </td>
+                            {{-- Sumber --}}
+                            <td class="px-6 py-4 w-32">
+                                @if($task->type === 'self')
+                                    <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-600">
+                                        Mandiri
+                                    </span>
+                                @elseif($task->type === 'assigned')
+                                    <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-blue-50 text-blue-700"
+                                        title="Dari: {{ $task->creator?->name ?? 'Admin' }}">
+                                        {{ $task->creator?->name ?? 'Admin' }}
+                                    </span>
+                                @elseif($task->type === 'default')
+                                    <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-purple-50 text-purple-700">
+                                        Rutin
+                                    </span>
+                                @endif
+                            </td>
 
-                                        {{-- Status --}}
-                                        <td class="px-6 py-4 w-28">
-                                            <x-task-status-badge :status="$status" :completedAt="$assignment?->completed_at" />
-                                        </td>
+                            {{-- Status --}}
+                            <td class="px-6 py-4 w-28">
+                                <x-task-status-badge :status="$status" :completedAt="$assignment?->completed_at" />
+                            </td>
 
-                                        {{-- Aksi --}}
-                                        <td class="px-6 py-4 w-32">
-                                            <div class="flex items-center justify-end gap-1.5 whitespace-nowrap">
-                                                {{-- Tombol Detail (selalu bisa dilihat) --}}
-                                                <button onclick="openDetailModal(JSON.parse(this.closest('tr').dataset.task))"
-                                                    class="p-1.5 text-gray-400 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition"
-                                                    title="Lihat Detail">
-                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                            d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                            d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                                                    </svg>
-                                                </button>
+                            {{-- Aksi --}}
+                            <td class="px-6 py-4 w-32">
+                                <div class="flex items-center justify-end gap-1.5 whitespace-nowrap">
+                                    {{-- Tombol Detail --}}
+                                    <button onclick="openDetailModal(JSON.parse(this.closest('tr').dataset.task))"
+                                        class="p-1.5 text-gray-400 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition"
+                                        title="Lihat Detail">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                        </svg>
+                                    </button>
 
-                                                @if($status === 'pending')
-                                                    {{-- Tombol Selesai --}}
-                                                    <button onclick="openCompleteModal({{ $task->id }}, '{{ addslashes($task->title) }}')"
-                                                        class="p-1.5 text-gray-400 hover:text-green-600 hover:bg-green-50 rounded-lg transition"
-                                                        title="Tandai Selesai">
-                                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                                d="M5 13l4 4L19 7" />
-                                                        </svg>
-                                                    </button>
+                                    @if($status === 'pending')
+                                        {{-- Tombol Selesai --}}
+                                        <button onclick="openCompleteModal({{ $task->id }}, '{{ addslashes($task->title) }}')"
+                                            class="p-1.5 text-gray-400 hover:text-green-600 hover:bg-green-50 rounded-lg transition"
+                                            title="Tandai Selesai">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M5 13l4 4L19 7" />
+                                            </svg>
+                                        </button>
 
-                                                    {{-- Edit & Hapus hanya untuk tugas mandiri --}}
-                                                    @if($task->type === 'self')
-                                                        <button
-                                                            onclick="openEditModal({{ $task->id }}, this.closest('tr').dataset.editTitle, this.closest('tr').dataset.editDesc)"
-                                                            class="p-1.5 text-gray-400 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition"
-                                                            title="Edit">
-                                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                                    d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                                                            </svg>
-                                                        </button>
-                                                        <button onclick="openDeleteModal({{ $task->id }}, '{{ addslashes($task->title) }}')"
-                                                            class="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition"
-                                                            title="Hapus">
-                                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                                            </svg>
-                                                        </button>
-                                                    @endif
-                                                @endif
-                                            </div>
-                                        </td>
-                                    </tr>
+                                        {{-- Edit & Hapus hanya untuk tugas mandiri --}}
+                                        @if($task->type === 'self')
+                                            <button
+                                                onclick="openEditModal({{ $task->id }}, this.closest('tr').dataset.editTitle, this.closest('tr').dataset.editDesc)"
+                                                class="p-1.5 text-gray-400 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition"
+                                                title="Edit">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                        d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                                </svg>
+                                            </button>
+                                            <button onclick="openDeleteModal({{ $task->id }}, '{{ addslashes($task->title) }}')"
+                                                class="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition"
+                                                title="Hapus">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                                </svg>
+                                            </button>
+                                        @endif
+                                    @endif
+                                </div>
+                            </td>
+                        </tr>
                     @empty
                         <tr>
                             <td colspan="5" class="px-6 py-12 text-center text-gray-400 text-sm">
@@ -159,8 +156,7 @@
         </div>
     </div>
 
-    {{-- â”€â”€ MODAL TAMBAH
-    â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ --}}
+    {{-- MODAL TAMBAH --}}
     <div id="modal-create" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/50">
         <div class="bg-white rounded-2xl shadow-xl w-full max-w-md mx-4">
             <div class="flex items-center justify-between px-6 py-4 border-b border-gray-200">
@@ -172,7 +168,7 @@
                     </svg>
                 </button>
             </div>
-            <form action="{{ route('programmer.tasks.store') }}" method="POST" class="px-6 py-5 space-y-4">
+            <form action="{{ route('vg.tasks.store') }}" method="POST" class="px-6 py-5 space-y-4">
                 @csrf
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Judul Tugas</label>
@@ -201,9 +197,7 @@
         </div>
     </div>
 
-    {{-- â”€â”€ MODAL EDIT
-    â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-    --}}
+    {{-- MODAL EDIT --}}
     <div id="modal-edit" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/50">
         <div class="bg-white rounded-2xl shadow-xl w-full max-w-md mx-4">
             <div class="flex items-center justify-between px-6 py-4 border-b border-gray-200">
@@ -245,9 +239,7 @@
         </div>
     </div>
 
-    {{-- â”€â”€ MODAL HAPUS
-    â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-    --}}
+    {{-- MODAL HAPUS --}}
     <div id="modal-delete" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/50">
         <div class="bg-white rounded-2xl shadow-xl w-full max-w-sm mx-4">
             <div class="px-6 py-5 text-center">
@@ -280,7 +272,7 @@
         </div>
     </div>
 
-    {{-- â”€â”€ MODAL CHECKLIST SELESAI â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ --}}
+    {{-- MODAL CHECKLIST SELESAI --}}
     <div id="modal-complete" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/50">
         <div class="bg-white rounded-2xl shadow-xl w-full max-w-md mx-4">
             <div class="flex items-center justify-between px-6 py-4 border-b border-gray-200">
@@ -331,22 +323,21 @@
         function openEditModal(id, title, description) {
             document.getElementById('edit-title').value = title;
             document.getElementById('edit-description').value = description;
-            document.getElementById('form-edit').action = `/programmer/tasks/${id}`;
+            document.getElementById('form-edit').action = `/vg/tasks/${id}`;
             document.getElementById('modal-edit').classList.remove('hidden');
         }
 
         function openDeleteModal(id, title) {
             document.getElementById('delete-task-title').textContent = title;
-            document.getElementById('form-delete').action = `/programmer/tasks/${id}`;
+            document.getElementById('form-delete').action = `/vg/tasks/${id}`;
             document.getElementById('modal-delete').classList.remove('hidden');
         }
 
         function openCompleteModal(id, title) {
             document.getElementById('complete-task-title').textContent = title;
-            document.getElementById('form-complete').action = `/programmer/tasks/${id}/complete`;
+            document.getElementById('form-complete').action = `/vg/tasks/${id}/complete`;
             document.getElementById('modal-complete').classList.remove('hidden');
         }
-
     </script>
 
 @endsection

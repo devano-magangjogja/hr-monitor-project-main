@@ -23,8 +23,8 @@ class DashboardController extends Controller
 
     public function teamProgressDetail(User $user)
     {
-        // Hanya boleh lihat detail hr_staff dan hr_assistant
-        abort_if(! in_array($user->role, ['hr_staff', 'hr_assistant']), 403);
+        // Admin dapat melihat detail progres seluruh anggota tim (selain admin sendiri)
+        abort_if($user->role === 'admin', 404);
 
         $tasks      = $this->taskService->getAllTasksForUserToday($user->id);
         $scoreWeek  = $this->taskService->getUserScore($user->id, 'week');
