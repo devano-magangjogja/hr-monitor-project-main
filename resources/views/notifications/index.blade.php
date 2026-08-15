@@ -13,6 +13,14 @@
         @include('components.sidebar-cs')
     @elseif(Auth::user()->isOb())
         @include('components.sidebar-ob')
+    @elseif(Auth::user()->isProgrammer())
+        @include('components.sidebar-programmer')
+    @elseif(Auth::user()->isDg())
+        @include('components.sidebar-dg')
+    @elseif(Auth::user()->isVg())
+        @include('components.sidebar-vg')
+    @elseif(Auth::user()->isPm())
+        @include('components.sidebar-pm')
     @else
         @include('components.sidebar-assistant')
     @endif
