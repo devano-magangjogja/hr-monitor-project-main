@@ -24,8 +24,8 @@ class UserController extends Controller
     {
         $validated = $request->validate([
             'name'      => ['required', 'string', 'max:100'],
-            'email'     => ['required', 'email', 'max:100'],
-            'password'  => ['required', 'string', 'min:8', 'confirmed'],
+            'email'     => ['required', 'email', 'max:100', 'unique:users,email'],
+            'password'  => ['required', 'string', 'min:8'],
             'role'      => ['required', 'in:hr_staff,hr_assistant,cs,ob,programmer,dg,vg,pm'],
             'is_active' => ['nullable', 'boolean'],
         ]);

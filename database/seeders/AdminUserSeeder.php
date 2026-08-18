@@ -2,8 +2,9 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
+use App\Models\AppSetting;
 use App\Models\User;
+use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 
 class AdminUserSeeder extends Seeder
@@ -13,7 +14,8 @@ class AdminUserSeeder extends Seeder
      */
     public function run(): void
     {
-        if (! User::where('email', 'dep@hrdwms.com')->exists()) {
+
+        if (!User::where('email', 'dep@hrdwms.com')->exists()) {
             User::create([
                 'name' => 'dep',
                 'email' => 'dep@hrdwms.com',

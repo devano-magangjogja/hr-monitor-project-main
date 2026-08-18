@@ -26,4 +26,27 @@ class Pemagang extends Model
     {
         return $this->hasMany(Presensi::class, 'pemagang_id');
     }
+
+    /**
+     * Mendapatkan nomor WhatsApp berformat 628...
+     */
+    public function getWaNumberAttribute(): string
+    {
+        $phone = preg_replace('/[^0-9]/', '', (string)$this->no_hp);
+        if (str_starts_with($phone, '0')) {
+            $phone = '62' . substr($phone, 1);
+        } elseif (str_starts_with($phone, '8')) {
+            $phone = '62' . $phone;
+        }
+        return $phone;
+    }
+
+    /**
+     * URL direct chat WhatsApp konfirmasi ketidakhadiran
+     */
+    public function getWaUrlAttribute(): string
+    {
+        $message = "Halo {$this->nama_lengkap}, kami dari tim HR ingin menanyakan konfirmasi kehadiran Anda untuk kegiatan magang hari ini. Mohon informasikan keterangan atau kendala Anda. Terima kasih.";
+        return "https://wa.me/{$this->wa_number}?text=" . urlencode($message);
+    }
 }

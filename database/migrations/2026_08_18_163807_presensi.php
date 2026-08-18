@@ -12,7 +12,8 @@ return new class extends Migration {
     {
         Schema::create('presensi', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('pemagang_id')->constrained('pemagang');
+            $table->foreignId('pemagang_id')->constrained('pemagang')->cascadeOnDelete();
+            $table->date('tanggal')->nullable();
             $table->enum('shift', [
                 'Pagi',
                 'Middle',
@@ -20,7 +21,7 @@ return new class extends Migration {
             ]);
             $table->time('waktu_masuk');
             $table->enum('keterangan', [
-                'Datang Lebih Awal',
+                'Lebih Awal',
                 'Tepat Waktu',
                 'Terlambat',
                 'Tidak Hadir',

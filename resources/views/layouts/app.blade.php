@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>@yield('title', 'HR-DWMS') — HR-DWMS</title>
+    <title>@yield('title', $appName ?? 'Seven Inc') — {{ $appName ?? 'Seven Inc' }}</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body class="bg-[#F1F5F9] font-sans antialiased h-full">
@@ -191,7 +191,7 @@
         </header>
 
         {{-- Page Content --}}
-        <main class="flex-1 overflow-y-auto p-3 sm:p-4 md:p-6">
+        <main class="flex-1 overflow-y-auto p-3 sm:p-4 md:p-6 pb-24 sm:pb-28">
             @yield('content')
         </main>
     </div>

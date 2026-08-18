@@ -322,4 +322,77 @@
 })();
 </script>
 
+@elseif($errors->any())
+
+{{-- ── VALIDATION ERROR TOAST (Pojok Kanan Bawah) ──────── --}}
+<div id="toast-val-error"
+     role="alert"
+     class="fixed bottom-6 right-6 z-[9999] flex items-start gap-3 px-5 py-4 rounded-2xl shadow-xl
+            bg-white border border-red-200 max-w-sm w-full
+            translate-y-4 opacity-0 transition-all duration-300 ease-out">
+
+    <div class="w-8 h-8 rounded-full bg-red-100 flex items-center justify-center flex-shrink-0 mt-0.5">
+        <svg class="w-4 h-4 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+                  d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+        </svg>
+    </div>
+
+    <div class="flex-1 min-w-0">
+        <p class="text-sm font-semibold text-red-800">Periksa Inputan Anda</p>
+        <p class="text-xs text-gray-600 mt-0.5 leading-snug">{{ $errors->first() }}</p>
+    </div>
+
+    <div class="absolute bottom-0 left-0 h-1 rounded-b-2xl bg-red-400"
+         id="val-error-progress"
+         style="width: 100%; transition: width 4.5s linear;"></div>
+
+    <button onclick="dismissValErrorToast()"
+            class="flex-shrink-0 text-gray-400 hover:text-gray-600 transition mt-0.5"
+            aria-label="Tutup">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M6 18L18 6M6 6l12 12"/>
+        </svg>
+    </button>
+</div>
+
+<script>
+(function () {
+    const toast    = document.getElementById('toast-val-error');
+    const progress = document.getElementById('val-error-progress');
+    let   timer;
+
+    function show() {
+        requestAnimationFrame(function () {
+            toast.classList.remove('translate-y-4', 'opacity-0');
+            toast.classList.add('translate-y-0', 'opacity-100');
+            requestAnimationFrame(function () {
+                progress.style.width = '0%';
+            });
+        });
+        timer = setTimeout(dismissValErrorToast, 4500);
+    }
+
+    window.dismissValErrorToast = function () {
+        clearTimeout(timer);
+        toast.classList.remove('translate-y-0', 'opacity-100');
+        toast.classList.add('translate-y-4', 'opacity-0');
+        setTimeout(function () { toast.remove(); }, 300);
+    };
+
+    toast.addEventListener('mouseenter', function () {
+        clearTimeout(timer);
+        progress.style.transition = 'none';
+    });
+    toast.addEventListener('mouseleave', function () {
+        progress.style.transition = 'width 2s linear';
+        progress.style.width = '0%';
+        timer = setTimeout(dismissValErrorToast, 2000);
+    });
+
+    requestAnimationFrame(show);
+})();
+</script>
+
 @endif

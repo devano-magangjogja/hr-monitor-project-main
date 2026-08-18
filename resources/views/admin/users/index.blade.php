@@ -310,7 +310,7 @@
                         </template>
                         <template x-if="!hasPhoto || !previewUrl">
                             <div id="edit-avatar-initials"
-                                class="w-full h-full bg-primary-100 flex items-center justify-center">
+                                 class="w-full h-full bg-primary-100 flex items-center justify-center">
                                 <span id="edit-avatar-letter" class="text-lg font-bold text-primary-600"></span>
                             </div>
                         </template>
@@ -432,12 +432,30 @@
 
     {{-- ── JavaScript Modal ────────────────────────────────── --}}
     <script>
-        function openEditModal(id, name, email, role, isActive) {
+        function openEditModal(id, name, email, role, isActive, imageUrl = '') {
             document.getElementById('edit-name').value = name;
             document.getElementById('edit-email').value = email;
             document.getElementById('edit-role').value = role;
             document.getElementById('edit-status').value = isActive;
             document.getElementById('form-edit').action = `/admin/users/${id}`;
+
+            const letter = document.getElementById('edit-avatar-letter');
+            if (letter) letter.textContent = name.charAt(0).toUpperCase();
+
+            const photoArea = document.getElementById('edit-photo-area');
+            if (photoArea && photoArea._x_dataStack && photoArea._x_dataStack[0]) {
+                const alpineData = photoArea._x_dataStack[0];
+                if (imageUrl) {
+                    alpineData.previewUrl = imageUrl;
+                    alpineData.hasPhoto = true;
+                    alpineData.removePhoto = false;
+                } else {
+                    alpineData.previewUrl = '';
+                    alpineData.hasPhoto = false;
+                    alpineData.removePhoto = false;
+                }
+            }
+
             document.getElementById('modal-edit').classList.remove('hidden');
         }
 

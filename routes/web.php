@@ -13,6 +13,7 @@ use App\Http\Controllers\Staff\DashboardController as StaffDashboard;
 use App\Http\Controllers\Staff\TaskController as StaffTaskController;
 use App\Http\Controllers\Staff\UserController as StaffUserController;
 use App\Http\Controllers\Staff\NotificationController as StaffNotificationController;
+use App\Http\Controllers\Staff\PresensiController as StaffPresensiController;
 use App\Http\Controllers\Cs\DashboardController as CsDashboard;
 use App\Http\Controllers\Cs\TaskController as CsTaskController;
 use App\Http\Controllers\Ob\DashboardController as ObDashboard;
@@ -108,6 +109,13 @@ Route::prefix('staff')->name('staff.')->middleware(['auth', 'role:hr_staff'])->g
     // Notifikasi Custom
     Route::get('/notifications', [StaffNotificationController::class, 'index'])->name('notifications.index');
     Route::post('/notifications', [StaffNotificationController::class, 'store'])->name('notifications.store');
+
+    // Presensi Pemagang
+    Route::get('/presensi', [StaffPresensiController::class, 'index'])->name('presensi.index');
+    Route::post('/presensi', [StaffPresensiController::class, 'store'])->name('presensi.store');
+    Route::patch('/presensi/{presensi}', [StaffPresensiController::class, 'update'])->name('presensi.update');
+    Route::delete('/presensi/{presensi}', [StaffPresensiController::class, 'destroy'])->name('presensi.destroy');
+    Route::get('/presensi/laporan', [StaffPresensiController::class, 'laporan'])->name('presensi.laporan');
 });
 
 // ── CS (Customer Service) ────────────────────────────────────────────────────

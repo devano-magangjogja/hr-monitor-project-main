@@ -23,11 +23,11 @@ class AppServiceProvider extends ServiceProvider
         // Inject settings ke semua view — dengan fallback aman jika tabel belum ada
         View::composer('*', function ($view) {
             try {
-                $appName    = AppSetting::get('app_name', 'HR-DWMS');
-                $appLogo    = AppSetting::get('app_logo');
+                $appName     = AppSetting::get('app_name', 'Seven Inc');
+                $appLogo     = AppSetting::get('app_logo');
                 $appWaGroups = WaGroup::active()->get();
             } catch (\Exception $e) {
-                $appName     = 'HR-DWMS';
+                $appName     = 'Seven Inc';
                 $appLogo     = null;
                 $appWaGroups = collect();
             }
