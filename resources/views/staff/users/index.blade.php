@@ -157,17 +157,57 @@
                        class="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm
                               focus:outline-none focus:ring-2 focus:ring-primary-500">
             </div>
-            <div>
-                <input type="password" name="password" required minlength="8"
-                       placeholder="Password"
-                       class="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm
-                              focus:outline-none focus:ring-2 focus:ring-primary-500">
+            <div x-data="{ show: false }">
+                <div class="flex items-center justify-between mb-1">
+                    <label class="block text-sm font-medium text-gray-700">Password <span class="text-red-500">*</span></label>
+                    <span id="create-pwd-len-msg" class="text-[11px] text-gray-400 font-medium">Min. 8 karakter</span>
+                </div>
+                <div class="relative">
+                    <input :type="show ? 'text' : 'password'" id="create-password" name="password" required minlength="8"
+                           placeholder="Minimal 8 karakter"
+                           class="w-full px-4 py-2.5 pr-10 border border-gray-300 rounded-lg text-sm transition
+                                  focus:outline-none focus:ring-2 focus:ring-primary-500">
+                    <button type="button" @click="show = !show"
+                            class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition"
+                            title="Tampilkan / Sembunyikan Password">
+                        <svg x-show="!show" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                  d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                  d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                        </svg>
+                        <svg x-show="show" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="display:none">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                  d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"/>
+                        </svg>
+                    </button>
+                </div>
             </div>
-            <div>
-                <input type="password" name="password_confirmation" required
-                       placeholder="Konfirmasi Password"
-                       class="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm
-                              focus:outline-none focus:ring-2 focus:ring-primary-500">
+            <div x-data="{ show: false }">
+                <div class="flex items-center justify-between mb-1">
+                    <label class="block text-sm font-medium text-gray-700">Konfirmasi Password <span class="text-red-500">*</span></label>
+                    <span id="create-pwd-match-msg" class="text-[11px] font-semibold hidden"></span>
+                </div>
+                <div class="relative">
+                    <input :type="show ? 'text' : 'password'" id="create-password-confirmation" name="password_confirmation" required
+                           placeholder="Ulangi password di atas"
+                           class="w-full px-4 py-2.5 pr-10 border border-gray-300 rounded-lg text-sm transition
+                                  focus:outline-none focus:ring-2 focus:ring-primary-500">
+                    <button type="button" @click="show = !show"
+                            class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition"
+                            title="Tampilkan / Sembunyikan Password">
+                        <svg x-show="!show" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                  d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                  d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                        </svg>
+                        <svg x-show="show" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="display:none">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                  d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"/>
+                        </svg>
+                    </button>
+                </div>
             </div>
             <div class="flex justify-end gap-3 pt-2">
                 <button type="button"
@@ -326,17 +366,57 @@
         <form id="form-password" action="" method="POST" class="px-6 py-5 space-y-4">
             @csrf
             @method('PATCH')
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Password Baru</label>
-                <input type="password" name="password" required minlength="8"
-                       class="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm
-                              focus:outline-none focus:ring-2 focus:ring-primary-500">
+            <div x-data="{ show: false }">
+                <div class="flex items-center justify-between mb-1">
+                    <label class="block text-sm font-medium text-gray-700">Password Baru <span class="text-red-500">*</span></label>
+                    <span id="reset-pwd-len-msg" class="text-[11px] text-gray-400 font-medium">Min. 8 karakter</span>
+                </div>
+                <div class="relative">
+                    <input :type="show ? 'text' : 'password'" id="reset-password" name="password" required minlength="8"
+                           placeholder="Minimal 8 karakter"
+                           class="w-full px-4 py-2.5 pr-10 border border-gray-300 rounded-lg text-sm transition
+                                  focus:outline-none focus:ring-2 focus:ring-primary-500">
+                    <button type="button" @click="show = !show"
+                            class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition"
+                            title="Tampilkan / Sembunyikan Password">
+                        <svg x-show="!show" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                  d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                  d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                        </svg>
+                        <svg x-show="show" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="display:none">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                  d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"/>
+                        </svg>
+                    </button>
+                </div>
             </div>
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Konfirmasi Password Baru</label>
-                <input type="password" name="password_confirmation" required
-                       class="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm
-                              focus:outline-none focus:ring-2 focus:ring-primary-500">
+            <div x-data="{ show: false }">
+                <div class="flex items-center justify-between mb-1">
+                    <label class="block text-sm font-medium text-gray-700">Konfirmasi Password Baru <span class="text-red-500">*</span></label>
+                    <span id="reset-pwd-match-msg" class="text-[11px] font-semibold hidden"></span>
+                </div>
+                <div class="relative">
+                    <input :type="show ? 'text' : 'password'" id="reset-password-confirmation" name="password_confirmation" required
+                           placeholder="Ulangi password baru"
+                           class="w-full px-4 py-2.5 pr-10 border border-gray-300 rounded-lg text-sm transition
+                                  focus:outline-none focus:ring-2 focus:ring-primary-500">
+                    <button type="button" @click="show = !show"
+                            class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition"
+                            title="Tampilkan / Sembunyikan Password">
+                        <svg x-show="!show" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                  d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                  d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                        </svg>
+                        <svg x-show="show" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="display:none">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                  d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"/>
+                        </svg>
+                    </button>
+                </div>
             </div>
             <div class="flex justify-end gap-3 pt-2">
                 <button type="button"
@@ -393,6 +473,77 @@
 
 @push('scripts')
 <script>
+    function setupPasswordMatchValidation(pwdInputId, confirmInputId, matchMsgId, lenMsgId, formEl) {
+        const pwdInput = document.getElementById(pwdInputId);
+        const confirmInput = document.getElementById(confirmInputId);
+        const matchMsg = document.getElementById(matchMsgId);
+        const lenMsg = lenMsgId ? document.getElementById(lenMsgId) : null;
+
+        if (!pwdInput || !confirmInput || !matchMsg) return;
+
+        function validate() {
+            const pwd = pwdInput.value;
+            const confirm = confirmInput.value;
+
+            // Indikator panjang password
+            if (lenMsg) {
+                if (pwd.length > 0 && pwd.length < 8) {
+                    lenMsg.textContent = `${pwd.length}/8 karakter (Kurang ${8 - pwd.length})`;
+                    lenMsg.className = 'text-[11px] text-amber-600 font-semibold';
+                } else if (pwd.length >= 8) {
+                    lenMsg.textContent = '✓ Panjang cukup';
+                    lenMsg.className = 'text-[11px] text-emerald-600 font-semibold';
+                } else {
+                    lenMsg.textContent = 'Min. 8 karakter';
+                    lenMsg.className = 'text-[11px] text-gray-400 font-medium';
+                }
+            }
+
+            // Indikator pencocokan password
+            if (confirm.length === 0) {
+                matchMsg.classList.add('hidden');
+                confirmInput.classList.remove('border-red-500', 'border-emerald-500', 'focus:ring-red-500', 'focus:ring-emerald-500');
+                confirmInput.classList.add('border-gray-300');
+                return true;
+            }
+
+            matchMsg.classList.remove('hidden');
+
+            if (pwd === confirm) {
+                matchMsg.innerHTML = '<span class="inline-flex items-center gap-1 text-emerald-600 font-semibold"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg> Password cocok</span>';
+                confirmInput.classList.remove('border-gray-300', 'border-red-500', 'focus:ring-red-500');
+                confirmInput.classList.add('border-emerald-500', 'focus:ring-emerald-500');
+                return true;
+            } else {
+                matchMsg.innerHTML = '<span class="inline-flex items-center gap-1 text-red-600 font-semibold"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg> Password tidak cocok</span>';
+                confirmInput.classList.remove('border-gray-300', 'border-emerald-500', 'focus:ring-emerald-500');
+                confirmInput.classList.add('border-red-500', 'focus:ring-red-500');
+                return false;
+            }
+        }
+
+        pwdInput.addEventListener('input', validate);
+        confirmInput.addEventListener('input', validate);
+
+        if (formEl) {
+            formEl.addEventListener('submit', function(e) {
+                if (pwdInput.value !== confirmInput.value) {
+                    e.preventDefault();
+                    validate();
+                    confirmInput.focus();
+                }
+            });
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const createForm = document.querySelector('#modal-create form');
+        setupPasswordMatchValidation('create-password', 'create-password-confirmation', 'create-pwd-match-msg', 'create-pwd-len-msg', createForm);
+
+        const resetForm = document.getElementById('form-password');
+        setupPasswordMatchValidation('reset-password', 'reset-password-confirmation', 'reset-pwd-match-msg', 'reset-pwd-len-msg', resetForm);
+    });
+
     function openEditModal(id, name, email, isActive, imageUrl) {
         document.getElementById('edit-name').value   = name;
         document.getElementById('edit-email').value  = email;
@@ -404,6 +555,20 @@
 
     function openPasswordModal(id, name) {
         document.getElementById('password-user-name').textContent = name;
+        document.getElementById('reset-password').value = '';
+        document.getElementById('reset-password-confirmation').value = '';
+        const matchMsg = document.getElementById('reset-pwd-match-msg');
+        if (matchMsg) matchMsg.classList.add('hidden');
+        const lenMsg = document.getElementById('reset-pwd-len-msg');
+        if (lenMsg) {
+            lenMsg.textContent = 'Min. 8 karakter';
+            lenMsg.className = 'text-[11px] text-gray-400 font-medium';
+        }
+        const confirmInput = document.getElementById('reset-password-confirmation');
+        if (confirmInput) {
+            confirmInput.classList.remove('border-red-500', 'border-emerald-500', 'focus:ring-red-500', 'focus:ring-emerald-500');
+            confirmInput.classList.add('border-gray-300');
+        }
         document.getElementById('form-password').action = `/staff/users/${id}/password`;
         document.getElementById('modal-password').classList.remove('hidden');
     }
