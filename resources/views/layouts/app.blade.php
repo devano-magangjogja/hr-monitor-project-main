@@ -137,7 +137,7 @@
                 <a href="{{ route('notifications.index') }}"
                    class="relative p-1.5 text-gray-500 hover:text-primary-600 hover:bg-primary-50
                           rounded-lg transition min-w-[40px] min-h-[40px] flex items-center justify-center">
-                    <svg class="w-4 sm:w-5 h-4 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg id="nav-notif-bell-icon" class="w-4 sm:w-5 h-4 sm:h-5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
                     </svg>
@@ -145,12 +145,10 @@
                         try { $unread = Auth::user()->unreadNotifications->count(); }
                         catch (\Exception $e) { $unread = 0; }
                     @endphp
-                    @if($unread > 0)
-                        <span class="absolute top-0 right-0 w-4 h-4 bg-red-500 text-white
-                                    text-[10px] rounded-full flex items-center justify-center font-medium">
-                            {{ $unread > 9 ? '9+' : $unread }}
-                        </span>
-                    @endif
+                    <span id="nav-notif-badge" class="{{ $unread > 0 ? '' : 'hidden' }} absolute top-0 right-0 w-4 h-4 bg-red-500 text-white
+                                text-[10px] rounded-full flex items-center justify-center font-medium transition-all">
+                        {{ $unread > 9 ? '9+' : ($unread > 0 ? $unread : '') }}
+                    </span>
                 </a>
 
                 {{-- Tanggal (desktop only) --}}
@@ -199,7 +197,7 @@
     @include('components.task-detail-modal')
 </div>
 
-{{-- Notification Popup — di luar semua container overflow --}}
+{{-- Notification Popup (Tengah Layar & Real-time Live) — di luar semua container overflow --}}
 @include('components.notification-popup')
 
 {{-- Floating Chat Button --}}

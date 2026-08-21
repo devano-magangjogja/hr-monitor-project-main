@@ -221,6 +221,7 @@ Route::prefix('pm')->name('pm.')->middleware(['auth', 'role:pm'])->group(functio
 // ── Notifications (All Roles) ────────────────────────────────────────────────
 Route::middleware('auth')->prefix('notifications')->name('notifications.')->group(function () {
     Route::get('/', [NotificationController::class, 'index'])->name('index');
+    Route::get('/live-check', [NotificationController::class, 'liveCheck'])->name('live.check');
     Route::patch('/{id}/read', [NotificationController::class, 'markAsRead'])->name('read');
     Route::patch('/read-all', [NotificationController::class, 'markAllAsRead'])->name('read.all');
 });
