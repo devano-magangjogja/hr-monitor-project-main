@@ -20,6 +20,7 @@ use App\Http\Controllers\Ob\DashboardController as ObDashboard;
 use App\Http\Controllers\Ob\TaskController as ObTaskController;
 use App\Http\Controllers\Assistant\DashboardController as AssistantDashboard;
 use App\Http\Controllers\Assistant\TaskController as AssistantTaskController;
+use App\Http\Controllers\Assistant\PresensiController as AssistantPresensiController;
 use App\Http\Controllers\Programmer\DashboardController as ProgrammerDashboard;
 use App\Http\Controllers\Programmer\TaskController as ProgrammerTaskController;
 use App\Http\Controllers\DG\DashboardController as DGDashboard;
@@ -30,6 +31,7 @@ use App\Http\Controllers\PM\DashboardController as PMDashboard;
 use App\Http\Controllers\PM\TaskController as PMTaskController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\PemagangController;
 
 // ── Auth (All Roles) ────────────────────────────────────────────────────────
 Route::get('/', fn() => redirect()->route('login'));
@@ -80,12 +82,15 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin'])->grou
     Route::post('/settings/wa-groups', [AdminSettingController::class, 'storeWaGroup'])->name('settings.wa-groups.store');
     Route::patch('/settings/wa-groups/{waGroup}', [AdminSettingController::class, 'updateWaGroup'])->name('settings.wa-groups.update');
     Route::delete('/settings/wa-groups/{waGroup}', [AdminSettingController::class, 'destroyWaGroup'])->name('settings.wa-groups.destroy');
+
+    // Tambah Pemagang
+    Route::post('/pemagang', [PemagangController::class, 'store'])->name('pemagang.store');
 });
 
 // ── HR Staff ────────────────────────────────────────────────────────────────
 Route::prefix('staff')->name('staff.')->middleware(['auth', 'role:hr_staff'])->group(function () {
     Route::get('/dashboard', [StaffDashboard::class, 'index'])->name('dashboard');
-    Route::resource('tasks', StaffTaskController::class) ->only(['index', 'store', 'update', 'destroy']);
+    Route::resource('tasks', StaffTaskController::class)->only(['index', 'store', 'update', 'destroy']);
     Route::patch('/tasks/{task}/complete', [StaffTaskController::class, 'complete'])->name('tasks.complete');
     Route::get('/tasks/daily', [StaffTaskController::class, 'dailyIndex'])->name('tasks.daily');
     Route::patch('/tasks/daily/{task}/complete', [StaffTaskController::class, 'dailyComplete'])->name('tasks.daily.complete');
@@ -116,6 +121,9 @@ Route::prefix('staff')->name('staff.')->middleware(['auth', 'role:hr_staff'])->g
     Route::patch('/presensi/{presensi}', [StaffPresensiController::class, 'update'])->name('presensi.update');
     Route::delete('/presensi/{presensi}', [StaffPresensiController::class, 'destroy'])->name('presensi.destroy');
     Route::get('/presensi/laporan', [StaffPresensiController::class, 'laporan'])->name('presensi.laporan');
+
+    // Tambah Pemagang
+    Route::post('/pemagang', [PemagangController::class, 'store'])->name('pemagang.store');
 });
 
 // ── CS (Customer Service) ────────────────────────────────────────────────────
@@ -155,11 +163,21 @@ Route::prefix('assistant')->name('assistant.')->middleware(['auth', 'role:hr_ass
     Route::patch('/tasks/assigned/{task}/complete', [AssistantTaskController::class, 'assignedComplete'])->name('tasks.assigned.complete');
     Route::get('/tasks/all', [AssistantTaskController::class, 'allIndex'])->name('tasks.all');
     Route::patch('/tasks/all/{task}/complete', [AssistantTaskController::class, 'allComplete'])->name('tasks.all.complete');
-    Route::resource('tasks', AssistantTaskController::class) ->only(['index', 'store']);
+    Route::resource('tasks', AssistantTaskController::class)->only(['index', 'store']);
     Route::patch('/tasks/{task}', [AssistantTaskController::class, 'update'])->name('tasks.update');
     Route::delete('/tasks/{task}', [AssistantTaskController::class, 'destroy'])->name('tasks.destroy');
     Route::patch('/tasks/{task}/complete', [AssistantTaskController::class, 'complete'])->name('tasks.complete');
     Route::get('/history', [AssistantTaskController::class, 'history'])->name('tasks.history');
+
+    // Presensi Pemagang
+    Route::get('/presensi', [AssistantPresensiController::class, 'index'])->name('presensi.index');
+    Route::post('/presensi', [AssistantPresensiController::class, 'store'])->name('presensi.store');
+    Route::patch('/presensi/{presensi}', [AssistantPresensiController::class, 'update'])->name('presensi.update');
+    Route::delete('/presensi/{presensi}', [AssistantPresensiController::class, 'destroy'])->name('presensi.destroy');
+    Route::get('/presensi/laporan', [AssistantPresensiController::class, 'laporan'])->name('presensi.laporan');
+
+    // Tambah Pemagang
+    Route::post('/pemagang', [PemagangController::class, 'store'])->name('pemagang.store');
 });
 
 // ── Programmer ───────────────────────────────────────────────────────────────

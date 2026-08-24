@@ -13,6 +13,7 @@ class Task extends Model
         'description',
         'task_date',
         'type',
+        'kantor',
         'created_by',
         'default_task_id',
     ];

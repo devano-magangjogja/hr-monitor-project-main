@@ -18,9 +18,11 @@ class Presensi extends Model
         'pemagang_id',
         'tanggal',
         'shift',
+        'kantor',
         'waktu_masuk',
         'keterangan',
-        'notes'
+        'notes',
+        'created_by',
     ];
 
     public function pemagang(): BelongsTo
@@ -31,5 +33,10 @@ class Presensi extends Model
     public function pemagangs(): BelongsTo
     {
         return $this->pemagang();
+    }
+
+    public function creator(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'created_by');
     }
 }

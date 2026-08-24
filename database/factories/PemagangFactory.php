@@ -21,7 +21,6 @@ class PemagangFactory extends Factory
     {
         return [
             'nama_lengkap' => $this->faker->name(),
-            'nim' => $this->faker->unique()->numerify('230######'),
             'no_hp' => $this->faker->unique()->numerify('081#########'),
             'kampus' => $this->faker->randomElement([
                 'Universitas Indonesia',

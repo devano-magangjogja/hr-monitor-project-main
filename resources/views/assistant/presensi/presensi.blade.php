@@ -5,7 +5,7 @@
 @section('page-subtitle', 'Presensi tanggal: ' . $formattedDate)
 
 @section('sidebar')
-    @include('components.sidebar-staff')
+    @include('components.sidebar-assistant')
 @endsection
 
 @section('content')
@@ -26,21 +26,18 @@
                     <h2 class="text-base sm:text-lg font-bold text-gray-800">
                         Presensi: <span class="text-primary-600">{{ $formattedDate }}</span>
                     </h2>
+                    @if(!empty($assignedKantor))
+                        <span
+                            class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-bold bg-blue-100 text-blue-800 border border-blue-200">
+                            Bertugas di: {{ $assignedKantor }}
+                        </span>
+                    @endif
                 </div>
             </div>
         </div>
         <div class="w-full sm:w-auto flex items-center gap-2">
-            <button type="button" onclick="openCreatePemagangModal()"
-                class="w-full sm:w-auto flex items-center justify-center gap-2 px-4 py-2.5 bg-primary-600 hover:bg-primary-700 text-white text-xs sm:text-sm font-semibold rounded-xl transition shadow-sm hover:shadow">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-                </svg>
-                <span>Tambah Pemagang</span>
-            </button>
             <button onclick="openCreateModal()"
-                class="w-full sm:w-auto flex items-center justify-center gap-2 px-4 py-2.5 text-white text-xs sm:text-sm font-semibold rounded-xl transition shadow-sm hover:shadow"
-                style="background-color: #DC2626;" onmouseover="this.style.backgroundColor='#B91C1C'"
-                onmouseout="this.style.backgroundColor='#DC2626'">
+                class="w-full sm:w-auto flex items-center justify-center gap-2 px-4 py-2.5 bg-primary-600 hover:bg-primary-700 text-white text-xs sm:text-sm font-semibold rounded-xl transition shadow-sm hover:shadow">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
                 </svg>
@@ -48,19 +45,6 @@
             </button>
         </div>
     </div>
-
-    @if($asistenKantors->count() > 0)
-        <div
-            class="mb-5 flex items-center gap-2 flex-wrap bg-blue-50/80 border border-blue-200 rounded-xl px-4 py-2.5 text-xs text-blue-900 shadow-2xs">
-            <span class="font-bold flex items-center gap-1">Asisten Bertugas Hari Ini:</span>
-            @foreach($asistenKantors as $ak)
-                <span
-                    class="inline-flex items-center gap-1 bg-white border border-blue-200 px-2.5 py-1 rounded-lg font-medium text-blue-800 shadow-2xs">
-                    <strong>{{ $ak['name'] }}</strong> &rarr; <span class="text-blue-600 font-bold">{{ $ak['kantor'] }}</span>
-                </span>
-            @endforeach
-        </div>
-    @endif
 
     {{-- ── Stat Cards Ringkasan Tanggal Ini ────────────────────── --}}
     <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4 mb-8">
@@ -145,27 +129,14 @@
         <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
 
             {{-- Filter Form --}}
-            <form method="GET" action="{{ route('staff.presensi.index') }}"
-                class="flex-1 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-3">
+            <form method="GET" action="{{ route('assistant.presensi.index') }}"
+                class="flex-1 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
                 {{-- Input Tanggal --}}
                 <div>
                     <label class="block text-[11px] font-semibold text-gray-500 uppercase tracking-wider mb-1">Pilih
                         Tanggal</label>
                     <input type="date" name="tanggal" value="{{ $tanggal }}" onchange="this.form.submit()"
                         class="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-xs sm:text-sm font-medium text-gray-800 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:bg-white transition">
-                </div>
-
-                {{-- Filter Kantor --}}
-                <div>
-                    <label
-                        class="block text-[11px] font-semibold text-gray-500 uppercase tracking-wider mb-1">Kantor</label>
-                    <select name="kantor" onchange="this.form.submit()"
-                        class="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:bg-white transition text-gray-700">
-                        <option value="">Semua Kantor</option>
-                        @foreach($kantorList as $k)
-                            <option value="{{ $k }}" {{ request('kantor') == $k ? 'selected' : '' }}>{{ $k }}</option>
-                        @endforeach
-                    </select>
                 </div>
 
                 {{-- Filter Shift --}}
@@ -213,7 +184,7 @@
 
             @if(!$isToday)
                 <div class="flex items-center gap-2 flex-shrink-0 self-end lg:self-center">
-                    <a href="{{ route('staff.presensi.index') }}"
+                    <a href="{{ route('assistant.presensi.index') }}"
                         class="px-3.5 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs sm:text-sm font-semibold rounded-lg transition"
                         title="Kembali ke Hari Ini">
                         Hari Ini
@@ -252,11 +223,11 @@
                         <th class="px-6 py-3.5 w-12 text-center">No</th>
                         <th class="px-6 py-3.5">Nama Pemagang</th>
                         <th class="px-6 py-3.5">Divisi</th>
-                        <th class="px-6 py-3.5">Kantor</th>
                         <th class="px-6 py-3.5">Shift</th>
                         <th class="px-6 py-3.5">Waktu Masuk</th>
-                        <th class="px-6 py-3.5">Status</th>
-                        <th class="px-6 py-3.5 text-center">Aksi</th>
+                        <th class="px-6 py-3.5">Status Kehadiran</th>
+                        <th class="px-6 py-3.5">Catatan</th>
+                        <th class="px-6 py-3.5 text-right">Aksi</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-100">
@@ -302,14 +273,6 @@
                                 </span>
                             </td>
 
-                            {{-- Kantor --}}
-                            <td class="px-6 py-4">
-                                <span
-                                    class="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-medium bg-blue-50 text-blue-700">
-                                    {{ $presensi->kantor ?? 'Kantor 1' }}
-                                </span>
-                            </td>
-
                             {{-- Shift --}}
                             <td class="px-6 py-4">
                                 <span
@@ -338,21 +301,25 @@
                                 </span>
                             </td>
 
+                            {{-- Catatan --}}
+                            <td class="px-6 py-4 text-xs text-gray-500 max-w-[200px] truncate" title="{{ $presensi->notes }}">
+                                {{ $presensi->notes ?: '-' }}
+                            </td>
+
                             {{-- Aksi --}}
                             <td class="px-6 py-4 text-right">
                                 <div class="flex items-center justify-end gap-1.5">
                                     {{-- Edit --}}
                                     <button type="button" onclick="openEditModal(
-                                                    {{ $presensi->id }},
-                                                    {{ $presensi->pemagang_id }},
-                                                    '{{ addslashes($pemagang ? $pemagang->nama_lengkap : '') }}',
-                                                    '{{ $presensi->tanggal }}',
-                                                    '{{ $presensi->shift }}',
-                                                    '{{ substr($presensi->waktu_masuk, 0, 5) }}',
-                                                    '{{ $presensi->keterangan }}',
-                                                    '{{ addslashes($presensi->notes ?: '') }}',
-                                                    '{{ $presensi->kantor ?? 'Kantor 1' }}'
-                                                )"
+                                                                                                                            {{ $presensi->id }},
+                                                                                                                            {{ $presensi->pemagang_id }},
+                                                                                                                            '{{ addslashes($pemagang ? $pemagang->nama_lengkap : '') }}',
+                                                                                                                            '{{ $presensi->tanggal }}',
+                                                                                                                            '{{ $presensi->shift }}',
+                                                                                                                            '{{ substr($presensi->waktu_masuk, 0, 5) }}',
+                                                                                                                            '{{ $presensi->keterangan }}',
+                                                                                                                            '{{ addslashes($presensi->notes ?: '') }}'
+                                                                                                                        )"
                                         class="p-1.5 text-gray-400 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition"
                                         title="Edit Presensi">
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -363,11 +330,11 @@
 
                                     {{-- Hapus --}}
                                     <button type="button" onclick="openDeleteModal(
-                                                    {{ $presensi->id }},
-                                                    '{{ addslashes($pemagang ? $pemagang->nama_lengkap : 'Pemagang') }}',
-                                                    '{{ $presensi->shift }}',
-                                                    '{{ substr($presensi->waktu_masuk, 0, 5) }}'
-                                                )"
+                                                                                                                            {{ $presensi->id }},
+                                                                                                                            '{{ addslashes($pemagang ? $pemagang->nama_lengkap : 'Pemagang') }}',
+                                                                                                                            '{{ $presensi->shift }}',
+                                                                                                                            '{{ substr($presensi->waktu_masuk, 0, 5) }}'
+                                                                                                                        )"
                                         class="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition"
                                         title="Hapus Presensi">
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -519,16 +486,15 @@
                                 <div class="flex items-center justify-end gap-1.5">
                                     {{-- Edit --}}
                                     <button type="button" onclick="openEditModal(
-                                                    {{ $presensi->id }},
-                                                    {{ $presensi->pemagang_id }},
-                                                    '{{ addslashes($pemagang ? $pemagang->nama_lengkap : '') }}',
-                                                    '{{ $presensi->tanggal }}',
-                                                    '{{ $presensi->shift }}',
-                                                    '{{ substr($presensi->waktu_masuk, 0, 5) }}',
-                                                    '{{ $presensi->keterangan }}',
-                                                    '{{ addslashes($presensi->notes ?: '') }}',
-                                                    '{{ $presensi->kantor ?? 'Kantor 1' }}'
-                                                )"
+                                                                                                                            {{ $presensi->id }},
+                                                                                                                            {{ $presensi->pemagang_id }},
+                                                                                                                            '{{ addslashes($pemagang ? $pemagang->nama_lengkap : '') }}',
+                                                                                                                            '{{ $presensi->tanggal }}',
+                                                                                                                            '{{ $presensi->shift }}',
+                                                                                                                            '{{ substr($presensi->waktu_masuk, 0, 5) }}',
+                                                                                                                            '{{ $presensi->keterangan }}',
+                                                                                                                            '{{ addslashes($presensi->notes ?: '') }}'
+                                                                                                                        )"
                                         class="p-1.5 text-gray-400 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition"
                                         title="Ubah Status Presensi">
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -539,11 +505,11 @@
 
                                     {{-- Hapus --}}
                                     <button type="button" onclick="openDeleteModal(
-                                                    {{ $presensi->id }},
-                                                    '{{ addslashes($pemagang ? $pemagang->nama_lengkap : 'Pemagang') }}',
-                                                    '{{ $presensi->shift }}',
-                                                    '{{ substr($presensi->waktu_masuk, 0, 5) }}'
-                                                )"
+                                                                                                                            {{ $presensi->id }},
+                                                                                                                            '{{ addslashes($pemagang ? $pemagang->nama_lengkap : 'Pemagang') }}',
+                                                                                                                            '{{ $presensi->shift }}',
+                                                                                                                            '{{ substr($presensi->waktu_masuk, 0, 5) }}'
+                                                                                                                        )"
                                         class="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition"
                                         title="Hapus Data">
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -597,7 +563,7 @@
                 </button>
             </div>
 
-            <form action="{{ route('staff.presensi.store') }}" method="POST" class="px-5 pt-3 pb-4 space-y-3">
+            <form action="{{ route('assistant.presensi.store') }}" method="POST" class="px-5 pt-3 pb-4 space-y-3">
                 @csrf
 
                 {{-- Tanggal Presensi (Otomatis Hari Ini & Terkunci) --}}
@@ -680,45 +646,22 @@
                     </div>
                 </div>
 
-                {{-- Shift Kerja & Lokasi Kantor --}}
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    <div>
-                        <label class="block text-[11px] font-bold text-gray-700 uppercase tracking-wider mb-1">
-                            Shift Kerja <span class="text-red-500">*</span>
-                        </label>
-                        <div class="relative">
-                            <select name="shift" required
-                                class="w-full px-3 py-2 pr-8 bg-gray-50 border border-gray-300 rounded-lg text-xs sm:text-sm appearance-none cursor-pointer focus:outline-none focus:ring-2 focus:ring-primary-500 focus:bg-white transition hover:bg-white hover:border-primary-500">
-                                <option value="Pagi">Shift Pagi (08:00 - 16:00)</option>
-                                <option value="Middle">Shift Middle (10:00 - 18:00)</option>
-                                <option value="Siang">Shift Siang (13:00 - 21:00)</option>
-                            </select>
-                            <div class="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400">
-                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M19 9l-7 7-7-7" />
-                                </svg>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div>
-                        <label class="block text-[11px] font-bold text-gray-700 uppercase tracking-wider mb-1">
-                            Lokasi Kantor <span class="text-red-500">*</span>
-                        </label>
-                        <div class="relative">
-                            <select name="kantor" required
-                                class="w-full px-3 py-2 pr-8 bg-gray-50 border border-gray-300 rounded-lg text-xs sm:text-sm appearance-none cursor-pointer focus:outline-none focus:ring-2 focus:ring-primary-500 focus:bg-white transition hover:bg-white hover:border-primary-500">
-                                @foreach($kantorList as $k)
-                                    <option value="{{ $k }}">{{ $k }}</option>
-                                @endforeach
-                            </select>
-                            <div class="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400">
-                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M19 9l-7 7-7-7" />
-                                </svg>
-                            </div>
+                {{-- Shift Kerja --}}
+                <div>
+                    <label class="block text-[11px] font-bold text-gray-700 uppercase tracking-wider mb-1">
+                        Shift Kerja <span class="text-red-500">*</span>
+                    </label>
+                    <div class="relative">
+                        <select name="shift" required
+                            class="w-full px-3 py-2 pr-8 bg-gray-50 border border-gray-300 rounded-lg text-xs sm:text-sm appearance-none cursor-pointer focus:outline-none focus:ring-2 focus:ring-primary-500 focus:bg-white transition hover:bg-white hover:border-primary-500">
+                            <option value="Pagi">Shift Pagi (08:00 - 16:00)</option>
+                            <option value="Middle">Shift Middle (10:00 - 18:00)</option>
+                            <option value="Siang">Shift Siang (13:00 - 21:00)</option>
+                        </select>
+                        <div class="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                            </svg>
                         </div>
                     </div>
                 </div>
@@ -856,45 +799,22 @@
                     </span>
                 </div>
 
-                {{-- Shift Kerja & Lokasi Kantor --}}
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    <div>
-                        <label class="block text-[11px] font-bold text-gray-700 uppercase tracking-wider mb-1">
-                            Shift Kerja <span class="text-red-500">*</span>
-                        </label>
-                        <div class="relative">
-                            <select id="edit-shift" name="shift" required
-                                class="w-full px-3 py-2 pr-8 bg-gray-50 border border-gray-300 rounded-lg text-xs sm:text-sm appearance-none cursor-pointer focus:outline-none focus:ring-2 focus:ring-primary-500 focus:bg-white transition hover:bg-white hover:border-primary-500">
-                                <option value="Pagi">Shift Pagi</option>
-                                <option value="Middle">Shift Middle</option>
-                                <option value="Siang">Shift Siang</option>
-                            </select>
-                            <div class="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400">
-                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M19 9l-7 7-7-7" />
-                                </svg>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div>
-                        <label class="block text-[11px] font-bold text-gray-700 uppercase tracking-wider mb-1">
-                            Lokasi Kantor <span class="text-red-500">*</span>
-                        </label>
-                        <div class="relative">
-                            <select id="edit-kantor" name="kantor" required
-                                class="w-full px-3 py-2 pr-8 bg-gray-50 border border-gray-300 rounded-lg text-xs sm:text-sm appearance-none cursor-pointer focus:outline-none focus:ring-2 focus:ring-primary-500 focus:bg-white transition hover:bg-white hover:border-primary-500">
-                                @foreach($kantorList as $k)
-                                    <option value="{{ $k }}">{{ $k }}</option>
-                                @endforeach
-                            </select>
-                            <div class="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400">
-                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M19 9l-7 7-7-7" />
-                                </svg>
-                            </div>
+                {{-- Shift Kerja --}}
+                <div>
+                    <label class="block text-[11px] font-bold text-gray-700 uppercase tracking-wider mb-1">
+                        Shift Kerja <span class="text-red-500">*</span>
+                    </label>
+                    <div class="relative">
+                        <select id="edit-shift" name="shift" required
+                            class="w-full px-3 py-2 pr-8 bg-gray-50 border border-gray-300 rounded-lg text-xs sm:text-sm appearance-none cursor-pointer focus:outline-none focus:ring-2 focus:ring-primary-500 focus:bg-white transition hover:bg-white hover:border-primary-500">
+                            <option value="Pagi">Shift Pagi</option>
+                            <option value="Middle">Shift Middle</option>
+                            <option value="Siang">Shift Siang</option>
+                        </select>
+                        <div class="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                            </svg>
                         </div>
                     </div>
                 </div>
@@ -977,101 +897,6 @@
                     <button type="submit"
                         class="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white text-xs sm:text-sm font-medium rounded-lg transition shadow-sm">
                         Simpan Perubahan
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-
-    {{-- ── MODAL TAMBAH PEMAGANG BARU ────────────────────────── --}}
-    <div id="modal-create-pemagang"
-        class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 transition-all duration-200">
-        <div
-            class="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden animate-in fade-in zoom-in-95 duration-150">
-
-            {{-- Header Modal --}}
-            <div class="flex items-center justify-between px-5 py-3 border-b border-gray-100 bg-gray-50/50">
-                <div class="flex items-center gap-2.5">
-                    <div
-                        class="w-8 h-8 rounded-xl bg-primary-100 text-primary-600 flex items-center justify-center flex-shrink-0">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
-                        </svg>
-                    </div>
-                    <div>
-                        <h3 class="text-sm sm:text-base font-bold text-gray-800">Tambah Data Pemagang</h3>
-                        <p class="text-[11px] text-gray-500">Daftarkan pemagang baru ke sistem</p>
-                    </div>
-                </div>
-                <button type="button" onclick="closeCreatePemagangModal()"
-                    class="text-gray-400 hover:text-gray-600 p-1.5 rounded-lg hover:bg-gray-100 transition">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                </button>
-            </div>
-
-            {{-- Form Tambah Pemagang --}}
-            <form action="{{ route(Auth::user()->role === 'admin' ? 'admin.pemagang.store' : 'staff.pemagang.store') }}"
-                method="POST" class="px-5 py-4 space-y-3">
-                @csrf
-
-                {{-- Nama Lengkap --}}
-                <div>
-                    <label class="block text-[11px] font-bold text-gray-700 uppercase tracking-wider mb-1">
-                        Nama Lengkap <span class="text-red-500">*</span>
-                    </label>
-                    <input type="text" name="nama_lengkap" required placeholder="Contoh: John Doe"
-                        class="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:bg-white transition hover:bg-white hover:border-primary-500">
-                </div>
-
-                {{-- Nomor WhatsApp --}}
-                <div>
-                    <label class="block text-[11px] font-bold text-gray-700 uppercase tracking-wider mb-1">
-                        Nomor WhatsApp / HP <span class="text-red-500">*</span>
-                    </label>
-                    <input type="text" name="no_hp" required placeholder="Contoh: 081234567890" inputmode="tel"
-                        class="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:bg-white transition hover:bg-white hover:border-primary-500">
-                    <p class="text-[10px] text-gray-400 mt-0.5">Digunakan untuk konfirmasi kehadiran via WhatsApp</p>
-                </div>
-
-                {{-- Asal Kampus / Sekolah --}}
-                <div>
-                    <label class="block text-[11px] font-bold text-gray-700 uppercase tracking-wider mb-1">
-                        Asal Kampus / Sekolah <span class="text-red-500">*</span>
-                    </label>
-                    <input type="text" name="kampus" required placeholder="Contoh: Universitas Indonesia / SMK 1"
-                        class="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:bg-white transition hover:bg-white hover:border-primary-500">
-                </div>
-
-                {{-- Divisi --}}
-                <div>
-                    <label class="block text-[11px] font-bold text-gray-700 uppercase tracking-wider mb-1">
-                        Divisi Magang <span class="text-red-500">*</span>
-                    </label>
-                    <div class="relative">
-                        <input type="text" name="divisi" required list="divisi-options"
-                            placeholder="Pilih atau ketik divisi..."
-                            class="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:bg-white transition hover:bg-white hover:border-primary-500">
-                        <datalist id="divisi-options">
-                            @foreach($divisiList as $div)
-                                <option value="{{ $div }}">{{ $div }}</option>
-                            @endforeach
-                        </datalist>
-                    </div>
-                </div>
-
-                {{-- Modal Actions --}}
-                <div class="flex items-center justify-end gap-2.5 pt-3 border-t border-gray-100">
-                    <button type="button" onclick="closeCreatePemagangModal()"
-                        class="px-4 py-2 border border-gray-200 text-gray-700 text-xs sm:text-sm font-semibold rounded-xl hover:bg-gray-50 transition">
-                        Batal
-                    </button>
-                    <button type="submit"
-                        class="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white text-xs sm:text-sm font-semibold rounded-xl transition shadow-sm">
-                        Simpan Pemagang
                     </button>
                 </div>
             </form>
@@ -1170,16 +995,6 @@
             const textEl = document.getElementById('selected-pemagang-text');
             textEl.innerHTML = `<strong class="text-gray-800 font-semibold">${name}</strong> <span class="text-xs text-gray-500">(${kampus}) - Div. ${divisi}</span>`;
             document.getElementById('pemagang-dropdown-menu').classList.add('hidden');
-        }
-
-        function openCreatePemagangModal() {
-            const modal = document.getElementById('modal-create-pemagang');
-            if (modal) modal.classList.remove('hidden');
-        }
-
-        function closeCreatePemagangModal() {
-            const modal = document.getElementById('modal-create-pemagang');
-            if (modal) modal.classList.add('hidden');
         }
 
         // Tutup dropdown saat klik di luar area
@@ -1283,7 +1098,7 @@
             document.getElementById('edit-waktu').value = `${jam}:${menit}`;
         }
 
-        function openEditModal(id, pemagangId, pemagangName, tanggal, shift, waktu, keterangan, notes, kantor) {
+        function openEditModal(id, pemagangId, pemagangName, tanggal, shift, waktu, keterangan, notes) {
             document.getElementById('edit-pemagang-id').value = pemagangId;
             document.getElementById('edit-pemagang-name').textContent = pemagangName;
             document.getElementById('edit-tanggal').value = tanggal;
@@ -1294,10 +1109,6 @@
             }
 
             document.getElementById('edit-shift').value = shift;
-            const editKantorEl = document.getElementById('edit-kantor');
-            if (editKantorEl) {
-                editKantorEl.value = kantor || 'Kantor 1';
-            }
 
             // Sync waktu 24 jam ke input jam & menit
             if (waktu) {
@@ -1313,14 +1124,14 @@
 
             document.getElementById('edit-keterangan').value = keterangan;
             document.getElementById('edit-notes').value = notes;
-            document.getElementById('form-edit').action = `/staff/presensi/${id}`;
+            document.getElementById('form-edit').action = `/assistant/presensi/${id}`;
             document.getElementById('modal-edit').classList.remove('hidden');
         }
 
         function openDeleteModal(id, pemagangName, shift, waktu) {
             document.getElementById('delete-pemagang-name').textContent = pemagangName;
             document.getElementById('delete-info').textContent = `${shift} - ${waktu}`;
-            document.getElementById('form-delete').action = `/staff/presensi/${id}`;
+            document.getElementById('form-delete').action = `/assistant/presensi/${id}`;
             document.getElementById('modal-delete').classList.remove('hidden');
         }
     </script>

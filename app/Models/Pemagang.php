@@ -16,7 +16,6 @@ class Pemagang extends Model
 
     protected $fillable = [
         'nama_lengkap',
-        'nim',
         'no_hp',
         'kampus',
         'divisi',

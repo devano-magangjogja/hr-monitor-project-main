@@ -66,6 +66,7 @@ class TaskService
             'description' => $data['description'] ?? null,
             'task_date'   => Carbon::today(),
             'type'        => 'assigned',
+            'kantor'      => $data['kantor'] ?? null,
             'created_by'  => Auth::id(),
         ]);
 
@@ -86,6 +87,7 @@ class TaskService
         $updated = $this->taskRepository->update($task, [
             'title'       => $data['title'],
             'description' => $data['description'] ?? null,
+            'kantor'      => $data['kantor'] ?? null,
         ]);
 
         $this->taskRepository->deleteAssignments($task->id);

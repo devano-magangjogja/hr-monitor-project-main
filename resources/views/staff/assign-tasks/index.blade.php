@@ -45,9 +45,15 @@
                 @endphp
                 <tr class="hover:bg-gray-50 transition">
                     <td class="px-6 py-4 w-48">
-                        <div class="truncate max-w-[170px] font-medium text-gray-800"
-                             title="{{ $task->title }}">
-                            {{ $task->title }}
+                        <div class="flex items-center gap-2 flex-wrap">
+                            <span class="font-medium text-gray-800" title="{{ $task->title }}">
+                                {{ $task->title }}
+                            </span>
+                            @if($task->kantor)
+                                <span class="inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-semibold bg-blue-50 text-blue-700 border border-blue-200">
+                                    📍 {{ $task->kantor }}
+                                </span>
+                            @endif
                         </div>
                     </td>
                     <td class="px-6 py-4">
@@ -114,7 +120,8 @@
                                         {{ $task->id }},
                                         '{{ addslashes($task->title) }}',
                                         '{{ addslashes($task->description ?? '') }}',
-                                        {{ json_encode($task->assignedUsers->pluck('id')) }}
+                                        {{ json_encode($task->assignedUsers->pluck('id')) }},
+                                        '{{ $task->kantor ?? '' }}'
                                     )"
                                     class="p-1.5 text-gray-400 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition"
                                     title="Edit">
@@ -181,6 +188,21 @@
                 <textarea name="description" rows="3"
                           class="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm
                                  focus:outline-none focus:ring-2 focus:ring-primary-500 resize-none">{{ old('description') }}</textarea>
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">
+                    Lokasi Kantor Penugasan <span class="text-gray-400 font-normal">(opsional)</span>
+                </label>
+                <select name="kantor"
+                        class="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm
+                               focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white">
+                    <option value="">-- Tanpa Lokasi Kantor Khusus --</option>
+                    <option value="Kantor 1" {{ old('kantor') == 'Kantor 1' ? 'selected' : '' }}>Kantor 1</option>
+                    <option value="Kantor 2" {{ old('kantor') == 'Kantor 2' ? 'selected' : '' }}>Kantor 2</option>
+                    <option value="Kantor 3" {{ old('kantor') == 'Kantor 3' ? 'selected' : '' }}>Kantor 3</option>
+                    <option value="Kantor 4" {{ old('kantor') == 'Kantor 4' ? 'selected' : '' }}>Kantor 4</option>
+                </select>
+                <p class="text-[11px] text-gray-400 mt-1">Jika dipilih, asisten akan terhubung ke kantor ini saat mencatat presensi hari ini.</p>
             </div>
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-2">
@@ -257,6 +279,21 @@
                 <textarea id="edit-description" name="description" rows="3"
                           class="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm
                                  focus:outline-none focus:ring-2 focus:ring-primary-500 resize-none"></textarea>
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">
+                    Lokasi Kantor Penugasan <span class="text-gray-400 font-normal">(opsional)</span>
+                </label>
+                <select id="edit-kantor" name="kantor"
+                        class="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm
+                               focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white">
+                    <option value="">-- Tanpa Lokasi Kantor Khusus --</option>
+                    <option value="Kantor 1">Kantor 1</option>
+                    <option value="Kantor 2">Kantor 2</option>
+                    <option value="Kantor 3">Kantor 3</option>
+                    <option value="Kantor 4">Kantor 4</option>
+                </select>
+                <p class="text-[11px] text-gray-400 mt-1">Jika dipilih, asisten akan terhubung ke kantor ini saat mencatat presensi hari ini.</p>
             </div>
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-2">
@@ -420,9 +457,13 @@
             .replace(/"/g, '&quot;');
     }
 
-    function openEditModal(id, title, description, currentUserIds) {
+    function openEditModal(id, title, description, currentUserIds, kantor) {
         document.getElementById('edit-title').value = title;
         document.getElementById('edit-description').value = description;
+        const editKantorEl = document.getElementById('edit-kantor');
+        if (editKantorEl) {
+            editKantorEl.value = kantor || '';
+        }
         document.getElementById('form-edit').action = `/staff/assign-tasks/${id}`;
 
         document.querySelectorAll('.edit-user-checkbox').forEach(cb => {
