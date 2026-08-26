@@ -46,6 +46,11 @@ class SettingService
         }
     }
 
+    public function updateWaTemplate(string $template): void
+    {
+        $this->settingRepo->set('wa_template_tidak_hadir', trim($template));
+    }
+
     // ── WA Groups ────────────────────────────────────────
 
     public function getAllWaGroups()

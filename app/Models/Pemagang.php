@@ -45,7 +45,15 @@ class Pemagang extends Model
      */
     public function getWaUrlAttribute(): string
     {
-        $message = "Halo {$this->nama_lengkap}, kami dari tim HR ingin menanyakan konfirmasi kehadiran Anda untuk kegiatan magang hari ini. Mohon informasikan keterangan atau kendala Anda. Terima kasih.";
+        $defaultTemplate = "Halo {nama}, kami dari tim HR ingin menanyakan konfirmasi kehadiran Anda untuk kegiatan magang ({divisi} - {kampus}) hari ini. Mohon informasikan keterangan atau kendala Anda. Terima kasih.";
+        $template = AppSetting::get('wa_template_tidak_hadir', $defaultTemplate);
+
+        $message = str_replace(
+            ['{nama}', '{divisi}', '{kampus}'],
+            [$this->nama_lengkap ?? '', $this->divisi ?? '', $this->kampus ?? ''],
+            $template
+        );
+
         return "https://wa.me/{$this->wa_number}?text=" . urlencode($message);
     }
 }

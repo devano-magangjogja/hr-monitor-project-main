@@ -9,6 +9,7 @@ use App\Http\Controllers\Admin\TaskController as AdminTaskController;
 use App\Http\Controllers\Admin\ReportController;
 use App\Http\Controllers\Admin\NotificationController as AdminNotificationController;
 use App\Http\Controllers\Admin\SettingController as AdminSettingController;
+use App\Http\Controllers\Admin\PresensiController as AdminPresensiController;
 use App\Http\Controllers\Staff\DashboardController as StaffDashboard;
 use App\Http\Controllers\Staff\TaskController as StaffTaskController;
 use App\Http\Controllers\Staff\UserController as StaffUserController;
@@ -79,9 +80,17 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin'])->grou
     // Pengaturan
     Route::get('/settings', [AdminSettingController::class, 'index'])->name('settings.index');
     Route::post('/settings/app-info', [AdminSettingController::class, 'updateAppInfo'])->name('settings.app-info');
+    Route::post('/settings/wa-template', [AdminSettingController::class, 'updateWaTemplate'])->name('settings.wa-template');
     Route::post('/settings/wa-groups', [AdminSettingController::class, 'storeWaGroup'])->name('settings.wa-groups.store');
     Route::patch('/settings/wa-groups/{waGroup}', [AdminSettingController::class, 'updateWaGroup'])->name('settings.wa-groups.update');
     Route::delete('/settings/wa-groups/{waGroup}', [AdminSettingController::class, 'destroyWaGroup'])->name('settings.wa-groups.destroy');
+
+    // Presensi Pemagang
+    Route::get('/presensi', [AdminPresensiController::class, 'index'])->name('presensi.index');
+    Route::post('/presensi', [AdminPresensiController::class, 'store'])->name('presensi.store');
+    Route::patch('/presensi/{presensi}', [AdminPresensiController::class, 'update'])->name('presensi.update');
+    Route::delete('/presensi/{presensi}', [AdminPresensiController::class, 'destroy'])->name('presensi.destroy');
+    Route::get('/presensi/laporan', [AdminPresensiController::class, 'laporan'])->name('presensi.laporan');
 
     // Tambah Pemagang
     Route::post('/pemagang', [PemagangController::class, 'store'])->name('pemagang.store');

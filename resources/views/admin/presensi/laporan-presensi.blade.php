@@ -5,7 +5,7 @@
 @section('page-subtitle', 'Rekapitulasi dan analisis kedisiplinan kehadiran anak magang')
 
 @section('sidebar')
-    @include('components.sidebar-staff')
+    @include('components.sidebar-admin')
 @endsection
 
 @section('content')
@@ -32,7 +32,7 @@
         </p>
     </div>
     <div class="flex items-center gap-2.5 flex-wrap">
-        <a href="{{ route('staff.presensi.index') }}"
+        <a href="{{ route('admin.presensi.index') }}"
            class="flex items-center gap-2 px-3.5 py-2 bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 text-xs sm:text-sm font-medium rounded-lg transition shadow-sm">
             <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
@@ -125,7 +125,7 @@
 
 {{-- ── Filter Bar Laporan (Sembunyi saat Print) ─────────────── --}}
 <div class="print:hidden bg-white rounded-xl border border-gray-200 p-4 mb-6 shadow-sm">
-    <form method="GET" action="{{ route('staff.presensi.laporan') }}" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
+    <form method="GET" action="{{ route('admin.presensi.laporan') }}" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
         {{-- Search input --}}
         <div class="relative">
             <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-gray-400">
@@ -172,7 +172,7 @@
             </select>
 
             @if(request()->hasAny(['search', 'divisi', 'shift', 'keterangan']))
-                <a href="{{ route('staff.presensi.laporan') }}"
+                <a href="{{ route('admin.presensi.laporan') }}"
                    class="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition"
                    title="Reset Filter">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

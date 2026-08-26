@@ -37,6 +37,19 @@ class SettingController extends Controller
         return back()->with('success', 'Informasi aplikasi berhasil diperbarui.');
     }
 
+    // ── Update Template Pesan WhatsApp ───────────────────
+
+    public function updateWaTemplate(Request $request)
+    {
+        $request->validate([
+            'wa_template_tidak_hadir' => ['required', 'string', 'max:1000'],
+        ]);
+
+        $this->settingService->updateWaTemplate($request->input('wa_template_tidak_hadir'));
+
+        return back()->with('success', 'Template pesan WhatsApp konfirmasi ketidakhadiran berhasil diperbarui.');
+    }
+
     // ── WA Group CRUD ────────────────────────────────────
 
     public function storeWaGroup(Request $request)

@@ -231,3 +231,30 @@
     </svg>
     Profil Saya
 </a> --}}
+
+{{-- Divider --}}
+<div class="pt-4 pb-2">
+    <p class="px-4 text-[11px] font-semibold text-slate-500 uppercase tracking-widest">Presensi Pemagang</p>
+</div>
+
+{{-- Presensi --}}
+<a href="{{ route('admin.presensi.index') }}"
+    class="flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-all
+          {{ request()->routeIs('admin.presensi.index') ? 'bg-white/10 text-white' : 'text-slate-400 hover:bg-white/5 hover:text-white' }}">
+    <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+    </svg>
+    Presensi
+</a>
+
+{{-- Laporan Presensi --}}
+<a href="{{ route('admin.presensi.laporan') }}"
+    class="flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-all
+          {{ request()->routeIs('admin.presensi.laporan') ? 'bg-white/10 text-white' : 'text-slate-400 hover:bg-white/5 hover:text-white' }}">
+    <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+    </svg>
+    Laporan Presensi
+</a>

@@ -31,6 +31,7 @@
         <thead>
             <tr class="bg-gray-50 border-b border-gray-200">
                 <th class="text-left px-3 sm:px-6 py-2.5 sm:py-3.5 font-semibold text-gray-600 text-xs sm:text-sm w-32 sm:w-48">Judul</th>
+                <th class="text-left px-3 sm:px-6 py-2.5 sm:py-3.5 font-semibold text-gray-600 text-xs sm:text-sm w-28 sm:w-32">Kantor</th>
                 <th class="text-left px-3 sm:px-6 py-2.5 sm:py-3.5 font-semibold text-gray-600 text-xs sm:text-sm">Deskripsi</th>
                 <th class="text-left px-3 sm:px-6 py-2.5 sm:py-3.5 font-semibold text-gray-600 text-xs sm:text-sm w-24 sm:w-48">Penerima</th>
                 <th class="text-right px-3 sm:px-6 py-2.5 sm:py-3.5 font-semibold text-gray-600 text-xs sm:text-sm w-16 sm:w-20">Aksi</th>
@@ -46,16 +47,20 @@
 
                     {{-- Judul --}}
                     <td class="px-3 sm:px-6 py-4 w-36 sm:w-48">
-                        <div class="flex items-center gap-1.5 flex-wrap">
-                            <span class="font-medium text-gray-800 text-xs sm:text-sm" title="{{ $task->title }}">
-                                {{ $task->title }}
+                        <span class="font-medium text-gray-800 text-xs sm:text-sm" title="{{ $task->title }}">
+                            {{ $task->title }}
+                        </span>
+                    </td>
+
+                    {{-- Kantor --}}
+                    <td class="px-3 sm:px-6 py-4 w-28 sm:w-32">
+                        @if($task->kantor)
+                            <span class="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-semibold bg-blue-50 text-blue-700 border border-blue-200">
+                                {{ $task->kantor }}
                             </span>
-                            @if($task->kantor)
-                                <span class="inline-flex items-center px-1.5 sm:px-2 py-0.5 rounded-md text-[10px] sm:text-[11px] font-semibold bg-blue-50 text-blue-700 border border-blue-200">
-                                    📍 {{ $task->kantor }}
-                                </span>
-                            @endif
-                        </div>
+                        @else
+                            <span class="text-gray-400 text-xs sm:text-sm font-medium">-</span>
+                        @endif
                     </td>
 
                     {{-- Deskripsi --}}

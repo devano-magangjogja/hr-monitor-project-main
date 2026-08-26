@@ -5,7 +5,7 @@
 @section('page-subtitle', 'Presensi tanggal: ' . $formattedDate)
 
 @section('sidebar')
-    @include('components.sidebar-staff')
+    @include('components.sidebar-admin')
 @endsection
 
 @section('content')
@@ -343,16 +343,16 @@
                                 <div class="flex items-center justify-end gap-1.5">
                                     {{-- Edit --}}
                                     <button type="button" onclick="openEditModal(
-                                                    {{ $presensi->id }},
-                                                    {{ $presensi->pemagang_id }},
-                                                    '{{ addslashes($pemagang ? $pemagang->nama_lengkap : '') }}',
-                                                    '{{ $presensi->tanggal }}',
-                                                    '{{ $presensi->shift }}',
-                                                    '{{ substr($presensi->waktu_masuk, 0, 5) }}',
-                                                    '{{ $presensi->keterangan }}',
-                                                    '{{ addslashes($presensi->notes ?: '') }}',
-                                                    '{{ $presensi->kantor ?? 'Kantor 1' }}'
-                                                )"
+                                                            {{ $presensi->id }},
+                                                            {{ $presensi->pemagang_id }},
+                                                            '{{ addslashes($pemagang ? $pemagang->nama_lengkap : '') }}',
+                                                            '{{ $presensi->tanggal }}',
+                                                            '{{ $presensi->shift }}',
+                                                            '{{ substr($presensi->waktu_masuk, 0, 5) }}',
+                                                            '{{ $presensi->keterangan }}',
+                                                            '{{ addslashes($presensi->notes ?: '') }}',
+                                                            '{{ $presensi->kantor ?? 'Kantor 1' }}'
+                                                        )"
                                         class="p-1.5 text-gray-400 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition"
                                         title="Edit Presensi">
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -363,11 +363,11 @@
 
                                     {{-- Hapus --}}
                                     <button type="button" onclick="openDeleteModal(
-                                                    {{ $presensi->id }},
-                                                    '{{ addslashes($pemagang ? $pemagang->nama_lengkap : 'Pemagang') }}',
-                                                    '{{ $presensi->shift }}',
-                                                    '{{ substr($presensi->waktu_masuk, 0, 5) }}'
-                                                )"
+                                                            {{ $presensi->id }},
+                                                            '{{ addslashes($pemagang ? $pemagang->nama_lengkap : 'Pemagang') }}',
+                                                            '{{ $presensi->shift }}',
+                                                            '{{ substr($presensi->waktu_masuk, 0, 5) }}'
+                                                        )"
                                         class="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition"
                                         title="Hapus Presensi">
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -519,16 +519,16 @@
                                 <div class="flex items-center justify-end gap-1.5">
                                     {{-- Edit --}}
                                     <button type="button" onclick="openEditModal(
-                                                    {{ $presensi->id }},
-                                                    {{ $presensi->pemagang_id }},
-                                                    '{{ addslashes($pemagang ? $pemagang->nama_lengkap : '') }}',
-                                                    '{{ $presensi->tanggal }}',
-                                                    '{{ $presensi->shift }}',
-                                                    '{{ substr($presensi->waktu_masuk, 0, 5) }}',
-                                                    '{{ $presensi->keterangan }}',
-                                                    '{{ addslashes($presensi->notes ?: '') }}',
-                                                    '{{ $presensi->kantor ?? 'Kantor 1' }}'
-                                                )"
+                                                            {{ $presensi->id }},
+                                                            {{ $presensi->pemagang_id }},
+                                                            '{{ addslashes($pemagang ? $pemagang->nama_lengkap : '') }}',
+                                                            '{{ $presensi->tanggal }}',
+                                                            '{{ $presensi->shift }}',
+                                                            '{{ substr($presensi->waktu_masuk, 0, 5) }}',
+                                                            '{{ $presensi->keterangan }}',
+                                                            '{{ addslashes($presensi->notes ?: '') }}',
+                                                            '{{ $presensi->kantor ?? 'Kantor 1' }}'
+                                                        )"
                                         class="p-1.5 text-gray-400 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition"
                                         title="Ubah Status Presensi">
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -539,11 +539,11 @@
 
                                     {{-- Hapus --}}
                                     <button type="button" onclick="openDeleteModal(
-                                                    {{ $presensi->id }},
-                                                    '{{ addslashes($pemagang ? $pemagang->nama_lengkap : 'Pemagang') }}',
-                                                    '{{ $presensi->shift }}',
-                                                    '{{ substr($presensi->waktu_masuk, 0, 5) }}'
-                                                )"
+                                                            {{ $presensi->id }},
+                                                            '{{ addslashes($pemagang ? $pemagang->nama_lengkap : 'Pemagang') }}',
+                                                            '{{ $presensi->shift }}',
+                                                            '{{ substr($presensi->waktu_masuk, 0, 5) }}'
+                                                        )"
                                         class="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition"
                                         title="Hapus Data">
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1033,8 +1033,8 @@
                         Nomor WhatsApp / HP <span class="text-red-500">*</span>
                     </label>
                     <input type="text" name="no_hp" required placeholder="Contoh: 081234567890" inputmode="tel"
+                        maxlength="13" minlength="10"
                         class="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:bg-white transition hover:bg-white hover:border-primary-500">
-                    <p class="text-[10px] text-gray-400 mt-0.5">Digunakan untuk konfirmasi kehadiran via WhatsApp</p>
                 </div>
 
                 {{-- Asal Kampus / Sekolah --}}

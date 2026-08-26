@@ -33,6 +33,7 @@
         <thead>
             <tr class="bg-gray-50 border-b border-gray-200">
                 <th class="text-left px-6 py-3.5 font-semibold text-gray-600 w-48">Judul</th>
+                <th class="text-left px-6 py-3.5 font-semibold text-gray-600 w-32">Kantor</th>
                 <th class="text-left px-6 py-3.5 font-semibold text-gray-600">Deskripsi</th>
                 <th class="text-left px-6 py-3.5 font-semibold text-gray-600 w-48">Penerima</th>
                 <th class="text-right px-6 py-3.5 font-semibold text-gray-600 w-28">Aksi</th>
@@ -44,17 +45,22 @@
                     $hasCompleted = $task->assignments->where('is_completed', 1)->count() > 0;
                 @endphp
                 <tr class="hover:bg-gray-50 transition">
+                    {{-- Judul --}}
                     <td class="px-6 py-4 w-48">
-                        <div class="flex items-center gap-2 flex-wrap">
-                            <span class="font-medium text-gray-800" title="{{ $task->title }}">
-                                {{ $task->title }}
+                        <span class="font-medium text-gray-800" title="{{ $task->title }}">
+                            {{ $task->title }}
+                        </span>
+                    </td>
+
+                    {{-- Kantor --}}
+                    <td class="px-6 py-4 w-32">
+                        @if($task->kantor)
+                            <span class="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-semibold bg-blue-50 text-blue-700 border border-blue-200">
+                                {{ $task->kantor }}
                             </span>
-                            @if($task->kantor)
-                                <span class="inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-semibold bg-blue-50 text-blue-700 border border-blue-200">
-                                    📍 {{ $task->kantor }}
-                                </span>
-                            @endif
-                        </div>
+                        @else
+                            <span class="text-gray-400 text-sm font-medium">-</span>
+                        @endif
                     </td>
                     <td class="px-6 py-4">
                         <div class="truncate max-w-[220px] text-gray-500"
