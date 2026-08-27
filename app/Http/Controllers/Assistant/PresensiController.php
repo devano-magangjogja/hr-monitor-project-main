@@ -25,11 +25,14 @@ class PresensiController extends Controller
           ->whereNotNull('kantor')
           ->value('kantor');
 
-        // Query dasar berdasarkan tanggal & kantor
+        // Jika belum ada penugasan kantor, jangan tampilkan data kantor acak
         $baseQuery = Presensi::with(['pemagang', 'creator'])->where('tanggal', $tanggal);
 
         if ($assignedKantor) {
             $baseQuery->where('kantor', $assignedKantor);
+        } else {
+            // Asisten belum punya tugas kantor pada tanggal ini
+            $baseQuery->whereRaw('1 = 0');
         }
 
         if ($request->filled('search')) {
@@ -74,6 +77,8 @@ class PresensiController extends Controller
         $statsQuery = Presensi::where('tanggal', $tanggal);
         if ($assignedKantor) {
             $statsQuery->where('kantor', $assignedKantor);
+        } else {
+            $statsQuery->whereRaw('1 = 0');
         }
 
         $stats = [
@@ -86,7 +91,7 @@ class PresensiController extends Controller
             'total_hadir'    => (clone $statsQuery)->whereIn('keterangan', ['Lebih Awal', 'Tepat Waktu', 'Terlambat'])->count(),
         ];
 
-        // List pemagang untuk dropdown modal (tidak menampilkan yang sudah ter-presensi di kantor lain pada tanggal ini)
+        // List pemagang untuk dropdown modal
         $pemagangQuery = Pemagang::query();
         if ($assignedKantor) {
             $pemagangQuery->whereDoesntHave('presensis', function ($q) use ($tanggal, $assignedKantor) {
@@ -119,6 +124,17 @@ class PresensiController extends Controller
     {
         $today = Carbon::today()->format('Y-m-d');
 
+        // Cari tugas asisten hari ini untuk mendapatkan lokasi kantor
+        $assignedKantor = Task::whereHas('assignments', function ($q) {
+            $q->where('user_id', Auth::id());
+        })->where('task_date', $today)
+          ->whereNotNull('kantor')
+          ->value('kantor');
+
+        if (!$assignedKantor) {
+            return back()->with('error', 'Anda belum dapat melakukan presensi karena Admin atau Staff belum menentukan tugas penugasan kantor Anda untuk hari ini. Silakan hubungi Admin atau Staff.')->withInput();
+        }
+
         $validated = $request->validate([
             'pemagang_id' => ['required', 'exists:pemagang,id'],
             'shift'       => ['required', 'in:Pagi,Middle,Siang'],
@@ -127,14 +143,7 @@ class PresensiController extends Controller
             'notes'       => ['nullable', 'string', 'max:500'],
         ]);
 
-        // Cari tugas asisten hari ini untuk mendapatkan lokasi kantor
-        $assignedKantor = Task::whereHas('assignments', function ($q) {
-            $q->where('user_id', Auth::id());
-        })->where('task_date', $today)
-          ->whereNotNull('kantor')
-          ->value('kantor');
-
-        $kantorTujuan = $assignedKantor ?? 'Kantor 1';
+        $kantorTujuan = $assignedKantor;
 
         // Validasi: Cegah pencatatan jika pemagang sudah tercatat di kantor lain hari ini
         $alreadyOtherOffice = Presensi::where('pemagang_id', $validated['pemagang_id'])
@@ -210,7 +219,25 @@ class PresensiController extends Controller
             $assignedKantor = Presensi::where('created_by', Auth::id())
                 ->where('tanggal', $tanggal)
                 ->whereNotNull('kantor')
-                ->value('kantor') ?? 'Kantor 1';
+                ->value('kantor');
+        }
+
+        // Jika belum ada kantor penugasan
+        if (!$assignedKantor) {
+            $rekapPemagang = collect();
+            $stats = [
+                'total_pemagang' => 0,
+                'avg_rate'       => 0,
+                'datang_awal'    => 0,
+                'tepat_waktu'    => 0,
+                'terlambat'      => 0,
+                'tidak_hadir'    => 0,
+                'total_hadir'    => 0,
+            ];
+            $logs = collect();
+            $divisiList = collect();
+
+            return view('assistant.presensi.laporan-presensi', compact('rekapPemagang', 'stats', 'logs', 'divisiList', 'assignedKantor', 'tanggal', 'formattedDate'));
         }
 
         // Tabel 1: Rekapitulasi Pemagang HANYA untuk pemagang yang presensi di kantor tersebut pada hari itu
