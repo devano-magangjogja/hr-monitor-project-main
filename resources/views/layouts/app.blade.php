@@ -26,7 +26,7 @@
     {{-- ── SIDEBAR ──────────────────────────────────────── --}}
     <aside class="fixed inset-y-0 left-0 z-40 w-[240px] sm:w-[260px] bg-[#1C2434] flex flex-col
                   transform transition-transform duration-200 ease-in-out
-                  -translate-x-full lg:translate-x-0 lg:static lg:inset-auto lg:z-auto"
+                  -translate-x-full lg:translate-x-0 lg:static lg:inset-auto lg:z-auto print:hidden"
            :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'">
 
         {{-- Logo --}}
@@ -109,7 +109,7 @@
 
         {{-- Topbar --}}
         <header class="bg-white border-b border-gray-200 px-3 sm:px-4 md:px-6 py-2.5 sm:py-3 md:py-3.5 flex items-center
-                       justify-between flex-shrink-0 shadow-sm gap-2 sm:gap-3">
+                       justify-between flex-shrink-0 shadow-sm gap-2 sm:gap-3 print:hidden">
 
             <div class="flex items-center gap-2 sm:gap-3 min-w-0">
                 {{-- Hamburger (mobile only) --}}
@@ -189,7 +189,7 @@
         </header>
 
         {{-- Page Content --}}
-        <main class="flex-1 overflow-y-auto p-3 sm:p-4 md:p-6 pb-24 sm:pb-28">
+        <main class="flex-1 overflow-y-auto p-3 sm:p-4 md:p-6 pb-24 sm:pb-28 print:p-0 print:m-0 print:overflow-visible">
             @yield('content')
         </main>
     </div>

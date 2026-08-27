@@ -330,6 +330,9 @@
                         <input type="hidden" name="remove_image" :value="removePhoto ? '1' : '0'">
                     </div>
                 </div>
+                @error('image')
+                    <p class="mt-1 text-xs text-red-500">{{ $message }}</p>
+                @enderror
             </div>
 
             <div class="flex justify-end gap-3 pt-2">

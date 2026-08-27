@@ -3,10 +3,13 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Notification;
 use App\Models\User;
 use App\Notifications\CustomNotification;
+use App\Services\NotificationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Str;
 
 class NotificationController extends Controller
 {
@@ -18,18 +21,13 @@ class NotificationController extends Controller
             ->orderBy('name')
             ->get();
 
-        // Riwayat notifikasi custom yang sudah dikirim admin
-        // Diambil dari tabel notifications, type = CustomNotification
-        $sent = \App\Models\Notification::where('type', \App\Notifications\CustomNotification::class)
-            ->latest()
-            ->take(50)
-            ->get()
-            ->map(function ($n) {
-                $n->recipient = User::find($n->notifiable_id);
-                return $n;
-            });
+        $roles = \App\Models\Role::where('name', '!=', 'admin')->orderBy('id')->get();
 
-        return view('admin.notifications.index', compact('users', 'sent'));
+        $sent = NotificationService::groupSentCustomNotifications(
+            Notification::query()
+        );
+
+        return view('admin.notifications.index', compact('users', 'roles', 'sent'));
     }
 
     public function store(Request $request)
@@ -37,14 +35,13 @@ class NotificationController extends Controller
         $validated = $request->validate([
             'title'      => ['required', 'string', 'max:100'],
             'message'    => ['required', 'string', 'max:500'],
-            'recipients' => ['required', 'in:all,hr_staff,hr_assistant,cs,ob,programmer,dg,vg,pm,specific'],
+            'recipients' => ['required', 'string'],
             'user_ids'   => ['required_if:recipients,specific', 'array'],
             'user_ids.*' => ['integer', 'exists:users,id'],
         ]);
 
-        $senderName = Auth::user()->name;
+        $sender = Auth::user();
 
-        // Tentukan penerima
         if ($validated['recipients'] === 'specific') {
             $users = User::whereIn('id', $validated['user_ids'])
                 ->where('role', '!=', 'admin')
@@ -69,7 +66,13 @@ class NotificationController extends Controller
         $notification = new CustomNotification(
             $validated['title'],
             $validated['message'],
-            $senderName
+            $sender->name,
+            $sender->id,
+            $sender->role_label,
+            $validated['recipients'],
+            NotificationService::audienceLabel($validated['recipients']),
+            (string) Str::uuid(),
+            $users->count()
         );
 
         foreach ($users as $user) {

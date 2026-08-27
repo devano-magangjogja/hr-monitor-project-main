@@ -1,3 +1,60 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@media print {
+    @page {
+        size: A4 portrait;
+        margin: 12mm 15mm;
+    }
+
+    body {
+        background: #ffffff !important;
+        color: #111827 !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+
+    /* Reset layout container restrictions on print */
+    .h-screen,
+    .overflow-hidden,
+    .overflow-y-auto,
+    .overflow-x-auto {
+        height: auto !important;
+        overflow: visible !important;
+    }
+
+    /* Hide UI navigation elements */
+    aside,
+    header,
+    nav,
+    .print\:hidden,
+    #nav-notif-badge,
+    #floating-chat-btn,
+    .fixed,
+    .sticky {
+        display: none !important;
+    }
+
+    main {
+        padding: 0 !important;
+        margin: 0 !important;
+        width: 100% !important;
+        max-width: 100% !important;
+    }
+
+    /* Clean table printing */
+    table {
+        width: 100% !important;
+        border-collapse: collapse !important;
+    }
+
+    tr {
+        page-break-inside: avoid !important;
+    }
+
+    .print-avoid-break {
+        page-break-inside: avoid !important;
+        break-inside: avoid !important;
+    }
+}

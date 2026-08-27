@@ -10,16 +10,31 @@
 
 @section('content')
 
-{{-- ── Print Header (Hanya muncul saat cetak) ──────────────── --}}
-<div class="hidden print:block mb-6 border-b border-gray-300 pb-4">
-    <div class="flex items-center justify-between">
-        <div>
-            <h1 class="text-xl font-bold text-gray-900">Laporan Rekapitulasi Presensi Pemagang</h1>
-            <p class="text-xs text-gray-600">Dicetak pada: {{ \Carbon\Carbon::now()->locale('id')->translatedFormat('l, d F Y - H:i') }} WIB</p>
+{{-- ── Print Header / Kop Surat Resmi (Hanya muncul saat cetak) ── --}}
+<div class="hidden print:block mb-6 border-b-2 border-gray-800 pb-4">
+    <div class="flex items-center justify-between gap-4">
+        <div class="flex items-center gap-3.5">
+            @php
+                $useStorageLogo = !empty($appLogo) && \Illuminate\Support\Facades\Storage::disk('public')->exists($appLogo);
+            @endphp
+            @if($useStorageLogo)
+                <img src="{{ asset('storage/' . $appLogo) }}" alt="{{ $appName ?? 'Seven Inc' }}" class="w-12 h-12 object-contain">
+            @else
+                <img src="{{ asset('images/seveninc_logo.png') }}" alt="{{ $appName ?? 'Seven Inc' }}" class="w-12 h-12 object-contain">
+            @endif
+            <div>
+                <h1 class="text-base font-bold text-gray-900 uppercase tracking-wide">{{ $appName ?? 'Seven Inc' }}</h1>
+                <p class="text-xs font-semibold text-gray-700">HUMAN RESOURCES DEPARTMENT &bull; MONITORING PRESENSI MAGANG</p>
+                <p class="text-[11px] text-gray-500">Laporan Rekapitulasi Kedisiplinan & Log Presensi Pemagang</p>
+            </div>
         </div>
-        <div class="text-right">
-            <p class="text-sm font-semibold text-gray-800">HR Department</p>
-            <p class="text-xs text-gray-500">Sistem Monitoring Magang</p>
+        <div class="text-right text-[11px] text-gray-600 leading-tight">
+            <p><span class="font-semibold text-gray-800">Tanggal Cetak:</span> {{ \Carbon\Carbon::now()->locale('id')->translatedFormat('d F Y, H:i') }} WIB</p>
+            <p><span class="font-semibold text-gray-800">Dicetak Oleh:</span> {{ Auth::user()->name }} ({{ Auth::user()->role_label }})</p>
+            <p><span class="font-semibold text-gray-800">Filter Lokasi:</span> {{ request('kantor') ?: 'Semua Lokasi Kantor' }}</p>
+            @if(request('divisi'))
+                <p><span class="font-semibold text-gray-800">Divisi:</span> {{ request('divisi') }}</p>
+            @endif
         </div>
     </div>
 </div>
@@ -52,73 +67,73 @@
 </div>
 
 {{-- ── Stat Cards Summary ─────────────────────────────────── --}}
-<div class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+<div class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 print:grid-cols-4 gap-4 print:gap-3 mb-6 print:mb-5 print-avoid-break">
 
     {{-- Disiplin Rate --}}
-    <div class="bg-white rounded-xl border border-gray-200 p-4 sm:p-5 shadow-sm">
-        <div class="flex items-center justify-between mb-3">
-            <p class="text-xs sm:text-sm font-medium text-gray-500">Tingkat Kedisiplinan</p>
-            <div class="w-9 h-9 rounded-lg bg-green-50 flex items-center justify-center flex-shrink-0">
-                <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <div class="bg-white rounded-xl border border-gray-200 print:border-gray-300 p-4 sm:p-5 print:p-3 shadow-sm print:shadow-none">
+        <div class="flex items-center justify-between mb-2 print:mb-1">
+            <p class="text-xs sm:text-sm print:text-xs font-medium text-gray-500">Tingkat Kedisiplinan</p>
+            <div class="w-8 h-8 print:hidden rounded-lg bg-green-50 flex items-center justify-center flex-shrink-0">
+                <svg class="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                           d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
                 </svg>
             </div>
         </div>
-        <p class="text-2xl sm:text-3xl font-bold text-green-600">{{ $stats['avg_rate'] }}%</p>
-        <div class="w-full bg-gray-100 rounded-full h-1.5 mt-2 overflow-hidden">
+        <p class="text-2xl sm:text-3xl print:text-xl font-bold text-green-600">{{ $stats['avg_rate'] }}%</p>
+        <div class="w-full bg-gray-100 rounded-full h-1.5 mt-2 print:hidden overflow-hidden">
             <div class="bg-green-500 h-1.5 rounded-full" style="width: {{ min(100, $stats['avg_rate']) }}%"></div>
         </div>
-        <p class="text-[11px] text-gray-400 mt-1.5">persentase hadir tepat waktu & awal</p>
+        <p class="text-[11px] print:text-[10px] text-gray-400 mt-1">Hadir tepat waktu & awal</p>
     </div>
 
     {{-- Total Hadir Tepat Waktu & Awal --}}
-    <div class="bg-white rounded-xl border border-gray-200 p-4 sm:p-5 shadow-sm">
-        <div class="flex items-center justify-between mb-3">
-            <p class="text-xs sm:text-sm font-medium text-gray-500">Hadir Tepat / Awal</p>
-            <div class="w-9 h-9 rounded-lg bg-blue-50 flex items-center justify-center flex-shrink-0">
-                <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <div class="bg-white rounded-xl border border-gray-200 print:border-gray-300 p-4 sm:p-5 print:p-3 shadow-sm print:shadow-none">
+        <div class="flex items-center justify-between mb-2 print:mb-1">
+            <p class="text-xs sm:text-sm print:text-xs font-medium text-gray-500">Hadir Tepat / Awal</p>
+            <div class="w-8 h-8 print:hidden rounded-lg bg-blue-50 flex items-center justify-center flex-shrink-0">
+                <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                           d="M5 13l4 4L19 7"/>
                 </svg>
             </div>
         </div>
-        <p class="text-2xl sm:text-3xl font-bold text-gray-800">
+        <p class="text-2xl sm:text-3xl print:text-xl font-bold text-gray-800">
             {{ $stats['datang_awal'] + $stats['tepat_waktu'] }}
         </p>
-        <p class="text-[11px] text-gray-400 mt-1.5">
-            {{ $stats['datang_awal'] }} lebih awal &bull; {{ $stats['tepat_waktu'] }} tepat waktu
+        <p class="text-[11px] print:text-[10px] text-gray-400 mt-1">
+            {{ $stats['datang_awal'] }} awal &bull; {{ $stats['tepat_waktu'] }} tepat
         </p>
     </div>
 
     {{-- Total Terlambat --}}
-    <div class="bg-white rounded-xl border border-gray-200 p-4 sm:p-5 shadow-sm">
-        <div class="flex items-center justify-between mb-3">
-            <p class="text-xs sm:text-sm font-medium text-gray-500">Total Terlambat</p>
-            <div class="w-9 h-9 rounded-lg bg-amber-50 flex items-center justify-center flex-shrink-0">
-                <svg class="w-5 h-5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <div class="bg-white rounded-xl border border-gray-200 print:border-gray-300 p-4 sm:p-5 print:p-3 shadow-sm print:shadow-none">
+        <div class="flex items-center justify-between mb-2 print:mb-1">
+            <p class="text-xs sm:text-sm print:text-xs font-medium text-gray-500">Total Terlambat</p>
+            <div class="w-8 h-8 print:hidden rounded-lg bg-amber-50 flex items-center justify-center flex-shrink-0">
+                <svg class="w-4 h-4 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                           d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
                 </svg>
             </div>
         </div>
-        <p class="text-2xl sm:text-3xl font-bold text-amber-600">{{ $stats['terlambat'] }}</p>
-        <p class="text-[11px] text-gray-400 mt-1.5">catatan presensi terlambat</p>
+        <p class="text-2xl sm:text-3xl print:text-xl font-bold text-amber-600">{{ $stats['terlambat'] }}</p>
+        <p class="text-[11px] print:text-[10px] text-gray-400 mt-1">Presensi terlambat</p>
     </div>
 
     {{-- Total Tidak Hadir --}}
-    <div class="bg-white rounded-xl border border-gray-200 p-4 sm:p-5 shadow-sm">
-        <div class="flex items-center justify-between mb-3">
-            <p class="text-xs sm:text-sm font-medium text-gray-500">Tidak Hadir</p>
-            <div class="w-9 h-9 rounded-lg bg-red-50 flex items-center justify-center flex-shrink-0">
-                <svg class="w-5 h-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <div class="bg-white rounded-xl border border-gray-200 print:border-gray-300 p-4 sm:p-5 print:p-3 shadow-sm print:shadow-none">
+        <div class="flex items-center justify-between mb-2 print:mb-1">
+            <p class="text-xs sm:text-sm print:text-xs font-medium text-gray-500">Tidak Hadir</p>
+            <div class="w-8 h-8 print:hidden rounded-lg bg-red-50 flex items-center justify-center flex-shrink-0">
+                <svg class="w-4 h-4 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                           d="M6 18L18 6M6 6l12 12"/>
                 </svg>
             </div>
         </div>
-        <p class="text-2xl sm:text-3xl font-bold text-red-600">{{ $stats['tidak_hadir'] }}</p>
-        <p class="text-[11px] text-gray-400 mt-1.5">alpa / izin sakit</p>
+        <p class="text-2xl sm:text-3xl print:text-xl font-bold text-red-600">{{ $stats['tidak_hadir'] }}</p>
+        <p class="text-[11px] print:text-[10px] text-gray-400 mt-1">Alpa / izin / sakit</p>
     </div>
 
 </div>
@@ -185,32 +200,32 @@
 </div>
 
 {{-- ── TABEL 1: Rekapitulasi Per Pemagang ──────────────────── --}}
-<div id="tabel-rekap-pemagang" class="bg-white rounded-xl border border-gray-200 overflow-hidden shadow-sm mb-8 scroll-mt-6">
-    <div class="px-6 py-4 border-b border-gray-200 bg-gray-50/60 flex items-center justify-between">
+<div id="tabel-rekap-pemagang" class="bg-white rounded-xl border border-gray-200 print:border-gray-300 overflow-hidden shadow-sm print:shadow-none mb-8 print:mb-6 scroll-mt-6 print-avoid-break">
+    <div class="px-6 py-4 print:px-4 print:py-2.5 border-b border-gray-200 print:border-gray-300 bg-gray-50/60 print:bg-gray-100 flex items-center justify-between">
         <div>
-            <h2 class="text-sm sm:text-base font-bold text-gray-800">Rekapitulasi Kehadiran per Pemagang</h2>
-            <p class="text-xs text-gray-500 mt-0.5">Ringkasan performa dan tingkat kedisiplinan setiap individu</p>
+            <h2 class="text-sm sm:text-base print:text-sm font-bold text-gray-800">I. Rekapitulasi Kehadiran per Pemagang</h2>
+            <p class="text-xs print:text-[11px] text-gray-500">Ringkasan performa dan tingkat kedisiplinan kehadiran setiap individu</p>
         </div>
-        <span class="text-xs font-semibold px-2.5 py-1 bg-primary-50 text-primary-700 rounded-full">
-            {{ $rekapPemagang->total() }} Pemagang
+        <span class="text-xs font-semibold px-2.5 py-1 bg-primary-50 text-primary-700 rounded-full print:bg-transparent print:text-gray-700 print:border print:border-gray-300">
+            Total: {{ $rekapPemagang->total() }} Pemagang
         </span>
     </div>
 
     <div class="overflow-x-auto">
-        <table class="w-full text-left text-sm min-w-[750px]">
+        <table class="w-full text-left text-sm print:text-xs min-w-[750px] print:min-w-full">
             <thead>
-                <tr class="bg-gray-50 border-b border-gray-200 text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                    <th class="px-6 py-3.5">Pemagang</th>
-                    <th class="px-6 py-3.5">Divisi</th>
-                    <th class="px-4 py-3.5 text-center">Lebih Awal</th>
-                    <th class="px-4 py-3.5 text-center">Tepat Waktu</th>
-                    <th class="px-4 py-3.5 text-center">Terlambat</th>
-                    <th class="px-4 py-3.5 text-center">Tidak Hadir</th>
-                    <th class="px-4 py-3.5 text-center">Total</th>
-                    <th class="px-6 py-3.5 text-right">Kedisiplinan</th>
+                <tr class="bg-gray-50 print:bg-gray-100 border-b border-gray-200 print:border-gray-300 text-xs print:text-[11px] font-semibold text-gray-600 print:text-gray-800 uppercase tracking-wider">
+                    <th class="px-6 py-3.5 print:px-3 print:py-2">Pemagang</th>
+                    <th class="px-6 py-3.5 print:px-3 print:py-2">Divisi</th>
+                    <th class="px-4 py-3.5 print:px-2 print:py-2 text-center">Awal</th>
+                    <th class="px-4 py-3.5 print:px-2 print:py-2 text-center">Tepat</th>
+                    <th class="px-4 py-3.5 print:px-2 print:py-2 text-center">Telat</th>
+                    <th class="px-4 py-3.5 print:px-2 print:py-2 text-center">Alpa</th>
+                    <th class="px-4 py-3.5 print:px-2 print:py-2 text-center">Total</th>
+                    <th class="px-6 py-3.5 print:px-3 print:py-2 text-right">Kedisiplinan</th>
                 </tr>
             </thead>
-            <tbody class="divide-y divide-gray-100">
+            <tbody class="divide-y divide-gray-100 print:divide-gray-200">
                 @forelse($rekapPemagang as $item)
                     @php
                         $p = $item->pemagang;
@@ -219,67 +234,66 @@
                     @endphp
                     <tr class="hover:bg-gray-50/80 transition">
 
-                        {{-- Nama & Info (Cukup teks nama tanpa icon) --}}
-                        <td class="px-6 py-4">
-                            <p class="font-semibold text-gray-800 text-sm">{{ $p->nama_lengkap }}</p>
-                            <p class="text-xs text-gray-400 mt-0.5">{{ $p->kampus }}</p>
+                        {{-- Nama & Info --}}
+                        <td class="px-6 py-3.5 print:px-3 print:py-2">
+                            <p class="font-semibold text-gray-800 text-sm print:text-xs">{{ $p->nama_lengkap }}</p>
+                            <p class="text-xs print:text-[10px] text-gray-400">{{ $p->kampus }}</p>
                         </td>
 
                         {{-- Divisi --}}
-                        <td class="px-6 py-4">
-                            <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-medium bg-gray-100 text-gray-700">
+                        <td class="px-6 py-3.5 print:px-3 print:py-2">
+                            <span class="inline-flex items-center px-2 py-0.5 rounded text-xs print:text-[10px] font-medium bg-gray-100 text-gray-700 print:border print:border-gray-200">
                                 {{ $p->divisi }}
                             </span>
                         </td>
 
                         {{-- Lebih Awal --}}
-                        <td class="px-4 py-4 text-center">
-                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-indigo-50 text-indigo-700">
+                        <td class="px-4 py-3.5 print:px-2 print:py-2 text-center">
+                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs print:text-[11px] font-semibold bg-indigo-50 text-indigo-700 print:bg-transparent print:text-indigo-800">
                                 {{ $item->datang_awal }}
                             </span>
                         </td>
 
                         {{-- Tepat Waktu --}}
-                        <td class="px-4 py-4 text-center">
-                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-green-50 text-green-700">
+                        <td class="px-4 py-3.5 print:px-2 print:py-2 text-center">
+                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs print:text-[11px] font-semibold bg-green-50 text-green-700 print:bg-transparent print:text-green-800">
                                 {{ $item->tepat_waktu }}
                             </span>
                         </td>
 
                         {{-- Terlambat --}}
-                        <td class="px-4 py-4 text-center">
-                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-amber-50 text-amber-700">
+                        <td class="px-4 py-3.5 print:px-2 print:py-2 text-center">
+                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs print:text-[11px] font-semibold {{ $item->terlambat > 0 ? 'bg-amber-50 text-amber-700 print:text-amber-800' : 'text-gray-400' }}">
                                 {{ $item->terlambat }}
                             </span>
                         </td>
 
                         {{-- Tidak Hadir --}}
-                        <td class="px-4 py-4 text-center">
-                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-red-50 text-red-700">
+                        <td class="px-4 py-3.5 print:px-2 print:py-2 text-center">
+                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs print:text-[11px] font-semibold {{ $item->tidak_hadir > 0 ? 'bg-red-50 text-red-700 print:text-red-800' : 'text-gray-400' }}">
                                 {{ $item->tidak_hadir }}
                             </span>
                         </td>
 
                         {{-- Total --}}
-                        <td class="px-4 py-4 text-center font-bold text-gray-700">
+                        <td class="px-4 py-3.5 print:px-2 print:py-2 text-center font-bold text-gray-800 print:text-xs">
                             {{ $item->total }}
                         </td>
 
-                        {{-- Kedisiplinan Rate --}}
-                        <td class="px-6 py-4 text-right">
-                            <div class="flex flex-col items-end">
-                                <span class="font-bold text-xs {{ $rateColor }}">{{ $item->rate }}%</span>
-                                <div class="w-20 bg-gray-100 rounded-full h-1.5 mt-1 overflow-hidden">
-                                    <div class="{{ $barColor }} h-1.5 rounded-full" style="width: {{ $item->rate }}%"></div>
+                        {{-- Rate --}}
+                        <td class="px-6 py-3.5 print:px-3 print:py-2 text-right">
+                            <div class="flex items-center justify-end gap-2">
+                                <span class="font-bold text-sm print:text-xs {{ $rateColor }}">{{ $item->rate }}%</span>
+                                <div class="w-14 bg-gray-100 rounded-full h-1.5 overflow-hidden print:hidden">
+                                    <div class="{{ $barColor }} h-1.5 rounded-full" style="width: {{ min(100, $item->rate) }}%"></div>
                                 </div>
                             </div>
                         </td>
-
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="8" class="px-6 py-8 text-center text-gray-400 text-sm">
-                            Tidak ada data pemagang ditemukan.
+                        <td colspan="8" class="px-6 py-8 text-center text-gray-400 text-xs">
+                            Tidak ada data presensi pemagang yang sesuai dengan filter.
                         </td>
                     </tr>
                 @endforelse
@@ -294,34 +308,33 @@
     @endif
 </div>
 
-
-{{-- ── TABEL 2: Riwayat Log Presensi Lengkap ───────────────── --}}
-<div id="tabel-log-presensi" class="bg-white rounded-xl border border-gray-200 overflow-hidden shadow-sm scroll-mt-6">
-    <div class="px-6 py-4 border-b border-gray-200 bg-gray-50/60 flex items-center justify-between">
+{{-- ── TABEL 2: Detail Riwayat Log Presensi ───────────────── --}}
+<div id="tabel-log-presensi" class="bg-white rounded-xl border border-gray-200 print:border-gray-300 overflow-hidden shadow-sm print:shadow-none scroll-mt-6 print-avoid-break">
+    <div class="px-6 py-4 print:px-4 print:py-2.5 border-b border-gray-200 print:border-gray-300 bg-gray-50/60 print:bg-gray-100 flex items-center justify-between">
         <div>
-            <h2 class="text-sm sm:text-base font-bold text-gray-800">Riwayat Detail Presensi</h2>
-            <p class="text-xs text-gray-500 mt-0.5">Log presensi masuk harian pemagang</p>
+            <h2 class="text-sm sm:text-base print:text-sm font-bold text-gray-800">II. Riwayat Detail Log Presensi</h2>
+            <p class="text-xs print:text-[11px] text-gray-500">Catatan waktu presensi masuk dan status kehadiran pemagang</p>
         </div>
-        <span class="text-xs font-semibold px-2.5 py-1 bg-gray-100 text-gray-700 rounded-full">
-            {{ $logs->total() }} Log
+        <span class="text-xs font-semibold px-2.5 py-1 bg-gray-100 text-gray-700 rounded-full print:bg-transparent print:border print:border-gray-300">
+            Total Log: {{ $logs->total() }}
         </span>
     </div>
 
     <div class="overflow-x-auto">
-        <table class="w-full text-left text-sm min-w-[700px]">
+        <table class="w-full text-left text-sm print:text-xs min-w-[750px] print:min-w-full">
             <thead>
-                <tr class="bg-gray-50 border-b border-gray-200 text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                    <th class="px-6 py-3.5">Pemagang</th>
-                    <th class="px-6 py-3.5">Divisi</th>
-                    <th class="px-6 py-3.5">Kantor</th>
-                    <th class="px-6 py-3.5">Shift</th>
-                    <th class="px-6 py-3.5">Waktu Masuk</th>
-                    <th class="px-6 py-3.5">Status</th>
-                    <th class="px-6 py-3.5">Pencatat</th>
-                    <th class="px-6 py-3.5">Catatan</th>
+                <tr class="bg-gray-50 print:bg-gray-100 border-b border-gray-200 print:border-gray-300 text-xs print:text-[11px] font-semibold text-gray-600 print:text-gray-800 uppercase tracking-wider">
+                    <th class="px-6 py-3.5 print:px-3 print:py-2">Pemagang</th>
+                    <th class="px-6 py-3.5 print:px-3 print:py-2">Divisi</th>
+                    <th class="px-6 py-3.5 print:px-3 print:py-2">Lokasi</th>
+                    <th class="px-6 py-3.5 print:px-3 print:py-2">Shift</th>
+                    <th class="px-6 py-3.5 print:px-3 print:py-2">Waktu Masuk</th>
+                    <th class="px-6 py-3.5 print:px-3 print:py-2">Status</th>
+                    <th class="px-6 py-3.5 print:px-3 print:py-2">Pencatat</th>
+                    <th class="px-6 py-3.5 print:px-3 print:py-2">Catatan</th>
                 </tr>
             </thead>
-            <tbody class="divide-y divide-gray-100">
+            <tbody class="divide-y divide-gray-100 print:divide-gray-200">
                 @forelse($logs as $log)
                     @php
                         $pemagang = $log->pemagang;
@@ -330,48 +343,47 @@
                             'Tepat Waktu' => 'bg-green-50 text-green-700 border-green-200',
                             'Terlambat'   => 'bg-amber-50 text-amber-700 border-amber-200',
                             'Tidak Hadir' => 'bg-red-50 text-red-700 border-red-200',
-                            default       => 'bg-gray-50 text-gray-700 border-gray-200',
+                            default       => 'bg-gray-100 text-gray-700 border-gray-200',
                         };
-
                         $shiftStyle = match($log->shift) {
-                            'Pagi'   => 'bg-blue-50 text-blue-700',
-                            'Middle' => 'bg-purple-50 text-purple-700',
-                            'Siang'  => 'bg-orange-50 text-orange-700',
+                            'Pagi'    => 'bg-sky-50 text-sky-700',
+                            'Middle'  => 'bg-purple-50 text-purple-700',
+                            'Siang'   => 'bg-orange-50 text-orange-700',
                             default  => 'bg-gray-100 text-gray-700',
                         };
                     @endphp
                     <tr class="hover:bg-gray-50/80 transition">
-                        <td class="px-6 py-3.5">
-                            <p class="font-medium text-gray-800 text-xs sm:text-sm">{{ $pemagang ? $pemagang->nama_lengkap : 'Pemagang Dihapus' }}</p>
-                            <p class="text-[11px] text-gray-400">{{ $pemagang ? $pemagang->kampus : '-' }}</p>
+                        <td class="px-6 py-3 print:px-3 print:py-1.5">
+                            <p class="font-medium text-gray-800 text-xs sm:text-sm print:text-xs">{{ $pemagang ? $pemagang->nama_lengkap : 'Pemagang Dihapus' }}</p>
+                            <p class="text-[11px] print:text-[10px] text-gray-400">{{ $pemagang ? $pemagang->kampus : '-' }}</p>
                         </td>
-                        <td class="px-6 py-3.5">
-                            <span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-medium bg-gray-100 text-gray-700">
+                        <td class="px-6 py-3 print:px-3 print:py-1.5">
+                            <span class="inline-flex items-center px-2 py-0.5 rounded text-xs print:text-[10px] font-medium bg-gray-100 text-gray-700 print:border print:border-gray-200">
                                 {{ $pemagang ? $pemagang->divisi : '-' }}
                             </span>
                         </td>
-                        <td class="px-6 py-3.5">
-                            <span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-medium bg-blue-50 text-blue-700">
+                        <td class="px-6 py-3 print:px-3 print:py-1.5">
+                            <span class="inline-flex items-center px-2 py-0.5 rounded text-xs print:text-[10px] font-medium bg-blue-50 text-blue-700 print:border print:border-blue-200">
                                 {{ $log->kantor ?? 'Kantor 1' }}
                             </span>
                         </td>
-                        <td class="px-6 py-3.5">
-                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium {{ $shiftStyle }}">
+                        <td class="px-6 py-3 print:px-3 print:py-1.5">
+                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs print:text-[10px] font-medium {{ $shiftStyle }}">
                                 {{ $log->shift }}
                             </span>
                         </td>
-                        <td class="px-6 py-3.5 text-xs text-gray-700 font-medium">
+                        <td class="px-6 py-3 print:px-3 print:py-1.5 text-xs text-gray-700 font-medium">
                             {{ substr($log->waktu_masuk, 0, 5) }} WIB
                         </td>
-                        <td class="px-6 py-3.5">
-                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium border {{ $badgeStyle }}">
+                        <td class="px-6 py-3 print:px-3 print:py-1.5">
+                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs print:text-[10px] font-medium border {{ $badgeStyle }}">
                                 {{ $log->keterangan }}
                             </span>
                         </td>
-                        <td class="px-6 py-3.5 text-xs text-gray-600 font-medium">
+                        <td class="px-6 py-3 print:px-3 print:py-1.5 text-xs text-gray-600 font-medium">
                             {{ $log->creator?->name ?? 'Staff/Admin' }}
                         </td>
-                        <td class="px-6 py-3.5 text-xs text-gray-500 max-w-[200px] truncate">
+                        <td class="px-6 py-3 print:px-3 print:py-1.5 text-xs text-gray-500 max-w-[200px] truncate">
                             {{ $log->notes ?: '-' }}
                         </td>
                     </tr>
@@ -391,6 +403,25 @@
             {{ $logs->links() }}
         </div>
     @endif
+</div>
+
+{{-- ── Lembar Tanda Tangan / Pengesahan (Hanya muncul saat cetak) ── --}}
+<div class="hidden print:block mt-8 pt-6 border-t border-gray-300 print-avoid-break">
+    <div class="flex justify-between items-start text-xs text-gray-700">
+        <div class="text-center w-52">
+            <p class="text-gray-500 mb-1">Dicetak & Diverifikasi Oleh,</p>
+            <div class="h-16"></div>
+            <p class="font-bold underline text-gray-900">{{ Auth::user()->name }}</p>
+            <p class="text-[10px] text-gray-500">{{ Auth::user()->role_label }}</p>
+        </div>
+        <div class="text-center w-60">
+            <p class="text-gray-500 mb-1">Yogyakarta, {{ \Carbon\Carbon::now()->locale('id')->translatedFormat('d F Y') }}</p>
+            <p class="text-gray-500">Mengetahui, HR Department</p>
+            <div class="h-14"></div>
+            <p class="font-bold underline text-gray-900">( ............................................ )</p>
+            <p class="text-[10px] text-gray-500">Penanggung Jawab</p>
+        </div>
+    </div>
 </div>
 
 @endsection

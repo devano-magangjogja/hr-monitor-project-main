@@ -19,7 +19,7 @@
 
                 <form action="{{ route('admin.notifications.store') }}" method="POST" class="space-y-4" x-data="{
                           recipients: 'all',
-                          users: {{ $users->map(fn($u) => ['id' => $u->id, 'name' => $u->name, 'role' => $u->role])->values()->toJson() }},
+                          users: {{ $users->map(fn($u) => ['id' => $u->id, 'name' => $u->name, 'role' => $u->role, 'role_label' => $u->role_label])->values()->toJson() }},
                           selected: []
                       }">
                     @csrf
@@ -39,9 +39,9 @@
                     {{-- Pesan --}}
                     <div>
                         <label class="block text-xs font-medium text-gray-700 mb-1">Isi Pesan</label>
-                        <textarea name="message" required maxlength="500" rows="4"
-                            placeholder="Tulis isi notifikasi di sini..." class="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm resize-none
-                                         focus:outline-none focus:ring-2 focus:ring-primary-500
+                        <textarea name="message" rows="3" required maxlength="500"
+                            placeholder="Tuliskan pesan notifikasi yang ingin disampaikan..." class="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm
+                                         focus:outline-none focus:ring-2 focus:ring-primary-500 resize-none
                                          @error('message') border-red-400 @enderror">{{ old('message') }}</textarea>
                         @error('message')
                             <p class="mt-1 text-xs text-red-500">{{ $message }}</p>
@@ -54,14 +54,9 @@
                         <select name="recipients" x-model="recipients" class="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm
                                        focus:outline-none focus:ring-2 focus:ring-primary-500">
                             <option value="all">Semua (Seluruh Anggota Tim)</option>
-                            <option value="hr_staff">Semua HR Staff</option>
-                            <option value="hr_assistant">Semua HR Assistant</option>
-                            <option value="cs">Semua CS (Customer Service)</option>
-                            <option value="ob">Semua OB (Office Boy)</option>
-                            <option value="programmer">Semua Programmer</option>
-                            <option value="dg">Semua DG (Design Graphics)</option>
-                            <option value="vg">Semua VG (Videografer)</option>
-                            <option value="pm">Semua PM (Project Manager)</option>
+                            @foreach($roles as $r)
+                                <option value="{{ $r->name }}">Semua {{ $r->label }}</option>
+                            @endforeach
                             <option value="specific">Pilih Pengguna Tertentu</option>
                         </select>
                     </div>
@@ -76,16 +71,7 @@
                                                   focus:ring-primary-500">
                                     <div class="flex-1 min-w-0">
                                         <p class="text-sm font-medium text-gray-800 truncate" x-text="user.name"></p>
-                                        <p class="text-xs text-gray-400" x-text="{
-                                               hr_staff:     'HR Staff',
-                                               hr_assistant: 'HR Assistant',
-                                               cs:           'CS (Customer Service)',
-                                               ob:           'OB (Office Boy)',
-                                               programmer:   'Programmer',
-                                               dg:           'DG (Design Graphics)',
-                                               vg:           'VG (Videografer)',
-                                               pm:           'PM (Project Manager)',
-                                           }[user.role] ?? user.role"></p>
+                                        <p class="text-xs text-gray-400" x-text="user.role_label || user.role"></p>
                                     </div>
                                 </label>
                             </template>
@@ -113,14 +99,13 @@
             <div class="bg-white rounded-xl border border-gray-200 overflow-hidden">
                 <div class="px-6 py-4 border-b border-gray-200">
                     <h2 class="text-sm font-semibold text-gray-800">Riwayat Notifikasi Terkirim</h2>
-                    <p class="text-xs text-gray-400 mt-0.5">50 notifikasi terbaru</p>
+                    <p class="text-xs text-gray-400 mt-0.5">50 pengiriman terbaru</p>
                 </div>
 
                 <div class="divide-y divide-gray-100">
                     @forelse($sent as $item)
                         @php
                             $data = $item->data;
-                            $recipient = $item->recipient;
                         @endphp
                         <div class="px-6 py-4 hover:bg-gray-50 transition">
                             <div class="flex items-start gap-3">
@@ -149,20 +134,40 @@
                                             </span>
                                         </div>
                                     </div>
-                                    <div class="flex items-center gap-2 mt-2">
+                                    <div class="flex flex-wrap items-center gap-x-2 gap-y-1 mt-2">
                                         <span class="text-xs text-gray-400">Ke:</span>
-                                        @if($recipient)
-                                            <span
-                                                class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium {{ $recipient->role_badge_class }}">
-                                                {{ $recipient->name }} ({{ $recipient->role_label }})
+                                        @if($item->is_bulk)
+                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-primary-50 text-primary-700 border border-primary-200">
+                                                {{ $item->audience_label ?: 'Semua Penerima' }}
                                             </span>
+                                            <span class="text-xs text-gray-400">&bull; {{ $item->recipient_count }} orang</span>
+                                        @elseif($item->recipients->isNotEmpty())
+                                            @foreach($item->recipients->take(3) as $recipient)
+                                                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium {{ $recipient->role_badge_class }}">
+                                                    {{ $recipient->name }} ({{ $recipient->role_label }})
+                                                </span>
+                                            @endforeach
+                                            @if($item->recipients->count() > 3)
+                                                <span class="text-xs text-gray-400">+{{ $item->recipients->count() - 3 }} lainnya</span>
+                                            @endif
                                         @else
                                             <span class="text-xs text-gray-400 italic">Pengguna dihapus</span>
                                         @endif
-                                        @if(!is_null($item->read_at))
-                                            <span class="text-xs text-green-600">• Dibaca</span>
+                                    </div>
+                                    <div class="flex flex-wrap items-center gap-x-2 gap-y-1 mt-1.5">
+                                        <span class="text-xs text-gray-400">Dari:</span>
+                                        <span class="text-xs font-semibold text-gray-700 flex items-center gap-1">
+                                            {{ $item->sender_name ?: 'Admin' }}
+                                            @if($item->sender_role)
+                                                <span class="font-normal text-[11px] text-gray-500 bg-gray-100 px-1.5 py-0.5 rounded">({{ $item->sender_role }})</span>
+                                            @endif
+                                        </span>
+                                        @if($item->is_bulk || $item->group_size > 1)
+                                            <span class="text-xs text-gray-400">&bull; {{ $item->read_count }}/{{ $item->group_size }} dibaca</span>
+                                        @elseif(!is_null($item->read_at))
+                                            <span class="text-xs text-green-600 font-medium">&bull; Dibaca</span>
                                         @else
-                                            <span class="text-xs text-orange-500">• Belum dibaca</span>
+                                            <span class="text-xs text-orange-500 font-medium">&bull; Belum dibaca</span>
                                         @endif
                                     </div>
                                 </div>

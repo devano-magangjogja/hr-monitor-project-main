@@ -16,7 +16,8 @@ class DefaultTaskController extends Controller
     public function index()
     {
         $defaultTasks = $this->defaultTaskService->getAll();
-        return view('admin.default-tasks.index', compact('defaultTasks'));
+        $roles = \App\Models\Role::where('name', '!=', 'admin')->orderBy('id')->get();
+        return view('admin.default-tasks.index', compact('defaultTasks', 'roles'));
     }
 
     public function store(Request $request)
@@ -24,7 +25,7 @@ class DefaultTaskController extends Controller
         $validated = $request->validate([
             'title'       => ['required', 'string', 'max:150'],
             'description' => ['nullable', 'string'],
-            'target_role' => ['required', 'in:hr_staff,hr_assistant,cs,ob,programmer,dg,vg,pm'],
+            'target_role' => ['required', 'exists:roles,name'],
             'is_active'   => ['nullable', 'boolean'],
         ]);
 
@@ -39,7 +40,7 @@ class DefaultTaskController extends Controller
         $validated = $request->validate([
             'title'       => ['required', 'string', 'max:150'],
             'description' => ['nullable', 'string'],
-            'target_role' => ['required', 'in:hr_staff,hr_assistant,cs,ob,programmer,dg,vg,pm'],
+            'target_role' => ['required', 'exists:roles,name'],
             'is_active'   => ['nullable', 'boolean'],
         ]);
 

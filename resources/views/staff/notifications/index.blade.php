@@ -106,14 +106,13 @@
         <div class="bg-white rounded-xl border border-gray-200 overflow-hidden">
             <div class="px-6 py-4 border-b border-gray-200">
                 <h2 class="text-sm font-semibold text-gray-800">Riwayat Notifikasi Terkirim</h2>
-                <p class="text-xs text-gray-400 mt-0.5">50 notifikasi terbaru ke HR Assistant</p>
+                <p class="text-xs text-gray-400 mt-0.5">50 pengiriman terbaru ke HR Assistant</p>
             </div>
 
             <div class="divide-y divide-gray-100">
                 @forelse($sent as $item)
                     @php
-                        $data      = $item->data;
-                        $recipient = $item->recipient;
+                        $data = $item->data;
                     @endphp
                     <div class="px-6 py-4 hover:bg-gray-50 transition">
                         <div class="flex items-start gap-3">
@@ -137,20 +136,40 @@
                                         {{ $item->created_at->locale('id')->diffForHumans() }}
                                     </span>
                                 </div>
-                                <div class="flex items-center gap-2 mt-2">
+                                <div class="flex flex-wrap items-center gap-x-2 gap-y-1 mt-2">
                                     <span class="text-xs text-gray-400">Ke:</span>
-                                    @if($recipient)
-                                        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium
-                                                     bg-purple-50 text-purple-700">
-                                            {{ $recipient->name }}
+                                    @if($item->is_bulk)
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-purple-50 text-purple-700 border border-purple-200">
+                                            {{ $item->audience_label ?: 'Semua HR Assistant' }}
                                         </span>
+                                        <span class="text-xs text-gray-400">&bull; {{ $item->recipient_count }} orang</span>
+                                    @elseif($item->recipients->isNotEmpty())
+                                        @foreach($item->recipients->take(3) as $recipient)
+                                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-purple-50 text-purple-700">
+                                                {{ $recipient->name }}
+                                            </span>
+                                        @endforeach
+                                        @if($item->recipients->count() > 3)
+                                            <span class="text-xs text-gray-400">+{{ $item->recipients->count() - 3 }} lainnya</span>
+                                        @endif
                                     @else
                                         <span class="text-xs text-gray-400 italic">Pengguna dihapus</span>
                                     @endif
-                                    @if(!is_null($item->read_at))
-                                        <span class="text-xs text-green-600">• Dibaca</span>
+                                </div>
+                                <div class="flex flex-wrap items-center gap-x-2 gap-y-1 mt-1.5">
+                                    <span class="text-xs text-gray-400">Dari:</span>
+                                    <span class="text-xs font-semibold text-gray-700 flex items-center gap-1">
+                                        {{ $item->sender_name ?: 'HR Staff' }}
+                                        @if($item->sender_role)
+                                            <span class="font-normal text-[11px] text-gray-500 bg-gray-100 px-1.5 py-0.5 rounded">({{ $item->sender_role }})</span>
+                                        @endif
+                                    </span>
+                                    @if($item->is_bulk || $item->group_size > 1)
+                                        <span class="text-xs text-gray-400">&bull; {{ $item->read_count }}/{{ $item->group_size }} dibaca</span>
+                                    @elseif(!is_null($item->read_at))
+                                        <span class="text-xs text-green-600 font-medium">&bull; Dibaca</span>
                                     @else
-                                        <span class="text-xs text-orange-500">• Belum dibaca</span>
+                                        <span class="text-xs text-orange-500 font-medium">&bull; Belum dibaca</span>
                                     @endif
                                 </div>
                             </div>

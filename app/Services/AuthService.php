@@ -43,7 +43,12 @@ class AuthService
 
     public function redirectByRole(): string
     {
-        return match(Auth::user()->role) {
+        $user = Auth::user();
+        if (! $user) {
+            return route('login');
+        }
+
+        return match($user->role) {
             'admin'        => route('admin.dashboard'),
             'hr_staff'     => route('staff.dashboard'),
             'hr_assistant' => route('assistant.dashboard'),
@@ -53,7 +58,12 @@ class AuthService
             'dg'           => route('dg.dashboard'),
             'vg'           => route('vg.dashboard'),
             'pm'           => route('pm.dashboard'),
-            default        => route('login'),
+            default        => match($user->base_type) {
+                'admin'     => route('admin.dashboard'),
+                'staff'     => route('staff.dashboard'),
+                'assistant' => route('assistant.dashboard'),
+                default     => route('member.dashboard'),
+            },
         };
     }
 }

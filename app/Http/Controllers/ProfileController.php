@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Services\UserService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\ValidationException;
 
 class ProfileController extends Controller
@@ -47,6 +48,13 @@ class ProfileController extends Controller
                 ->with('success', 'Profil berhasil diperbarui.');
         } catch (ValidationException $e) {
             return back()->withErrors($e->errors())->withInput();
+        } catch (\Throwable $e) {
+            Log::error('Gagal memperbarui profil: ' . $e->getMessage(), [
+                'user_id' => Auth::id(),
+                'exception' => $e,
+            ]);
+
+            return back()->with('error', 'Terjadi kendala saat memperbarui profil. Silakan coba beberapa saat lagi.')->withInput();
         }
     }
 

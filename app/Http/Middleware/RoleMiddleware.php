@@ -25,9 +25,17 @@ class RoleMiddleware
                 ->withErrors(['email' => 'Akun Anda telah dinonaktifkan.']);
         }
 
-        // Role tidak sesuai — dukung multi-role via koma, misal "role:cs,ob"
+        // Role & Base Type check
         $allowedRoles = explode(',', $role);
-        if (! in_array($user->role, $allowedRoles, true)) {
+        
+        $hasAccess = in_array($user->role, $allowedRoles, true)
+            || in_array($user->base_type, $allowedRoles, true)
+            || (in_array('admin', $allowedRoles, true) && $user->isAdmin())
+            || (in_array('hr_staff', $allowedRoles, true) && $user->isHrStaff())
+            || (in_array('hr_assistant', $allowedRoles, true) && $user->isHrAssistant())
+            || (in_array('member', $allowedRoles, true) && $user->isMember());
+
+        if (! $hasAccess) {
             abort(403, 'Anda tidak memiliki akses ke halaman ini.');
         }
 

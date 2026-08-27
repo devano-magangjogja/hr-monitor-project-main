@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Models\WaGroup;
 use App\Services\SettingService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Validation\ValidationException;
 
 class SettingController extends Controller
 {
@@ -29,12 +31,22 @@ class SettingController extends Controller
             'remove_logo' => ['nullable', 'in:0,1'],
         ]);
 
-        $this->settingService->updateAppInfo(
-            ['app_name' => $request->app_name, 'remove_logo' => $request->remove_logo],
-            $request->hasFile('logo') ? $request->file('logo') : null
-        );
+        try {
+            $this->settingService->updateAppInfo(
+                ['app_name' => $request->app_name, 'remove_logo' => $request->remove_logo],
+                $request->hasFile('logo') ? $request->file('logo') : null
+            );
 
-        return back()->with('success', 'Informasi aplikasi berhasil diperbarui.');
+            return back()->with('success', 'Informasi aplikasi berhasil diperbarui.');
+        } catch (ValidationException $e) {
+            return back()->withErrors($e->errors())->withInput();
+        } catch (\Throwable $e) {
+            Log::error('Gagal memperbarui informasi aplikasi/logo: ' . $e->getMessage(), [
+                'exception' => $e,
+            ]);
+
+            return back()->with('error', 'Terjadi kendala saat memperbarui informasi aplikasi atau logo. Silakan coba beberapa saat lagi.')->withInput();
+        }
     }
 
     // ── Update Template Pesan WhatsApp ───────────────────

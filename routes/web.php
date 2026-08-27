@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\Admin\RoleController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboard;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\DefaultTaskController;
@@ -30,6 +31,8 @@ use App\Http\Controllers\VG\DashboardController as VGDashboard;
 use App\Http\Controllers\VG\TaskController as VGTaskController;
 use App\Http\Controllers\PM\DashboardController as PMDashboard;
 use App\Http\Controllers\PM\TaskController as PMTaskController;
+use App\Http\Controllers\Member\DashboardController as MemberDashboard;
+use App\Http\Controllers\Member\TaskController as MemberTaskController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\PemagangController;
@@ -44,6 +47,8 @@ Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin'])->group(function () {
     Route::get('/dashboard', [AdminDashboard::class, 'index'])->name('dashboard');
     Route::get('/team-progress/{user}', [AdminDashboard::class, 'teamProgressDetail'])->name('dashboard.team-progress-detail');
+    Route::resource('roles', RoleController::class)
+        ->only(['index', 'store', 'update', 'destroy']);
     Route::resource('users', UserController::class)
         ->only(['index', 'store', 'update', 'destroy']);
     Route::patch('/users/{user}/password', [UserController::class, 'updatePassword'])->name('users.password');
@@ -243,6 +248,20 @@ Route::prefix('pm')->name('pm.')->middleware(['auth', 'role:pm'])->group(functio
     Route::get('/tasks/all', [PMTaskController::class, 'allIndex'])->name('tasks.all');
     Route::patch('/tasks/all/{task}/complete', [PMTaskController::class, 'allComplete'])->name('tasks.all.complete');
     Route::get('/history', [PMTaskController::class, 'history'])->name('tasks.history');
+});
+
+// ── Member / Mandiri (Custom & Standalone Roles) ─────────────────────────────
+Route::prefix('member')->name('member.')->middleware(['auth', 'role:member'])->group(function () {
+    Route::get('/dashboard', [MemberDashboard::class, 'index'])->name('dashboard');
+    Route::resource('tasks', MemberTaskController::class)->only(['index', 'store', 'update', 'destroy']);
+    Route::patch('/tasks/{task}/complete', [MemberTaskController::class, 'complete'])->name('tasks.complete');
+    Route::get('/tasks/daily', [MemberTaskController::class, 'dailyIndex'])->name('tasks.daily');
+    Route::patch('/tasks/daily/{task}/complete', [MemberTaskController::class, 'dailyComplete'])->name('tasks.daily.complete');
+    Route::get('/tasks/assigned', [MemberTaskController::class, 'assignedIndex'])->name('tasks.assigned');
+    Route::patch('/tasks/assigned/{task}/complete', [MemberTaskController::class, 'assignedComplete'])->name('tasks.assigned.complete');
+    Route::get('/tasks/all', [MemberTaskController::class, 'allIndex'])->name('tasks.all');
+    Route::patch('/tasks/all/{task}/complete', [MemberTaskController::class, 'allComplete'])->name('tasks.all.complete');
+    Route::get('/history', [MemberTaskController::class, 'history'])->name('tasks.history');
 });
 
 // ── Notifications (All Roles) ────────────────────────────────────────────────

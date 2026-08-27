@@ -9,6 +9,8 @@
         @include('components.sidebar-admin')
     @elseif(Auth::user()->isHrStaff())
         @include('components.sidebar-staff')
+    @elseif(Auth::user()->isHrAssistant())
+        @include('components.sidebar-assistant')
     @elseif(Auth::user()->isCs())
         @include('components.sidebar-cs')
     @elseif(Auth::user()->isOb())
@@ -22,7 +24,7 @@
     @elseif(Auth::user()->isPm())
         @include('components.sidebar-pm')
     @else
-        @include('components.sidebar-assistant')
+        @include('components.sidebar-member')
     @endif
 @endsection
 

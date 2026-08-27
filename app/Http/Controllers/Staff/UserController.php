@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Services\UserService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\ValidationException;
 
 class UserController extends Controller
@@ -70,6 +71,13 @@ class UserController extends Controller
                 ->with('success', 'Data HR Assistant berhasil diperbarui.');
         } catch (ValidationException $e) {
             return back()->withErrors($e->errors())->withInput();
+        } catch (\Throwable $e) {
+            Log::error('Gagal memperbarui data HR Assistant: ' . $e->getMessage(), [
+                'target_user_id' => $user->id,
+                'exception' => $e,
+            ]);
+
+            return back()->with('error', 'Terjadi kendala saat memperbarui data HR Assistant. Silakan coba beberapa saat lagi.')->withInput();
         }
     }
 

@@ -67,29 +67,8 @@
 
                                         {{-- Role --}}
                                         <td class="px-6 py-4">
-                                            <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium
-                                                                                                                                {{ match ($user->role) {
-                            'hr_staff' => 'bg-blue-50 text-blue-700',
-                            'hr_assistant' => 'bg-purple-50 text-purple-700',
-                            'cs' => 'bg-teal-50 text-teal-700',
-                            'ob' => 'bg-orange-50 text-orange-700',
-                            'programmer' => 'bg-cyan-50 text-cyan-700',
-                            'dg' => 'bg-red-50 text-red-700',
-                            'vg' => 'bg-yellow-50 text-yellow-700',
-                            'pm' => 'bg-pink-50 text-pink-700',
-                            default => 'bg-gray-100 text-gray-600',
-                        } }}">
-                                                {{ match ($user->role) {
-                            'hr_staff' => 'HR Staff',
-                            'hr_assistant' => 'HR Assistant',
-                            'cs' => 'CS (Customer Service)',
-                            'ob' => 'OB (Office Boy)',
-                            'programmer' => 'Programmer',
-                            'dg' => 'DG (Design Graphics)',
-                            'vg' => 'VG (Videografer)',
-                            'pm' => 'PM (Project Manager)',
-                            default => strtoupper($user->role),
-                        } }}
+                                            <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold {{ $user->role_badge_class }}">
+                                                {{ $user->role_label }}
                                             </span>
                                         </td>
 
@@ -239,14 +218,9 @@
                 <select name="role" required
                     class="w-full px-3 sm:px-4 py-2 sm:py-2.5 border border-gray-300 rounded-lg text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-primary-500">
                     <option value="">-- Pilih Role --</option>
-                    <option value="hr_staff">HR Staff</option>
-                    <option value="hr_assistant">HR Assistant</option>
-                    <option value="cs">CS (Customer Service)</option>
-                    <option value="ob">OB (Office Boy)</option>
-                    <option value="programmer">Programmer</option>
-                    <option value="dg">DG (Design Graphics)</option>
-                    <option value="vg">VG (Videografer)</option>
-                    <option value="pm">PM (Project Manager)</option>
+                    @foreach($roles as $r)
+                        <option value="{{ $r->name }}">{{ $r->label }}</option>
+                    @endforeach
                 </select>
             </div>
             <div>
@@ -304,14 +278,9 @@
                 <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-1">Role</label>
                 <select id="edit-role" name="role" required class="w-full px-3 sm:px-4 py-2 sm:py-2.5 border border-gray-300 rounded-lg text-xs sm:text-sm
                                                focus:outline-none focus:ring-2 focus:ring-primary-500">
-                    <option value="hr_staff">HR Staff</option>
-                    <option value="hr_assistant">HR Assistant</option>
-                    <option value="cs">CS (Customer Service)</option>
-                    <option value="ob">OB (Office Boy)</option>
-                    <option value="programmer">Programmer</option>
-                    <option value="dg">DG (Design Graphics)</option>
-                    <option value="vg">VG (Videografer)</option>
-                    <option value="pm">PM (Project Manager)</option>
+                    @foreach($roles as $r)
+                        <option value="{{ $r->name }}">{{ $r->label }}</option>
+                    @endforeach
                 </select>
             </div>
 

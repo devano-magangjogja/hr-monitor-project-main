@@ -6,27 +6,30 @@ use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Services\UserService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\ValidationException;
 
 class UserController extends Controller
 {
     public function __construct(
         protected UserService $userService
-    ) {}
+    ) {
+    }
 
     public function index()
     {
         $users = $this->userService->getAllUsers();
-        return view('admin.users.index', compact('users'));
+        $roles = \App\Models\Role::where('name', '!=', 'admin')->orderBy('id')->get();
+        return view('admin.users.index', compact('users', 'roles'));
     }
 
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'name'      => ['required', 'string', 'max:100'],
-            'email'     => ['required', 'email', 'max:100', 'unique:users,email'],
-            'password'  => ['required', 'string', 'min:8', 'confirmed'],
-            'role'      => ['required', 'in:hr_staff,hr_assistant,cs,ob,programmer,dg,vg,pm'],
+            'name' => ['required', 'string', 'max:100'],
+            'email' => ['required', 'email', 'max:100', 'unique:users,email'],
+            'password' => ['required', 'string', 'min:8', 'confirmed'],
+            'role' => ['required', 'exists:roles,name'],
             'is_active' => ['nullable', 'boolean'],
         ]);
 
@@ -42,11 +45,11 @@ class UserController extends Controller
     public function update(Request $request, User $user)
     {
         $validated = $request->validate([
-            'name'         => ['required', 'string', 'max:100'],
-            'email'        => ['required', 'email', 'max:100'],
-            'role'         => ['required', 'in:hr_staff,hr_assistant,cs,ob,programmer,dg,vg,pm'],
-            'is_active'    => ['nullable', 'boolean'],
-            'image'        => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
+            'name' => ['required', 'string', 'max:100'],
+            'email' => ['required', 'email', 'max:100'],
+            'role' => ['required', 'exists:roles,name'],
+            'is_active' => ['nullable', 'boolean'],
+            'image' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
             'remove_image' => ['nullable', 'in:0,1'],
         ]);
 
@@ -60,6 +63,13 @@ class UserController extends Controller
                 ->with('success', 'Data pengguna berhasil diperbarui.');
         } catch (ValidationException $e) {
             return back()->withErrors($e->errors())->withInput();
+        } catch (\Throwable $e) {
+            Log::error('Gagal memperbarui data pengguna oleh Admin: ' . $e->getMessage(), [
+                'target_user_id' => $user->id,
+                'exception' => $e,
+            ]);
+
+            return back()->with('error', 'Terjadi kendala saat memperbarui data pengguna. Silakan coba beberapa saat lagi.')->withInput();
         }
     }
 

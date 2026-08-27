@@ -37,6 +37,11 @@ class User extends Authenticatable
 
     // ── Relasi ──────────────────────────────────────────
 
+    public function roleModel()
+    {
+        return $this->belongsTo(Role::class, 'role', 'name');
+    }
+
     public function taskAssignments()
     {
         return $this->hasMany(TaskAssignment::class, 'user_id');
@@ -52,21 +57,41 @@ class User extends Authenticatable
         return $this->hasMany(DefaultTask::class, 'created_by');
     }
 
-    // ── Helper Role ──────────────────────────────────────
+    // ── Helper Role & Base Type ──────────────────────────
+
+    public function getBaseTypeAttribute(): string
+    {
+        if ($this->relationLoaded('roleModel') && $this->roleModel) {
+            return $this->roleModel->base_type;
+        }
+
+        // Cache lookup or fallback
+        $role = Role::where('name', $this->role)->first();
+        if ($role) {
+            return $role->base_type;
+        }
+
+        return match ($this->role) {
+            'admin'        => 'admin',
+            'hr_staff'     => 'staff',
+            'hr_assistant' => 'assistant',
+            default        => 'member',
+        };
+    }
 
     public function isAdmin(): bool
     {
-        return $this->role === 'admin';
+        return $this->role === 'admin' || $this->base_type === 'admin';
     }
 
     public function isHrStaff(): bool
     {
-        return $this->role === 'hr_staff';
+        return $this->role === 'hr_staff' || $this->base_type === 'staff';
     }
 
     public function isHrAssistant(): bool
     {
-        return $this->role === 'hr_assistant';
+        return $this->role === 'hr_assistant' || $this->base_type === 'assistant';
     }
 
     public function isCs(): bool
@@ -104,6 +129,15 @@ class User extends Authenticatable
      */
     public function getRoleLabelAttribute(): string
     {
+        if ($this->relationLoaded('roleModel') && $this->roleModel) {
+            return $this->roleModel->label;
+        }
+
+        $role = Role::where('name', $this->role)->first();
+        if ($role) {
+            return $role->label;
+        }
+
         return match ($this->role) {
             'admin'        => 'Administrator',
             'hr_staff'     => 'HR Staff',
@@ -123,6 +157,15 @@ class User extends Authenticatable
      */
     public function getRoleBadgeClassAttribute(): string
     {
+        if ($this->relationLoaded('roleModel') && $this->roleModel) {
+            return $this->roleModel->badge_class;
+        }
+
+        $role = Role::where('name', $this->role)->first();
+        if ($role) {
+            return $role->badge_class;
+        }
+
         return match ($this->role) {
             'admin'        => 'bg-red-50 text-red-700',
             'hr_staff'     => 'bg-blue-50 text-blue-700',
@@ -139,11 +182,15 @@ class User extends Authenticatable
 
     /**
      * Apakah role ini setara "staff mandiri" (tidak punya bawahan)?
-     * cs, ob, programmer, dg, vg, pm memakai pola dashboard/tugas mandiri
-     * tetapi tanpa fitur kelola assistant.
+     * cs, ob, programmer, dg, vg, pm atau role kustom dengan base_type 'member'
      */
     public function isStandalone(): bool
     {
-        return in_array($this->role, ['cs', 'ob', 'programmer', 'dg', 'vg', 'pm']);
+        return $this->base_type === 'member';
+    }
+
+    public function isMember(): bool
+    {
+        return $this->base_type === 'member';
     }
 }

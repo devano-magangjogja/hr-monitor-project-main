@@ -6,33 +6,27 @@ use App\Http\Controllers\Controller;
 use App\Models\Notification;
 use App\Models\User;
 use App\Notifications\CustomNotification;
+use App\Services\NotificationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Str;
 
 class NotificationController extends Controller
 {
     public function index()
     {
-        // Hanya HR Assistant aktif
         $users = User::where('role', 'hr_assistant')
             ->where('is_active', 1)
             ->orderBy('name')
             ->get();
 
-        // Riwayat notifikasi custom yang dikirim ke hr_assistant
-        $sent = Notification::where('type', \App\Notifications\CustomNotification::class)
-            ->latest()
-            ->take(50)
-            ->get()
-            ->filter(function ($n) {
-                $recipient = User::find($n->notifiable_id);
-                return $recipient && $recipient->role === 'hr_assistant';
-            })
-            ->map(function ($n) {
-                $n->recipient = User::find($n->notifiable_id);
-                return $n;
-            })
-            ->values();
+        $assistantIds = User::where('role', 'hr_assistant')->pluck('id');
+
+        $sent = NotificationService::groupSentCustomNotifications(
+            Notification::query()
+                ->where('notifiable_type', User::class)
+                ->whereIn('notifiable_id', $assistantIds)
+        );
 
         return view('staff.notifications.index', compact('users', 'sent'));
     }
@@ -47,10 +41,9 @@ class NotificationController extends Controller
             'user_ids.*' => ['integer', 'exists:users,id'],
         ]);
 
-        $senderName = Auth::user()->name;
+        $sender = Auth::user();
 
         if ($validated['recipients'] === 'specific') {
-            // Pastikan hanya bisa kirim ke hr_assistant
             $users = User::whereIn('id', $validated['user_ids'])
                 ->where('role', 'hr_assistant')
                 ->where('is_active', 1)
@@ -68,7 +61,13 @@ class NotificationController extends Controller
         $notification = new CustomNotification(
             $validated['title'],
             $validated['message'],
-            $senderName
+            $sender->name,
+            $sender->id,
+            $sender->role_label,
+            $validated['recipients'],
+            NotificationService::audienceLabel($validated['recipients'], 'staff'),
+            (string) Str::uuid(),
+            $users->count()
         );
 
         foreach ($users as $user) {
