@@ -11,21 +11,18 @@
 @section('content')
 
 {{-- Filter Period --}}
-<div class="bg-white rounded-xl border border-gray-200 p-4 mb-6">
-    <div class="flex flex-wrap items-center gap-3">
-        <label class="text-sm font-medium text-gray-700">Periode:</label>
+<div class="bg-white rounded-xl border border-gray-200 p-4 sm:p-5 mb-6 shadow-sm flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+    <div class="flex items-center gap-2">
+        <span class="text-xs sm:text-sm font-semibold text-gray-700">Pilih Periode:</span>
+        <span class="text-xs text-gray-400">({{ $period === 'week' ? 'Minggu Ini' : 'Bulan Ini' }})</span>
+    </div>
+    <div class="inline-flex p-1 bg-gray-100/90 rounded-xl border border-gray-200 w-full sm:w-auto">
         <a href="{{ route('admin.reports.ranking', ['period' => 'week']) }}"
-           class="px-4 py-2 text-sm font-medium rounded-lg transition
-                  {{ $period === 'week'
-                      ? 'bg-primary-600 text-white'
-                      : 'border border-gray-300 text-gray-600 hover:bg-gray-50' }}">
+           class="flex-1 sm:flex-none text-center px-4 py-2 text-xs sm:text-sm font-semibold rounded-lg transition-all {{ $period === 'week' ? 'bg-white text-primary-600 shadow-sm' : 'text-gray-600 hover:text-gray-900' }}">
             Minggu Ini
         </a>
         <a href="{{ route('admin.reports.ranking', ['period' => 'month']) }}"
-           class="px-4 py-2 text-sm font-medium rounded-lg transition
-                  {{ $period === 'month'
-                      ? 'bg-primary-600 text-white'
-                      : 'border border-gray-300 text-gray-600 hover:bg-gray-50' }}">
+           class="flex-1 sm:flex-none text-center px-4 py-2 text-xs sm:text-sm font-semibold rounded-lg transition-all {{ $period === 'month' ? 'bg-white text-primary-600 shadow-sm' : 'text-gray-600 hover:text-gray-900' }}">
             Bulan Ini
         </a>
     </div>

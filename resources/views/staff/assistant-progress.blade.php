@@ -11,50 +11,64 @@
 @section('content')
 
 {{-- Filter Rentang Tanggal --}}
-<div class="bg-white rounded-xl border border-gray-200 p-4 mb-6">
+<div class="bg-white rounded-xl border border-gray-200 p-4 sm:p-5 mb-6 shadow-sm">
     <form method="GET" action="{{ route('staff.assistant-progress') }}"
-          class="flex flex-wrap items-end gap-3">
+          class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-3 items-end">
 
-        <div class="flex flex-col gap-1">
-            <label class="text-xs font-medium text-gray-500">Dari Tanggal</label>
-            <input type="date" name="date_from" value="{{ $dateFrom }}"
-                   max="{{ $today }}"
-                   class="px-3 py-2 border border-gray-300 rounded-lg text-sm
-                          focus:outline-none focus:ring-2 focus:ring-primary-500">
+        {{-- Dari Tanggal --}}
+        <div class="lg:col-span-4">
+            <label class="block text-[11px] font-semibold text-gray-500 uppercase tracking-wider mb-1">
+                Dari Tanggal
+            </label>
+            <input type="date" name="date_from" value="{{ $dateFrom }}" max="{{ $today }}"
+                   class="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-xs sm:text-sm font-medium text-gray-800 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:bg-white transition">
         </div>
 
-        <div class="flex flex-col gap-1">
-            <label class="text-xs font-medium text-gray-500">Sampai Tanggal</label>
-            <input type="date" name="date_to" value="{{ $dateTo }}"
-                   max="{{ $today }}"
-                   class="px-3 py-2 border border-gray-300 rounded-lg text-sm
-                          focus:outline-none focus:ring-2 focus:ring-primary-500">
+        {{-- Sampai Tanggal --}}
+        <div class="lg:col-span-4">
+            <label class="block text-[11px] font-semibold text-gray-500 uppercase tracking-wider mb-1">
+                Sampai Tanggal
+            </label>
+            <input type="date" name="date_to" value="{{ $dateTo }}" max="{{ $today }}"
+                   class="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-xs sm:text-sm font-medium text-gray-800 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:bg-white transition">
         </div>
 
-        <button type="submit"
-                class="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white
-                       text-sm font-medium rounded-lg transition">
-            Tampilkan
-        </button>
+        {{-- Tombol Aksi --}}
+        <div class="sm:col-span-2 lg:col-span-4 flex items-center gap-2">
+            <button type="submit"
+                    class="flex-1 flex items-center justify-center gap-1.5 px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white text-xs sm:text-sm font-semibold rounded-lg transition shadow-sm hover:shadow">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+                </svg>
+                <span>Tampilkan</span>
+            </button>
 
-        @if($dateFrom !== $today || $dateTo !== $today)
-            <a href="{{ route('staff.assistant-progress') }}"
-               class="px-4 py-2 text-sm text-gray-600 hover:text-gray-800
-                      border border-gray-300 rounded-lg transition">
-                Hari Ini
-            </a>
-        @endif
+            @if($dateFrom !== $today || $dateTo !== $today)
+                <a href="{{ route('staff.assistant-progress') }}"
+                   class="px-3.5 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs sm:text-sm font-semibold rounded-lg transition text-center flex-shrink-0"
+                   title="Kembali ke Hari Ini">
+                    Hari Ini
+                </a>
+            @endif
+        </div>
     </form>
 
-    <p class="text-xs text-gray-400 mt-3">
-        Menampilkan periode:
-        <span class="font-medium text-gray-600">
-            {{ \Carbon\Carbon::parse($dateFrom)->locale('id')->translatedFormat('d M Y') }}
-            @if($dateFrom !== $dateTo)
-                — {{ \Carbon\Carbon::parse($dateTo)->locale('id')->translatedFormat('d M Y') }}
-            @endif
+    {{-- Info periode aktif --}}
+    <div class="mt-3 pt-3 border-t border-gray-100 flex items-center gap-2 text-xs text-gray-500">
+        <svg class="w-4 h-4 text-primary-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+        </svg>
+        <span>Menampilkan periode:
+            <strong class="font-semibold text-gray-800">
+                {{ \Carbon\Carbon::parse($dateFrom)->locale('id')->translatedFormat('d M Y') }}
+                @if($dateFrom !== $dateTo)
+                    — {{ \Carbon\Carbon::parse($dateTo)->locale('id')->translatedFormat('d M Y') }}
+                @endif
+            </strong>
         </span>
-    </p>
+    </div>
 </div>
 
 {{-- Stat Cards Ringkasan --}}
