@@ -136,7 +136,8 @@
                                     <button
                                         onclick="openDetailModal(JSON.parse(this.dataset.detail))"
                                         data-detail="{{ json_encode([
-                                            'title'       => $task->title,
+                                           'title'       => $task->title,
+                                            'kantor'      => $task->kantor,
                                             'description' => $task->description ?? '',
                                             'type'        => $task->type,
                                             'date'        => $task->task_date->translatedFormat('d M Y'),

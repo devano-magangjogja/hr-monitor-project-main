@@ -12,13 +12,14 @@ class TaskController extends Controller
 {
     public function __construct(
         protected TaskService $taskService
-    ) {}
+    ) {
+    }
 
     // ── Halaman 1: Tugas dari Admin ──────────────────────
 
     public function index()
     {
-        $tasks           = $this->taskService->getTasksCreatedByAdmin();
+        $tasks = $this->taskService->getTasksCreatedByAdmin();
         $assignableUsers = $this->taskService->getAssignableUsers();
         return view('admin.tasks.index', compact('tasks', 'assignableUsers'));
     }
@@ -26,11 +27,11 @@ class TaskController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'title'       => ['required', 'string', 'max:200'],
+            'title' => ['required', 'string', 'max:200'],
             'description' => ['nullable', 'string'],
-            'kantor'      => ['nullable', 'string', 'in:Kantor 1,Kantor 2,Kantor 3,Kantor 4'],
-            'user_ids'    => ['required', 'array', 'min:1'],
-            'user_ids.*'  => ['integer', 'exists:users,id'],
+            'kantor' => ['nullable', 'string', 'in:Kantor 1,Kantor 2,Kantor 3,Kantor 4'],
+            'user_ids' => ['required', 'array', 'min:1'],
+            'user_ids.*' => ['integer', 'exists:users,id'],
         ]);
 
         try {
@@ -45,11 +46,11 @@ class TaskController extends Controller
     public function update(Request $request, Task $task)
     {
         $validated = $request->validate([
-            'title'       => ['required', 'string', 'max:200'],
+            'title' => ['required', 'string', 'max:200'],
             'description' => ['nullable', 'string'],
-            'kantor'      => ['nullable', 'string', 'in:Kantor 1,Kantor 2,Kantor 3,Kantor 4'],
-            'user_ids'    => ['required', 'array', 'min:1'],
-            'user_ids.*'  => ['integer', 'exists:users,id'],
+            'kantor' => ['nullable', 'string', 'in:Kantor 1,Kantor 2,Kantor 3,Kantor 4'],
+            'user_ids' => ['required', 'array', 'min:1'],
+            'user_ids.*' => ['integer', 'exists:users,id'],
         ]);
 
         try {
@@ -130,6 +131,20 @@ class TaskController extends Controller
     {
         $tasks = $this->taskService->getAllTasksForRole('pm');
         return view('admin.tasks.pm', compact('tasks'));
+    }
+
+    // ── Halaman Dinamis: Pantau Role Kustom / Apapun ─────
+    public function roleTasks(\App\Models\Role $role)
+    {
+        if ($role->name === 'hr_staff') {
+            $tasks = $this->taskService->getTasksByStaff();
+        } elseif ($role->name === 'hr_assistant') {
+            $tasks = $this->taskService->getAllTasksForAssistant();
+        } else {
+            $tasks = $this->taskService->getAllTasksForRole($role->name);
+        }
+
+        return view('admin.tasks.role-tasks', compact('tasks', 'role'));
     }
 
     // ── Force Destroy (Admin hapus task siapapun) ────────

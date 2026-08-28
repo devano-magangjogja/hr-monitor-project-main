@@ -22,6 +22,7 @@
                 <thead>
                     <tr class="bg-gray-50 border-b border-gray-200">
                         <th class="text-left px-6 py-3.5 font-semibold text-gray-600 w-48">Judul</th>
+                        <th class="text-left px-6 py-3.5 font-semibold text-gray-600 w-28">Kantor</th>
                         <th class="text-left px-6 py-3.5 font-semibold text-gray-600">Deskripsi</th>
                         <th class="text-left px-6 py-3.5 font-semibold text-gray-600 w-28">Status</th>
                         <th class="text-right px-6 py-3.5 font-semibold text-gray-600 w-20">Aksi</th>
@@ -34,7 +35,8 @@
                                         $status = $assignment?->is_completed ?? 'pending';
                                     @endphp
                                     <tr class="hover:bg-gray-50 transition" data-task="{{ json_encode([
-                            'title' => $task->title,
+                           'title' => $task->title,
+                            'kantor'      => $task->kantor,
                             'description' => $task->description ?? '',
                             'type' => $task->type,
                             'date' => $task->task_date->translatedFormat('d M Y'),
@@ -47,6 +49,9 @@
                                             <div class="truncate max-w-[170px] font-medium text-gray-800" title="{{ $task->title }}">
                                                 {{ $task->title }}
                                             </div>
+                                        </td>
+                                        <td class="px-6 py-4 w-28">
+                                            <span class="text-sm text-gray-600">{{ $task->kantor ?: '-' }}</span>
                                         </td>
                                         <td class="px-6 py-4">
                                             <div class="truncate max-w-[280px] text-gray-500" title="{{ $task->description ?? '-' }}">

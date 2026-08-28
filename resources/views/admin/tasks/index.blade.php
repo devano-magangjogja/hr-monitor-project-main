@@ -116,6 +116,7 @@
                                 data-detail="{{ json_encode([
                                     'title'       => $task->title,
                                     'description' => $task->description ?? '',
+                                    'kantor'      => $task->kantor,
                                     'type'        => $task->type,
                                     'date'        => $task->task_date->translatedFormat('d M Y'),
                                     'source'      => $task->creator?->name ?? 'Sistem',
@@ -221,7 +222,7 @@
                 <option value="Kantor 3" {{ old('kantor') == 'Kantor 3' ? 'selected' : '' }}>Kantor 3</option>
                 <option value="Kantor 4" {{ old('kantor') == 'Kantor 4' ? 'selected' : '' }}>Kantor 4</option>
             </select>
-            <p class="text-[11px] text-gray-400 mt-1">Khusus jika ditugaskan ke Asisten untuk presensi.</p>
+            <p class="text-[11px] text-gray-400 mt-1">Berlaku untuk tugas ke seluruh role. Kosongkan jika tidak ada lokasi khusus.</p>
         </div>
         <div>
             <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-2">
@@ -309,7 +310,7 @@
                 <option value="Kantor 3">Kantor 3</option>
                 <option value="Kantor 4">Kantor 4</option>
             </select>
-            <p class="text-[11px] text-gray-400 mt-1">Khusus jika ditugaskan ke Asisten untuk presensi.</p>
+            <p class="text-[11px] text-gray-400 mt-1">Berlaku untuk tugas ke seluruh role. Kosongkan jika tidak ada lokasi khusus.</p>
         </div>
         <div>
             <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-2">

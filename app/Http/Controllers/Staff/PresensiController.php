@@ -92,17 +92,20 @@ class PresensiController extends Controller
         $divisiList = Pemagang::select('divisi')->distinct()->orderBy('divisi')->pluck('divisi');
 
         // Monitoring Asisten yang sedang bertugas di masing-masing kantor pada tanggal ini
+        // Hanya tampilkan user dengan role hr_assistant / base_type assistant yang bertugas mengelola presensi
         $asistenKantors = Task::where('task_date', $tanggal)
             ->whereNotNull('kantor')
-            ->with('assignedUsers')
+            ->with(['assignedUsers.roleModel'])
             ->get()
             ->flatMap(function ($task) {
-                return $task->assignedUsers->map(function ($u) use ($task) {
-                    return [
-                        'name'   => $u->name,
-                        'kantor' => $task->kantor,
-                    ];
-                });
+                return $task->assignedUsers
+                    ->filter(fn($u) => $u->isHrAssistant())
+                    ->map(function ($u) use ($task) {
+                        return [
+                            'name'   => $u->name,
+                            'kantor' => $task->kantor,
+                        ];
+                    });
             })->unique(fn($item) => $item['name'] . $item['kantor'])->values();
 
         $kantorList = ['Kantor 1', 'Kantor 2', 'Kantor 3', 'Kantor 4'];

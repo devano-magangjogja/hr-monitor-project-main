@@ -34,25 +34,27 @@ class TaskService
 
     public function getAssignableUsers(): Collection
     {
-        $role = Auth::user()->role;
+        $user = Auth::user();
 
         /** @var Builder $query */
         $query = User::query();
 
-        if ($role === 'admin') {
+        if ($user->isAdmin()) {
             // Admin bisa assign ke semua role kecuali admin itu sendiri
             return $query
-                ->whereIn('role', ['hr_staff', 'hr_assistant', 'cs', 'ob', 'programmer', 'dg', 'vg', 'pm'])
+                ->where('role', '!=', 'admin')
                 ->where('is_active', 1)
                 ->orderBy('role')
                 ->orderBy('name')
                 ->get();
         }
 
-        // hr_staff bisa assign ke hr_assistant saja (punya bawahan)
-        // cs dan ob tidak punya bawahan — tidak dipanggil untuk assign
+        // hr_staff bisa assign ke hr_assistant / user dengan base_type assistant
         return $query
-            ->where('role', 'hr_assistant')
+            ->where(function ($q) {
+                $q->where('role', 'hr_assistant')
+                  ->orWhereHas('roleModel', fn($r) => $r->where('base_type', 'assistant'));
+            })
             ->where('is_active', 1)
             ->orderBy('name')
             ->get();
@@ -209,19 +211,21 @@ class TaskService
             ]);
         }
 
-        $role = Auth::user()->role;
-
-        $allowedRoles = $role === 'admin'
-            ? ['hr_staff', 'hr_assistant', 'cs', 'ob', 'programmer', 'dg', 'vg', 'pm']
-            : ['hr_assistant']; // hr_staff hanya bisa assign ke hr_assistant
+        $user = Auth::user();
 
         /** @var Builder $query */
-        $query = User::query();
+        $query = User::query()->whereIn('id', $userIds);
 
-        $invalid = $query
-            ->whereIn('id', $userIds)
-            ->whereNotIn('role', $allowedRoles)
-            ->exists();
+        if ($user->isAdmin()) {
+            // Admin tidak boleh assign ke sesama admin
+            $invalid = (clone $query)->where('role', 'admin')->exists();
+        } else {
+            // Staff hanya boleh assign ke assistant
+            $invalid = (clone $query)
+                ->where('role', '!=', 'hr_assistant')
+                ->whereDoesntHave('roleModel', fn($r) => $r->where('base_type', 'assistant'))
+                ->exists();
+        }
 
         if ($invalid) {
             throw ValidationException::withMessages([

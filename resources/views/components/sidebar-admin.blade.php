@@ -65,93 +65,36 @@
             Buat Tugas
         </a>
 
-        {{-- Pantau HR Staff --}}
-        <a href="{{ route('admin.tasks.staff') }}"
-            class="flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-all
-                  {{ request()->routeIs('admin.tasks.staff') ? 'text-white bg-white/10' : 'text-slate-400 hover:text-white hover:bg-white/5' }}">
-            <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                    d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-            </svg>
-            Pantau HR Staff
-        </a>
+        @php
+            $allRoles = \App\Models\Role::where('name', '!=', 'admin')->orderBy('id')->get();
+        @endphp
 
-        {{-- Pantau HR Assistant --}}
-        <a href="{{ route('admin.tasks.assistant') }}"
-            class="flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-all
-                  {{ request()->routeIs('admin.tasks.assistant') ? 'text-white bg-white/10' : 'text-slate-400 hover:text-white hover:bg-white/5' }}">
-            <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                    d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
-            </svg>
-            Pantau HR Assistant
-        </a>
-
-        {{-- Pantau CS --}}
-        <a href="{{ route('admin.tasks.cs') }}"
-            class="flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-all
-                  {{ request()->routeIs('admin.tasks.cs') ? 'text-white bg-white/10' : 'text-slate-400 hover:text-white hover:bg-white/5' }}">
-            <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                    d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
-            </svg>
-            Pantau CS
-        </a>
-
-        {{-- Pantau OB --}}
-        <a href="{{ route('admin.tasks.ob') }}"
-            class="flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-all
-                  {{ request()->routeIs('admin.tasks.ob') ? 'text-white bg-white/10' : 'text-slate-400 hover:text-white hover:bg-white/5' }}">
-            <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                    d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-            </svg>
-            Pantau OB
-        </a>
-
-        {{-- Pantau Programmer --}}
-        <a href="{{ route('admin.tasks.programmer') }}"
-            class="flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-all
-                  {{ request()->routeIs('admin.tasks.programmer') ? 'text-white bg-white/10' : 'text-slate-400 hover:text-white hover:bg-white/5' }}">
-            <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                    d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
-            </svg>
-            Pantau Programmer
-        </a>
-
-        {{-- Pantau DG --}}
-        <a href="{{ route('admin.tasks.dg') }}"
-            class="flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-all
-                  {{ request()->routeIs('admin.tasks.dg') ? 'text-white bg-white/10' : 'text-slate-400 hover:text-white hover:bg-white/5' }}">
-            <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                    d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-            </svg>
-            Pantau DG
-        </a>
-
-        {{-- Pantau VG --}}
-        <a href="{{ route('admin.tasks.vg') }}"
-            class="flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-all
-                  {{ request()->routeIs('admin.tasks.vg') ? 'text-white bg-white/10' : 'text-slate-400 hover:text-white hover:bg-white/5' }}">
-            <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                    d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
-            </svg>
-            Pantau VG
-        </a>
-
-        {{-- Pantau PM --}}
-        <a href="{{ route('admin.tasks.pm') }}"
-            class="flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-all
-                  {{ request()->routeIs('admin.tasks.pm') ? 'text-white bg-white/10' : 'text-slate-400 hover:text-white hover:bg-white/5' }}">
-            <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                    d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2h-2a2 2 0 00-2 2" />
-            </svg>
-            Pantau PM
-        </a>
+        @foreach($allRoles as $r)
+            @php
+                $isCurrentRole = request()->routeIs('admin.tasks.by-role') && optional(request()->route('role'))->name === $r->name;
+            @endphp
+            <a href="{{ route('admin.tasks.by-role', $r->name) }}"
+                class="flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-all
+                      {{ $isCurrentRole ? 'text-white bg-white/10 font-medium' : 'text-slate-400 hover:text-white hover:bg-white/5' }}">
+                @if($r->base_type === 'staff')
+                    <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                    </svg>
+                @elseif($r->base_type === 'assistant')
+                    <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                @else
+                    <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+                    </svg>
+                @endif
+                <span class="truncate">Pantau {{ $r->label }}</span>
+            </a>
+        @endforeach
     </div>
 </div>
 

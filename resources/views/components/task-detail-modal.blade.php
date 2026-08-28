@@ -37,6 +37,12 @@
                 <p id="detail-description" class="text-sm text-gray-600 whitespace-pre-wrap"></p>
             </div>
 
+            {{-- Lokasi kantor (hanya tampil jika diisi) --}}
+            <div id="detail-kantor-wrapper" class="hidden">
+                <p class="text-xs font-medium text-gray-400 uppercase tracking-wider mb-1">Lokasi Kantor</p>
+                <p id="detail-kantor" class="text-sm text-gray-600"></p>
+            </div>
+
             {{-- Row: Tipe + Tanggal --}}
             <div class="grid grid-cols-2 gap-4">
                 <div>
@@ -95,6 +101,16 @@
 
         // Deskripsi
         document.getElementById('detail-description').textContent = data.description || 'Tidak ada deskripsi.';
+
+        // Lokasi kantor
+        const kantorWrapper = document.getElementById('detail-kantor-wrapper');
+        const kantorEl = document.getElementById('detail-kantor');
+        if (data.kantor) {
+            kantorWrapper.classList.remove('hidden');
+            kantorEl.textContent = data.kantor;
+        } else {
+            kantorWrapper.classList.add('hidden');
+        }
 
         // Tipe
         const typeEl = document.getElementById('detail-type');
