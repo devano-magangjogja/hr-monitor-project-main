@@ -17,9 +17,13 @@ class PresensiController extends Controller
      */
     public function index(Request $request)
     {
-        // Default tanggal adalah hari ini
-        $tanggal = $request->input('tanggal', Carbon::today()->format('Y-m-d'));
-        $isToday = $tanggal === Carbon::today()->format('Y-m-d');
+        // Default tanggal adalah hari ini, tidak boleh melebihi hari ini
+        $todayDate = Carbon::today()->format('Y-m-d');
+        $tanggal = $request->input('tanggal', $todayDate);
+        if ($tanggal > $todayDate) {
+            $tanggal = $todayDate;
+        }
+        $isToday = $tanggal === $todayDate;
         $formattedDate = Carbon::parse($tanggal)->locale('id')->translatedFormat('l, d F Y');
 
         // Query dasar berdasarkan tanggal yang dipilih

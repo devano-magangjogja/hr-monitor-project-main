@@ -31,8 +31,15 @@ use App\Http\Controllers\VG\DashboardController as VGDashboard;
 use App\Http\Controllers\VG\TaskController as VGTaskController;
 use App\Http\Controllers\PM\DashboardController as PMDashboard;
 use App\Http\Controllers\PM\TaskController as PMTaskController;
+use App\Http\Controllers\PM\SosmedController as PMSosmedController;
 use App\Http\Controllers\Member\DashboardController as MemberDashboard;
 use App\Http\Controllers\Member\TaskController as MemberTaskController;
+use App\Http\Controllers\Admin\SosmedController as AdminSosmedController;
+use App\Http\Controllers\Staff\SosmedController as StaffSosmedController;
+use App\Http\Controllers\Member\SosmedController as MemberSosmedController;
+use App\Http\Controllers\Sosmed\DashboardController as SosmedDashboard;
+use App\Http\Controllers\Sosmed\TaskController as SosmedTaskController;
+use App\Http\Controllers\Sosmed\SosmedController as SosmedSosmedController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\PemagangController;
@@ -99,6 +106,13 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin'])->grou
 
     // Tambah Pemagang
     Route::post('/pemagang', [PemagangController::class, 'store'])->name('pemagang.store');
+
+    // Manajemen Akun & Monitoring Sosmed
+    Route::get('/sosmed', [AdminSosmedController::class, 'index'])->name('sosmed.index');
+    Route::post('/sosmed/accounts', [AdminSosmedController::class, 'storeAccount'])->name('sosmed.accounts.store');
+    Route::patch('/sosmed/accounts/{account}', [AdminSosmedController::class, 'updateAccount'])->name('sosmed.accounts.update');
+    Route::patch('/sosmed/accounts/{account}/assign', [AdminSosmedController::class, 'assignAccount'])->name('sosmed.accounts.assign');
+    Route::delete('/sosmed/accounts/{account}', [AdminSosmedController::class, 'destroyAccount'])->name('sosmed.accounts.destroy');
 });
 
 // ── HR Staff ────────────────────────────────────────────────────────────────
@@ -138,6 +152,11 @@ Route::prefix('staff')->name('staff.')->middleware(['auth', 'role:hr_staff'])->g
 
     // Tambah Pemagang
     Route::post('/pemagang', [PemagangController::class, 'store'])->name('pemagang.store');
+
+    // Manajemen Sosmed & Approval Level 2
+    Route::get('/sosmed', [StaffSosmedController::class, 'index'])->name('sosmed.index');
+    Route::patch('/sosmed/accounts/{account}/assign', [StaffSosmedController::class, 'assignAccount'])->name('sosmed.accounts.assign');
+    Route::patch('/sosmed/tasks/{task}/verify', [StaffSosmedController::class, 'verifyTask'])->name('sosmed.tasks.verify');
 });
 
 // ── CS (Customer Service) ────────────────────────────────────────────────────
@@ -248,6 +267,33 @@ Route::prefix('pm')->name('pm.')->middleware(['auth', 'role:pm'])->group(functio
     Route::get('/tasks/all', [PMTaskController::class, 'allIndex'])->name('tasks.all');
     Route::patch('/tasks/all/{task}/complete', [PMTaskController::class, 'allComplete'])->name('tasks.all.complete');
     Route::get('/history', [PMTaskController::class, 'history'])->name('tasks.history');
+
+    // Sosmed Management
+    Route::get('/sosmed', [PMSosmedController::class, 'index'])->name('sosmed.index');
+    Route::post('/sosmed/tasks', [PMSosmedController::class, 'storeTask'])->name('sosmed.tasks.store');
+    Route::patch('/sosmed/tasks/{task}/verify', [PMSosmedController::class, 'verifyTask'])->name('sosmed.tasks.verify');
+    Route::delete('/sosmed/tasks/{task}', [PMSosmedController::class, 'destroyTask'])->name('sosmed.tasks.destroy');
+    Route::post('/sosmed/accounts', [PMSosmedController::class, 'storeAccount'])->name('sosmed.accounts.store');
+    Route::patch('/sosmed/accounts/{account}/assign', [PMSosmedController::class, 'assignAccount'])->name('sosmed.accounts.assign');
+    Route::delete('/sosmed/accounts/{account}', [PMSosmedController::class, 'destroyAccount'])->name('sosmed.accounts.destroy');
+});
+
+// ── Sosmed (Social Media Specialist) ─────────────────────────────────────────
+Route::prefix('sosmed')->name('sosmed.')->middleware(['auth', 'role:sosmed,digital_marketing'])->group(function () {
+    Route::get('/dashboard', [SosmedDashboard::class, 'index'])->name('dashboard');
+    Route::resource('tasks', SosmedTaskController::class)->only(['index', 'store', 'update', 'destroy']);
+    Route::patch('/tasks/{task}/complete', [SosmedTaskController::class, 'complete'])->name('tasks.complete');
+    Route::get('/tasks/daily', [SosmedTaskController::class, 'dailyIndex'])->name('tasks.daily');
+    Route::patch('/tasks/daily/{task}/complete', [SosmedTaskController::class, 'dailyComplete'])->name('tasks.daily.complete');
+    Route::get('/tasks/assigned', [SosmedTaskController::class, 'assignedIndex'])->name('tasks.assigned');
+    Route::patch('/tasks/assigned/{task}/complete', [SosmedTaskController::class, 'assignedComplete'])->name('tasks.assigned.complete');
+    Route::get('/tasks/all', [SosmedTaskController::class, 'allIndex'])->name('tasks.all');
+    Route::patch('/tasks/all/{task}/complete', [SosmedTaskController::class, 'allComplete'])->name('tasks.all.complete');
+    Route::get('/history', [SosmedTaskController::class, 'history'])->name('tasks.history');
+
+    // Tugas & Akun Sosmed Saya
+    Route::get('/sosmed', [SosmedSosmedController::class, 'index'])->name('sosmed.index');
+    Route::patch('/sosmed/tasks/{task}/submit', [SosmedSosmedController::class, 'submitTask'])->name('sosmed.tasks.submit');
 });
 
 // ── Member / Mandiri (Custom & Standalone Roles) ─────────────────────────────
@@ -262,6 +308,10 @@ Route::prefix('member')->name('member.')->middleware(['auth', 'role:member'])->g
     Route::get('/tasks/all', [MemberTaskController::class, 'allIndex'])->name('tasks.all');
     Route::patch('/tasks/all/{task}/complete', [MemberTaskController::class, 'allComplete'])->name('tasks.all.complete');
     Route::get('/history', [MemberTaskController::class, 'history'])->name('tasks.history');
+
+    // Tugas & Akun Sosmed Saya
+    Route::get('/sosmed', [MemberSosmedController::class, 'index'])->name('sosmed.index');
+    Route::patch('/sosmed/tasks/{task}/submit', [MemberSosmedController::class, 'submitTask'])->name('sosmed.tasks.submit');
 });
 
 // ── Notifications (All Roles) ────────────────────────────────────────────────

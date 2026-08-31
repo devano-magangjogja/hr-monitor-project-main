@@ -31,7 +31,7 @@ class User extends Authenticatable
     {
         return [
             'is_active' => 'boolean',
-            'role'      => 'string',
+            'role' => 'string',
         ];
     }
 
@@ -72,10 +72,10 @@ class User extends Authenticatable
         }
 
         return match ($this->role) {
-            'admin'        => 'admin',
-            'hr_staff'     => 'staff',
+            'admin' => 'admin',
+            'hr_staff' => 'staff',
             'hr_assistant' => 'assistant',
-            default        => 'member',
+            default => 'member',
         };
     }
 
@@ -124,6 +124,11 @@ class User extends Authenticatable
         return $this->role === 'pm';
     }
 
+    public function isSosmed(): bool
+    {
+        return $this->role === 'sosmed';
+    }
+
     /**
      * Label resmi role lengkap dengan kepanjangan singkatan
      */
@@ -139,16 +144,18 @@ class User extends Authenticatable
         }
 
         return match ($this->role) {
-            'admin'        => 'Administrator',
-            'hr_staff'     => 'HR Staff',
+            'admin' => 'Administrator',
+            'hr_staff' => 'HR Staff',
             'hr_assistant' => 'HR Assistant',
-            'cs'           => 'CS (Customer Service)',
-            'ob'           => 'OB (Office Boy)',
-            'programmer'   => 'Programmer',
-            'dg'           => 'DG (Design Graphics)',
-            'vg'           => 'VG (Videografer)',
-            'pm'           => 'PM (Project Manager)',
-            default        => strtoupper($this->role),
+            'cs' => 'CS (Customer Service)',
+            'ob' => 'OB (Office Boy)',
+            'programmer' => 'Programmer',
+            'dg' => 'DG (Design Graphics)',
+            'vg' => 'VG (Videografer)',
+            'pm' => 'PM (Project Manager)',
+            'sosmed' => 'Sosmed (Social Media)',
+            'digital_marketing' => 'Digital Marketing',
+            default => strtoupper($this->role),
         };
     }
 
@@ -167,16 +174,17 @@ class User extends Authenticatable
         }
 
         return match ($this->role) {
-            'admin'        => 'bg-red-50 text-red-700',
-            'hr_staff'     => 'bg-blue-50 text-blue-700',
+            'admin' => 'bg-red-50 text-red-700',
+            'hr_staff' => 'bg-blue-50 text-blue-700',
             'hr_assistant' => 'bg-purple-50 text-purple-700',
-            'cs'           => 'bg-teal-50 text-teal-700',
-            'ob'           => 'bg-orange-50 text-orange-700',
-            'programmer'   => 'bg-cyan-50 text-cyan-700',
-            'dg'           => 'bg-rose-50 text-rose-700',
-            'vg'           => 'bg-amber-50 text-amber-700',
-            'pm'           => 'bg-indigo-50 text-indigo-700',
-            default        => 'bg-gray-100 text-gray-700',
+            'cs' => 'bg-teal-50 text-teal-700',
+            'ob' => 'bg-orange-50 text-orange-700',
+            'programmer' => 'bg-cyan-50 text-cyan-700',
+            'dg' => 'bg-rose-50 text-rose-700',
+            'vg' => 'bg-amber-50 text-amber-700',
+            'pm' => 'bg-indigo-50 text-indigo-700',
+            'sosmed' => 'bg-pink-50 text-pink-700',
+            default => 'bg-gray-100 text-gray-700',
         };
     }
 

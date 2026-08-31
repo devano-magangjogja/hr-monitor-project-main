@@ -145,13 +145,13 @@
         <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
 
             {{-- Filter Form --}}
-            <form method="GET" action="{{ route('staff.presensi.index') }}"
+            <form method="GET" action="{{ route('admin.presensi.index') }}"
                 class="flex-1 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-3">
                 {{-- Input Tanggal --}}
                 <div>
                     <label class="block text-[11px] font-semibold text-gray-500 uppercase tracking-wider mb-1">Pilih
                         Tanggal</label>
-                    <input type="date" name="tanggal" value="{{ $tanggal }}" onchange="this.form.submit()"
+                    <input type="date" name="tanggal" value="{{ $tanggal }}" max="{{ \Carbon\Carbon::today()->format('Y-m-d') }}" onchange="this.form.submit()"
                         class="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-xs sm:text-sm font-medium text-gray-800 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:bg-white transition">
                 </div>
 
@@ -213,7 +213,7 @@
 
             @if(!$isToday)
                 <div class="flex items-center gap-2 flex-shrink-0 self-end lg:self-center">
-                    <a href="{{ route('staff.presensi.index') }}"
+                    <a href="{{ route('admin.presensi.index') }}"
                         class="px-3.5 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs sm:text-sm font-semibold rounded-lg transition"
                         title="Kembali ke Hari Ini">
                         Hari Ini
@@ -597,7 +597,7 @@
                 </button>
             </div>
 
-            <form action="{{ route('staff.presensi.store') }}" method="POST" class="px-5 pt-3 pb-4 space-y-3">
+            <form action="{{ route('admin.presensi.store') }}" method="POST" class="px-5 pt-3 pb-4 space-y-3">
                 @csrf
 
                 {{-- Tanggal Presensi (Otomatis Hari Ini & Terkunci) --}}
@@ -1313,14 +1313,14 @@
 
             document.getElementById('edit-keterangan').value = keterangan;
             document.getElementById('edit-notes').value = notes;
-            document.getElementById('form-edit').action = `/staff/presensi/${id}`;
+            document.getElementById('form-edit').action = `/admin/presensi/${id}`;
             document.getElementById('modal-edit').classList.remove('hidden');
         }
 
         function openDeleteModal(id, pemagangName, shift, waktu) {
             document.getElementById('delete-pemagang-name').textContent = pemagangName;
             document.getElementById('delete-info').textContent = `${shift} - ${waktu}`;
-            document.getElementById('form-delete').action = `/staff/presensi/${id}`;
+            document.getElementById('form-delete').action = `/admin/presensi/${id}`;
             document.getElementById('modal-delete').classList.remove('hidden');
         }
     </script>

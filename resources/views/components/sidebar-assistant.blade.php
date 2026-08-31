@@ -1,17 +1,3 @@
-{{-- Profil Saya
-<a href="{{ route('profile.show') }}"
-    class="flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-all
-          {{ request()->routeIs('profile.*') ? 'bg-white/10 text-white' : 'text-slate-400 hover:bg-white/5 hover:text-white' }}">
-    <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-            d="M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0zm6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-    </svg>
-    Profil Saya
-</a> --}}
-
-{{-- Separator --}}
-<div class="my-2 border-t border-white/10"></div>
-
 {{-- Dashboard --}}
 <a href="{{ route('assistant.dashboard') }}"
     class="flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-all

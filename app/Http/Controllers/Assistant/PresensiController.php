@@ -14,8 +14,12 @@ class PresensiController extends Controller
 {
     public function index(Request $request)
     {
-        $tanggal = $request->input('tanggal', Carbon::today()->format('Y-m-d'));
-        $isToday = $tanggal === Carbon::today()->format('Y-m-d');
+        $todayDate = Carbon::today()->format('Y-m-d');
+        $tanggal = $request->input('tanggal', $todayDate);
+        if ($tanggal > $todayDate) {
+            $tanggal = $todayDate;
+        }
+        $isToday = $tanggal === $todayDate;
         $formattedDate = Carbon::parse($tanggal)->locale('id')->translatedFormat('l, d F Y');
 
         // Cari tugas asisten pada tanggal ini yang memiliki lokasi kantor
