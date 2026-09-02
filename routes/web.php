@@ -270,12 +270,9 @@ Route::prefix('pm')->name('pm.')->middleware(['auth', 'role:pm'])->group(functio
 
     // Sosmed Management
     Route::get('/sosmed', [PMSosmedController::class, 'index'])->name('sosmed.index');
-    Route::post('/sosmed/tasks', [PMSosmedController::class, 'storeTask'])->name('sosmed.tasks.store');
-    Route::patch('/sosmed/tasks/{task}/verify', [PMSosmedController::class, 'verifyTask'])->name('sosmed.tasks.verify');
-    Route::delete('/sosmed/tasks/{task}', [PMSosmedController::class, 'destroyTask'])->name('sosmed.tasks.destroy');
-    Route::post('/sosmed/accounts', [PMSosmedController::class, 'storeAccount'])->name('sosmed.accounts.store');
+    Route::post('/sosmed/accounts/{account}/submit', [PMSosmedController::class, 'submitAccountTask'])->name('sosmed.accounts.submit');
     Route::patch('/sosmed/accounts/{account}/assign', [PMSosmedController::class, 'assignAccount'])->name('sosmed.accounts.assign');
-    Route::delete('/sosmed/accounts/{account}', [PMSosmedController::class, 'destroyAccount'])->name('sosmed.accounts.destroy');
+    Route::patch('/sosmed/tasks/{task}/verify', [PMSosmedController::class, 'verifyTask'])->name('sosmed.tasks.verify');
 });
 
 // ── Sosmed (Social Media Specialist) ─────────────────────────────────────────
@@ -293,7 +290,7 @@ Route::prefix('sosmed')->name('sosmed.')->middleware(['auth', 'role:sosmed,digit
 
     // Tugas & Akun Sosmed Saya
     Route::get('/sosmed', [SosmedSosmedController::class, 'index'])->name('sosmed.index');
-    Route::patch('/sosmed/tasks/{task}/submit', [SosmedSosmedController::class, 'submitTask'])->name('sosmed.tasks.submit');
+    Route::post('/sosmed/accounts/{account}/submit', [SosmedSosmedController::class, 'submitAccountTask'])->name('sosmed.accounts.submit');
 });
 
 // ── Member / Mandiri (Custom & Standalone Roles) ─────────────────────────────

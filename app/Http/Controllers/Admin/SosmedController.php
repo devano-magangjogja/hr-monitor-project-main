@@ -39,11 +39,9 @@ class SosmedController extends Controller
             ->orderBy('users.name')
             ->get();
 
-        $staffs = User::join('roles', 'users.role', '=', 'roles.name')
-            ->where('roles.base_type', 'member')
-            ->where('users.is_active', true)
-            ->select('users.*')
-            ->orderBy('users.name')
+        $staffs = User::whereIn('role', ['sosmed'])
+            ->where('is_active', true)
+            ->orderBy('name')
             ->get();
 
         $stats = [

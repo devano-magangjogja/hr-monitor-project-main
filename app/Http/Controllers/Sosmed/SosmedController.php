@@ -13,58 +13,76 @@ class SosmedController extends Controller
 {
     public function index(Request $request)
     {
-        $tab = $request->query('tab', 'tasks');
         $currentUserId = Auth::id();
 
-        // 1. KEAMANAN AKSES: SOSMED HANYA MELIHAT AKUN YANG MENJADI TANGGUNG JAWABNYA (staff_id = Auth::id())
+        // Akun yang didelegasikan ke user ini oleh PM
         $accounts = SosmedAccount::with(['pmUser', 'creator'])
             ->where('staff_id', $currentUserId)
             ->orderBy('platform')
             ->get();
 
-        // 2. TUGAS SOSMED MILIK USER INI (Baik Harian maupun Custom)
-        $myTasks = SosmedTask::with(['account.pmUser', 'assignedBy', 'verifiedBy', 'hrVerifiedBy'])
-            ->where('assigned_to', $currentUserId)
-            ->orderBy('task_date', 'desc')
-            ->get();
+        $accountIds = $accounts->pluck('id');
 
-        // 3. RIWAYAT PENGERJAAN & APPROVAL
-        $historyTasks = SosmedTask::with(['account.pmUser', 'verifiedBy', 'hrVerifiedBy', 'logs'])
-            ->where('assigned_to', $currentUserId)
-            ->whereIn('status', ['done_by_staff', 'verified_by_pm', 'approved_hr', 'rejected'])
-            ->orderBy('updated_at', 'desc')
-            ->get();
+        // Tugas hari ini per akun
+        $todayTasks = SosmedTask::with(['verifiedBy', 'hrVerifiedBy'])
+            ->whereIn('sosmed_account_id', $accountIds)
+            ->whereDate('task_date', now()->toDateString())
+            ->get()
+            ->keyBy('sosmed_account_id');
 
+        // Statistik hari ini
         $stats = [
             'total_accounts' => $accounts->count(),
-            'pending_tasks'  => $myTasks->where('status', 'pending')->count(),
-            'waiting_pm'     => $myTasks->where('status', 'done_by_staff')->count(),
-            'waiting_hr'     => $myTasks->where('status', 'verified_by_pm')->count(),
-            'approved_final' => $myTasks->where('status', 'approved_hr')->count(),
-            'rejected'       => $myTasks->where('status', 'rejected')->count(),
+            'pending_tasks'  => $accounts->filter(function ($acc) use ($todayTasks) {
+                if (!isset($todayTasks[$acc->id])) return true;
+                return in_array($todayTasks[$acc->id]->status, ['pending', 'rejected']);
+            })->count(),
+            'waiting_pm'     => $todayTasks->where('status', 'done_by_staff')->count(),
+            'waiting_hr'     => $todayTasks->where('status', 'verified_by_pm')->count(),
+            'approved_final' => $todayTasks->where('status', 'approved_hr')->count(),
         ];
 
-        return view('sosmed.sosmed.index', compact(
-            'tab', 'accounts', 'myTasks', 'historyTasks', 'stats'
-        ));
+        return view('sosmed.sosmed.index', compact('accounts', 'todayTasks', 'stats'));
     }
 
-    // Sosmed menyelesaikan tugas dan submit link konten
-    public function submitTask(Request $request, SosmedTask $task)
+    /**
+     * Sosmed staff submit bukti untuk akun yang ia pegang hari ini.
+     * Menerima multi-link (array of URLs).
+     */
+    public function submitAccountTask(Request $request, SosmedAccount $account)
     {
-        if ($task->assigned_to !== Auth::id()) {
-            abort(403, 'Akses ditolak. Ini bukan tugas Anda.');
+        if ($account->staff_id !== Auth::id()) {
+            abort(403, 'Akses ditolak. Anda bukan penanggung jawab akun ini.');
         }
 
         $validated = $request->validate([
-            'link_upload' => ['required', 'url', 'max:500'],
-            'description' => ['nullable', 'string', 'max:500'],
+            'links'       => ['required', 'array', 'min:1'],
+            'links.*'     => ['required', 'url', 'max:500'],
+            'description' => ['nullable', 'string', 'max:1000'],
         ]);
 
-        $task->update([
-            'link_upload' => $validated['link_upload'],
+        // Hapus entri kosong
+        $links = array_values(array_filter($validated['links'], fn($l) => !empty(trim($l))));
+        if (empty($links)) {
+            return back()->withErrors(['links' => 'Minimal satu link bukti harus diisi.'])->withInput();
+        }
+
+        // Cari atau buat tugas hari ini
+        $task = SosmedTask::firstOrNew([
+            'sosmed_account_id' => $account->id,
+            'task_date'         => now()->toDateString(),
+        ]);
+
+        $task->fill([
+            'assigned_to' => Auth::id(),
+            'assigned_by' => $account->pm_id ?? $account->created_by ?? Auth::id(),
+            'type'        => 'daily',
+            'title'       => 'Laporan Konten - ' . $account->name,
+            'link_upload' => $links,
+            'description' => $validated['description'] ?? null,
             'status'      => 'done_by_staff',
         ]);
+        $task->save();
 
         SosmedApprovalLog::create([
             'sosmed_task_id' => $task->id,
@@ -72,10 +90,10 @@ class SosmedController extends Controller
             'user_name'      => Auth::user()->name,
             'role_name'      => Auth::user()->role_label,
             'action'         => 'submitted',
-            'notes'          => 'Tugas selesai dikerjakan. Bukti URL: ' . $validated['link_upload'],
+            'notes'          => 'Bukti disubmit (' . count($links) . ' link). Menunggu verifikasi PM.',
         ]);
 
-        return redirect()->route('sosmed.sosmed.index', ['tab' => 'tasks'])
-            ->with('success', 'Tugas berhasil diselesaikan dan diteruskan ke PM (' . ($task->account?->pmUser?->name ?? 'PM') . ') untuk verifikasi.');
+        return redirect()->route('sosmed.sosmed.index')
+            ->with('success', $account->name . ' berhasil ditandai selesai dan diteruskan ke PM untuk verifikasi.');
     }
 }

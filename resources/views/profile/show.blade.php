@@ -23,6 +23,8 @@
         @include('components.sidebar-vg')
     @elseif(Auth::user()->isPm())
         @include('components.sidebar-pm')
+    @elseif(Auth::user()->isSosmed())
+        @include('components.sidebar-sosmed')
     @else
         @include('components.sidebar-member')
     @endif
