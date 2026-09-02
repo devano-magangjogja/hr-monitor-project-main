@@ -8,7 +8,7 @@
 @section('content')
     @include('components.notification-popup')
 
-    {{-- Stats Cards Utama --}}
+    {{-- Stats Cards --}}
     <x-responsive-grid :cols="'grid-cols-2 sm:grid-cols-4'" :gap="'gap-3 sm:gap-4 md:gap-5'" class="mb-4 md:mb-5">
         <x-responsive-card :padding="'p-3 sm:p-4 md:p-5'">
             <div class="flex items-center justify-between mb-3">
