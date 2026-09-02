@@ -11,7 +11,7 @@
 @section('content')
     @include('components.notification-popup')
 
-    {{-- ── Stat Cards ──────────────────────────────────────── --}}
+    {{-- ── Stat Card ──────────────────────────────────────── --}}
     <x-responsive-grid :cols="'grid-cols-2 sm:grid-cols-3 lg:grid-cols-5'" :gap="'gap-3 sm:gap-4 md:gap-5'" class="mb-8">
 
         {{-- Total Tugas --}}
