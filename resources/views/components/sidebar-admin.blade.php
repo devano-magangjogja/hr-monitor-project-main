@@ -75,7 +75,7 @@
             @endphp
             <a href="{{ route('admin.tasks.by-role', $r->name) }}"
                 class="flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-all
-                                      {{ $isCurrentRole ? 'text-white bg-white/10 font-medium' : 'text-slate-400 hover:text-white hover:bg-white/5' }}">
+                                              {{ $isCurrentRole ? 'text-white bg-white/10 font-medium' : 'text-slate-400 hover:text-white hover:bg-white/5' }}">
                 @if($r->base_type === 'staff')
                     <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -97,6 +97,17 @@
         @endforeach
     </div>
 </div>
+
+{{-- Sosmed Management --}}
+<a href="{{ route('admin.sosmed.index') }}"
+    class="flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-all
+          {{ request()->routeIs('admin.sosmed.*') ? 'bg-white/10 text-white' : 'text-slate-400 hover:bg-white/5 hover:text-white' }}">
+    <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M8 12H8.01M12 12H12.01M16 12H16.01M21.0039 12C21.0039 16.9706 16.9745 21 12.0039 21C9.9675 21 3.00463 21 3.00463 21C3.00463 21 4.56382 17.2561 3.93982 16.0008C3.34076 14.7956 3.00391 13.4372 3.00391 12C3.00391 7.02944 7.03334 3 12.0039 3C16.9745 3 21.0039 7.02944 21.0039 12Z" />
+    </svg>
+    Sosmed
+</a>
 
 {{-- Default Task --}}
 <a href="{{ route('admin.default-tasks.index') }}"
@@ -156,17 +167,6 @@
             d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
     </svg>
     Ranking
-</a>
-
-{{-- Sosmed Management --}}
-<a href="{{ route('admin.sosmed.index') }}"
-    class="flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-all
-          {{ request()->routeIs('admin.sosmed.*') ? 'bg-white/10 text-white' : 'text-slate-400 hover:bg-white/5 hover:text-white' }}">
-    <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-            d="M8 12H8.01M12 12H12.01M16 12H16.01M21.0039 12C21.0039 16.9706 16.9745 21 12.0039 21C9.9675 21 3.00463 21 3.00463 21C3.00463 21 4.56382 17.2561 3.93982 16.0008C3.34076 14.7956 3.00391 13.4372 3.00391 12C3.00391 7.02944 7.03334 3 12.0039 3C16.9745 3 21.0039 7.02944 21.0039 12Z" />
-    </svg>
-    Sosmed
 </a>
 
 {{-- Divider --}}

@@ -425,11 +425,11 @@
 
     {{-- ═══ MODAL: SUBMIT BUKTI (PM) ════════════════════════════════════ --}}
     <div id="modal-submit" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4">
-        <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" onclick="document.getElementById('modal-submit').classList.add('hidden')"></div>
+        <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" onclick="closeSubmitModal()"></div>
         <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-lg z-10">
             <div class="flex items-center justify-between px-6 py-4 border-b border-gray-200">
                 <h3 class="text-base font-bold text-gray-800">Submit Bukti Konten</h3>
-                <button onclick="document.getElementById('modal-submit').classList.add('hidden')" class="text-gray-400 hover:text-gray-600">
+                <button onclick="closeSubmitModal()" class="text-gray-400 hover:text-gray-600">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                 </button>
             </div>
@@ -446,7 +446,7 @@
                         Link Bukti Konten <span class="text-red-500">*</span>
                         <span class="font-normal text-gray-400 ml-1">(bisa lebih dari satu)</span>
                     </label>
-                    <div id="links-container" class="space-y-2">
+                    <div id="links-container" class="space-y-2 max-h-[220px] overflow-y-auto pr-1">
                         <div class="flex gap-2 link-row">
                             <input type="url" name="links[]" required placeholder="https://instagram.com/p/xxx"
                                 class="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 focus:outline-none">
@@ -469,7 +469,7 @@
                 </div>
 
                 <div class="flex gap-3 pt-1">
-                    <button type="button" onclick="document.getElementById('modal-submit').classList.add('hidden')"
+                    <button type="button" onclick="cancelSubmitModal()"
                         class="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-sm text-gray-700">Batal</button>
                     <button type="submit"
                         class="flex-1 px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-lg text-sm font-semibold">
@@ -572,43 +572,81 @@
 @push('scripts')
 <script>
 // ── Submit Modal ──────────────────────────────────────────────────────────────
+// Draft state: persists until user clicks Batal
+let _submitDraft = null; // { accId, accName, action, links: [], desc }
+
 function openSubmitModal(accId, accName, hasExisting, existingDesc) {
-    document.getElementById('submit-account-name').textContent = accName;
-    document.getElementById('form-submit').action = `/pm/sosmed/accounts/${accId}/submit`;
-    document.getElementById('submit-description').value = existingDesc || '';
+    const modal = document.getElementById('modal-submit');
 
-    // Reset link rows ke 1
-    const container = document.getElementById('links-container');
-    container.innerHTML = `
-        <div class="flex gap-2 link-row">
-            <input type="url" name="links[]" required placeholder="https://instagram.com/p/xxx"
-                class="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 focus:outline-none">
-            <button type="button" onclick="removeLinkRow(this)" class="text-gray-300 hover:text-rose-500 px-1 transition hidden remove-btn">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-            </button>
-        </div>`;
+    // If re-opening the SAME account while a draft exists, restore it
+    if (_submitDraft && _submitDraft.accId === accId) {
+        _restoreSubmitDraft();
+    } else {
+        // New account — initialise fresh
+        _submitDraft = { accId, accName, action: `/pm/sosmed/accounts/${accId}/submit`, links: [''], desc: existingDesc || '' };
+        _restoreSubmitDraft();
+    }
 
-    document.getElementById('modal-submit').classList.remove('hidden');
+    modal.classList.remove('hidden');
 }
 
-function addLinkRow() {
+function _restoreSubmitDraft() {
+    document.getElementById('submit-account-name').textContent = _submitDraft.accName;
+    document.getElementById('form-submit').action = _submitDraft.action;
+    document.getElementById('submit-description').value = _submitDraft.desc;
+
     const container = document.getElementById('links-container');
+    container.innerHTML = '';
+    (_submitDraft.links.length ? _submitDraft.links : ['']).forEach((url, i) => {
+        _appendLinkRow(container, url, i === 0);
+    });
+    updateRemoveButtons();
+}
+
+function _appendLinkRow(container, value, isFirst) {
     const row = document.createElement('div');
     row.className = 'flex gap-2 link-row';
     row.innerHTML = `
-        <input type="url" name="links[]" placeholder="https://tiktok.com/@xxx/video/xxx"
+        <input type="url" name="links[]" ${isFirst ? 'required' : ''} value="${value}"
+            placeholder="${isFirst ? 'https://instagram.com/p/xxx' : 'https://tiktok.com/@xxx/video/xxx'}"
             class="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 focus:outline-none">
-        <button type="button" onclick="removeLinkRow(this)" class="text-gray-300 hover:text-rose-500 px-1 transition remove-btn">
+        <button type="button" onclick="removeLinkRow(this)" class="text-gray-300 hover:text-rose-500 px-1 transition remove-btn ${isFirst ? 'hidden' : ''}">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
         </button>`;
     container.appendChild(row);
+}
+
+function _saveDraftFromDOM() {
+    if (!_submitDraft) return;
+    _submitDraft.links = Array.from(document.querySelectorAll('#links-container .link-row input')).map(i => i.value);
+    _submitDraft.desc  = document.getElementById('submit-description').value;
+}
+
+// Backdrop / X close — save draft, just hide
+function closeSubmitModal() {
+    _saveDraftFromDOM();
+    document.getElementById('modal-submit').classList.add('hidden');
+}
+
+// Batal button — discard draft, hide
+function cancelSubmitModal() {
+    _submitDraft = null;
+    document.getElementById('modal-submit').classList.add('hidden');
+}
+
+function addLinkRow() {
+    _saveDraftFromDOM();
+    const container = document.getElementById('links-container');
+    _appendLinkRow(container, '', false);
     updateRemoveButtons();
+    // Scroll to bottom so new row is visible
+    container.scrollTop = container.scrollHeight;
 }
 
 function removeLinkRow(btn) {
-    const row = btn.closest('.link-row');
-    row.remove();
+    btn.closest('.link-row').remove();
     updateRemoveButtons();
+    _saveDraftFromDOM();
 }
 
 function updateRemoveButtons() {

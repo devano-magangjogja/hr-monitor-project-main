@@ -97,6 +97,13 @@ class TaskController extends Controller
         return view('admin.tasks.cs', compact('tasks'));
     }
 
+    // ── Halaman 9: Pantau PM ─────────────────────
+    public function pmTasks()
+    {
+        $tasks = $this->taskService->getAllTasksForRole('pm');
+        return view('admin.tasks.pm', compact('tasks'));
+    }
+
     // ── Halaman 5: Pantau OB ─────────────────────────────
 
     public function obTasks()
@@ -124,13 +131,6 @@ class TaskController extends Controller
     {
         $tasks = $this->taskService->getAllTasksForRole('vg');
         return view('admin.tasks.vg', compact('tasks'));
-    }
-
-    // ── Halaman 9: Pantau PM ─────────────────────
-    public function pmTasks()
-    {
-        $tasks = $this->taskService->getAllTasksForRole('pm');
-        return view('admin.tasks.pm', compact('tasks'));
     }
 
     // ── Halaman Dinamis: Pantau Role Kustom / Apapun ─────
