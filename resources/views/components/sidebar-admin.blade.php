@@ -75,7 +75,7 @@
             @endphp
             <a href="{{ route('admin.tasks.by-role', $r->name) }}"
                 class="flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-all
-                                              {{ $isCurrentRole ? 'text-white bg-white/10 font-medium' : 'text-slate-400 hover:text-white hover:bg-white/5' }}">
+                                                      {{ $isCurrentRole ? 'text-white bg-white/10 font-medium' : 'text-slate-400 hover:text-white hover:bg-white/5' }}">
                 @if($r->base_type === 'staff')
                     <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
