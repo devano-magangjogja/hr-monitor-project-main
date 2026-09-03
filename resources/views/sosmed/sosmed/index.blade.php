@@ -68,8 +68,7 @@
                         <col class="w-1/4"> {{-- Nama Akun --}}
                         <col class="w-32"> {{-- Platform --}}
                         <col class="w-32"> {{-- Link Profil --}}
-                        <col class="w-1/5"> {{-- Project Manager --}}
-                        <col class="w-1/5"> {{-- Bukti Konten --}}
+                        <col class="w-1/4"> {{-- Bukti Konten --}}
                         <col class="w-36"> {{-- Status / Aksi --}}
                     </colgroup>
                     <thead>
@@ -79,7 +78,6 @@
                             <th class="px-4 py-3 text-left">Nama Akun</th>
                             <th class="px-4 py-3 text-left">Platform</th>
                             <th class="px-4 py-3 text-left">Link Profil</th>
-                            <th class="px-4 py-3 text-left">Project Manager</th>
                             <th class="px-4 py-3 text-left">Bukti Konten</th>
                             <th class="px-4 py-3 text-center">Status / Aksi</th>
                         </tr>
@@ -146,15 +144,6 @@
                                     @endif
                                 </td>
 
-                                {{-- Project Manager (Dirapikan tanpa background box) --}}
-                                <td class="px-4 py-3.5 text-xs whitespace-nowrap">
-                                    @if($acc->pmUser)
-                                        <span class="font-medium text-gray-800">{{ $acc->pmUser->name }}</span>
-                                    @else
-                                        <span class="text-gray-300">—</span>
-                                    @endif
-                                </td>
-
                                 {{-- Bukti Konten --}}
                                 <td class="px-4 py-3.5 text-xs">
                                     @if($todayTask && $todayTask->hasLinks())
@@ -196,7 +185,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="7" class="px-4 py-12 text-center text-sm text-gray-400">
+                                <td colspan="6" class="px-4 py-12 text-center text-sm text-gray-400">
                                     Belum ada akun sosial media yang di-assign kepada Anda oleh PM / HR Staff.
                                 </td>
                             </tr>

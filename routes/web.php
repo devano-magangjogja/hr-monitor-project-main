@@ -156,6 +156,7 @@ Route::prefix('staff')->name('staff.')->middleware(['auth', 'role:hr_staff'])->g
     // Manajemen Sosmed & Approval Level 2
     Route::get('/sosmed', [StaffSosmedController::class, 'index'])->name('sosmed.index');
     Route::patch('/sosmed/accounts/{account}/assign', [StaffSosmedController::class, 'assignAccount'])->name('sosmed.accounts.assign');
+    Route::post('/sosmed/oversight', [StaffSosmedController::class, 'assignOversight'])->name('sosmed.oversight.assign');
     Route::patch('/sosmed/tasks/{task}/verify', [StaffSosmedController::class, 'verifyTask'])->name('sosmed.tasks.verify');
 });
 
@@ -271,7 +272,6 @@ Route::prefix('pm')->name('pm.')->middleware(['auth', 'role:pm'])->group(functio
     // Sosmed Management
     Route::get('/sosmed', [PMSosmedController::class, 'index'])->name('sosmed.index');
     Route::post('/sosmed/accounts/{account}/submit', [PMSosmedController::class, 'submitAccountTask'])->name('sosmed.accounts.submit');
-    Route::patch('/sosmed/accounts/{account}/assign', [PMSosmedController::class, 'assignAccount'])->name('sosmed.accounts.assign');
     Route::patch('/sosmed/tasks/{task}/verify', [PMSosmedController::class, 'verifyTask'])->name('sosmed.tasks.verify');
 });
 

@@ -86,6 +86,15 @@
                 </svg>
                 Laporan Tugas & Monitoring
             </a>
+            <a href="{{ route('staff.sosmed.index', ['tab' => 'oversight']) }}"
+                class="flex items-center gap-2 px-5 py-3.5 text-sm font-medium whitespace-nowrap border-b-2 transition
+                                      {{ $tab === 'oversight' ? 'border-primary-600 text-primary-600 bg-primary-50/50' : 'border-transparent text-gray-500 hover:text-gray-700' }}">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+                Oversight PM → Sosmed ({{ $oversightLinks->count() }})
+            </a>
         </div>
 
         {{-- ── TAB 1: DISTRIBUSI AKUN ─────────────────────────────────── --}}
@@ -433,7 +442,163 @@
     @endif
     </div>
 
-    {{-- ── MODAL ASSIGN ACCOUNT (HR STAFF) ─────────────────────────── --}}
+    @if($tab === 'oversight')
+    <div class="p-4 sm:p-5">
+        <div class="mb-5 flex flex-wrap items-start justify-between gap-3">
+            <div>
+                <h3 class="text-sm font-semibold text-gray-800">Pengaturan Oversight PM → Role Sosmed</h3>
+                <p class="text-xs text-gray-500 mt-0.5">
+                    Tentukan PM mana yang bertanggung jawab mengawasi setiap user role Sosmed.
+                    Satu user Sosmed hanya bisa diawasi oleh satu PM.
+                    Setelah disimpan, <strong>pm_id</strong> pada semua akun milik user Sosmed tersebut akan otomatis diperbarui.
+                </p>
+            </div>
+            <button onclick="document.getElementById('modal-oversight').classList.remove('hidden')"
+                class="flex-shrink-0 flex items-center gap-2 px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white text-sm font-semibold rounded-lg transition shadow-sm">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                </svg>
+                Tambah / Edit Oversight
+            </button>
+        </div>
+
+        {{-- Current oversight links --}}
+        @if($oversightLinks->count() > 0)
+            <div class="overflow-x-auto rounded-lg border border-gray-100">
+                <table class="w-full text-sm table-fixed">
+                    <colgroup>
+                        <col class="w-1/3"> {{-- sosmed user --}}
+                        <col class="w-1/3"> {{-- PM --}}
+                        <col class="w-40">  {{-- akun dikelola --}}
+                        <col class="w-24">  {{-- aksi --}}
+                    </colgroup>
+                    <thead>
+                        <tr class="bg-gray-50 border-b border-gray-200 text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                            <th class="px-4 py-3 text-left">User Sosmed</th>
+                            <th class="px-4 py-3 text-left">Diawasi oleh PM</th>
+                            <th class="px-4 py-3 text-left">Akun Dikelola</th>
+                            <th class="px-4 py-3 text-center">Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-100">
+                        @foreach($oversightLinks as $link)
+                            @php
+                                $sosmedAccCount = $staffs->firstWhere('id', $link->sosmed_id)
+                                    ? $accounts->where('staff_id', $link->sosmed_id)->count()
+                                    : 0;
+                            @endphp
+                            <tr class="hover:bg-gray-50/80 transition align-middle">
+                                <td class="px-4 py-3.5">
+                                    @if($link->sosmedUser)
+                                        <div class="flex items-center gap-1.5">
+                                            <div class="w-7 h-7 rounded-full bg-pink-100 text-pink-700 font-bold flex items-center justify-center text-xs flex-shrink-0">
+                                                {{ strtoupper(substr($link->sosmedUser->name, 0, 1)) }}
+                                            </div>
+                                            <div class="min-w-0">
+                                                <p class="font-semibold text-gray-800 text-sm truncate">{{ $link->sosmedUser->name }}</p>
+                                                <p class="text-xs text-gray-400">{{ $link->sosmedUser->role_label }}</p>
+                                            </div>
+                                        </div>
+                                    @else
+                                        <span class="text-gray-400 text-xs">(user dihapus)</span>
+                                    @endif
+                                </td>
+                                <td class="px-4 py-3.5">
+                                    @if($link->pm)
+                                        <div class="flex items-center gap-1.5">
+                                            <div class="w-7 h-7 rounded-full bg-indigo-100 text-indigo-700 font-bold flex items-center justify-center text-xs flex-shrink-0">
+                                                {{ strtoupper(substr($link->pm->name, 0, 1)) }}
+                                            </div>
+                                            <span class="font-semibold text-gray-800 text-sm truncate">{{ $link->pm->name }}</span>
+                                        </div>
+                                    @else
+                                        <span class="text-gray-400 text-xs">(PM dihapus)</span>
+                                    @endif
+                                </td>
+                                <td class="px-4 py-3.5 text-xs text-gray-600">
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full font-medium
+                                        {{ $sosmedAccCount > 0 ? 'bg-blue-50 text-blue-700 border border-blue-200' : 'bg-gray-100 text-gray-500' }}">
+                                        {{ $sosmedAccCount }} akun
+                                    </span>
+                                </td>
+                                <td class="px-4 py-3.5 text-center">
+                                    <button
+                                        onclick="openOversightModal({{ $link->sosmed_id }}, '{{ addslashes($link->sosmedUser?->name ?? '') }}', {{ $link->pm_id }})"
+                                        class="px-2.5 py-1 bg-gray-50 hover:bg-primary-50 border border-gray-200 hover:border-primary-300 text-gray-600 hover:text-primary-600 text-xs font-medium rounded-lg transition">
+                                        Edit
+                                    </button>
+                                </td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+        @else
+            <div class="p-10 text-center bg-gray-50 rounded-xl border border-dashed border-gray-200">
+                <svg class="w-8 h-8 mx-auto text-gray-300 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                        d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>
+                </svg>
+                <p class="text-sm text-gray-500 font-medium">Belum ada oversight yang dikonfigurasi.</p>
+                <p class="text-xs text-gray-400 mt-1">Klik tombol "Tambah / Edit Oversight" untuk mulai menetapkan PM pengawas.</p>
+            </div>
+        @endif
+    </div>
+    @endif
+
+    {{-- ── MODAL OVERSIGHT (HR STAFF → assign PM to Sosmed user) ──────── --}}
+    <div id="modal-oversight" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div class="absolute inset-0 bg-black/50 backdrop-blur-sm"
+            onclick="document.getElementById('modal-oversight').classList.add('hidden')"></div>
+        <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-sm z-10">
+            <div class="flex items-center justify-between px-6 py-4 border-b border-gray-200">
+                <h3 class="text-base font-bold text-gray-800">Tetapkan PM Pengawas</h3>
+                <button onclick="document.getElementById('modal-oversight').classList.add('hidden')"
+                    class="text-gray-400 hover:text-gray-600">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+            </div>
+            <form method="POST" action="{{ route('staff.sosmed.oversight.assign') }}" class="p-6 space-y-4">
+                @csrf
+                <div>
+                    <label class="block text-xs font-semibold text-gray-600 mb-1.5">
+                        User Sosmed <span class="text-red-500">*</span>
+                    </label>
+                    <select name="sosmed_id" id="oversight-sosmed-sel" required
+                        class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 focus:outline-none">
+                        <option value="">-- Pilih User Sosmed --</option>
+                        @foreach($staffs as $st)
+                            <option value="{{ $st->id }}">{{ $st->name }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-gray-600 mb-1.5">
+                        PM Pengawas <span class="text-red-500">*</span>
+                    </label>
+                    <select name="pm_id" id="oversight-pm-sel" required
+                        class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 focus:outline-none">
+                        <option value="">-- Pilih PM --</option>
+                        @foreach($pms as $pm)
+                            <option value="{{ $pm->id }}">{{ $pm->name }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                <div class="bg-blue-50 border border-blue-200 rounded-lg px-3 py-2 text-xs text-blue-700">
+                    Setelah disimpan, PM yang dipilih akan otomatis menjadi <strong>pm_id</strong> pada semua akun yang dikelola user Sosmed tersebut.
+                </div>
+                <div class="flex gap-3 pt-1">
+                    <button type="button" onclick="document.getElementById('modal-oversight').classList.add('hidden')"
+                        class="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-sm text-gray-700">Batal</button>
+                    <button type="submit"
+                        class="flex-1 px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-lg text-sm font-semibold">Simpan</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <div id="modal-assign" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4">
         <div class="absolute inset-0 bg-black/50 backdrop-blur-sm"
             onclick="document.getElementById('modal-assign').classList.add('hidden')"></div>
@@ -554,6 +719,12 @@
             document.getElementById('assign-pm-sel').value = currentPmId ?? '';
             document.getElementById('assign-staff-sel').value = currentStaffId ?? '';
             document.getElementById('modal-assign').classList.remove('hidden');
+        }
+
+        function openOversightModal(sosmedId, sosmedName, currentPmId) {
+            document.getElementById('oversight-sosmed-sel').value = sosmedId ?? '';
+            document.getElementById('oversight-pm-sel').value = currentPmId ?? '';
+            document.getElementById('modal-oversight').classList.remove('hidden');
         }
 
         function openVerifyModal(taskId, title) {

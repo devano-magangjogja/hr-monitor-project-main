@@ -21,6 +21,11 @@
             <p class="text-2xl font-bold text-amber-600">{{ $stats['pending_today'] }}</p>
             <p class="text-[11px] text-amber-600 mt-0.5">belum disubmit</p>
         </div>
+        <div class="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
+            <p class="text-xs font-medium text-gray-500 mb-1">Tim Sosmed Diawasi</p>
+            <p class="text-2xl font-bold text-pink-600">{{ $stats['oversight_count'] }}</p>
+            <p class="text-[11px] text-gray-400 mt-0.5">user sosmed</p>
+        </div>
         <div class="bg-white rounded-xl border {{ $stats['need_pm_verify'] > 0 ? 'border-blue-300 bg-blue-50/30 ring-2 ring-blue-400/30' : 'border-gray-200' }} p-4 shadow-sm relative">
             @if($stats['need_pm_verify'] > 0)
                 <span class="absolute top-3 right-3 flex h-2 w-2">
@@ -42,11 +47,6 @@
             <p class="text-2xl font-bold text-emerald-600">{{ $stats['approved_final'] }}</p>
             <p class="text-[11px] text-emerald-600 mt-0.5">selesai 100%</p>
         </div>
-        <div class="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
-            <p class="text-xs font-medium text-gray-500 mb-1">Ditolak / Revisi</p>
-            <p class="text-2xl font-bold text-rose-600">{{ $stats['rejected'] }}</p>
-            <p class="text-[11px] text-rose-600 mt-0.5">perlu perbaikan</p>
-        </div>
     </div>
 
     {{-- ═══ TABS ════════════════════════════════════════════════════════ --}}
@@ -64,7 +64,18 @@
                 Akun Saya ({{ $accounts->count() }})
             </a>
 
-            {{-- Tab 2: Verifikasi --}}
+            {{-- Tab 2: Tim Sosmed Saya --}}
+            <a href="{{ route('pm.sosmed.index', ['tab' => 'oversight']) }}"
+               class="flex items-center gap-2 px-5 py-3.5 text-sm font-medium whitespace-nowrap border-b-2 transition
+                      {{ $tab === 'oversight' ? 'border-primary-600 text-primary-600 bg-primary-50/50' : 'border-transparent text-gray-500 hover:text-gray-700' }}">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>
+                </svg>
+                Tim Sosmed Saya ({{ $stats['oversight_count'] }})
+            </a>
+
+            {{-- Tab 3: Verifikasi --}}
             <a href="{{ route('pm.sosmed.index', ['tab' => 'approvals']) }}"
                class="flex items-center gap-2 px-5 py-3.5 text-sm font-medium whitespace-nowrap border-b-2 transition
                       {{ $tab === 'approvals' ? 'border-primary-600 text-primary-600 bg-primary-50/50' : 'border-transparent text-gray-500 hover:text-gray-700' }}">
@@ -91,9 +102,7 @@
                     <div>
                         <h3 class="text-sm font-semibold text-gray-800">Daftar Akun & Status Pengerjaan Hari Ini</h3>
                         <p class="mt-0.5 text-xs text-gray-500">
-                            Klik <strong>Submit Bukti</strong> untuk akun yang Anda kerjakan sendiri,
-                            atau klik <strong>Atur Staff</strong> untuk mendelegasikan ke tim Sosmed.
-                            Mendelegasikan ke staff akan otomatis membuat tugas harian untuk mereka.
+                            Klik <strong>Submit Bukti</strong> untuk mengirim hasil konten hari ini ke HR Staff untuk approval final.
                         </p>
                     </div>
                     <div class="shrink-0 rounded-lg border border-indigo-200 bg-indigo-50 px-3 py-1.5 text-xs font-medium text-indigo-700">
@@ -109,10 +118,9 @@
                             <col class="w-44">   {{-- Nama Akun --}}
                             <col class="w-28">   {{-- Platform --}}
                             <col class="w-20">   {{-- Link --}}
-                            <col class="w-32">   {{-- PJ Sosmed --}}
-                            <col class="w-28">   {{-- Bukti --}}
+                            <col class="w-32">   {{-- Bukti --}}
                             <col class="w-36">   {{-- Status --}}
-                            <col class="w-28">   {{-- Aksi --}}
+                            <col class="w-24">   {{-- Aksi --}}
                         </colgroup>
                         <thead>
                             <tr class="border-b border-gray-200 bg-gray-50 text-xs font-semibold uppercase tracking-wide text-gray-500">
@@ -120,7 +128,6 @@
                                 <th class="px-4 py-3 text-left">Nama Akun</th>
                                 <th class="px-4 py-3 text-left">Platform</th>
                                 <th class="px-4 py-3 text-left">Link</th>
-                                <th class="px-4 py-3 text-left">PJ Sosmed</th>
                                 <th class="px-4 py-3 text-left">Bukti Hari Ini</th>
                                 <th class="px-4 py-3 text-left">Status</th>
                                 <th class="px-4 py-3 text-center">Aksi</th>
@@ -133,7 +140,6 @@
                                     $status      = $todayTask?->status ?? 'pending';
                                     $isSubmitted = in_array($status, ['done_by_staff', 'verified_by_pm', 'approved_hr']);
                                     $isRejected  = $status === 'rejected';
-                                    $pmCanSubmit = is_null($acc->staff_id);
                                 @endphp
                                 <tr class="align-middle transition hover:bg-gray-50/60">
 
@@ -141,14 +147,12 @@
                                     <td class="px-3 py-3.5 text-center">
                                         @if($isSubmitted)
                                             <span class="inline-flex h-6 w-6 items-center justify-center rounded-full border border-emerald-300 bg-emerald-100 text-xs text-emerald-600" title="Sudah diurus">✓</span>
-                                        @elseif($pmCanSubmit)
+                                        @else
                                             <button type="button"
                                                 onclick="openSubmitModal({{ $acc->id }}, '{{ addslashes($acc->name) }}', {{ $todayTask ? 'true' : 'false' }}, '{{ addslashes($todayTask?->description ?? '') }}')"
                                                 class="inline-flex h-6 w-6 items-center justify-center rounded-md border-2 transition {{ $isRejected ? 'border-rose-400 bg-rose-50 hover:bg-rose-100' : 'border-gray-300 bg-white hover:border-primary-500' }}"
                                                 title="{{ $isRejected ? 'Klik untuk revisi' : 'Klik untuk submit bukti' }}">
                                             </button>
-                                        @else
-                                            <span class="inline-flex h-6 w-6 items-center justify-center rounded-full bg-gray-100 text-xs text-gray-400" title="Dikerjakan oleh tim sosmed">→</span>
                                         @endif
                                     </td>
 
@@ -184,20 +188,6 @@
                                         @endif
                                     </td>
 
-                                    {{-- PJ Sosmed --}}
-                                    <td class="px-4 py-3.5">
-                                        @if($acc->staffUser)
-                                            <div class="flex items-center gap-1.5">
-                                                <div class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-pink-100 text-[10px] font-bold text-pink-700">
-                                                    {{ strtoupper(substr($acc->staffUser->name, 0, 1)) }}
-                                                </div>
-                                                <span class="truncate text-xs font-medium text-gray-800">{{ $acc->staffUser->name }}</span>
-                                            </div>
-                                        @else
-                                            <span class="text-xs italic text-gray-400">Belum ada</span>
-                                        @endif
-                                    </td>
-
                                     {{-- Bukti Hari Ini --}}
                                     <td class="px-4 py-3.5">
                                         @if($todayTask && $todayTask->hasLinks())
@@ -216,11 +206,7 @@
 
                                     {{-- Status --}}
                                     <td class="px-4 py-3.5">
-                                        @if($isSubmitted)
-                                            <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold {{ $todayTask->status_badge_class }}">
-                                                {{ $todayTask->status_label }}
-                                            </span>
-                                        @elseif($isRejected)
+                                        @if($isSubmitted || $isRejected)
                                             <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold {{ $todayTask->status_badge_class }}">
                                                 {{ $todayTask->status_label }}
                                             </span>
@@ -231,25 +217,16 @@
 
                                     {{-- Aksi --}}
                                     <td class="px-4 py-3.5 text-center">
-                                        <div class="flex items-center justify-center gap-1.5">
-                                            @if($pmCanSubmit)
-                                                <button type="button"
-                                                    onclick="openSubmitModal({{ $acc->id }}, '{{ addslashes($acc->name) }}', {{ $todayTask ? 'true' : 'false' }}, '{{ addslashes($todayTask?->description ?? '') }}')"
-                                                    class="rounded-lg {{ $isRejected ? 'bg-rose-500 hover:bg-rose-600' : 'bg-primary-600 hover:bg-primary-700' }} px-2.5 py-1 text-xs font-semibold text-white shadow-sm transition">
-                                                    {{ $isRejected ? 'Revisi' : 'Submit' }}
-                                                </button>
-                                            @endif
-                                            <button type="button"
-                                                onclick="openAssignStaffModal({{ $acc->id }}, '{{ addslashes($acc->name) }}', {{ $acc->staff_id ?? 'null' }})"
-                                                class="rounded-lg border border-gray-200 bg-white px-2.5 py-1 text-xs font-medium text-gray-600 shadow-sm transition hover:border-primary-300 hover:text-primary-600">
-                                                Staff
-                                            </button>
-                                        </div>
+                                        <button type="button"
+                                            onclick="openSubmitModal({{ $acc->id }}, '{{ addslashes($acc->name) }}', {{ $todayTask ? 'true' : 'false' }}, '{{ addslashes($todayTask?->description ?? '') }}')"
+                                            class="rounded-lg {{ $isRejected ? 'bg-rose-500 hover:bg-rose-600' : 'bg-primary-600 hover:bg-primary-700' }} px-2.5 py-1 text-xs font-semibold text-white shadow-sm transition">
+                                            {{ $isRejected ? 'Revisi' : 'Submit' }}
+                                        </button>
                                     </td>
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="8" class="px-4 py-12 text-center text-sm text-gray-400">
+                                    <td colspan="7" class="px-4 py-12 text-center text-sm text-gray-400">
                                         Belum ada akun sosial media yang di-assign ke Anda oleh HR Staff.
                                     </td>
                                 </tr>
@@ -261,7 +238,178 @@
         @endif
 
         {{-- ──────────────────────────────────────────────────────────────
-             TAB 2: VERIFIKASI TIM SOSMED (done_by_staff → verified_by_pm)
+             TAB 2: TIM SOSMED SAYA — progress monitoring
+        ─────────────────────────────────────────────────────────────── --}}
+        @if($tab === 'oversight')
+        <div class="p-4 sm:p-5">
+            <div class="mb-4">
+                <h3 class="text-sm font-semibold text-gray-800">Progress Tim Sosmed Saya</h3>
+                <p class="text-xs text-gray-500 mt-0.5">
+                    Pantau progress pengerjaan akun sosmed oleh user Sosmed yang berada di bawah pengawasan Anda.
+                    Ditetapkan oleh HR Staff.
+                </p>
+            </div>
+
+            @if($oversightData->isEmpty())
+                <div class="p-10 text-center bg-gray-50 rounded-xl border border-dashed border-gray-200">
+                    <svg class="w-8 h-8 mx-auto text-gray-300 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                            d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>
+                    </svg>
+                    <p class="text-sm text-gray-500 font-medium">Belum ada tim sosmed yang diawasi.</p>
+                    <p class="text-xs text-gray-400 mt-1">HR Staff perlu menetapkan Anda sebagai PM pengawas untuk user Sosmed tertentu.</p>
+                </div>
+            @else
+                <div class="space-y-6">
+                    @foreach($oversightData as $entry)
+                        @php $sosmedUser = $entry['sosmed_user']; @endphp
+                        <div class="rounded-xl border border-gray-200 overflow-hidden shadow-sm">
+                            {{-- Sosmed user header --}}
+                            <div class="flex items-center justify-between px-5 py-3.5 bg-gray-50 border-b border-gray-200">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-9 h-9 rounded-full bg-pink-100 text-pink-700 font-bold flex items-center justify-center text-sm flex-shrink-0">
+                                        {{ strtoupper(substr($sosmedUser->name, 0, 1)) }}
+                                    </div>
+                                    <div>
+                                        <p class="font-semibold text-gray-800 text-sm">{{ $sosmedUser->name }}</p>
+                                        <p class="text-xs text-gray-400">{{ $sosmedUser->role_label }}</p>
+                                    </div>
+                                </div>
+                                <div class="flex items-center gap-3 text-xs">
+                                    <span class="px-2.5 py-1 rounded-full font-medium
+                                        {{ $entry['pending'] > 0 ? 'bg-amber-50 text-amber-700 border border-amber-200' : 'bg-emerald-50 text-emerald-700 border border-emerald-200' }}">
+                                        {{ $entry['done'] }}/{{ $entry['total'] }} selesai hari ini
+                                    </span>
+                                </div>
+                            </div>
+
+                            {{-- Accounts table --}}
+                            @if($entry['accounts']->isEmpty())
+                                <div class="px-5 py-6 text-center text-sm text-gray-400">
+                                    Belum ada akun sosmed yang dikelola user ini.
+                                </div>
+                            @else
+                                {{-- Desktop (md+) --}}
+                                <div class="hidden md:block overflow-x-auto">
+                                    <table class="w-full text-sm table-fixed">
+                                        <colgroup>
+                                            <col> {{-- nama akun --}}
+                                            <col class="w-28"> {{-- platform --}}
+                                            <col class="w-28"> {{-- link --}}
+                                            <col class="w-32"> {{-- bukti hari ini --}}
+                                            <col class="w-36"> {{-- status --}}
+                                        </colgroup>
+                                        <thead>
+                                            <tr class="border-b border-gray-100 text-xs font-semibold text-gray-400 uppercase tracking-wide bg-white">
+                                                <th class="px-4 py-2.5 text-left">Akun</th>
+                                                <th class="px-4 py-2.5 text-left">Platform</th>
+                                                <th class="px-4 py-2.5 text-left">Link</th>
+                                                <th class="px-4 py-2.5 text-left">Bukti Hari Ini</th>
+                                                <th class="px-4 py-2.5 text-left">Status</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody class="divide-y divide-gray-50">
+                                            @foreach($entry['accounts'] as $acc)
+                                                @php
+                                                    $t      = $entry['today_tasks'][$acc->id] ?? null;
+                                                    $tSt    = $t?->status ?? 'pending';
+                                                    $tDone  = in_array($tSt, ['done_by_staff', 'verified_by_pm', 'approved_hr']);
+                                                    $tRej   = $tSt === 'rejected';
+                                                @endphp
+                                                <tr class="hover:bg-gray-50/60 transition align-middle">
+                                                    <td class="px-4 py-3">
+                                                        <p class="font-semibold text-gray-800 truncate text-sm">{{ $acc->name }}</p>
+                                                    </td>
+                                                    <td class="px-4 py-3">
+                                                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-xs font-medium border {{ $acc->platform_color }}">
+                                                            {{ $acc->platform_icon }} {{ $acc->platform }}
+                                                        </span>
+                                                    </td>
+                                                    <td class="px-4 py-3">
+                                                        @if($acc->link)
+                                                            <a href="{{ $acc->link }}" target="_blank"
+                                                                class="text-xs text-primary-600 hover:underline inline-flex items-center gap-1">
+                                                                <svg class="w-3 h-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+                                                                </svg>
+                                                                Buka
+                                                            </a>
+                                                        @else
+                                                            <span class="text-xs text-gray-300">—</span>
+                                                        @endif
+                                                    </td>
+                                                    <td class="px-4 py-3">
+                                                        @if($t && $t->hasLinks())
+                                                            <button type="button"
+                                                                onclick="openLinksPopup({{ json_encode($t->link_upload) }}, '{{ addslashes($acc->name) }}')"
+                                                                class="inline-flex items-center gap-1 text-xs text-primary-600 font-medium hover:underline">
+                                                                <svg class="w-3 h-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/>
+                                                                </svg>
+                                                                {{ $t->link_count }} link
+                                                            </button>
+                                                        @else
+                                                            <span class="text-xs text-gray-300">—</span>
+                                                        @endif
+                                                    </td>
+                                                    <td class="px-4 py-3">
+                                                        @if($t)
+                                                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium {{ $t->status_badge_class }}">
+                                                                {{ $t->status_label }}
+                                                            </span>
+                                                        @else
+                                                            <span class="text-xs text-gray-400 italic">Belum dikerjakan</span>
+                                                        @endif
+                                                    </td>
+                                                </tr>
+                                            @endforeach
+                                        </tbody>
+                                    </table>
+                                </div>
+
+                                {{-- Mobile cards --}}
+                                <div class="md:hidden divide-y divide-gray-100">
+                                    @foreach($entry['accounts'] as $acc)
+                                        @php
+                                            $t     = $entry['today_tasks'][$acc->id] ?? null;
+                                            $tDone = $t && in_array($t->status, ['done_by_staff','verified_by_pm','approved_hr']);
+                                        @endphp
+                                        <div class="px-4 py-3 flex items-center justify-between gap-3">
+                                            <div class="min-w-0">
+                                                <p class="font-semibold text-gray-800 text-sm truncate">{{ $acc->name }}</p>
+                                                <span class="inline-flex items-center gap-1 mt-0.5 px-2 py-0.5 rounded-md text-xs font-medium border {{ $acc->platform_color }}">
+                                                    {{ $acc->platform_icon }} {{ $acc->platform }}
+                                                </span>
+                                            </div>
+                                            <div class="flex items-center gap-2 flex-shrink-0">
+                                                @if($t && $t->hasLinks())
+                                                    <button type="button"
+                                                        onclick="openLinksPopup({{ json_encode($t->link_upload) }}, '{{ addslashes($acc->name) }}')"
+                                                        class="text-xs text-primary-600 font-medium hover:underline">
+                                                        {{ $t->link_count }} link
+                                                    </button>
+                                                @endif
+                                                @if($t)
+                                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium {{ $t->status_badge_class }}">
+                                                        {{ $t->status_label }}
+                                                    </span>
+                                                @else
+                                                    <span class="text-xs text-gray-400 italic">Belum</span>
+                                                @endif
+                                            </div>
+                                        </div>
+                                    @endforeach
+                                </div>
+                            @endif
+                        </div>
+                    @endforeach
+                </div>
+            @endif
+        </div>
+        @endif
+
+        {{-- ──────────────────────────────────────────────────────────────
+             TAB 3: VERIFIKASI TIM SOSMED (done_by_staff → verified_by_pm)
         ─────────────────────────────────────────────────────────────── --}}
         @if($tab === 'approvals')
         <div class="p-4 sm:p-5">
@@ -481,43 +629,6 @@
     </div>
 
     {{-- ═══ MODAL: ASSIGN STAFF ══════════════════════════════════════════ --}}
-    <div id="modal-assign-staff" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4">
-        <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" onclick="document.getElementById('modal-assign-staff').classList.add('hidden')"></div>
-        <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-sm z-10">
-            <div class="flex items-center justify-between px-5 py-4 border-b border-gray-200">
-                <h3 class="text-base font-bold text-gray-800">Delegasikan ke Staff Sosmed</h3>
-                <button onclick="document.getElementById('modal-assign-staff').classList.add('hidden')" class="text-gray-400 hover:text-gray-600">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-                </button>
-            </div>
-            <form id="form-assign-staff" method="POST" action="" class="p-5 pt-0.5 space-y-4">
-                @csrf @method('PATCH')
-                <div>
-                    <p class="text-xs text-gray-500 mb-0.5">Akun</p>
-                    <p id="staff-acc-name" class="text-sm font-semibold text-gray-800"></p>
-                </div>
-                <div class="bg-amber-50 border border-amber-200 rounded-lg px-3 py-2 text-xs text-amber-700">
-                    Setelah disimpan, tugas ini otomatis tersimpan untuk staff yang dipilih.
-                </div>
-                <div>
-                    <label class="block text-xs font-semibold text-gray-600 mb-1.5">Pilih Staff Sosmed <span class="text-red-500">*</span></label>
-                    <select name="staff_id" id="staff-sel-input" required
-                        class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 focus:outline-none">
-                        <option value="">Tidak ada staff sosmed terpilih</option>
-                        @foreach($sosmedStaff as $st)
-                            <option value="{{ $st->id }}">{{ $st->name }}</option>
-                        @endforeach
-                    </select>
-                </div>
-                <div class="flex gap-3">
-                    <button type="button" onclick="document.getElementById('modal-assign-staff').classList.add('hidden')"
-                        class="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-sm text-gray-700">Batal</button>
-                    <button type="submit" class="flex-1 px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-lg text-sm font-semibold">Simpan</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
     {{-- ═══ MODAL: VERIFIKASI PM ══════════════════════════════════════════ --}}
     <div id="modal-verify" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4">
         <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" onclick="document.getElementById('modal-verify').classList.add('hidden')"></div>
@@ -655,14 +766,6 @@ function updateRemoveButtons() {
         const btn = r.querySelector('.remove-btn');
         if (btn) btn.classList.toggle('hidden', rows.length === 1);
     });
-}
-
-// ── Assign Staff Modal ────────────────────────────────────────────────────────
-function openAssignStaffModal(accId, accName, currentStaffId) {
-    document.getElementById('staff-acc-name').textContent = accName;
-    document.getElementById('form-assign-staff').action = `/pm/sosmed/accounts/${accId}/assign`;
-    document.getElementById('staff-sel-input').value = currentStaffId ?? '';
-    document.getElementById('modal-assign-staff').classList.remove('hidden');
 }
 
 // ── Verify Modal ──────────────────────────────────────────────────────────────
