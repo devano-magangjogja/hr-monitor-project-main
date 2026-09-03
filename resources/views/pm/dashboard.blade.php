@@ -12,7 +12,8 @@
             <div class="flex items-center justify-between mb-3">
                 <p class="text-xs sm:text-sm font-medium text-gray-500">Total Tugas</p>
                 <div class="w-8 h-8 sm:w-9 sm:h-9 rounded-lg bg-primary-50 flex items-center justify-center flex-shrink-0">
-                    <svg class="w-4 sm:w-5 h-4 sm:h-5 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg class="w-4 sm:w-5 h-4 sm:h-5 text-primary-600" fill="none" stroke="currentColor"
+                        viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
                     </svg>
@@ -37,7 +38,8 @@
             <div class="flex items-center justify-between mb-3">
                 <p class="text-xs sm:text-sm font-medium text-gray-500">Belum Selesai</p>
                 <div class="w-8 h-8 sm:w-9 sm:h-9 rounded-lg bg-yellow-50 flex items-center justify-center flex-shrink-0">
-                    <svg class="w-4 sm:w-5 h-4 sm:h-5 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg class="w-4 sm:w-5 h-4 sm:h-5 text-yellow-600" fill="none" stroke="currentColor"
+                        viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
@@ -61,9 +63,10 @@
     </x-responsive-grid>
 
     <x-responsive-card>
-        <div class="px-3 sm:px-6 py-4 border-b border-gray-200 flex items-center justify-between">
+        <div class="px-3 sm:px-6 py-4 pt-1 border-b border-gray-200 flex items-center justify-between">
             <h2 class="text-xs sm:text-sm font-semibold text-gray-700">Tugas Hari Ini</h2>
-            <a href="{{ route('pm.tasks.all') }}" class="text-xs text-primary-600 hover:text-primary-700 font-medium">Lihat Semua →</a>
+            <a href="{{ route('pm.tasks.all') }}" class="text-xs text-primary-600 hover:text-primary-700 font-medium">Lihat
+                Semua →</a>
         </div>
         <div class="divide-y divide-gray-100">
             @forelse($tasks->take(5) as $task)
@@ -73,8 +76,9 @@
                     $isNotDone = $assignment?->is_completed === 'not_done';
                 @endphp
                 <div class="px-3 sm:px-6 py-2.5 sm:py-3.5 flex items-center gap-3">
-                    <div class="w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0
-                        {{ $isDone ? 'border-green-500 bg-green-500' : ($isNotDone ? 'border-red-400 bg-red-400' : 'border-gray-300') }}">
+                    <div
+                        class="w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0
+                                {{ $isDone ? 'border-green-500 bg-green-500' : ($isNotDone ? 'border-red-400 bg-red-400' : 'border-gray-300') }}">
                         @if($isDone)
                             <svg class="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
                                 <path fill-rule="evenodd"
@@ -90,7 +94,8 @@
                         @endif
                     </div>
                     <div class="flex-1 min-w-0">
-                        <p class="text-xs sm:text-sm font-medium truncate {{ $isDone ? 'line-through text-gray-400' : ($isNotDone ? 'text-red-400' : 'text-gray-800') }}">
+                        <p
+                            class="text-xs sm:text-sm font-medium truncate {{ $isDone ? 'line-through text-gray-400' : ($isNotDone ? 'text-red-400' : 'text-gray-800') }}">
                             {{ $task->title }}
                         </p>
                         <p class="text-xs text-gray-400 mt-0.5">
@@ -101,11 +106,15 @@
                         </p>
                     </div>
                     @if($isDone)
-                        <span class="inline-flex px-1.5 sm:px-2 py-0.5 rounded-full text-xs bg-green-50 text-green-700 flex-shrink-0">Selesai</span>
+                        <span
+                            class="inline-flex px-1.5 sm:px-2 py-0.5 rounded-full text-xs bg-green-50 text-green-700 flex-shrink-0">Selesai</span>
                     @elseif($isNotDone)
-                        <span class="inline-flex px-1.5 sm:px-2 py-0.5 rounded-full text-xs bg-red-50 text-red-700 flex-shrink-0">Tidak Dikerjakan</span>
+                        <span
+                            class="inline-flex px-1.5 sm:px-2 py-0.5 rounded-full text-xs bg-red-50 text-red-700 flex-shrink-0">Tidak
+                            Dikerjakan</span>
                     @else
-                        <span class="inline-flex px-1.5 sm:px-2 py-0.5 rounded-full text-xs bg-yellow-50 text-yellow-700 flex-shrink-0">Pending</span>
+                        <span
+                            class="inline-flex px-1.5 sm:px-2 py-0.5 rounded-full text-xs bg-yellow-50 text-yellow-700 flex-shrink-0">Pending</span>
                     @endif
                 </div>
             @empty

@@ -66,20 +66,6 @@
         </x-responsive-card>
     </x-responsive-grid>
 
-    {{-- Akses Cepat ke Modul Sosmed --}}
-    <div
-        class="bg-gradient-to-r from-pink-500 to-indigo-600 rounded-xl p-4 sm:p-5 text-white mb-6 shadow-md flex items-center justify-between">
-        <div>
-            <h2 class="text-base sm:text-lg font-bold">Modul Tugas & Akun Sosmed</h2>
-            <p class="text-xs sm:text-sm text-pink-100 mt-0.5">Kelola akun dan submit link bukti postingan harian/custom di
-                sini.</p>
-        </div>
-        <a href="{{ route('sosmed.sosmed.index') }}"
-            class="px-4 py-2 bg-white text-pink-600 text-xs sm:text-sm font-bold rounded-lg hover:bg-pink-50 transition shadow">
-            Buka Halaman Sosmed →
-        </a>
-    </div>
-
     {{-- Ringkasan Tugas Hari Ini --}}
     <x-responsive-card>
         <div class="px-3 sm:px-6 pt-0.5 py-4 border-b border-gray-200 flex items-center justify-between">
@@ -97,7 +83,7 @@
                 <div class="px-3 sm:px-6 py-2.5 sm:py-3.5 flex items-center gap-3">
                     <div
                         class="w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0
-                                        {{ $isDone ? 'border-green-500 bg-green-500' : ($isNotDone ? 'border-red-400 bg-red-400' : 'border-gray-300') }}">
+                                                {{ $isDone ? 'border-green-500 bg-green-500' : ($isNotDone ? 'border-red-400 bg-red-400' : 'border-gray-300') }}">
                         @if($isDone)
                             <svg class="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
                                 <path fill-rule="evenodd"
