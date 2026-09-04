@@ -39,37 +39,52 @@ class SosmedController extends Controller
             ->orderBy('users.name')
             ->get();
 
-        $staffs = User::whereIn('role', ['sosmed'])
+        $executors = User::whereIn('role', ['sosmed', 'pm'])
             ->where('is_active', true)
             ->orderBy('name')
             ->get();
+        $staffs = $executors; // compatibility
 
         $stats = [
             'total_accounts' => $accounts->count(),
-            'unassigned_pm'  => $accounts->whereNull('pm_id')->count(),
+            'unassigned_pm' => $accounts->whereNull('pm_id')->count(),
             'unassigned_staff' => $accounts->whereNull('staff_id')->count(),
-            'total_tasks'    => $tasks->count(),
-            'pending_tasks'  => $tasks->where('status', 'pending')->count(),
+            'total_tasks' => $tasks->count(),
+            'pending_tasks' => $tasks->where('status', 'pending')->count(),
             'need_pm_verify' => $tasks->where('status', 'done_by_staff')->count(),
             'need_hr_verify' => $tasks->where('status', 'verified_by_pm')->count(),
-            'completed'      => $tasks->where('status', 'approved_hr')->count(),
+            'completed' => $tasks->where('status', 'approved_hr')->count(),
         ];
 
         return view('admin.sosmed.index', compact(
-            'tab', 'accounts', 'tasks', 'logs', 'pms', 'staffs', 'stats'
+            'tab',
+            'accounts',
+            'tasks',
+            'logs',
+            'pms',
+            'staffs',
+            'executors',
+            'stats'
         ));
     }
 
     public function storeAccount(Request $request)
     {
         $validated = $request->validate([
-            'name'     => ['required', 'string', 'max:200'],
+            'name' => ['required', 'string', 'max:200'],
             'platform' => ['required', 'string', 'max:50'],
-            'link'     => ['nullable', 'url', 'max:500'],
-            'pm_id'    => ['nullable', 'exists:users,id'],
+            'link' => ['nullable', 'url', 'max:500'],
+            'pm_id' => ['nullable', 'exists:users,id'],
             'staff_id' => ['nullable', 'exists:users,id'],
-            'notes'    => ['nullable', 'string'],
+            'notes' => ['nullable', 'string'],
         ]);
+
+        if (!empty($validated['staff_id'])) {
+            $staff = User::find($validated['staff_id']);
+            if ($staff && $staff->role === 'pm') {
+                $validated['pm_id'] = null;
+            }
+        }
 
         SosmedAccount::create([
             ...$validated,
@@ -83,13 +98,20 @@ class SosmedController extends Controller
     public function updateAccount(Request $request, SosmedAccount $account)
     {
         $validated = $request->validate([
-            'name'     => ['required', 'string', 'max:200'],
+            'name' => ['required', 'string', 'max:200'],
             'platform' => ['required', 'string', 'max:50'],
-            'link'     => ['nullable', 'url', 'max:500'],
-            'pm_id'    => ['nullable', 'exists:users,id'],
+            'link' => ['nullable', 'url', 'max:500'],
+            'pm_id' => ['nullable', 'exists:users,id'],
             'staff_id' => ['nullable', 'exists:users,id'],
-            'notes'    => ['nullable', 'string'],
+            'notes' => ['nullable', 'string'],
         ]);
+
+        if (!empty($validated['staff_id'])) {
+            $staff = User::find($validated['staff_id']);
+            if ($staff && $staff->role === 'pm') {
+                $validated['pm_id'] = null;
+            }
+        }
 
         $account->update($validated);
 
@@ -100,9 +122,16 @@ class SosmedController extends Controller
     public function assignAccount(Request $request, SosmedAccount $account)
     {
         $validated = $request->validate([
-            'pm_id'    => ['nullable', 'exists:users,id'],
+            'pm_id' => ['nullable', 'exists:users,id'],
             'staff_id' => ['nullable', 'exists:users,id'],
         ]);
+
+        if (!empty($validated['staff_id'])) {
+            $staff = User::find($validated['staff_id']);
+            if ($staff && $staff->role === 'pm') {
+                $validated['pm_id'] = null;
+            }
+        }
 
         $account->update($validated);
 

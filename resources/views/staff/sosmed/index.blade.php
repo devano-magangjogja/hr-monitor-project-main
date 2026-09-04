@@ -86,15 +86,6 @@
                 </svg>
                 Laporan Tugas & Monitoring
             </a>
-            <a href="{{ route('staff.sosmed.index', ['tab' => 'oversight']) }}"
-                class="flex items-center gap-2 px-5 py-3.5 text-sm font-medium whitespace-nowrap border-b-2 transition
-                                      {{ $tab === 'oversight' ? 'border-primary-600 text-primary-600 bg-primary-50/50' : 'border-transparent text-gray-500 hover:text-gray-700' }}">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
-                </svg>
-                Oversight PM → Sosmed ({{ $oversightLinks->count() }})
-            </a>
         </div>
 
         {{-- ── TAB 1: DISTRIBUSI AKUN ─────────────────────────────────── --}}
@@ -108,13 +99,13 @@
 
                     {{-- Desktop table (md+) --}}
                     <div class="hidden md:block overflow-x-auto rounded-lg border border-gray-100">
-                        <table class="w-full text-sm">
+                        <table class="w-full table-fixed text-sm">
                             <colgroup>
                                 <col class="w-1/4"> {{-- nama akun --}}
                                 <col class="w-32"> {{-- platform --}}
                                 <col class="w-1/4"> {{-- link --}}
-                                <col class="w-1/5"> {{-- PJ PM --}}
-                                <col class="w-1/5"> {{-- PJ Sosmed --}}
+                                <col class="w-1/5"> {{-- Eksekutor --}}
+                                <col class="w-1/5"> {{-- Supervisor PM --}}
                                 <col class="w-24"> {{-- aksi --}}
                             </colgroup>
                             <thead>
@@ -123,8 +114,8 @@
                                     <th class="px-4 py-3 text-left">Nama Akun</th>
                                     <th class="px-4 py-3 text-left">Platform</th>
                                     <th class="px-4 py-3 text-left">Link Akun</th>
-                                    <th class="px-4 py-3 text-left">Project Manager</th>
-                                    <th class="px-4 py-3 text-left">PJ Sosmed</th>
+                                    <th class="px-4 py-3 text-left">Eksekutor</th>
+                                    <th class="px-4 py-3 text-left">Supervisor PM</th>
                                     <th class="px-4 py-3 text-center">Aksi</th>
                                 </tr>
                             </thead>
@@ -144,42 +135,75 @@
                                         <td class="px-4 py-3.5">
                                             @if($acc->link)
                                                 <a href="{{ $acc->link }}" target="_blank"
-                                                    class="text-xs text-primary-600 hover:underline truncate block max-w-[200px]">
-                                                    {{ parse_url($acc->link, PHP_URL_HOST) ?? $acc->link }}
+                                                    class="inline-flex items-center gap-1 text-xs text-primary-600 hover:underline">
+                                                    <svg class="w-3.5 h-3.5 flex-shrink-0" fill="none" stroke="currentColor"
+                                                        viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                            d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                                                    </svg>
+                                                    Buka
                                                 </a>
                                             @else
                                                 <span class="text-xs text-gray-300">—</span>
                                             @endif
                                         </td>
-                                        <td class="px-4 py-3.5">
-                                            @if($acc->pmUser)
-                                                <div class="flex items-center gap-1.5 min-w-0">
-                                                    <div
-                                                        class="w-6 h-6 rounded-full bg-indigo-100 text-indigo-700 font-bold flex items-center justify-center text-[10px] flex-shrink-0">
-                                                        {{ strtoupper(substr($acc->pmUser->name, 0, 1)) }}
-                                                    </div>
-                                                    <span class="font-medium text-gray-800 text-xs truncate">{{ $acc->pmUser->name }}</span>
-                                                </div>
-                                            @else
-                                                <span
-                                                    class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-amber-50 text-amber-700 border border-amber-200 whitespace-nowrap">Belum
-                                                    Di-assign</span>
-                                            @endif
-                                        </td>
-                                        <td class="px-4 py-3.5">
+                                        {{-- Eksekutor --}}
+                                        <td class="px-4 py-3 text-xs min-w-0">
                                             @if($acc->staffUser)
-                                                <div class="flex items-center gap-1.5 min-w-0">
+                                                @php
+                                                    $stRoleTag = match($acc->staffUser->role) {
+                                                        'pm' => 'PM Mandiri',
+                                                        'sosmed' => 'Staff Sosmed',
+                                                        'digital_marketing' => 'Digital Marketing',
+                                                        default => $acc->staffUser->role_label ?? strtoupper($acc->staffUser->role)
+                                                    };
+                                                @endphp
+                                                <div class="flex items-start gap-2 min-w-0">
                                                     <div
-                                                        class="w-6 h-6 rounded-full bg-pink-100 text-pink-700 font-bold flex items-center justify-center text-[10px] flex-shrink-0">
+                                                        class="w-6 h-6 rounded-full bg-pink-100 text-pink-700 font-bold flex items-center justify-center text-[10px] flex-shrink-0 mt-0.5">
                                                         {{ strtoupper(substr($acc->staffUser->name, 0, 1)) }}
                                                     </div>
-                                                    <span
-                                                        class="font-medium text-gray-800 text-xs truncate">{{ $acc->staffUser->name }}</span>
+                                                    <div class="min-w-0 flex-1">
+                                                        <span class="font-semibold text-gray-800 block truncate"
+                                                            title="{{ $acc->staffUser->name }}">
+                                                            {{ $acc->staffUser->name }}
+                                                        </span>
+                                                        <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold mt-0.5 {{ $acc->staffUser->role === 'pm' ? 'bg-indigo-50 text-indigo-700 border border-indigo-200' : 'bg-pink-50 text-pink-700 border border-pink-200' }}">
+                                                            {{ $stRoleTag }}
+                                                        </span>
+                                                    </div>
                                                 </div>
                                             @else
-                                                <span
-                                                    class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600 whitespace-nowrap">Belum
-                                                    Di-assign</span>
+                                                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-amber-50 text-amber-700 border border-amber-200 whitespace-nowrap">
+                                                    Belum Ditugaskan
+                                                </span>
+                                            @endif
+                                        </td>
+
+                                        {{-- Supervisor PM --}}
+                                        <td class="px-4 py-3 text-xs min-w-0">
+                                            @if($acc->staffUser && $acc->staffUser->role === 'pm')
+                                                <span class="text-gray-400 italic text-[11px] block">— (Langsung ke HR)</span>
+                                            @elseif($acc->pmUser)
+                                                <div class="flex items-start gap-2 min-w-0">
+                                                    <div
+                                                        class="w-6 h-6 rounded-full bg-indigo-100 text-indigo-700 font-bold flex items-center justify-center text-[10px] flex-shrink-0 mt-0.5">
+                                                        {{ strtoupper(substr($acc->pmUser->name, 0, 1)) }}
+                                                    </div>
+                                                    <div class="min-w-0 flex-1">
+                                                        <span class="font-semibold text-gray-800 block truncate"
+                                                            title="{{ $acc->pmUser->name }}">
+                                                            {{ $acc->pmUser->name }}
+                                                        </span>
+                                                        <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold mt-0.5 bg-purple-50 text-purple-700 border border-purple-200">
+                                                            Supervisor PM
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            @else
+                                                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600 whitespace-nowrap">
+                                                    Belum Ada PM
+                                                </span>
                                             @endif
                                         </td>
                                         <td class="px-4 py-3.5 text-center">
@@ -230,23 +254,31 @@
                                         @endif
                                     </div>
 
-                                    {{-- Row Project Manager (Kiri) & PJ Sosmed (Kanan) --}}
+                                    {{-- Row Eksekutor (Kiri) & Supervisor PM (Kanan) --}}
                                     <div class="flex items-center justify-between gap-2 pt-1">
                                         <div class="min-w-0">
-                                            <p class="text-gray-400 mb-0.5">Project Manager</p>
-                                            @if($acc->pmUser)
-                                                <span class="font-medium text-gray-800 truncate block">{{ $acc->pmUser->name }}</span>
+                                            <p class="text-gray-400 mb-0.5">Eksekutor</p>
+                                            @if($acc->staffUser)
+                                                @php
+                                                    $mStRoleTag = match($acc->staffUser->role) {
+                                                        'pm' => 'PM Mandiri',
+                                                        'sosmed' => 'Staff Sosmed',
+                                                        'digital_marketing' => 'Digital Marketing',
+                                                        default => $acc->staffUser->role_label ?? strtoupper($acc->staffUser->role)
+                                                    };
+                                                @endphp
+                                                <span class="font-medium text-gray-800 truncate block">
+                                                    {{ $acc->staffUser->name }} <span class="text-[10px] text-gray-500 font-normal">({{ $mStRoleTag }})</span>
+                                                </span>
                                             @else
-                                                <span class="text-amber-600 font-medium">Belum Di-assign</span>
+                                                <span class="text-amber-600 font-medium">Belum Ditugaskan</span>
                                             @endif
                                         </div>
                                         <div class="min-w-0 text-right">
-                                            <p class="text-gray-400 mb-0.5">PJ Sosmed</p>
-                                            @if($acc->staffUser)
-                                                <span class="font-medium text-gray-800 truncate block">{{ $acc->staffUser->name }}</span>
-                                            @else
-                                                <span class="text-gray-500 italic">Belum Di-assign</span>
-                                            @endif
+                                            <p class="text-gray-400 mb-0.5">Supervisor PM</p>
+                                            <span class="font-medium text-gray-800 truncate block">
+                                                {{ ($acc->staffUser && $acc->staffUser->role === 'pm') ? 'Langsung ke HR' : ($acc->pmUser?->name ?? 'Belum Ada PM') }}
+                                            </span>
                                         </div>
                                     </div>
                                 </div>
@@ -442,169 +474,16 @@
     @endif
     </div>
 
-    @if($tab === 'oversight')
-    <div class="p-4 sm:p-5">
-        <div class="mb-5 flex flex-wrap items-start justify-between gap-3">
-            <div>
-                <h3 class="text-sm font-semibold text-gray-800">Pengaturan Oversight PM → Role Sosmed</h3>
-                <p class="text-xs text-gray-500 mt-0.5">
-                    Tentukan PM mana yang bertanggung jawab mengawasi setiap user role Sosmed.
-                    Satu user Sosmed hanya bisa diawasi oleh satu PM.
-                    Setelah disimpan, <strong>pm_id</strong> pada semua akun milik user Sosmed tersebut akan otomatis diperbarui.
-                </p>
-            </div>
-            <button onclick="document.getElementById('modal-oversight').classList.remove('hidden')"
-                class="flex-shrink-0 flex items-center gap-2 px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white text-sm font-semibold rounded-lg transition shadow-sm">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
-                </svg>
-                Tambah / Edit Oversight
-            </button>
-        </div>
-
-        {{-- Current oversight links --}}
-        @if($oversightLinks->count() > 0)
-            <div class="overflow-x-auto rounded-lg border border-gray-100">
-                <table class="w-full text-sm table-fixed">
-                    <colgroup>
-                        <col class="w-1/3"> {{-- sosmed user --}}
-                        <col class="w-1/3"> {{-- PM --}}
-                        <col class="w-40">  {{-- akun dikelola --}}
-                        <col class="w-24">  {{-- aksi --}}
-                    </colgroup>
-                    <thead>
-                        <tr class="bg-gray-50 border-b border-gray-200 text-xs font-semibold text-gray-500 uppercase tracking-wide">
-                            <th class="px-4 py-3 text-left">User Sosmed</th>
-                            <th class="px-4 py-3 text-left">Diawasi oleh PM</th>
-                            <th class="px-4 py-3 text-left">Akun Dikelola</th>
-                            <th class="px-4 py-3 text-center">Aksi</th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-gray-100">
-                        @foreach($oversightLinks as $link)
-                            @php
-                                $sosmedAccCount = $staffs->firstWhere('id', $link->sosmed_id)
-                                    ? $accounts->where('staff_id', $link->sosmed_id)->count()
-                                    : 0;
-                            @endphp
-                            <tr class="hover:bg-gray-50/80 transition align-middle">
-                                <td class="px-4 py-3.5">
-                                    @if($link->sosmedUser)
-                                        <div class="flex items-center gap-1.5">
-                                            <div class="w-7 h-7 rounded-full bg-pink-100 text-pink-700 font-bold flex items-center justify-center text-xs flex-shrink-0">
-                                                {{ strtoupper(substr($link->sosmedUser->name, 0, 1)) }}
-                                            </div>
-                                            <div class="min-w-0">
-                                                <p class="font-semibold text-gray-800 text-sm truncate">{{ $link->sosmedUser->name }}</p>
-                                                <p class="text-xs text-gray-400">{{ $link->sosmedUser->role_label }}</p>
-                                            </div>
-                                        </div>
-                                    @else
-                                        <span class="text-gray-400 text-xs">(user dihapus)</span>
-                                    @endif
-                                </td>
-                                <td class="px-4 py-3.5">
-                                    @if($link->pm)
-                                        <div class="flex items-center gap-1.5">
-                                            <div class="w-7 h-7 rounded-full bg-indigo-100 text-indigo-700 font-bold flex items-center justify-center text-xs flex-shrink-0">
-                                                {{ strtoupper(substr($link->pm->name, 0, 1)) }}
-                                            </div>
-                                            <span class="font-semibold text-gray-800 text-sm truncate">{{ $link->pm->name }}</span>
-                                        </div>
-                                    @else
-                                        <span class="text-gray-400 text-xs">(PM dihapus)</span>
-                                    @endif
-                                </td>
-                                <td class="px-4 py-3.5 text-xs text-gray-600">
-                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full font-medium
-                                        {{ $sosmedAccCount > 0 ? 'bg-blue-50 text-blue-700 border border-blue-200' : 'bg-gray-100 text-gray-500' }}">
-                                        {{ $sosmedAccCount }} akun
-                                    </span>
-                                </td>
-                                <td class="px-4 py-3.5 text-center">
-                                    <button
-                                        onclick="openOversightModal({{ $link->sosmed_id }}, '{{ addslashes($link->sosmedUser?->name ?? '') }}', {{ $link->pm_id }})"
-                                        class="px-2.5 py-1 bg-gray-50 hover:bg-primary-50 border border-gray-200 hover:border-primary-300 text-gray-600 hover:text-primary-600 text-xs font-medium rounded-lg transition">
-                                        Edit
-                                    </button>
-                                </td>
-                            </tr>
-                        @endforeach
-                    </tbody>
-                </table>
-            </div>
-        @else
-            <div class="p-10 text-center bg-gray-50 rounded-xl border border-dashed border-gray-200">
-                <svg class="w-8 h-8 mx-auto text-gray-300 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-                        d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>
-                </svg>
-                <p class="text-sm text-gray-500 font-medium">Belum ada oversight yang dikonfigurasi.</p>
-                <p class="text-xs text-gray-400 mt-1">Klik tombol "Tambah / Edit Oversight" untuk mulai menetapkan PM pengawas.</p>
-            </div>
-        @endif
-    </div>
-    @endif
-
-    {{-- ── MODAL OVERSIGHT (HR STAFF → assign PM to Sosmed user) ──────── --}}
-    <div id="modal-oversight" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4">
-        <div class="absolute inset-0 bg-black/50 backdrop-blur-sm"
-            onclick="document.getElementById('modal-oversight').classList.add('hidden')"></div>
-        <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-sm z-10">
-            <div class="flex items-center justify-between px-6 py-4 border-b border-gray-200">
-                <h3 class="text-base font-bold text-gray-800">Tetapkan PM Pengawas</h3>
-                <button onclick="document.getElementById('modal-oversight').classList.add('hidden')"
-                    class="text-gray-400 hover:text-gray-600">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                    </svg>
-                </button>
-            </div>
-            <form method="POST" action="{{ route('staff.sosmed.oversight.assign') }}" class="p-6 space-y-4">
-                @csrf
-                <div>
-                    <label class="block text-xs font-semibold text-gray-600 mb-1.5">
-                        User Sosmed <span class="text-red-500">*</span>
-                    </label>
-                    <select name="sosmed_id" id="oversight-sosmed-sel" required
-                        class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 focus:outline-none">
-                        <option value="">-- Pilih User Sosmed --</option>
-                        @foreach($staffs as $st)
-                            <option value="{{ $st->id }}">{{ $st->name }}</option>
-                        @endforeach
-                    </select>
-                </div>
-                <div>
-                    <label class="block text-xs font-semibold text-gray-600 mb-1.5">
-                        PM Pengawas <span class="text-red-500">*</span>
-                    </label>
-                    <select name="pm_id" id="oversight-pm-sel" required
-                        class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 focus:outline-none">
-                        <option value="">-- Pilih PM --</option>
-                        @foreach($pms as $pm)
-                            <option value="{{ $pm->id }}">{{ $pm->name }}</option>
-                        @endforeach
-                    </select>
-                </div>
-                <div class="bg-blue-50 border border-blue-200 rounded-lg px-3 py-2 text-xs text-blue-700">
-                    Setelah disimpan, PM yang dipilih akan otomatis menjadi <strong>pm_id</strong> pada semua akun yang dikelola user Sosmed tersebut.
-                </div>
-                <div class="flex gap-3 pt-1">
-                    <button type="button" onclick="document.getElementById('modal-oversight').classList.add('hidden')"
-                        class="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-sm text-gray-700">Batal</button>
-                    <button type="submit"
-                        class="flex-1 px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-lg text-sm font-semibold">Simpan</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
+    {{-- ── MODAL DELEGASI AKUN (HR STAFF) ─────────────────────────── --}}
     <div id="modal-assign" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4">
         <div class="absolute inset-0 bg-black/50 backdrop-blur-sm"
             onclick="document.getElementById('modal-assign').classList.add('hidden')"></div>
-        <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-sm z-10">
+        <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-md z-10">
             <div class="flex items-center justify-between px-6 py-4 border-b border-gray-200">
-                <h3 class="text-base font-bold text-gray-800">Delegasi Akun Sosmed</h3>
+                <div>
+                    <h3 class="text-base font-bold text-gray-800">Atur Penugasan Akun Sosmed</h3>
+                    <p class="text-xs text-gray-400 mt-0.5">Tentukan eksekutor harian dan supervisor pengawas</p>
+                </div>
                 <button onclick="document.getElementById('modal-assign').classList.add('hidden')"
                     class="text-gray-400 hover:text-gray-600">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -612,40 +491,49 @@
                     </svg>
                 </button>
             </div>
-            <form id="form-assign" method="POST" action="" class="p-6 pt-1 space-y-4">
+            <form id="form-assign" method="POST" action="" class="p-6 pt-2 space-y-4">
                 @csrf @method('PATCH')
-                <div>
-                    <p class="text-xs text-gray-500 mb-0.5">Nama Akun</p>
-                    <p id="assign-acc-name" class="text-sm font-semibold text-gray-800"></p>
+                <div class="bg-gray-50 p-3 rounded-lg border border-gray-200">
+                    <p class="text-xs text-gray-500 mb-0.5">Nama Akun Sosial Media</p>
+                    <p id="assign-acc-name" class="text-sm font-bold text-gray-800"></p>
                 </div>
                 <div>
-                    <label class="block text-xs font-semibold text-gray-600 mb-1.5">Pilih Penanggung Jawab PM (Nama
-                        User)</label>
+                    <label class="block text-xs font-semibold text-gray-700 mb-1">1. Eksekutor (Dikelola Oleh)</label>
+                    <select name="staff_id" id="assign-staff-sel" onchange="syncSupervisorState(this, 'assign-pm-sel', 'assign-pm-hint')"
+                        class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 focus:outline-none">
+                        <option value="" data-role="">-- Belum Ditugaskan --</option>
+                        @foreach($executors as $ex)
+                            @php
+                                $exRoleLabel = match($ex->role) {
+                                    'pm' => 'PM Mandiri',
+                                    'sosmed' => 'Staff Sosmed',
+                                    'digital_marketing' => 'Digital Marketing',
+                                    default => $ex->role_label ?? strtoupper($ex->role)
+                                };
+                            @endphp
+                            <option value="{{ $ex->id }}" data-role="{{ $ex->role }}">
+                                {{ $ex->name }} ({{ $exRoleLabel }})
+                            </option>
+                        @endforeach
+                    </select>
+                    <p class="text-[11px] text-gray-400 mt-1">User yang bertugas membuat & mengunggah konten.</p>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-gray-700 mb-1">2. Supervisor (Diawasi Oleh PM)</label>
                     <select name="pm_id" id="assign-pm-sel"
                         class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 focus:outline-none">
-                        <option value="">-- Tanpa PM --</option>
+                        <option value="">-- Tanpa Supervisor / Langsung ke HR --</option>
                         @foreach($pms as $pm)
-                            <option value="{{ $pm->id }}">{{ $pm->name }}</option>
+                            <option value="{{ $pm->id }}">{{ $pm->name }} (PM)</option>
                         @endforeach
                     </select>
+                    <p id="assign-pm-hint" class="text-[11px] text-gray-400 mt-1">PM yang berwenang meninjau & approve tugas. Jika PM mengelola akun mandiri, bagian ini otomatis dinonaktifkan.</p>
                 </div>
-                <div>
-                    <label class="block text-xs font-semibold text-gray-600 mb-1.5">Pilih Penanggung Jawab Sosmed (Nama
-                        User)</label>
-                    <select name="staff_id" id="assign-staff-sel"
-                        class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 focus:outline-none">
-                        <option value="">-- Tanpa Staff --</option>
-                        @foreach($staffs as $st)
-                            <option value="{{ $st->id }}">{{ $st->name }}</option>
-                        @endforeach
-                    </select>
-                </div>
-                <div class="flex gap-3">
+                <div class="flex gap-3 pt-2">
                     <button type="button" onclick="document.getElementById('modal-assign').classList.add('hidden')"
-                        class="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-sm text-gray-700">Batal</button>
+                        class="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-sm text-gray-700 hover:bg-gray-50 transition">Batal</button>
                     <button type="submit"
-                        class="flex-1 px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-lg text-sm font-semibold">Simpan
-                        Delegasi</button>
+                        class="flex-1 px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-lg text-sm font-semibold shadow-sm transition">Simpan Penugasan</button>
                 </div>
             </form>
         </div>
@@ -713,19 +601,48 @@
 
 @push('scripts')
     <script>
+        function syncSupervisorState(staffSelect, pmSelectId, hintId) {
+            if (!staffSelect) return;
+            const pmSelect = document.getElementById(pmSelectId);
+            const hint = document.getElementById(hintId);
+            if (!pmSelect) return;
+
+            const selectedOption = staffSelect.options[staffSelect.selectedIndex];
+            const role = selectedOption ? selectedOption.getAttribute('data-role') : null;
+
+            if (role === 'pm') {
+                pmSelect.value = '';
+                pmSelect.disabled = true;
+                pmSelect.classList.add('bg-gray-100', 'text-gray-400', 'cursor-not-allowed');
+                if (hint) {
+                    hint.innerHTML = '<span class="text-indigo-600 font-semibold">🔒 PM Mandiri:</span> Akun dikelola langsung oleh PM. Hasil pengerjaan otomatis lolos Level 1 dan langsung diverifikasi HR Staff (supervisor otomatis dinonaktifkan).';
+                }
+            } else {
+                pmSelect.disabled = false;
+                pmSelect.classList.remove('bg-gray-100', 'text-gray-400', 'cursor-not-allowed');
+                if (hint) {
+                    hint.innerHTML = 'PM yang berwenang meninjau & approve tugas. Jika PM mengelola akun mandiri, bagian ini otomatis dinonaktifkan.';
+                }
+            }
+        }
+
         function openAssignModal(accId, accName, currentPmId, currentStaffId) {
             document.getElementById('assign-acc-name').textContent = accName;
             document.getElementById('form-assign').action = `/staff/sosmed/accounts/${accId}/assign`;
-            document.getElementById('assign-pm-sel').value = currentPmId ?? '';
             document.getElementById('assign-staff-sel').value = currentStaffId ?? '';
+            document.getElementById('assign-pm-sel').value = currentPmId ?? '';
+            syncSupervisorState(document.getElementById('assign-staff-sel'), 'assign-pm-sel', 'assign-pm-hint');
             document.getElementById('modal-assign').classList.remove('hidden');
         }
 
-        function openOversightModal(sosmedId, sosmedName, currentPmId) {
-            document.getElementById('oversight-sosmed-sel').value = sosmedId ?? '';
-            document.getElementById('oversight-pm-sel').value = currentPmId ?? '';
-            document.getElementById('modal-oversight').classList.remove('hidden');
-        }
+        // Enable any disabled select before submitting forms so payload isn't dropped
+        document.querySelectorAll('form').forEach(form => {
+            form.addEventListener('submit', function() {
+                this.querySelectorAll('select:disabled').forEach(sel => {
+                    sel.disabled = false;
+                });
+            });
+        });
 
         function openVerifyModal(taskId, title) {
             document.getElementById('verify-task-title').textContent = title;

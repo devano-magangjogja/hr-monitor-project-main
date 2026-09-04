@@ -62,14 +62,14 @@
         <div class="p-4 sm:p-6">
             {{-- ── Desktop Table (md+) ────────────────────────────────────────── --}}
             <div class="hidden md:block overflow-x-auto rounded-lg border border-gray-100">
-                <table class="w-full text-sm">
+                <table class="w-full table-fixed text-sm">
                     <colgroup>
-                        <col class="w-12"> {{-- Ceklis --}}
-                        <col class="w-1/4"> {{-- Nama Akun --}}
-                        <col class="w-32"> {{-- Platform --}}
-                        <col class="w-32"> {{-- Link Profil --}}
-                        <col class="w-1/4"> {{-- Bukti Konten --}}
-                        <col class="w-36"> {{-- Status / Aksi --}}
+                        <col class="w-12">     {{-- Ceklis --}}
+                        <col class="w-[30%]">  {{-- Nama Akun --}}
+                        <col class="w-32">     {{-- Platform --}}
+                        <col class="w-32">     {{-- Link Profil --}}
+                        <col class="w-[25%]">  {{-- Bukti Konten --}}
+                        <col class="w-36">     {{-- Status / Aksi --}}
                     </colgroup>
                     <thead>
                         <tr
@@ -108,8 +108,8 @@
                                 </td>
 
                                 {{-- Nama Akun --}}
-                                <td class="px-4 py-3.5">
-                                    <p class="font-semibold text-gray-800 truncate" title="{{ $acc->name }}">{{ $acc->name }}
+                                <td class="px-4 py-3.5 min-w-0">
+                                    <p class="font-semibold text-gray-800 truncate block" title="{{ $acc->name }}">{{ $acc->name }}
                                     </p>
                                     @if($isRejected && $todayTask?->rejection_note)
                                         <p
@@ -145,7 +145,7 @@
                                 </td>
 
                                 {{-- Bukti Konten --}}
-                                <td class="px-4 py-3.5 text-xs">
+                                <td class="px-4 py-3.5 text-xs min-w-0">
                                     @if($todayTask && $todayTask->hasLinks())
                                         <button type="button"
                                             onclick="openLinksPopup({{ json_encode($todayTask->link_upload) }}, '{{ addslashes($acc->name) }}')"
@@ -158,7 +158,7 @@
                                             {{ $todayTask->link_count }} link bukti
                                         </button>
                                         @if($todayTask->description)
-                                            <p class="text-[10px] text-gray-400 mt-0.5 truncate" title="{{ $todayTask->description }}">
+                                            <p class="text-[10px] text-gray-400 mt-0.5 truncate max-w-full block" title="{{ $todayTask->description }}">
                                                 {{ $todayTask->description }}
                                             </p>
                                         @endif

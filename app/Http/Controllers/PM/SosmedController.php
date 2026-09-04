@@ -17,103 +17,129 @@ class SosmedController extends Controller
         $tab           = $request->query('tab', 'accounts');
         $currentUserId = Auth::id();
 
-        // ── Tab 1: direct accounts (pm_id = me) ──────────────────────────
-        $accounts = SosmedAccount::with(['staffUser', 'creator'])
-            ->where('pm_id', $currentUserId)
+        // ── Kapasitas 1: Akun Mandiri yang Dikelola Sendiri oleh PM (Eksekutor) ────
+        $myAccounts = SosmedAccount::with(['creator'])
+            ->where('staff_id', $currentUserId)
             ->orderBy('platform')
             ->get();
 
-        $accountIds = $accounts->pluck('id');
+        $myAccountIds = $myAccounts->pluck('id');
 
         $todayTasks = SosmedTask::with(['verifiedBy', 'hrVerifiedBy'])
-            ->whereIn('sosmed_account_id', $accountIds)
+            ->whereIn('sosmed_account_id', $myAccountIds)
             ->whereDate('task_date', now()->toDateString())
             ->get()
             ->keyBy('sosmed_account_id');
 
-        // ── Tab 2: oversight — Sosmed users assigned to me via pivot ──────
+        $accounts = $myAccounts; // Tab 1: Akun yang dikerjakan sendiri
+
+        // ── Kapasitas 2: Akun & Staff yang Disupervisi oleh PM (Supervisor/Approver) ─
+        // 1. Akun langsung di mana pm_id = me tapi dikerjakan staff lain
+        $directSupervisedAccounts = SosmedAccount::with(['staffUser', 'creator'])
+            ->where('pm_id', $currentUserId)
+            ->where('staff_id', '!=', $currentUserId)
+            ->whereNotNull('staff_id')
+            ->get();
+
+        // 2. Akun via pivot oversight (PM -> Sosmed staff)
         $oversightLinks = PmSosmedOversight::with(['sosmedUser'])
             ->where('pm_id', $currentUserId)
             ->get();
 
-        // For each overseen Sosmed user, load their accounts + today's tasks
-        $oversightData = $oversightLinks->map(function ($link) {
-            $sosmedUser = $link->sosmedUser;
-            if (!$sosmedUser) return null;
+        $oversightStaffIds = $oversightLinks->pluck('sosmed_id')->filter();
 
-            $userAccounts = SosmedAccount::with(['pmUser'])
-                ->where('staff_id', $sosmedUser->id)
+        // Semua akun staff yang berada di bawah pengawasan PM ini
+        $allSupervisedAccounts = SosmedAccount::with(['staffUser', 'creator'])
+            ->where(function ($q) use ($currentUserId, $oversightStaffIds) {
+                $q->where(function ($q2) use ($currentUserId) {
+                    $q2->where('pm_id', $currentUserId)
+                       ->where('staff_id', '!=', $currentUserId)
+                       ->whereNotNull('staff_id');
+                })->orWhere(function ($q2) use ($oversightStaffIds, $currentUserId) {
+                    $q2->whereIn('staff_id', $oversightStaffIds)
+                       ->where('staff_id', '!=', $currentUserId);
+                });
+            })
+            ->orderBy('platform')
+            ->get();
+
+        $supervisedAccountIds = $allSupervisedAccounts->pluck('id')->unique();
+
+        $supervisedTodayTasks = SosmedTask::whereIn('sosmed_account_id', $supervisedAccountIds)
+            ->whereDate('task_date', now()->toDateString())
+            ->get()
+            ->keyBy('sosmed_account_id');
+
+        // Oversight data grouping per staff user
+        $oversightStaffUsers = $allSupervisedAccounts->pluck('staffUser')->filter()->unique('id');
+        $oversightData = $oversightStaffUsers->map(function ($staffUser) use ($supervisedTodayTasks) {
+            $userAccounts = SosmedAccount::where('staff_id', $staffUser->id)
                 ->orderBy('platform')
                 ->get();
-
             $userAccountIds = $userAccounts->pluck('id');
 
-            $userTodayTasks = SosmedTask::whereIn('sosmed_account_id', $userAccountIds)
-                ->whereDate('task_date', now()->toDateString())
-                ->get()
-                ->keyBy('sosmed_account_id');
+            $userTodayTasks = $supervisedTodayTasks->whereIn('sosmed_account_id', $userAccountIds);
 
             return [
-                'sosmed_user'   => $sosmedUser,
+                'sosmed_user'   => $staffUser,
                 'accounts'      => $userAccounts,
-                'today_tasks'   => $userTodayTasks,
+                'today_tasks'   => $userTodayTasks->keyBy('sosmed_account_id'),
                 'total'         => $userAccounts->count(),
                 'done'          => $userTodayTasks->whereIn('status', ['done_by_staff', 'verified_by_pm', 'approved_hr'])->count(),
                 'pending'       => $userAccounts->filter(function ($acc) use ($userTodayTasks) {
-                    return !isset($userTodayTasks[$acc->id])
-                        || in_array($userTodayTasks[$acc->id]->status, ['pending', 'rejected']);
+                    $t = $userTodayTasks->firstWhere('sosmed_account_id', $acc->id);
+                    return !$t || in_array($t->status, ['pending', 'rejected']);
                 })->count(),
             ];
-        })->filter()->values();
+        })->values();
 
-        // ── Tab 3: verification — tasks from ALL accounts PM can verify ───
-        // = direct accounts + accounts managed by overseen Sosmed users
-        $oversightAccountIds = $oversightData->flatMap(fn($d) => $d['accounts']->pluck('id'));
-        $allVerifiableIds    = $accountIds->merge($oversightAccountIds)->unique();
-
-        $pendingVerification = SosmedTask::with(['account', 'assignedUser'])
-            ->whereIn('sosmed_account_id', $allVerifiableIds)
+        // ── Tab 3: Verifikasi Tugas Tim (Approval Level 1) ─────────────────
+        // Tugas dari akun yang diawasi yang berstatus 'done_by_staff' dan bukan milik PM sendiri
+        $pendingVerification = SosmedTask::with(['account.staffUser', 'assignedUser'])
+            ->whereIn('sosmed_account_id', $supervisedAccountIds)
+            ->where('assigned_to', '!=', $currentUserId)
             ->where('status', 'done_by_staff')
             ->orderBy('updated_at', 'desc')
             ->get();
 
-        $approvalHistory = SosmedTask::with(['account', 'assignedUser', 'verifiedBy', 'hrVerifiedBy'])
-            ->whereIn('sosmed_account_id', $allVerifiableIds)
+        $approvalHistory = SosmedTask::with(['account.staffUser', 'assignedUser', 'verifiedBy', 'hrVerifiedBy'])
+            ->whereIn('sosmed_account_id', $supervisedAccountIds)
+            ->where('assigned_to', '!=', $currentUserId)
             ->whereIn('status', ['verified_by_pm', 'approved_hr', 'rejected'])
             ->orderBy('updated_at', 'desc')
             ->get();
 
         // ── Stats ─────────────────────────────────────────────────────────
-        $allTasks = SosmedTask::whereIn('sosmed_account_id', $allVerifiableIds)->get();
+        $allSupervisedTasks = SosmedTask::whereIn('sosmed_account_id', $supervisedAccountIds)->get();
 
         $stats = [
-            'total_accounts'    => $accounts->count(),
+            'total_accounts'    => $accounts->count(), // Akun mandiri yang dipegang sendiri
             'need_pm_verify'    => $pendingVerification->count(),
-            'waiting_hr'        => $allTasks->where('status', 'verified_by_pm')->count(),
-            'approved_final'    => $allTasks->where('status', 'approved_hr')->count(),
-            'rejected'          => $allTasks->where('status', 'rejected')->count(),
+            'waiting_hr'        => $allSupervisedTasks->where('status', 'verified_by_pm')->count(),
+            'approved_final'    => $allSupervisedTasks->where('status', 'approved_hr')->count(),
+            'rejected'          => $allSupervisedTasks->where('status', 'rejected')->count(),
             'pending_today'     => $accounts->filter(function ($acc) use ($todayTasks) {
                 if (!isset($todayTasks[$acc->id])) return true;
                 return in_array($todayTasks[$acc->id]->status, ['pending', 'rejected']);
             })->count(),
-            'oversight_count'   => $oversightLinks->count(),
+            'oversight_count'   => $allSupervisedAccounts->count(),
         ];
 
         return view('pm.sosmed.index', compact(
             'tab', 'accounts', 'todayTasks',
-            'oversightData', 'oversightLinks',
+            'oversightData', 'oversightLinks', 'allSupervisedAccounts',
             'pendingVerification', 'approvalHistory', 'stats'
         ));
     }
 
     /**
-     * PM submits proof for a direct account (pm_id = me).
-     * Bypasses level-1 (PM is the verifier), goes straight to verified_by_pm.
+     * PM submits proof for an account they manage directly as Executor.
+     * Goes straight to verified_by_pm (level-1 passed) and awaits final HR approval.
      */
     public function submitAccountTask(Request $request, SosmedAccount $account)
     {
-        if ($account->pm_id !== Auth::id()) {
-            abort(403, 'Akses ditolak. Anda bukan PM penanggung jawab akun ini.');
+        if ($account->staff_id !== Auth::id() && $account->pm_id !== Auth::id()) {
+            abort(403, 'Akses ditolak. Anda bukan eksekutor akun ini.');
         }
 
         $validated = $request->validate([

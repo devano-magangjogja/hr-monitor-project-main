@@ -156,7 +156,6 @@ Route::prefix('staff')->name('staff.')->middleware(['auth', 'role:hr_staff'])->g
     // Manajemen Sosmed & Approval Level 2
     Route::get('/sosmed', [StaffSosmedController::class, 'index'])->name('sosmed.index');
     Route::patch('/sosmed/accounts/{account}/assign', [StaffSosmedController::class, 'assignAccount'])->name('sosmed.accounts.assign');
-    Route::post('/sosmed/oversight', [StaffSosmedController::class, 'assignOversight'])->name('sosmed.oversight.assign');
     Route::patch('/sosmed/tasks/{task}/verify', [StaffSosmedController::class, 'verifyTask'])->name('sosmed.tasks.verify');
 });
 
