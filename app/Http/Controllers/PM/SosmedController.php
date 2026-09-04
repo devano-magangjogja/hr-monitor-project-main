@@ -14,7 +14,10 @@ class SosmedController extends Controller
 {
     public function index(Request $request)
     {
-        $tab           = $request->query('tab', 'accounts');
+        $tab = $request->query('tab', 'accounts');
+        if ($tab === 'approvals') {
+            $tab = 'oversight';
+        }
         $currentUserId = Auth::id();
 
         // ── Kapasitas 1: Akun Mandiri yang Dikelola Sendiri oleh PM (Eksekutor) ────
@@ -66,7 +69,11 @@ class SosmedController extends Controller
         $supervisedAccountIds = $allSupervisedAccounts->pluck('id')->unique();
 
         $supervisedTodayTasks = SosmedTask::whereIn('sosmed_account_id', $supervisedAccountIds)
-            ->whereDate('task_date', now()->toDateString())
+            ->where(function ($q) {
+                $q->whereDate('task_date', now()->toDateString())
+                  ->orWhere('status', 'done_by_staff');
+            })
+            ->orderBy('task_date', 'desc')
             ->get()
             ->keyBy('sosmed_account_id');
 
@@ -93,7 +100,7 @@ class SosmedController extends Controller
             ];
         })->values();
 
-        // ── Tab 3: Verifikasi Tugas Tim (Approval Level 1) ─────────────────
+        // ── Verifikasi Tugas Tim (Approval Level 1) ────────────────────────
         // Tugas dari akun yang diawasi yang berstatus 'done_by_staff' dan bukan milik PM sendiri
         $pendingVerification = SosmedTask::with(['account.staffUser', 'assignedUser'])
             ->whereIn('sosmed_account_id', $supervisedAccountIds)
@@ -229,7 +236,7 @@ class SosmedController extends Controller
                 'notes'          => 'Diverifikasi oleh PM. Menunggu persetujuan final HR Staff.',
             ]);
 
-            return redirect()->route('pm.sosmed.index', ['tab' => 'approvals'])
+            return redirect()->route('pm.sosmed.index', ['tab' => 'oversight'])
                 ->with('success', 'Tugas berhasil diverifikasi dan diteruskan ke HR Staff.');
         } else {
             $task->update([
@@ -248,7 +255,7 @@ class SosmedController extends Controller
                 'notes'          => $validated['rejection_note'] ?? 'Ditolak oleh PM',
             ]);
 
-            return redirect()->route('pm.sosmed.index', ['tab' => 'approvals'])
+            return redirect()->route('pm.sosmed.index', ['tab' => 'oversight'])
                 ->with('success', 'Tugas ditolak dan dikembalikan ke staff.');
         }
     }

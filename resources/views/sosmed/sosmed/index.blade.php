@@ -294,7 +294,7 @@
                     </svg>
                 </button>
             </div>
-            <form id="form-submit" method="POST" action="" class="p-6 pt-1 space-y-4">
+            <form id="form-submit" method="POST" action="" onsubmit="handleFormSubmit(event)" class="p-6 pt-1 space-y-4">
                 @csrf
                 <div>
                     <p class="text-xs text-gray-500 mb-0.5">Nama Akun Sosmed</p>
@@ -345,6 +345,32 @@
                     </button>
                 </div>
             </form>
+        </div>
+    </div>
+
+    {{-- ═══ MODAL: KONFIRMASI SUBMIT BUKTI ═══════════════════════════════ --}}
+    <div id="modal-confirm-submit" class="hidden fixed inset-0 z-[60] flex items-center justify-center p-4">
+        <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" onclick="closeConfirmSubmitModal()"></div>
+        <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-sm z-10 p-6 text-center transform transition-all">
+            <div class="w-12 h-12 rounded-full bg-primary-50 text-primary-600 flex items-center justify-center mx-auto mb-3.5">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+            </div>
+            <h3 class="text-base font-bold text-gray-800 mb-1">Submit Bukti?</h3>
+            <p class="text-xs text-gray-500 mb-5 leading-relaxed">
+                Apakah Anda yakin ingin mengirim bukti konten ini? Pastikan link yang diisi sudah benar.
+            </p>
+            <div class="flex gap-3">
+                <button type="button" onclick="closeConfirmSubmitModal()"
+                    class="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition">
+                    Tidak
+                </button>
+                <button type="button" id="btn-confirm-submit" onclick="submitConfirmed()"
+                    class="flex-1 px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-lg text-sm font-semibold shadow-sm transition">
+                    Ya
+                </button>
+            </div>
         </div>
     </div>
 
@@ -435,12 +461,48 @@
         function closeSubmitModal() {
             _saveDraftFromDOM();
             document.getElementById('modal-submit').classList.add('hidden');
+            closeConfirmSubmitModal();
         }
 
         // Batal button — discard draft, hide
         function cancelSubmitModal() {
             _submitDraft = null;
             document.getElementById('modal-submit').classList.add('hidden');
+            closeConfirmSubmitModal();
+        }
+
+        // ── Confirmation Modal Handlers ──────────────────────────────────────────
+        function handleFormSubmit(e) {
+            e.preventDefault();
+            const form = document.getElementById('form-submit');
+            if (!form.checkValidity()) {
+                form.reportValidity();
+                return;
+            }
+            const links = Array.from(form.querySelectorAll('input[name="links[]"]')).map(i => i.value.trim()).filter(Boolean);
+            if (links.length === 0) {
+                alert('Minimal satu link bukti harus diisi.');
+                return;
+            }
+            openConfirmSubmitModal();
+        }
+
+        function openConfirmSubmitModal() {
+            document.getElementById('modal-confirm-submit').classList.remove('hidden');
+        }
+
+        function closeConfirmSubmitModal() {
+            document.getElementById('modal-confirm-submit').classList.add('hidden');
+        }
+
+        function submitConfirmed() {
+            const btn = document.getElementById('btn-confirm-submit');
+            if (btn) {
+                btn.disabled = true;
+                btn.innerHTML = '<span class="inline-flex items-center gap-1.5"><svg class="animate-spin h-4 w-4 text-white" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Mengirim...</span>';
+            }
+            const form = document.getElementById('form-submit');
+            HTMLFormElement.prototype.submit.call(form);
         }
 
         function addLinkRow() {

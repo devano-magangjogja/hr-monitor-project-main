@@ -22,22 +22,31 @@ class PresensiController extends Controller
         $isToday = $tanggal === $todayDate;
         $formattedDate = Carbon::parse($tanggal)->locale('id')->translatedFormat('l, d F Y');
 
-        // Cari tugas asisten pada tanggal ini yang memiliki lokasi kantor
-        $assignedKantor = Task::whereHas('assignments', function ($q) {
-            $q->where('user_id', Auth::id());
-        })->where('task_date', $tanggal)
-          ->whereNotNull('kantor')
-          ->value('kantor');
+        // Cari kantor penugasan asisten:
+        // 1. Parameter request 'kantor' jika asisten memilih kantor tertentu
+        // 2. Tugas asisten pada tanggal ini yang memiliki kantor
+        // 3. Tugas kantor terbaru yang pernah ditugaskan kepada asisten ini
+        // 4. Riwayat presensi terakhir yang dibuat asisten ini
+        // 5. Default 'Kantor 1'
+        $assignedKantor = $request->input('kantor')
+            ?: Task::whereHas('assignments', fn($q) => $q->where('user_id', Auth::id()))
+                ->where('task_date', $tanggal)
+                ->whereNotNull('kantor')
+                ->value('kantor')
+            ?: Task::whereHas('assignments', fn($q) => $q->where('user_id', Auth::id()))
+                ->whereNotNull('kantor')
+                ->orderByDesc('task_date')
+                ->orderByDesc('created_at')
+                ->value('kantor')
+            ?: Presensi::where('created_by', Auth::id())
+                ->whereNotNull('kantor')
+                ->latest('id')
+                ->value('kantor')
+            ?: 'Kantor 1';
 
-        // Jika belum ada penugasan kantor, jangan tampilkan data kantor acak
-        $baseQuery = Presensi::with(['pemagang', 'creator'])->where('tanggal', $tanggal);
-
-        if ($assignedKantor) {
-            $baseQuery->where('kantor', $assignedKantor);
-        } else {
-            // Asisten belum punya tugas kantor pada tanggal ini
-            $baseQuery->whereRaw('1 = 0');
-        }
+        $baseQuery = Presensi::with(['pemagang', 'creator'])
+            ->where('tanggal', $tanggal)
+            ->where('kantor', $assignedKantor);
 
         if ($request->filled('search')) {
             $search = $request->input('search');
@@ -78,12 +87,7 @@ class PresensiController extends Controller
             ->fragment('tabel-tidak-hadir');
 
         // Statistik Ringkasan untuk TANGGAL YANG DIPILIH
-        $statsQuery = Presensi::where('tanggal', $tanggal);
-        if ($assignedKantor) {
-            $statsQuery->where('kantor', $assignedKantor);
-        } else {
-            $statsQuery->whereRaw('1 = 0');
-        }
+        $statsQuery = Presensi::where('tanggal', $tanggal)->where('kantor', $assignedKantor);
 
         $stats = [
             'total_pemagang' => Pemagang::count(),
@@ -108,6 +112,8 @@ class PresensiController extends Controller
         // List opsi divisi unik
         $divisiList = Pemagang::select('divisi')->distinct()->orderBy('divisi')->pluck('divisi');
 
+        $kantorList = ['Kantor 1', 'Kantor 2', 'Kantor 3', 'Kantor 4'];
+
         return view('assistant.presensi.presensi', compact(
             'presensiHadir',
             'presensiTidakHadir',
@@ -117,7 +123,8 @@ class PresensiController extends Controller
             'tanggal',
             'isToday',
             'formattedDate',
-            'assignedKantor'
+            'assignedKantor',
+            'kantorList'
         ));
     }
 
@@ -128,16 +135,22 @@ class PresensiController extends Controller
     {
         $today = Carbon::today()->format('Y-m-d');
 
-        // Cari tugas asisten hari ini untuk mendapatkan lokasi kantor
-        $assignedKantor = Task::whereHas('assignments', function ($q) {
-            $q->where('user_id', Auth::id());
-        })->where('task_date', $today)
-          ->whereNotNull('kantor')
-          ->value('kantor');
-
-        if (!$assignedKantor) {
-            return back()->with('error', 'Anda belum dapat melakukan presensi karena Admin atau Staff belum menentukan tugas penugasan kantor Anda untuk hari ini. Silakan hubungi Admin atau Staff.')->withInput();
-        }
+        // Cari kantor penugasan asisten
+        $assignedKantor = $request->input('kantor')
+            ?: Task::whereHas('assignments', fn($q) => $q->where('user_id', Auth::id()))
+                ->where('task_date', $today)
+                ->whereNotNull('kantor')
+                ->value('kantor')
+            ?: Task::whereHas('assignments', fn($q) => $q->where('user_id', Auth::id()))
+                ->whereNotNull('kantor')
+                ->orderByDesc('task_date')
+                ->orderByDesc('created_at')
+                ->value('kantor')
+            ?: Presensi::where('created_by', Auth::id())
+                ->whereNotNull('kantor')
+                ->latest('id')
+                ->value('kantor')
+            ?: 'Kantor 1';
 
         $validated = $request->validate([
             'pemagang_id' => ['required', 'exists:pemagang,id'],
@@ -145,9 +158,10 @@ class PresensiController extends Controller
             'waktu_masuk' => ['required'],
             'keterangan'  => ['required', 'in:Lebih Awal,Tepat Waktu,Terlambat,Tidak Hadir'],
             'notes'       => ['nullable', 'string', 'max:500'],
+            'kantor'      => ['nullable', 'string'],
         ]);
 
-        $kantorTujuan = $assignedKantor;
+        $kantorTujuan = $validated['kantor'] ?? $assignedKantor;
 
         // Validasi: Cegah pencatatan jika pemagang sudah tercatat di kantor lain hari ini
         $alreadyOtherOffice = Presensi::where('pemagang_id', $validated['pemagang_id'])
@@ -212,37 +226,22 @@ class PresensiController extends Controller
         $tanggal = $request->input('tanggal', $today);
         $formattedDate = Carbon::parse($tanggal)->locale('id')->translatedFormat('l, d F Y');
 
-        // Cari tugas asisten pada hari/tanggal ini yang memiliki lokasi kantor
-        $assignedKantor = Task::whereHas('assignments', function ($q) {
-            $q->where('user_id', Auth::id());
-        })->where('task_date', $tanggal)
-          ->whereNotNull('kantor')
-          ->value('kantor');
-
-        if (!$assignedKantor) {
-            $assignedKantor = Presensi::where('created_by', Auth::id())
-                ->where('tanggal', $tanggal)
+        // Cari kantor penugasan asisten
+        $assignedKantor = $request->input('kantor')
+            ?: Task::whereHas('assignments', fn($q) => $q->where('user_id', Auth::id()))
+                ->where('task_date', $tanggal)
                 ->whereNotNull('kantor')
-                ->value('kantor');
-        }
-
-        // Jika belum ada kantor penugasan
-        if (!$assignedKantor) {
-            $rekapPemagang = collect();
-            $stats = [
-                'total_pemagang' => 0,
-                'avg_rate'       => 0,
-                'datang_awal'    => 0,
-                'tepat_waktu'    => 0,
-                'terlambat'      => 0,
-                'tidak_hadir'    => 0,
-                'total_hadir'    => 0,
-            ];
-            $logs = collect();
-            $divisiList = collect();
-
-            return view('assistant.presensi.laporan-presensi', compact('rekapPemagang', 'stats', 'logs', 'divisiList', 'assignedKantor', 'tanggal', 'formattedDate'));
-        }
+                ->value('kantor')
+            ?: Task::whereHas('assignments', fn($q) => $q->where('user_id', Auth::id()))
+                ->whereNotNull('kantor')
+                ->orderByDesc('task_date')
+                ->orderByDesc('created_at')
+                ->value('kantor')
+            ?: Presensi::where('created_by', Auth::id())
+                ->whereNotNull('kantor')
+                ->latest('id')
+                ->value('kantor')
+            ?: 'Kantor 1';
 
         // Tabel 1: Rekapitulasi Pemagang HANYA untuk pemagang yang presensi di kantor tersebut pada hari itu
         $queryPemagang = Pemagang::whereHas('presensis', function ($q) use ($tanggal, $assignedKantor) {
@@ -349,6 +348,8 @@ class PresensiController extends Controller
               ->where('kantor', $assignedKantor);
         })->select('divisi')->distinct()->orderBy('divisi')->pluck('divisi');
 
-        return view('assistant.presensi.laporan-presensi', compact('rekapPemagang', 'stats', 'logs', 'divisiList', 'assignedKantor', 'tanggal', 'formattedDate'));
+        $kantorList = ['Kantor 1', 'Kantor 2', 'Kantor 3', 'Kantor 4'];
+
+        return view('assistant.presensi.laporan-presensi', compact('rekapPemagang', 'stats', 'logs', 'divisiList', 'assignedKantor', 'tanggal', 'formattedDate', 'kantorList'));
     }
 }

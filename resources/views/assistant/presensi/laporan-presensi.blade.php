@@ -143,12 +143,23 @@
 {{-- ── Filter Bar Laporan (Sembunyi saat Print) ─────────────── --}}
 <div class="print:hidden bg-white rounded-xl border border-gray-200 p-4 mb-6 shadow-sm">
     <form method="GET" action="{{ route('assistant.presensi.laporan') }}"
-        class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
+        class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
         
         {{-- Tanggal Filter --}}
         <div>
             <input type="date" name="tanggal" value="{{ $tanggal }}" onchange="this.form.submit()"
                 class="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:bg-white transition text-gray-700">
+        </div>
+
+        {{-- Filter Kantor --}}
+        <div>
+            <select name="kantor" onchange="this.form.submit()"
+                class="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:bg-white transition text-gray-700 font-medium">
+                @foreach ($kantorList as $k)
+                    <option value="{{ $k }}" {{ $assignedKantor == $k ? 'selected' : '' }}>
+                        {{ $k }}</option>
+                @endforeach
+            </select>
         </div>
 
         {{-- Search input --}}

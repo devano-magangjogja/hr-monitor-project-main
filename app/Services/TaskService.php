@@ -2,11 +2,14 @@
 
 namespace App\Services;
 
+use App\Models\SosmedAccount;
+use App\Models\SosmedTask;
 use App\Models\Task;
 use App\Models\User;
 use App\Notifications\TaskAssigned;
 use App\Repositories\TaskRepository;
 use App\Repositories\UserRepository;
+use App\Services\DefaultTaskService;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Auth;
@@ -197,9 +200,219 @@ class TaskService
         return $this->taskRepository->markAllPendingAsNotDone($today);
     }
 
-    public function getAllTasksForUserToday(int $userId): Collection
+    public function getAllTasksForUserToday(int $userId): \Illuminate\Support\Collection
     {
-        return $this->taskRepository->getAllTasksForUserToday($userId);
+        $today = Carbon::today()->toDateString();
+
+        // 1. Pastikan tugas rutin default hari ini sudah ter-generate (termasuk tugas Presensi)
+        try {
+            app(DefaultTaskService::class)->generateDailyTasks();
+        } catch (\Throwable $e) {
+            // Abaikan jika terjadi kendala saat auto-generate
+        }
+
+        // 2. Ambil tugas reguler dari repository
+        $regularTasks = $this->taskRepository->getAllTasksForUserToday($userId);
+
+        // 3. Ambil tugas pengelolaan akun sosmed untuk user ini
+        $sosmedTasks = $this->getSosmedTasksForUser($userId, $today);
+
+        // 4. Gabungkan seluruh tugas
+        return $regularTasks->concat($sosmedTasks);
+    }
+
+    /**
+     * Ambil seluruh tugas pengelolaan akun sosmed untuk user tertentu.
+     * Jika akun belum disetujui final (approved_hr) dari hari sebelumnya, tugas TIDAK AKAN HILANG.
+     */
+    public function getSosmedTasksForUser(int $userId, string $today): \Illuminate\Support\Collection
+    {
+        $user = User::find($userId);
+        if (!$user) {
+            return collect();
+        }
+
+        $items = collect();
+
+        // A. Akun di mana user ini menjadi penanggung jawab langsung (staff_id)
+        $accounts = SosmedAccount::with(['pmUser', 'creator'])
+            ->where('staff_id', $userId)
+            ->orderBy('platform')
+            ->get();
+
+        foreach ($accounts as $account) {
+            // 1. Tugas masa lalu yang BELUM disetujui final (status != 'approved_hr')
+            $unapprovedTasks = SosmedTask::with(['verifiedBy', 'hrVerifiedBy'])
+                ->where('sosmed_account_id', $account->id)
+                ->whereDate('task_date', '<', $today)
+                ->where('status', '!=', 'approved_hr')
+                ->orderByDesc('task_date')
+                ->get();
+
+            foreach ($unapprovedTasks as $pt) {
+                $items->push($this->formatSosmedTaskItem($pt, $account, $userId, true));
+            }
+
+            // 2. Tugas hari ini untuk akun tersebut
+            $todayTask = SosmedTask::with(['verifiedBy', 'hrVerifiedBy'])
+                ->where('sosmed_account_id', $account->id)
+                ->whereDate('task_date', $today)
+                ->first();
+
+            if ($todayTask) {
+                $items->push($this->formatSosmedTaskItem($todayTask, $account, $userId, false));
+            } else {
+                // Hari ini belum submit bukti -> Muncul otomatis sebagai tugas pending
+                $items->push($this->createPendingSosmedTaskItem($account, $userId, $today));
+            }
+        }
+
+        // B. Jika user adalah PM, ambil juga tugas verifikasi konten staff yang menunggu verifikasi PM
+        if ($user->role === 'pm') {
+            $supervisedAccountIds = SosmedAccount::where('pm_id', $userId)
+                ->where('staff_id', '!=', $userId)
+                ->whereNotNull('staff_id')
+                ->pluck('id');
+
+            if ($supervisedAccountIds->isNotEmpty()) {
+                $tasksNeedPmVerify = SosmedTask::with(['account', 'assignedToUser'])
+                    ->whereIn('sosmed_account_id', $supervisedAccountIds)
+                    ->where('status', 'done_by_staff')
+                    ->orderByDesc('task_date')
+                    ->get();
+
+                foreach ($tasksNeedPmVerify as $tv) {
+                    $items->push($this->formatPmVerificationTaskItem($tv, $userId));
+                }
+            }
+        }
+
+        return $items;
+    }
+
+    private function formatSosmedTaskItem(SosmedTask $task, SosmedAccount $account, int $userId, bool $isPastUnapproved = false): Task
+    {
+        $dateFormatted = Carbon::parse($task->task_date)->translatedFormat('d M Y');
+        $prefix = $isPastUnapproved ? "[Belum Disetujui] " : "";
+
+        $item = new Task([
+            'title'       => $prefix . ($task->title ?: ('Laporan Konten - ' . $account->name)),
+            'kantor'      => null,
+            'description' => $task->description ?: ($account->notes ?: 'Submit bukti konten harian.'),
+            'type'        => 'sosmed',
+        ]);
+        $item->id = $task->id;
+        $item->task_date = Carbon::parse($task->task_date);
+
+        $creatorName = $account->pmUser?->name ?? $account->creator?->name ?? 'Admin';
+        $item->setRelation('creator', (object)['name' => $creatorName]);
+
+        $item->setRelation('assignments', collect([
+            (object)[
+                'id'           => $task->id,
+                'task_id'      => $task->id,
+                'user_id'      => $userId,
+                'is_completed' => $task->status,
+                'completed_at' => $task->status === 'approved_hr' ? ($task->hr_verified_at ?? $task->updated_at) : null,
+                'note'         => $task->description ?? '',
+            ]
+        ]));
+
+        $user = User::find($userId);
+        $actionRoute = ($user && $user->role === 'pm') ? route('pm.sosmed.index') : route('sosmed.sosmed.index');
+
+        $item->is_sosmed = true;
+        $item->sosmed_status = $task->status;
+        $item->is_past_unapproved = $isPastUnapproved;
+        $item->platform = $account->platform;
+        $item->platform_color = $account->platform_color;
+        $item->action_url = $actionRoute;
+        $item->links = is_array($task->link_upload) ? $task->link_upload : ($task->link_upload ? json_decode($task->link_upload, true) : []);
+        $item->rejection_note = $task->rejection_note;
+        $item->account = $account;
+
+        return $item;
+    }
+
+    private function createPendingSosmedTaskItem(SosmedAccount $account, int $userId, string $today): Task
+    {
+        $item = new Task([
+            'title'       => 'Kelola Akun: ' . $account->name,
+            'kantor'      => null,
+            'description' => 'Wajib kelola dan submit bukti konten harian akun ' . $account->name . ($account->notes ? ' - Catatan: ' . $account->notes : ''),
+            'type'        => 'sosmed',
+        ]);
+        $item->id = 'sosmed_acc_' . $account->id;
+        $item->task_date = Carbon::parse($today);
+
+        $creatorName = $account->pmUser?->name ?? $account->creator?->name ?? 'Admin';
+        $item->setRelation('creator', (object)['name' => $creatorName]);
+
+        $item->setRelation('assignments', collect([
+            (object)[
+                'id'           => 0,
+                'task_id'      => $item->id,
+                'user_id'      => $userId,
+                'is_completed' => 'pending',
+                'completed_at' => null,
+                'note'         => '',
+            ]
+        ]));
+
+        $user = User::find($userId);
+        $actionRoute = ($user && $user->role === 'pm') ? route('pm.sosmed.index') : route('sosmed.sosmed.index');
+
+        $item->is_sosmed = true;
+        $item->sosmed_status = 'pending';
+        $item->is_past_unapproved = false;
+        $item->platform = $account->platform;
+        $item->platform_color = $account->platform_color;
+        $item->action_url = $actionRoute;
+        $item->links = [];
+        $item->rejection_note = null;
+        $item->account = $account;
+
+        return $item;
+    }
+
+    private function formatPmVerificationTaskItem(SosmedTask $tv, int $userId): Task
+    {
+        $acc = $tv->account;
+        $staffName = $tv->assignedToUser?->name ?? 'Staff Sosmed';
+
+        $item = new Task([
+            'title'       => 'Verifikasi Konten: ' . ($acc?->name ?? 'Akun Sosmed') . " ({$staffName})",
+            'kantor'      => null,
+            'description' => "Bukti konten telah disubmit oleh {$staffName}. Menunggu verifikasi Anda sebagai PM.",
+            'type'        => 'sosmed',
+        ]);
+        $item->id = $tv->id;
+        $item->task_date = Carbon::parse($tv->task_date);
+
+        $item->setRelation('creator', (object)['name' => $staffName]);
+
+        $item->setRelation('assignments', collect([
+            (object)[
+                'id'           => $tv->id,
+                'task_id'      => $tv->id,
+                'user_id'      => $userId,
+                'is_completed' => 'done_by_staff',
+                'completed_at' => null,
+                'note'         => $tv->description ?? '',
+            ]
+        ]));
+
+        $item->is_sosmed = true;
+        $item->sosmed_status = 'done_by_staff';
+        $item->is_pm_verification = true;
+        $item->platform = $acc?->platform;
+        $item->platform_color = $acc?->platform_color;
+        $item->action_url = route('pm.sosmed.index', ['tab' => 'oversight']);
+        $item->links = is_array($tv->link_upload) ? $tv->link_upload : ($tv->link_upload ? json_decode($tv->link_upload, true) : []);
+        $item->rejection_note = $tv->rejection_note;
+        $item->account = $acc;
+
+        return $item;
     }
 
     // ── Private Helpers ──────────────────────────────────
@@ -413,11 +626,19 @@ class TaskService
 
     /**
      * Urutkan koleksi tugas berdasarkan status:
-     * pending → not_done → completed
+     * pending/rejected → done_by_staff/verified_by_pm → not_done → completed/approved_hr
      */
     public function sortTasksByStatus(\Illuminate\Support\Collection|\Illuminate\Database\Eloquent\Collection $tasks, int $userId = 0): \Illuminate\Support\Collection
     {
-        $order = ['pending' => 0, 'not_done' => 1, 'completed' => 2];
+        $order = [
+            'pending'        => 0,
+            'rejected'       => 0,
+            'done_by_staff'  => 1,
+            'verified_by_pm' => 1,
+            'not_done'       => 2,
+            'approved_hr'    => 3,
+            'completed'      => 3,
+        ];
 
         return $tasks->sortBy(function ($task) use ($order, $userId) {
             $assignment = $userId

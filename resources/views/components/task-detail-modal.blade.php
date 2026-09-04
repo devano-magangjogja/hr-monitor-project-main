@@ -73,11 +73,25 @@
                 <div id="detail-assignees" class="space-y-2"></div>
             </div>
 
-            {{-- Catatan Penyelesaian --}}
+            {{-- Catatan Penyelesaian / Deskripsi Sosmed --}}
             <div id="detail-note-wrapper" class="hidden">
                 <p class="text-xs font-medium text-gray-400 uppercase tracking-wider mb-1">Catatan Penyelesaian</p>
                 <div class="bg-gray-50 rounded-lg px-4 py-3">
                     <p id="detail-note" class="text-sm text-gray-600 whitespace-pre-wrap"></p>
+                </div>
+            </div>
+
+            {{-- Link Bukti Konten Sosmed (jika ada) --}}
+            <div id="detail-links-wrapper" class="hidden">
+                <p class="text-xs font-medium text-gray-400 uppercase tracking-wider mb-1.5">Bukti Konten (Link Upload)</p>
+                <div id="detail-links" class="space-y-1.5 bg-gray-50 rounded-lg p-3"></div>
+            </div>
+
+            {{-- Catatan Penolakan / Revisi (jika ditolak) --}}
+            <div id="detail-rejection-wrapper" class="hidden">
+                <p class="text-xs font-medium text-rose-500 uppercase tracking-wider mb-1">Alasan Penolakan / Catatan Revisi</p>
+                <div class="bg-rose-50 border border-rose-200 rounded-lg px-4 py-3">
+                    <p id="detail-rejection-note" class="text-sm text-rose-700 whitespace-pre-wrap"></p>
                 </div>
             </div>
 
@@ -118,6 +132,7 @@
             'default':  { label: 'Rutin', cls: 'bg-purple-50 text-purple-700' },
             'assigned': { label: 'Ditugaskan', cls: 'bg-blue-50 text-blue-700' },
             'self':     { label: 'Mandiri', cls: 'bg-gray-100 text-gray-600' },
+            'sosmed':   { label: 'Sosmed', cls: 'bg-pink-50 text-pink-700' },
         };
         const type = typeMap[data.type] || { label: data.type, cls: 'bg-gray-100 text-gray-600' };
         typeEl.innerHTML = `<span class="inline-flex px-2.5 py-1 rounded-full text-xs font-medium ${type.cls}">${type.label}</span>`;
@@ -131,11 +146,15 @@
         // Status
         const statusEl = document.getElementById('detail-status');
         const statusMap = {
-            'completed': { label: 'Selesai', cls: 'bg-green-50 text-green-700' },
-            'not_done':  { label: 'Tidak Dikerjakan', cls: 'bg-red-50 text-red-700' },
-            'pending':   { label: 'Belum Selesai', cls: 'bg-yellow-50 text-yellow-700' },
+            'completed':      { label: 'Selesai', cls: 'bg-green-50 text-green-700' },
+            'approved_hr':    { label: 'Disetujui HR', cls: 'bg-emerald-50 text-emerald-700' },
+            'done_by_staff':  { label: 'Menunggu Verif PM', cls: 'bg-amber-50 text-amber-700' },
+            'verified_by_pm': { label: 'Menunggu Final HR', cls: 'bg-blue-50 text-blue-700' },
+            'rejected':       { label: 'Ditolak (Revisi)', cls: 'bg-rose-50 text-rose-700' },
+            'not_done':       { label: 'Tidak Dikerjakan', cls: 'bg-red-50 text-red-700' },
+            'pending':        { label: 'Belum Selesai', cls: 'bg-yellow-50 text-yellow-700' },
         };
-        const status = statusMap[data.status] || { label: '-', cls: 'bg-gray-100 text-gray-600' };
+        const status = statusMap[data.status] || { label: data.status, cls: 'bg-gray-100 text-gray-600' };
         statusEl.innerHTML = `<span class="inline-flex px-2.5 py-1 rounded-full text-xs font-medium ${status.cls}">${status.label}</span>`;
 
         // Penerima
@@ -180,6 +199,35 @@
             noteEl.textContent = data.note;
         } else {
             noteWrapper.classList.add('hidden');
+        }
+
+        // Bukti Link (Sosmed)
+        const linksWrapper = document.getElementById('detail-links-wrapper');
+        const linksEl = document.getElementById('detail-links');
+        if (data.links && Array.isArray(data.links) && data.links.length > 0) {
+            linksWrapper.classList.remove('hidden');
+            linksEl.innerHTML = data.links.map((link, idx) => `
+                <div class="flex items-center gap-2 text-xs">
+                    <span class="text-gray-400 font-mono">#${idx + 1}</span>
+                    <a href="${link}" target="_blank" rel="noopener noreferrer"
+                       class="text-primary-600 hover:text-primary-700 hover:underline flex items-center gap-1 truncate max-w-full font-medium">
+                        <span class="truncate">${link}</span>
+                        <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+                    </a>
+                </div>
+            `).join('');
+        } else {
+            linksWrapper.classList.add('hidden');
+        }
+
+        // Catatan Penolakan (Sosmed)
+        const rejWrapper = document.getElementById('detail-rejection-wrapper');
+        const rejEl = document.getElementById('detail-rejection-note');
+        if (data.rejection_note) {
+            rejWrapper.classList.remove('hidden');
+            rejEl.textContent = data.rejection_note;
+        } else {
+            rejWrapper.classList.add('hidden');
         }
 
         document.getElementById('modal-detail').classList.remove('hidden');
