@@ -23,6 +23,7 @@ use App\Http\Controllers\Ob\TaskController as ObTaskController;
 use App\Http\Controllers\Assistant\DashboardController as AssistantDashboard;
 use App\Http\Controllers\Assistant\TaskController as AssistantTaskController;
 use App\Http\Controllers\Assistant\PresensiController as AssistantPresensiController;
+use App\Http\Controllers\Assistant\SosmedController as AssistantSosmedController;
 use App\Http\Controllers\Programmer\DashboardController as ProgrammerDashboard;
 use App\Http\Controllers\Programmer\TaskController as ProgrammerTaskController;
 use App\Http\Controllers\DG\DashboardController as DGDashboard;
@@ -212,6 +213,10 @@ Route::prefix('assistant')->name('assistant.')->middleware(['auth', 'role:hr_ass
 
     // Tambah Pemagang
     Route::post('/pemagang', [PemagangController::class, 'store'])->name('pemagang.store');
+
+    // Approval Tugas Sosmed (backup PM)
+    Route::get('/sosmed', [AssistantSosmedController::class, 'index'])->name('sosmed.index');
+    Route::patch('/sosmed/tasks/{task}/verify', [AssistantSosmedController::class, 'verifyTask'])->name('sosmed.tasks.verify');
 });
 
 // ── Programmer ───────────────────────────────────────────────────────────────

@@ -686,33 +686,110 @@
     </div>
 
     {{-- ═══ MODAL: ASSIGN STAFF ══════════════════════════════════════════ --}}
-    {{-- ═══ MODAL: VERIFIKASI PM ══════════════════════════════════════════ --}}
-    <div id="modal-verify" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4">
-        <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" onclick="document.getElementById('modal-verify').classList.add('hidden')"></div>
-        <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-sm z-10">
-            <div class="flex items-center justify-between px-6 py-4 border-b border-gray-200">
-                <h3 class="text-base font-bold text-gray-800">Verifikasi Tugas (PM)</h3>
-                <button onclick="document.getElementById('modal-verify').classList.add('hidden')" class="text-gray-400 hover:text-gray-600">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+    {{-- ═══ MODAL: VERIFIKASI PM (APPROVE / REJECT) ══════════════════════ --}}
+    <div id="modal-verify" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4"
+         x-data="{ action: 'verify' }"
+         @open-verify.window="action = 'verify'">
+        <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" onclick="closeVerifyModal()"></div>
+        <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-md z-10 overflow-hidden">
+
+            {{-- Modal Header with Dynamic Color --}}
+            <div class="px-6 py-4 flex items-center justify-between transition-colors"
+                 :class="action === 'verify' ? 'bg-blue-50 border-b border-blue-100' : 'bg-rose-50 border-b border-rose-100'">
+                <div class="flex items-center gap-2.5">
+                    <div class="w-8 h-8 rounded-lg flex items-center justify-center transition-colors"
+                         :class="action === 'verify' ? 'bg-blue-100 text-blue-600' : 'bg-rose-100 text-rose-600'">
+                        <template x-if="action === 'verify'">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                            </svg>
+                        </template>
+                        <template x-if="action === 'reject'">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                            </svg>
+                        </template>
+                    </div>
+                    <div>
+                        <h3 class="text-sm font-bold text-gray-800"
+                            x-text="action === 'verify' ? 'Verifikasi & Setujui Tugas (PM)' : 'Tolak & Kembalikan Tugas'"></h3>
+                        <p class="text-[11px] text-gray-400">Verifikasi pengerjaan tim sosmed yang Anda awasi</p>
+                    </div>
+                </div>
+                <button type="button" onclick="closeVerifyModal()" class="text-gray-400 hover:text-gray-600 transition">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
                 </button>
             </div>
-            <div class="px-6 pt-4">
-                <p class="text-xs text-gray-500 mb-0.5">Tugas</p>
-                <p id="verify-task-title" class="text-sm font-semibold text-gray-800"></p>
-            </div>
-            <form id="form-verify" method="POST" action="" class="p-6 pt-3 space-y-4">
+
+            <form id="form-verify" method="POST" action="" class="p-6 space-y-4">
                 @csrf @method('PATCH')
-                <input type="hidden" name="action" id="verify-action" value="verify">
-                <div id="rej-field" class="hidden">
-                    <label class="block text-xs font-semibold text-gray-600 mb-1.5">Alasan Penolakan</label>
-                    <textarea name="rejection_note" rows="3" placeholder="Catatan perbaikan untuk staff..."
-                        class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-red-500 focus:outline-none"></textarea>
+                <input type="hidden" name="action" :value="action">
+
+                {{-- Task Info Card --}}
+                <div class="bg-gray-50 rounded-xl p-3.5 border border-gray-200/80">
+                    <p class="text-[11px] font-semibold text-gray-400 uppercase tracking-wider mb-1">Tugas yang Ditinjau</p>
+                    <p id="verify-task-title" class="text-sm font-bold text-gray-800 break-words"></p>
                 </div>
-                <div class="flex gap-3">
-                    <button type="submit" onclick="setPmAction('reject')"
-                        class="flex-1 px-4 py-2 border border-red-300 text-red-600 text-sm font-semibold rounded-lg hover:bg-red-50">Tolak</button>
-                    <button type="submit" onclick="setPmAction('verify')"
-                        class="flex-1 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-lg">Verifikasi</button>
+
+                {{-- Action Toggle (Segmented control) --}}
+                <div>
+                    <label class="block text-xs font-semibold text-gray-600 mb-2">Keputusan Verifikasi</label>
+                    <div class="grid grid-cols-2 gap-2 p-1 bg-gray-100 rounded-xl">
+                        <button type="button"
+                            @click="action = 'verify'"
+                            :class="action === 'verify' ? 'bg-white text-blue-700 shadow-sm font-bold' : 'text-gray-500 font-medium hover:text-gray-700'"
+                            class="py-2 text-xs rounded-lg transition-all flex items-center justify-center gap-1.5">
+                            <svg class="w-3.5 h-3.5 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                            </svg>
+                            Setujui
+                        </button>
+                        <button type="button"
+                            @click="action = 'reject'"
+                            :class="action === 'reject' ? 'bg-white text-rose-700 shadow-sm font-bold' : 'text-gray-500 font-medium hover:text-gray-700'"
+                            class="py-2 text-xs rounded-lg transition-all flex items-center justify-center gap-1.5">
+                            <svg class="w-3.5 h-3.5 text-rose-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                            </svg>
+                            Tolak
+                        </button>
+                    </div>
+                </div>
+
+                {{-- Rejection Note (conditionally visible) --}}
+                <div x-show="action === 'reject'" x-cloak class="space-y-1.5">
+                    <label class="block text-xs font-semibold text-gray-700">
+                        Catatan Revisi <span class="text-rose-500">*</span>
+                    </label>
+                    <textarea name="rejection_note" rows="3"
+                        placeholder="Jelaskan bagian yang perlu diperbaiki oleh staff..."
+                        class="w-full border border-gray-200 rounded-xl px-3.5 py-2.5 text-xs text-gray-800 placeholder-gray-400 focus:ring-2 focus:ring-rose-400 focus:border-rose-400 outline-none transition resize-none"></textarea>
+                    <p class="text-[11px] text-gray-400">Catatan ini akan dikirimkan ke staff yang mengerjakan tugas.</p>
+                </div>
+
+                {{-- Approval Note (conditionally visible) --}}
+                <div x-show="action === 'verify'" class="bg-blue-50 border border-blue-100 rounded-xl p-3 text-xs text-blue-800 leading-relaxed">
+                    <div class="flex items-start gap-2">
+                        <svg class="w-4 h-4 text-blue-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                        <p>Tugas akan lolos verifikasi Level-1 dan diteruskan ke <strong>HR Staff</strong> untuk persetujuan final. Log persetujuan PM Anda akan otomatis dicatat.</p>
+                    </div>
+                </div>
+
+                <div class="flex gap-3 pt-1">
+                    <button type="button" onclick="closeVerifyModal()"
+                        class="flex-1 px-4 py-2.5 rounded-xl border border-gray-300 text-sm text-gray-600 font-medium hover:bg-gray-50 transition">
+                        Batal
+                    </button>
+                    <button type="submit"
+                        class="flex-1 px-4 py-2.5 rounded-xl text-sm font-semibold text-white transition shadow-sm"
+                        :class="action === 'verify' ? 'bg-blue-600 hover:bg-blue-700' : 'bg-rose-600 hover:bg-rose-700'">
+                        <span x-show="action === 'verify'">Verifikasi Tugas</span>
+                        <span x-show="action === 'reject'">Tolak Tugas</span>
+                    </button>
                 </div>
             </form>
         </div>
@@ -865,24 +942,14 @@ function updateRemoveButtons() {
 function openVerifyModal(taskId, title) {
     document.getElementById('verify-task-title').textContent = title;
     document.getElementById('form-verify').action = `/pm/sosmed/tasks/${taskId}/verify`;
-    document.getElementById('rej-field').classList.add('hidden');
-    document.getElementById('verify-action').value = 'verify';
+    const ta = document.querySelector('#form-verify textarea[name="rejection_note"]');
+    if (ta) ta.value = '';
+    window.dispatchEvent(new CustomEvent('open-verify'));
     document.getElementById('modal-verify').classList.remove('hidden');
 }
 
-function setPmAction(action) {
-    document.getElementById('verify-action').value = action;
-    const rej = document.getElementById('rej-field');
-    if (action === 'reject') {
-        if (rej.classList.contains('hidden')) {
-            event.preventDefault();
-            rej.classList.remove('hidden');
-            rej.querySelector('textarea').focus();
-            return false;
-        }
-    } else {
-        rej.classList.add('hidden');
-    }
+function closeVerifyModal() {
+    document.getElementById('modal-verify').classList.add('hidden');
 }
 
 // ── Links Popup ───────────────────────────────────────────────────────────────
