@@ -31,7 +31,7 @@
         <div class="text-right text-[11px] text-gray-600 leading-tight">
             <p><span class="font-semibold text-gray-800">Tanggal Cetak:</span> {{ \Carbon\Carbon::now()->locale('id')->translatedFormat('d F Y, H:i') }} WIB</p>
             <p><span class="font-semibold text-gray-800">Petugas Asisten:</span> {{ Auth::user()->name }}</p>
-            <p><span class="font-semibold text-gray-800">Lokasi Penugasan:</span> {{ $assignedKantor }}</p>
+            <p><span class="font-semibold text-gray-800">Lokasi Penugasan:</span> {{ $assignedKantor ?: ($selectedKantor ?? '-') }}</p>
             <p><span class="font-semibold text-gray-800">Tanggal Presensi:</span> {{ $formattedDate }}</p>
         </div>
     </div>
@@ -44,7 +44,7 @@
             Menampilkan data rekapitulasi untuk <span
                 class="font-semibold text-gray-700">{{ $stats['total_pemagang'] }}</span> anak magang.
             <span class="ml-2 inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-xs font-semibold bg-blue-50 text-blue-700 border border-blue-200">
-                📍 {{ $assignedKantor }} &bull; {{ $formattedDate }}
+                📍 {{ $selectedKantor }} &bull; {{ $formattedDate }}
             </span>
         </p>
     </div>
@@ -156,7 +156,7 @@
             <select name="kantor" onchange="this.form.submit()"
                 class="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:bg-white transition text-gray-700 font-medium">
                 @foreach ($kantorList as $k)
-                    <option value="{{ $k }}" {{ $assignedKantor == $k ? 'selected' : '' }}>
+                    <option value="{{ $k }}" {{ $selectedKantor == $k ? 'selected' : '' }}>
                         {{ $k }}</option>
                 @endforeach
             </select>

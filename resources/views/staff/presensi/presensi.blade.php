@@ -1046,20 +1046,57 @@
                         class="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:bg-white transition hover:bg-white hover:border-primary-500">
                 </div>
 
-                {{-- Divisi --}}
-                <div>
+                {{-- Divisi dengan Fitur Pencarian Real-Time --}}
+                <div class="relative" id="searchable-divisi-container">
                     <label class="block text-[11px] font-bold text-gray-700 uppercase tracking-wider mb-1">
                         Divisi Magang <span class="text-red-500">*</span>
                     </label>
-                    <div class="relative">
-                        <input type="text" name="divisi" required list="divisi-options"
-                            placeholder="Pilih atau ketik divisi..."
-                            class="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:bg-white transition hover:bg-white hover:border-primary-500">
-                        <datalist id="divisi-options">
+
+                    <input type="hidden" name="divisi" id="create-pemagang-divisi" required>
+
+                    {{-- Trigger Box --}}
+                    <div id="divisi-select-trigger" onclick="toggleDivisiDropdown()"
+                        class="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-xs sm:text-sm flex items-center justify-between cursor-pointer hover:bg-white hover:border-primary-500 transition">
+                        <span id="selected-divisi-text" class="text-gray-400">-- Cari & Pilih Divisi Magang --</span>
+                        <svg class="w-3.5 h-3.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                        </svg>
+                    </div>
+
+                    {{-- Dropdown Menu Popover --}}
+                    <div id="divisi-dropdown-menu"
+                        class="hidden absolute z-50 left-0 right-0 mt-1 bg-white border border-gray-200 rounded-xl shadow-xl overflow-hidden animate-in fade-in duration-100">
+                        {{-- Search Box di dalam dropdown --}}
+                        <div class="p-2 border-b border-gray-100 bg-gray-50/90 sticky top-0 z-10">
+                            <div class="relative">
+                                <span class="absolute inset-y-0 left-0 flex items-center pl-2.5 pointer-events-none text-gray-400">
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                    </svg>
+                                </span>
+                                <input type="text" id="divisi-search-input" oninput="filterDivisiOptions(this.value)"
+                                    placeholder="Ketik untuk mencari divisi..."
+                                    class="w-full pl-8 pr-3 py-1.5 bg-white border border-gray-200 rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
+                            </div>
+                        </div>
+
+                        {{-- List Opsi Divisi --}}
+                        <div id="divisi-options-list" class="max-h-48 overflow-y-auto divide-y divide-gray-50">
                             @foreach($divisiList as $div)
-                                <option value="{{ $div }}">{{ $div }}</option>
+                                <div onclick="selectDivisi('{{ addslashes($div) }}')"
+                                    data-search="{{ strtolower($div) }}"
+                                    class="divisi-option px-3 py-2 hover:bg-primary-50 cursor-pointer transition flex items-center justify-between text-xs font-medium text-gray-700 hover:text-primary-700">
+                                    <span>{{ $div }}</span>
+                                    <svg class="w-3.5 h-3.5 text-primary-600 hidden check-icon" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                                    </svg>
+                                </div>
                             @endforeach
-                        </datalist>
+                            <div id="divisi-no-result" class="hidden px-3 py-3 text-center text-xs text-gray-400">
+                                Tidak ada divisi yang cocok
+                            </div>
+                        </div>
                     </div>
                 </div>
 
@@ -1182,11 +1219,84 @@
             if (modal) modal.classList.add('hidden');
         }
 
+        function toggleDivisiDropdown() {
+            const menu = document.getElementById('divisi-dropdown-menu');
+            if (!menu) return;
+            const isHidden = menu.classList.contains('hidden');
+            if (isHidden) {
+                menu.classList.remove('hidden');
+                const searchInput = document.getElementById('divisi-search-input');
+                if (searchInput) {
+                    searchInput.value = '';
+                    filterDivisiOptions('');
+                    setTimeout(() => searchInput.focus(), 50);
+                }
+            } else {
+                menu.classList.add('hidden');
+            }
+        }
+
+        function selectDivisi(name) {
+            const input = document.getElementById('create-pemagang-divisi');
+            if (input) input.value = name;
+            const textEl = document.getElementById('selected-divisi-text');
+            if (textEl) {
+                textEl.textContent = name;
+                textEl.classList.remove('text-gray-400');
+                textEl.classList.add('text-gray-800', 'font-semibold');
+            }
+
+            document.querySelectorAll('.divisi-option').forEach(el => {
+                const checkIcon = el.querySelector('.check-icon');
+                if (el.textContent.trim() === name) {
+                    checkIcon?.classList.remove('hidden');
+                    el.classList.add('bg-primary-50');
+                } else {
+                    checkIcon?.classList.add('hidden');
+                    el.classList.remove('bg-primary-50');
+                }
+            });
+
+            const menu = document.getElementById('divisi-dropdown-menu');
+            if (menu) menu.classList.add('hidden');
+        }
+
+        function filterDivisiOptions(query) {
+            const q = query.toLowerCase().trim();
+            const options = document.querySelectorAll('.divisi-option');
+            let visibleCount = 0;
+
+            options.forEach(option => {
+                const text = option.getAttribute('data-search') || option.textContent.toLowerCase();
+                if (!q || text.includes(q)) {
+                    option.classList.remove('hidden');
+                    visibleCount++;
+                } else {
+                    option.classList.add('hidden');
+                }
+            });
+
+            const noResult = document.getElementById('divisi-no-result');
+            if (noResult) {
+                if (visibleCount === 0) {
+                    noResult.classList.remove('hidden');
+                } else {
+                    noResult.classList.add('hidden');
+                }
+            }
+        }
+
         // Tutup dropdown saat klik di luar area
         document.addEventListener('click', function (e) {
-            const container = document.getElementById('searchable-pemagang-container');
-            if (container && !container.contains(e.target)) {
+            const pemagangContainer = document.getElementById('searchable-pemagang-container');
+            if (pemagangContainer && !pemagangContainer.contains(e.target)) {
                 const dropdown = document.getElementById('pemagang-dropdown-menu');
+                if (dropdown) dropdown.classList.add('hidden');
+            }
+
+            const divisiContainer = document.getElementById('searchable-divisi-container');
+            if (divisiContainer && !divisiContainer.contains(e.target)) {
+                const dropdown = document.getElementById('divisi-dropdown-menu');
                 if (dropdown) dropdown.classList.add('hidden');
             }
         });

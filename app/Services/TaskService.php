@@ -82,8 +82,12 @@ class TaskService
     public function updateTask(Task $task, array $data): bool
     {
         if ($this->taskRepository->hasAnyCompleted($task->id)) {
-            throw ValidationException::withMessages([
-                'task' => 'Tugas tidak dapat diedit karena sudah ada penerima yang menyelesaikannya.',
+            // Jika ada penerima yang sudah menyelesaikan tugas, perbarui informasi tugas (termasuk kantor)
+            // tanpa menghapus atau mereset assignment yang sudah selesai
+            return $this->taskRepository->update($task, [
+                'title'       => $data['title'],
+                'description' => $data['description'] ?? null,
+                'kantor'      => $data['kantor'] ?? null,
             ]);
         }
 
@@ -275,7 +279,7 @@ class TaskService
                 ->pluck('id');
 
             if ($supervisedAccountIds->isNotEmpty()) {
-                $tasksNeedPmVerify = SosmedTask::with(['account', 'assignedToUser'])
+                $tasksNeedPmVerify = SosmedTask::with(['account', 'assignedUser'])
                     ->whereIn('sosmed_account_id', $supervisedAccountIds)
                     ->where('status', 'done_by_staff')
                     ->orderByDesc('task_date')
@@ -378,7 +382,7 @@ class TaskService
     private function formatPmVerificationTaskItem(SosmedTask $tv, int $userId): Task
     {
         $acc = $tv->account;
-        $staffName = $tv->assignedToUser?->name ?? 'Staff Sosmed';
+        $staffName = $tv->assignedUser?->name ?? 'Staff Sosmed';
 
         $item = new Task([
             'title'       => 'Verifikasi Konten: ' . ($acc?->name ?? 'Akun Sosmed') . " ({$staffName})",

@@ -92,8 +92,8 @@ class PresensiController extends Controller
         // List semua pemagang untuk dropdown modal
         $pemagangs = Pemagang::orderBy('nama_lengkap', 'asc')->get();
 
-        // List opsi divisi unik
-        $divisiList = Pemagang::select('divisi')->distinct()->orderBy('divisi')->pluck('divisi');
+        // List opsi divisi lengkap
+        $divisiList = Pemagang::getAllDivisi();
 
         // Monitoring Asisten yang sedang bertugas di masing-masing kantor pada tanggal ini
         // Hanya tampilkan user dengan role hr_assistant / base_type assistant yang bertugas mengelola presensi
@@ -302,7 +302,7 @@ class PresensiController extends Controller
             ->withQueryString()
             ->fragment('tabel-log-presensi');
 
-        $divisiList = Pemagang::select('divisi')->distinct()->orderBy('divisi')->pluck('divisi');
+        $divisiList = Pemagang::getAllDivisi();
         $kantorList = ['Kantor 1', 'Kantor 2', 'Kantor 3', 'Kantor 4'];
 
         return view('admin.presensi.laporan-presensi', compact('rekapPemagang', 'stats', 'logs', 'divisiList', 'kantorList'));

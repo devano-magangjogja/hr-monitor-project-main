@@ -14,6 +14,33 @@ class Pemagang extends Model
 
     public $timestamps = false;
 
+    public const DIVISI_LIST = [
+        'Administrasi',
+        'UI/UX Designer',
+        'Programmer (Front end / Back end)',
+        'Human Resource',
+        'Social Media Specialist',
+        'Photographer / Videographer',
+        'Content Writer',
+        'Marketing & Sales',
+        'Content Creative (Desain Grafis)',
+        'Digital Marketing',
+        'Marcom / Public Relations.',
+        'TikTok Creator',
+        'Content Planner',
+        'Project Manager',
+        'Las',
+        'Animasi',
+        'SEO',
+        'Machine Learning',
+    ];
+
+    public static function getAllDivisi(): array
+    {
+        $fromDb = static::select('divisi')->distinct()->whereNotNull('divisi')->pluck('divisi')->toArray();
+        return array_values(array_unique(array_merge(self::DIVISI_LIST, $fromDb)));
+    }
+
     protected $fillable = [
         'nama_lengkap',
         'no_hp',
@@ -31,7 +58,7 @@ class Pemagang extends Model
      */
     public function getWaNumberAttribute(): string
     {
-        $phone = preg_replace('/[^0-9]/', '', (string)$this->no_hp);
+        $phone = preg_replace('/[^0-9]/', '', (string) $this->no_hp);
         if (str_starts_with($phone, '0')) {
             $phone = '62' . substr($phone, 1);
         } elseif (str_starts_with($phone, '8')) {

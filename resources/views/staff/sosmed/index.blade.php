@@ -499,6 +499,14 @@
                 </div>
                 <div>
                     <label class="block text-xs font-semibold text-gray-700 mb-1">1. Eksekutor (Dikelola Oleh)</label>
+                    <div class="relative mb-1.5">
+                        <input type="text" id="search-assign-staff-sel" placeholder="Cari eksekutor..."
+                               oninput="filterSelectOptions(this.value, 'assign-staff-sel')"
+                               class="w-full pl-7 pr-2.5 py-1 text-xs border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-primary-500 bg-gray-50 focus:bg-white transition">
+                        <svg class="w-3 h-3 text-gray-400 absolute left-2 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                        </svg>
+                    </div>
                     <select name="staff_id" id="assign-staff-sel" onchange="syncSupervisorState(this, 'assign-pm-sel', 'assign-pm-hint')"
                         class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 focus:outline-none">
                         <option value="" data-role="">-- Belum Ditugaskan --</option>
@@ -520,6 +528,14 @@
                 </div>
                 <div>
                     <label class="block text-xs font-semibold text-gray-700 mb-1">2. Supervisor (Diawasi Oleh PM)</label>
+                    <div class="relative mb-1.5">
+                        <input type="text" id="search-assign-pm-sel" placeholder="Cari supervisor PM..."
+                               oninput="filterSelectOptions(this.value, 'assign-pm-sel')"
+                               class="w-full pl-7 pr-2.5 py-1 text-xs border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-primary-500 bg-gray-50 focus:bg-white transition">
+                        <svg class="w-3 h-3 text-gray-400 absolute left-2 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                        </svg>
+                    </div>
                     <select name="pm_id" id="assign-pm-sel"
                         class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 focus:outline-none">
                         <option value="">-- Tanpa Supervisor / Langsung ke HR --</option>
@@ -601,6 +617,30 @@
 
 @push('scripts')
     <script>
+        function filterSelectOptions(query, selectId) {
+            const select = document.getElementById(selectId);
+            if (!select) return;
+            const q = (query || '').toLowerCase().trim();
+            const options = select.options;
+            for (let i = 0; i < options.length; i++) {
+                const opt = options[i];
+                if (!opt.value) {
+                    opt.hidden = false;
+                    continue;
+                }
+                const text = opt.text.toLowerCase();
+                opt.hidden = q ? !text.includes(q) : false;
+            }
+        }
+
+        function resetSearchFilter(inputId, selectId) {
+            const input = document.getElementById(inputId);
+            if (input) {
+                input.value = '';
+                filterSelectOptions('', selectId);
+            }
+        }
+
         function syncSupervisorState(staffSelect, pmSelectId, hintId) {
             if (!staffSelect) return;
             const pmSelect = document.getElementById(pmSelectId);
@@ -627,6 +667,8 @@
         }
 
         function openAssignModal(accId, accName, currentPmId, currentStaffId) {
+            resetSearchFilter('search-assign-staff-sel', 'assign-staff-sel');
+            resetSearchFilter('search-assign-pm-sel', 'assign-pm-sel');
             document.getElementById('assign-acc-name').textContent = accName;
             document.getElementById('form-assign').action = `/staff/sosmed/accounts/${accId}/assign`;
             document.getElementById('assign-staff-sel').value = currentStaffId ?? '';

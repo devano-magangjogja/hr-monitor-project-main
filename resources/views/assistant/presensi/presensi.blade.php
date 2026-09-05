@@ -27,9 +27,21 @@
                         Presensi: <span class="text-primary-600">{{ $formattedDate }}</span>
                     </h2>
                     <span
-                        class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-bold bg-blue-100 text-blue-800 border border-blue-200">
-                        📍 Bertugas di: {{ $assignedKantor }}
+                        class="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-bold {{ $assignedKantor ? 'bg-blue-100 text-blue-800 border border-blue-200' : 'bg-gray-100 text-gray-500 border border-gray-200' }}">
+                        Bertugas di: <span
+                            class="{{ $assignedKantor ? 'text-blue-900 font-extrabold' : 'text-gray-400 font-semibold' }}">{{ $assignedKantor ?: '-' }}</span>
                     </span>
+                    @if(!$assignedKantor && $selectedKantor)
+                        <form action="{{ route('assistant.presensi.set-kantor') }}" method="POST" class="inline">
+                            @csrf
+                            <input type="hidden" name="kantor" value="{{ $selectedKantor }}">
+                            <button type="submit"
+                                class="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-semibold bg-blue-50 text-blue-700 hover:bg-blue-100 border border-blue-200 rounded-lg transition"
+                                title="Tetapkan kantor ini sebagai tugas Anda hari ini">
+                                Jadikan {{ $selectedKantor }} Kantor Tugas Saya
+                            </button>
+                        </form>
+                    @endif
                 </div>
             </div>
         </div>
@@ -133,17 +145,21 @@
                 <div>
                     <label class="block text-[11px] font-semibold text-gray-500 uppercase tracking-wider mb-1">Pilih
                         Tanggal</label>
-                    <input type="date" name="tanggal" value="{{ $tanggal }}" max="{{ \Carbon\Carbon::today()->format('Y-m-d') }}" onchange="this.form.submit()"
+                    <input type="date" name="tanggal" value="{{ $tanggal }}"
+                        max="{{ \Carbon\Carbon::today()->format('Y-m-d') }}" onchange="this.form.submit()"
                         class="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-xs sm:text-sm font-medium text-gray-800 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:bg-white transition">
                 </div>
 
                 {{-- Filter Kantor --}}
                 <div>
-                    <label class="block text-[11px] font-semibold text-gray-500 uppercase tracking-wider mb-1">Kantor</label>
+                    <label
+                        class="block text-[11px] font-semibold text-gray-500 uppercase tracking-wider mb-1">Kantor</label>
                     <select name="kantor" onchange="this.form.submit()"
                         class="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:bg-white transition text-gray-700 font-medium">
+                        <option value="" {{ !$selectedKantor ? 'selected' : '' }}>Semua Kantor</option>
                         @foreach($kantorList as $k)
-                            <option value="{{ $k }}" {{ $assignedKantor == $k ? 'selected' : '' }}>{{ $k }}</option>
+                            <option value="{{ $k }}" {{ $selectedKantor == $k ? 'selected' : '' }}>{{ $k }}
+                                {{ $assignedKantor == $k ? '(Tugas)' : '' }}</option>
                         @endforeach
                     </select>
                 </div>
@@ -321,15 +337,15 @@
                                     {{-- Edit --}}
                                     <button type="button"
                                         onclick="openEditModal(
-                                                                                                                                                                                            {{ $presensi->id }},
-                                                                                                                                                                                            {{ $presensi->pemagang_id }},
-                                                                                                                                                                                            '{{ addslashes($pemagang ? $pemagang->nama_lengkap : '') }}',
-                                                                                                                                                                                            '{{ $presensi->tanggal }}',
-                                                                                                                                                                                            '{{ $presensi->shift }}',
-                                                                                                                                                                                            '{{ substr($presensi->waktu_masuk, 0, 5) }}',
-                                                                                                                                                                                            '{{ $presensi->keterangan }}',
-                                                                                                                                                                                            '{{ addslashes($presensi->notes ?: '') }}'
-                                                                                                                                                                                        )"
+                                                                                                                                                                                                    {{ $presensi->id }},
+                                                                                                                                                                                                    {{ $presensi->pemagang_id }},
+                                                                                                                                                                                                    '{{ addslashes($pemagang ? $pemagang->nama_lengkap : '') }}',
+                                                                                                                                                                                                    '{{ $presensi->tanggal }}',
+                                                                                                                                                                                                    '{{ $presensi->shift }}',
+                                                                                                                                                                                                    '{{ substr($presensi->waktu_masuk, 0, 5) }}',
+                                                                                                                                                                                                    '{{ $presensi->keterangan }}',
+                                                                                                                                                                                                    '{{ addslashes($presensi->notes ?: '') }}'
+                                                                                                                                                                                                )"
                                         class="p-1.5 text-gray-400 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition"
                                         title="Edit Presensi">
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -341,11 +357,11 @@
                                     {{-- Hapus --}}
                                     <button type="button"
                                         onclick="openDeleteModal(
-                                                                                                                                                                                            {{ $presensi->id }},
-                                                                                                                                                                                            '{{ addslashes($pemagang ? $pemagang->nama_lengkap : 'Pemagang') }}',
-                                                                                                                                                                                            '{{ $presensi->shift }}',
-                                                                                                                                                                                            '{{ substr($presensi->waktu_masuk, 0, 5) }}'
-                                                                                                                                                                                        )"
+                                                                                                                                                                                                    {{ $presensi->id }},
+                                                                                                                                                                                                    '{{ addslashes($pemagang ? $pemagang->nama_lengkap : 'Pemagang') }}',
+                                                                                                                                                                                                    '{{ $presensi->shift }}',
+                                                                                                                                                                                                    '{{ substr($presensi->waktu_masuk, 0, 5) }}'
+                                                                                                                                                                                                )"
                                         class="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition"
                                         title="Hapus Presensi">
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -498,15 +514,15 @@
                                     {{-- Edit --}}
                                     <button type="button"
                                         onclick="openEditModal(
-                                                                                                                                                                                            {{ $presensi->id }},
-                                                                                                                                                                                            {{ $presensi->pemagang_id }},
-                                                                                                                                                                                            '{{ addslashes($pemagang ? $pemagang->nama_lengkap : '') }}',
-                                                                                                                                                                                            '{{ $presensi->tanggal }}',
-                                                                                                                                                                                            '{{ $presensi->shift }}',
-                                                                                                                                                                                            '{{ substr($presensi->waktu_masuk, 0, 5) }}',
-                                                                                                                                                                                            '{{ $presensi->keterangan }}',
-                                                                                                                                                                                            '{{ addslashes($presensi->notes ?: '') }}'
-                                                                                                                                                                                        )"
+                                                                                                                                                                                                    {{ $presensi->id }},
+                                                                                                                                                                                                    {{ $presensi->pemagang_id }},
+                                                                                                                                                                                                    '{{ addslashes($pemagang ? $pemagang->nama_lengkap : '') }}',
+                                                                                                                                                                                                    '{{ $presensi->tanggal }}',
+                                                                                                                                                                                                    '{{ $presensi->shift }}',
+                                                                                                                                                                                                    '{{ substr($presensi->waktu_masuk, 0, 5) }}',
+                                                                                                                                                                                                    '{{ $presensi->keterangan }}',
+                                                                                                                                                                                                    '{{ addslashes($presensi->notes ?: '') }}'
+                                                                                                                                                                                                )"
                                         class="p-1.5 text-gray-400 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition"
                                         title="Ubah Status Presensi">
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -518,11 +534,11 @@
                                     {{-- Hapus --}}
                                     <button type="button"
                                         onclick="openDeleteModal(
-                                                                                                                                                                                            {{ $presensi->id }},
-                                                                                                                                                                                            '{{ addslashes($pemagang ? $pemagang->nama_lengkap : 'Pemagang') }}',
-                                                                                                                                                                                            '{{ $presensi->shift }}',
-                                                                                                                                                                                            '{{ substr($presensi->waktu_masuk, 0, 5) }}'
-                                                                                                                                                                                        )"
+                                                                                                                                                                                                    {{ $presensi->id }},
+                                                                                                                                                                                                    '{{ addslashes($pemagang ? $pemagang->nama_lengkap : 'Pemagang') }}',
+                                                                                                                                                                                                    '{{ $presensi->shift }}',
+                                                                                                                                                                                                    '{{ substr($presensi->waktu_masuk, 0, 5) }}'
+                                                                                                                                                                                                )"
                                         class="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition"
                                         title="Hapus Data">
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -599,23 +615,40 @@
                 </div>
 
                 {{-- Lokasi Kantor Tugas --}}
-                <div class="p-2.5 bg-blue-50/70 border border-blue-100 rounded-xl flex items-center justify-between">
-                    <div class="flex items-center gap-2.5">
-                        <div class="w-7 h-7 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center flex-shrink-0">
-                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                            </svg>
-                        </div>
-                        <div>
-                            <p class="text-[10px] font-medium text-gray-500">Lokasi Kantor</p>
-                            <p class="text-xs sm:text-sm font-bold text-blue-800">
-                                {{ $assignedKantor }}
-                            </p>
-                        </div>
+                <div>
+                    <div class="flex items-center justify-between mb-1">
+                        <label class="block text-[11px] font-bold text-gray-700 uppercase tracking-wider">
+                            Lokasi Kantor <span class="text-red-500">*</span>
+                        </label>
+                        @if($assignedKantor)
+                            <span class="text-[10px] font-semibold px-2 py-0.5 rounded bg-blue-100 text-blue-700">Resmi
+                                Ditugaskan</span>
+                        @else
+                            <span class="text-[10px] font-semibold px-2 py-0.5 rounded bg-amber-100 text-amber-700">Tentukan
+                                Kantor</span>
+                        @endif
                     </div>
-                    <span class="text-[10px] font-semibold px-2 py-0.5 rounded bg-blue-100 text-blue-700">Aktif</span>
-                    <input type="hidden" name="kantor" value="{{ $assignedKantor }}">
+                    <select name="kantor" id="create-kantor" required
+                        class="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-xs sm:text-sm font-semibold text-gray-800 focus:ring-2 focus:ring-primary-500 focus:bg-white transition">
+                        @if(!$assignedKantor && !$selectedKantor)
+                            <option value="" disabled selected>-- Pilih Lokasi Kantor Tugas --</option>
+                        @endif
+                        @foreach($kantorList as $k)
+                            <option value="{{ $k }}" {{ ($selectedKantor ?: $assignedKantor) == $k ? 'selected' : '' }}>
+                                {{ $k }} {{ $assignedKantor == $k ? '(Tugas Anda)' : '' }}
+                            </option>
+                        @endforeach
+                    </select>
+                    @if(!$assignedKantor)
+                        <p class="text-[11px] text-amber-600 mt-1 flex items-center gap-1">
+                            <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            Belum ada penempatan dari Staff/Admin. Memilih kantor ini akan otomatis mencatat tugas Anda hari
+                            ini.
+                        </p>
+                    @endif
                 </div>
 
                 {{-- Pilih Pemagang dengan Fitur Pencarian Real-Time --}}

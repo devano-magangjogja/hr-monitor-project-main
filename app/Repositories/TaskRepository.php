@@ -29,19 +29,21 @@ class TaskRepository
         /** @var Builder $query */
         $query = $this->model->newQuery();
 
-        // Tampilkan tugas yang dibuat hari ini ATAU tugas lama yang masih ada
-        // penerima dengan status pending (belum diselesaikan)
+        // Tampilkan tugas yang dibuat staff ini (type assigned) HANYA hari ini
+        // ATAU tugas default yang ditugaskan ke HR Assistant (carry-over pending tetap untuk default)
         return $query
             ->with(['assignments', 'assignedUsers:id,name,role'])
-            ->where('created_by', $staffId)
-            ->where('type', 'assigned')
-            ->where(function ($q) {
-                $q->whereDate('task_date', Carbon::today())
-                  ->orWhereHas('assignments', function ($q2) {
-                      $q2->where('is_completed', 'pending');
-                  });
+            ->where(function ($q) use ($staffId) {
+                $q->where(function ($q1) use ($staffId) {
+                    $q1->where('created_by', $staffId)
+                       ->where('type', 'assigned');
+                })
+                ->orWhereHas('assignments.user', function ($q2) {
+                    $q2->where('role', 'hr_assistant');
+                });
             })
-            ->whereDate('task_date', '<=', Carbon::today())
+            // assigned: hanya hari ini | default: hanya hari ini
+            ->whereDate('task_date', Carbon::today())
             ->orderByDesc('task_date')
             ->orderByDesc('created_at')
             ->get();
@@ -179,15 +181,22 @@ class TaskRepository
                 $q->where('user_id', $userId);
             })
             // default: hanya hari ini
-            // assigned + self: hari ini ATAU masih pending ATAU diselesaikan hari ini
+            // assigned: hanya hari ini (tidak carry-over ke hari berikutnya)
+            // self: hari ini ATAU masih pending ATAU diselesaikan hari ini
             ->where(function ($q) use ($userId, $today) {
                 $q->where(function ($q2) use ($today) {
                       // default task: hanya hari ini
                       $q2->where('type', 'default')
                          ->whereDate('task_date', $today);
                   })
+                  ->orWhere(function ($q2) use ($today) {
+                      // assigned: hanya hari ini
+                      $q2->where('type', 'assigned')
+                         ->whereDate('task_date', $today);
+                  })
                   ->orWhere(function ($q2) use ($userId, $today) {
-                      $q2->whereIn('type', ['assigned', 'self'])
+                      // self: hari ini ATAU masih pending ATAU diselesaikan hari ini
+                      $q2->where('type', 'self')
                          ->whereDate('task_date', '<=', $today)
                          ->where(function ($q3) use ($userId, $today) {
                              $q3->whereDate('task_date', $today)
@@ -322,7 +331,9 @@ class TaskRepository
         /** @var Builder $query */
         $query = $this->model->newQuery();
 
-        // default: hanya hari ini | assigned/self: hari ini + pending lama + selesai hari ini
+        // default: hanya hari ini
+        // assigned: hanya hari ini (tidak carry-over)
+        // self: hari ini + pending lama + selesai hari ini
         return $query
             ->with(['creator:id,name', 'assignments', 'assignedUsers:id,name,role'])
             ->whereHas('assignments', function ($q) {
@@ -332,11 +343,18 @@ class TaskRepository
             })
             ->where(function ($q) use ($today) {
                 $q->where(function ($q2) use ($today) {
+                      // default: hanya hari ini
                       $q2->where('type', 'default')
                          ->whereDate('task_date', $today);
                   })
                   ->orWhere(function ($q2) use ($today) {
-                      $q2->whereIn('type', ['assigned', 'self'])
+                      // assigned: hanya hari ini
+                      $q2->where('type', 'assigned')
+                         ->whereDate('task_date', $today);
+                  })
+                  ->orWhere(function ($q2) use ($today) {
+                      // self: hari ini + pending lama + selesai hari ini
+                      $q2->where('type', 'self')
                          ->whereDate('task_date', '<=', $today)
                          ->where(function ($q3) use ($today) {
                              $q3->whereDate('task_date', $today)
@@ -379,11 +397,18 @@ class TaskRepository
             })
             ->where(function ($q) use ($role, $today) {
                 $q->where(function ($q2) use ($today) {
+                      // default: hanya hari ini
                       $q2->where('type', 'default')
                          ->whereDate('task_date', $today);
                   })
+                  ->orWhere(function ($q2) use ($today) {
+                      // assigned: hanya hari ini (tidak carry-over)
+                      $q2->where('type', 'assigned')
+                         ->whereDate('task_date', $today);
+                  })
                   ->orWhere(function ($q2) use ($role, $today) {
-                      $q2->whereIn('type', ['assigned', 'self'])
+                      // self: hari ini + pending lama + selesai hari ini
+                      $q2->where('type', 'self')
                          ->whereDate('task_date', '<=', $today)
                          ->where(function ($q3) use ($role, $today) {
                              $q3->whereDate('task_date', $today)
@@ -641,7 +666,7 @@ class TaskRepository
         /** @var Builder $query */
         $query = $this->model->newQuery();
 
-        // Tampilkan tugas dari admin/staff: hari ini ATAU masih pending dari hari sebelumnya ATAU diselesaikan hari ini
+        // Tampilkan tugas dari admin/staff: HANYA hari ini (tidak carry-over ke hari berikutnya)
         return $query
             ->with(['assignments' => function ($q) use ($userId) {
                 $q->where('user_id', $userId);
@@ -650,20 +675,7 @@ class TaskRepository
                 $q->where('user_id', $userId);
             })
             ->where('type', 'assigned')
-            ->whereDate('task_date', '<=', Carbon::today())
-            ->where(function ($q) use ($userId, $today) {
-                $q->whereDate('task_date', $today)
-                  ->orWhereHas('assignments', function ($q2) use ($userId, $today) {
-                      $q2->where('user_id', $userId)
-                         ->where(function ($q3) use ($today) {
-                             $q3->where('is_completed', 'pending')
-                                ->orWhere(function ($q4) use ($today) {
-                                    $q4->where('is_completed', 'completed')
-                                       ->whereDate('completed_at', $today);
-                                });
-                         });
-                  });
-            })
+            ->whereDate('task_date', $today)
             ->orderByDesc('task_date')
             ->orderByDesc('created_at')
             ->get();

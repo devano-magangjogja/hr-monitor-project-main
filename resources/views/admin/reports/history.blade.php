@@ -31,18 +31,56 @@
             </div>
         </div>
 
-        {{-- Filter Pengguna --}}
-        <div class="lg:col-span-3">
+        {{-- Filter Pengguna (Searchable Dropdown) --}}
+        @php
+            $selectedUser = $users->firstWhere('id', $userId);
+        @endphp
+        <div class="lg:col-span-3 relative" id="user-filter-container">
             <label class="block text-[11px] font-semibold text-gray-500 uppercase tracking-wider mb-1">Pengguna</label>
-            <select name="user_id"
-                    class="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-xs sm:text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:bg-white transition">
-                <option value="">Semua Pengguna</option>
-                @foreach($users as $user)
-                    <option value="{{ $user->id }}" {{ $userId == $user->id ? 'selected' : '' }}>
-                        {{ $user->name }} ({{ $user->role_label }})
-                    </option>
-                @endforeach
-            </select>
+            <input type="hidden" name="user_id" id="filter-user-id" value="{{ $userId ?? '' }}">
+            
+            <div id="user-filter-trigger" onclick="toggleUserDropdown()"
+                 class="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-xs sm:text-sm text-gray-700 flex items-center justify-between cursor-pointer hover:bg-white hover:border-primary-500 transition">
+                <span id="user-filter-text" class="truncate font-medium {{ $selectedUser ? 'text-gray-800' : 'text-gray-500' }}">
+                    {{ $selectedUser ? $selectedUser->name . ' (' . $selectedUser->role_label . ')' : 'Semua Pengguna' }}
+                </span>
+                <svg class="w-3.5 h-3.5 text-gray-400 flex-shrink-0 ml-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                </svg>
+            </div>
+
+            {{-- Popover list --}}
+            <div id="user-filter-menu"
+                 class="hidden absolute z-30 left-0 right-0 mt-1 bg-white border border-gray-200 rounded-xl shadow-xl overflow-hidden">
+                <div class="p-2 border-b border-gray-100 bg-gray-50">
+                    <div class="relative">
+                        <input type="text" id="user-search-input" oninput="filterUserOptions(this.value)"
+                               placeholder="Cari nama atau role..."
+                               class="w-full pl-8 pr-3 py-1.5 bg-white border border-gray-200 rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-primary-500">
+                        <svg class="w-3.5 h-3.5 text-gray-400 absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                        </svg>
+                    </div>
+                </div>
+                <div id="user-options-list" class="max-h-48 overflow-y-auto divide-y divide-gray-50">
+                    <div onclick="selectUser('', 'Semua Pengguna')"
+                         data-search="semua pengguna all"
+                         class="user-filter-option px-3 py-2 hover:bg-primary-50 cursor-pointer text-xs font-semibold text-gray-600 hover:text-primary-700">
+                        Semua Pengguna
+                    </div>
+                    @foreach($users as $user)
+                        <div onclick="selectUser('{{ $user->id }}', '{{ addslashes($user->name) }} ({{ addslashes($user->role_label) }})')"
+                             data-search="{{ strtolower($user->name . ' ' . $user->role_label) }}"
+                             class="user-filter-option px-3 py-2 hover:bg-primary-50 cursor-pointer flex items-center justify-between text-xs text-gray-700 hover:text-primary-700">
+                            <span class="font-medium">{{ $user->name }}</span>
+                            <span class="text-[10px] px-1.5 py-0.5 rounded bg-gray-100 text-gray-500 font-normal">{{ $user->role_label }}</span>
+                        </div>
+                    @endforeach
+                    <div id="user-filter-no-result" class="hidden py-3 text-center text-xs text-gray-400">
+                        Tidak ada pengguna yang cocok
+                    </div>
+                </div>
+            </div>
         </div>
 
         {{-- Filter Tanggal --}}
@@ -315,6 +353,64 @@
             `/admin/reports/assignments/${assignmentId}`;
         document.getElementById('modal-delete').classList.remove('hidden');
     }
+
+    function toggleUserDropdown() {
+        const menu = document.getElementById('user-filter-menu');
+        if (!menu) return;
+        const isHidden = menu.classList.contains('hidden');
+        if (isHidden) {
+            menu.classList.remove('hidden');
+            const searchInput = document.getElementById('user-search-input');
+            if (searchInput) {
+                searchInput.value = '';
+                filterUserOptions('');
+                setTimeout(() => searchInput.focus(), 50);
+            }
+        } else {
+            menu.classList.add('hidden');
+        }
+    }
+
+    function selectUser(id, label) {
+        document.getElementById('filter-user-id').value = id;
+        const textEl = document.getElementById('user-filter-text');
+        textEl.textContent = label;
+        if (id) {
+            textEl.classList.remove('text-gray-500');
+            textEl.classList.add('text-gray-800');
+        } else {
+            textEl.classList.remove('text-gray-800');
+            textEl.classList.add('text-gray-500');
+        }
+        document.getElementById('user-filter-menu').classList.add('hidden');
+    }
+
+    function filterUserOptions(keyword) {
+        const query = (keyword || '').toLowerCase().trim();
+        const options = document.querySelectorAll('.user-filter-option');
+        let visibleCount = 0;
+        options.forEach(opt => {
+            const text = opt.getAttribute('data-search') || opt.textContent.toLowerCase();
+            if (!query || text.includes(query)) {
+                opt.classList.remove('hidden');
+                visibleCount++;
+            } else {
+                opt.classList.add('hidden');
+            }
+        });
+        const noResult = document.getElementById('user-filter-no-result');
+        if (noResult) {
+            noResult.classList.toggle('hidden', visibleCount > 0);
+        }
+    }
+
+    document.addEventListener('click', function(e) {
+        const container = document.getElementById('user-filter-container');
+        const menu = document.getElementById('user-filter-menu');
+        if (container && menu && !container.contains(e.target)) {
+            menu.classList.add('hidden');
+        }
+    });
 </script>
 
 @endsection
