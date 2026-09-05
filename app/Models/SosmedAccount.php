@@ -62,4 +62,16 @@ class SosmedAccount extends Model
     {
         return is_null($this->pm_id);
     }
+
+    public function getPlatformColorAttribute(): string
+    {
+        return match (strtolower($this->platform ?? '')) {
+            'instagram' => 'bg-pink-50 text-pink-700 border-pink-200',
+            'tiktok' => 'bg-neutral-900 border-neutral-800',
+            'youtube' => 'bg-red-50 text-red-700 border-red-200',
+            'facebook' => 'bg-blue-50 text-blue-700 border-blue-200',
+            'twitter', 'x' => 'bg-slate-50 text-slate-800 border-slate-200',
+            default => 'bg-purple-50 text-purple-700 border-purple-200',
+        };
+    }
 }

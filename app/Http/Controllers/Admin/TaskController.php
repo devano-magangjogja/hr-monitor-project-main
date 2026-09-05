@@ -55,8 +55,7 @@ class TaskController extends Controller
 
         try {
             $this->taskService->updateTask($task, $validated);
-            return redirect()->route('admin.tasks.index')
-                ->with('success', 'Tugas berhasil diperbarui.');
+            return back()->with('success', 'Tugas berhasil diperbarui.');
         } catch (ValidationException $e) {
             return back()->with('error', $e->errors()['task'][0] ?? 'Gagal memperbarui tugas.');
         }
@@ -66,8 +65,7 @@ class TaskController extends Controller
     {
         try {
             $this->taskService->deleteTask($task);
-            return redirect()->route('admin.tasks.index')
-                ->with('success', 'Tugas berhasil dihapus.');
+            return back()->with('success', 'Tugas berhasil dihapus.');
         } catch (ValidationException $e) {
             return back()->with('error', $e->errors()['task'][0] ?? 'Gagal menghapus tugas.');
         }
@@ -86,7 +84,9 @@ class TaskController extends Controller
     public function assistantTasks()
     {
         $tasks = $this->taskService->getAllTasksForAssistant();
-        return view('admin.tasks.assistant', compact('tasks'));
+        $assignableUsers = \App\Models\User::where('role', 'hr_assistant')->where('is_active', 1)->get();
+        $kantorList = ['Kantor 1', 'Kantor 2', 'Kantor 3', 'Kantor 4'];
+        return view('admin.tasks.assistant', compact('tasks', 'assignableUsers', 'kantorList'));
     }
 
     // ── Halaman 4: Pantau CS ─────────────────────────────

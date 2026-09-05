@@ -156,7 +156,6 @@ Route::prefix('staff')->name('staff.')->middleware(['auth', 'role:hr_staff'])->g
     // Manajemen Sosmed & Approval Level 2
     Route::get('/sosmed', [StaffSosmedController::class, 'index'])->name('sosmed.index');
     Route::patch('/sosmed/accounts/{account}/assign', [StaffSosmedController::class, 'assignAccount'])->name('sosmed.accounts.assign');
-    Route::post('/sosmed/oversight', [StaffSosmedController::class, 'assignOversight'])->name('sosmed.oversight.assign');
     Route::patch('/sosmed/tasks/{task}/verify', [StaffSosmedController::class, 'verifyTask'])->name('sosmed.tasks.verify');
 });
 
@@ -206,6 +205,7 @@ Route::prefix('assistant')->name('assistant.')->middleware(['auth', 'role:hr_ass
     // Presensi Pemagang
     Route::get('/presensi', [AssistantPresensiController::class, 'index'])->name('presensi.index');
     Route::post('/presensi', [AssistantPresensiController::class, 'store'])->name('presensi.store');
+    Route::post('/presensi/set-kantor', [AssistantPresensiController::class, 'setKantor'])->name('presensi.set-kantor');
     Route::patch('/presensi/{presensi}', [AssistantPresensiController::class, 'update'])->name('presensi.update');
     Route::delete('/presensi/{presensi}', [AssistantPresensiController::class, 'destroy'])->name('presensi.destroy');
     Route::get('/presensi/laporan', [AssistantPresensiController::class, 'laporan'])->name('presensi.laporan');

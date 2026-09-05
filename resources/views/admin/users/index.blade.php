@@ -215,7 +215,15 @@
             </div>
             <div>
                 <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-1">Role</label>
-                <select name="role" required
+                <div class="relative mb-1.5">
+                    <input type="text" id="search-create-user-role" placeholder="Cari role..."
+                           oninput="filterSelectOptions(this.value, 'create-user-role')"
+                           class="w-full pl-7 pr-2.5 py-1 text-xs border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-primary-500 bg-gray-50 focus:bg-white transition">
+                    <svg class="w-3 h-3 text-gray-400 absolute left-2 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                    </svg>
+                </div>
+                <select name="role" id="create-user-role" required
                     class="w-full px-3 sm:px-4 py-2 sm:py-2.5 border border-gray-300 rounded-lg text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-primary-500">
                     <option value="">-- Pilih Role --</option>
                     @foreach($roles as $r)
@@ -276,6 +284,14 @@
             {{-- Role --}}
             <div>
                 <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-1">Role</label>
+                <div class="relative mb-1.5">
+                    <input type="text" id="search-edit-user-role" placeholder="Cari role..."
+                           oninput="filterSelectOptions(this.value, 'edit-role')"
+                           class="w-full pl-7 pr-2.5 py-1 text-xs border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-primary-500 bg-gray-50 focus:bg-white transition">
+                    <svg class="w-3 h-3 text-gray-400 absolute left-2 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                    </svg>
+                </div>
                 <select id="edit-role" name="role" required class="w-full px-3 sm:px-4 py-2 sm:py-2.5 border border-gray-300 rounded-lg text-xs sm:text-sm
                                                focus:outline-none focus:ring-2 focus:ring-primary-500">
                     @foreach($roles as $r)
@@ -559,7 +575,28 @@
             setupPasswordMatchValidation('admin-reset-password', 'admin-reset-password-confirmation', 'admin-reset-pwd-match', 'admin-reset-pwd-len', resetForm);
         });
 
+        function filterSelectOptions(query, selectId) {
+            const select = document.getElementById(selectId);
+            if (!select) return;
+            const q = (query || '').toLowerCase().trim();
+            const options = select.options;
+            for (let i = 0; i < options.length; i++) {
+                const opt = options[i];
+                if (!opt.value) {
+                    opt.hidden = false;
+                    continue;
+                }
+                const text = opt.text.toLowerCase();
+                opt.hidden = q ? !text.includes(q) : false;
+            }
+        }
+
         function openEditModal(id, name, email, role, isActive, imageUrl = '') {
+            const searchInput = document.getElementById('search-edit-user-role');
+            if (searchInput) {
+                searchInput.value = '';
+                filterSelectOptions('', 'edit-role');
+            }
             document.getElementById('edit-name').value = name;
             document.getElementById('edit-email').value = email;
             document.getElementById('edit-role').value = role;

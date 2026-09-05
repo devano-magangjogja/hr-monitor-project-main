@@ -225,13 +225,23 @@
             <p class="text-[11px] text-gray-400 mt-1">Berlaku untuk tugas ke seluruh role. Kosongkan jika tidak ada lokasi khusus.</p>
         </div>
         <div>
-            <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-2">
+            <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-1.5">
                 Penerima Tugas <span class="text-red-500">*</span>
             </label>
+            <div class="relative mb-2">
+                <input type="text"
+                       placeholder="Cari penerima tugas..."
+                       oninput="filterRecipients(this.value, 'create-recipients-box')"
+                       class="w-full pl-8 pr-3 py-1.5 border border-gray-200 rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-primary-500 bg-gray-50 focus:bg-white transition">
+                <svg class="w-3.5 h-3.5 text-gray-400 absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                </svg>
+            </div>
             <div id="create-recipients-box"
                  class="space-y-2 max-h-48 overflow-y-auto border border-gray-200 rounded-lg p-2 sm:p-3">
                 @foreach($assignableUsers as $user)
-                    <label class="flex items-center gap-3 cursor-pointer hover:bg-gray-50 p-1.5 rounded-lg">
+                    <label class="recipient-item flex items-center gap-3 cursor-pointer hover:bg-gray-50 p-1.5 rounded-lg"
+                           data-search="{{ strtolower($user->name . ' ' . $user->role_label) }}">
                         <input type="checkbox" name="user_ids[]" value="{{ $user->id }}"
                                class="create-recipient-checkbox h-4 w-4 text-primary-600 border-gray-300 rounded">
                         <div>
@@ -242,6 +252,9 @@
                         </div>
                     </label>
                 @endforeach
+                <div class="recipient-no-result hidden py-3 text-center text-xs text-gray-400">
+                    Tidak ada penerima yang cocok.
+                </div>
             </div>
             <p id="create-recipient-error"
                class="hidden mt-1.5 text-xs text-red-500 flex items-center gap-1">
@@ -313,12 +326,22 @@
             <p class="text-[11px] text-gray-400 mt-1">Berlaku untuk tugas ke seluruh role. Kosongkan jika tidak ada lokasi khusus.</p>
         </div>
         <div>
-            <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-2">
+            <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-1.5">
                 Penerima Tugas <span class="text-red-500">*</span>
             </label>
-            <div class="space-y-2 max-h-48 overflow-y-auto border border-gray-200 rounded-lg p-2 sm:p-3">
+            <div class="relative mb-2">
+                <input type="text"
+                       placeholder="Cari penerima tugas..."
+                       oninput="filterRecipients(this.value, 'edit-recipients-box')"
+                       class="w-full pl-8 pr-3 py-1.5 border border-gray-200 rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-primary-500 bg-gray-50 focus:bg-white transition">
+                <svg class="w-3.5 h-3.5 text-gray-400 absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                </svg>
+            </div>
+            <div id="edit-recipients-box" class="space-y-2 max-h-48 overflow-y-auto border border-gray-200 rounded-lg p-2 sm:p-3">
                 @foreach($assignableUsers as $user)
-                    <label class="flex items-center gap-3 cursor-pointer hover:bg-gray-50 p-1.5 rounded-lg">
+                    <label class="recipient-item flex items-center gap-3 cursor-pointer hover:bg-gray-50 p-1.5 rounded-lg"
+                           data-search="{{ strtolower($user->name . ' ' . $user->role_label) }}">
                         <input type="checkbox" name="user_ids[]" value="{{ $user->id }}"
                                class="edit-user-checkbox h-4 w-4 text-primary-600 border-gray-300 rounded">
                         <div>
@@ -329,6 +352,9 @@
                         </div>
                     </label>
                 @endforeach
+                <div class="recipient-no-result hidden py-3 text-center text-xs text-gray-400">
+                    Tidak ada penerima yang cocok.
+                </div>
             </div>
         </div>
         <div class="flex justify-end gap-2 sm:gap-3 pt-2">
@@ -354,21 +380,19 @@
         </div>
         <h3 class="text-base font-semibold text-gray-800 mb-1">Hapus Tugas</h3>
         <p class="text-xs sm:text-sm text-gray-500 mb-6">
-            Yakin ingin menghapus
-            <span id="delete-task-title" class="font-semibold text-gray-700"></span>?
+            Apakah Anda yakin ingin menghapus tugas <strong id="delete-task-title"></strong>?
+            Tindakan ini tidak dapat dibatalkan.
         </p>
-        <form id="form-delete" action="" method="POST">
+        <form id="form-delete" action="" method="POST" class="flex justify-center gap-2 sm:gap-3">
             @csrf
             @method('DELETE')
-            <div class="flex justify-center gap-2 sm:gap-3">
-                <x-responsive-button variant="secondary" size="sm" type="button"
-                        onclick="document.getElementById('modal-delete').classList.add('hidden')">
-                    Batal
-                </x-responsive-button>
-                <x-responsive-button variant="danger" size="sm" type="submit">
-                    Ya, Hapus
-                </x-responsive-button>
-            </div>
+            <x-responsive-button variant="secondary" size="sm" type="button"
+                    onclick="document.getElementById('modal-delete').classList.add('hidden')">
+                Batal
+            </x-responsive-button>
+            <x-responsive-button variant="danger" size="sm" type="submit">
+                Ya, Hapus
+            </x-responsive-button>
         </form>
     </div>
 </x-responsive-modal>

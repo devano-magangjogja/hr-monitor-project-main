@@ -211,13 +211,23 @@
                 <p class="text-[11px] text-gray-400 mt-1">Jika dipilih, asisten akan terhubung ke kantor ini saat mencatat presensi hari ini.</p>
             </div>
             <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">
+                <label class="block text-sm font-medium text-gray-700 mb-1.5">
                     Pilih HR Assistant <span class="text-red-500">*</span>
                 </label>
+                <div class="relative mb-2">
+                    <input type="text"
+                           placeholder="Cari nama asisten..."
+                           oninput="filterRecipients(this.value, 'create-recipients-box')"
+                           class="w-full pl-8 pr-3 py-1.5 border border-gray-200 rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-primary-500 bg-gray-50 focus:bg-white transition">
+                    <svg class="w-3.5 h-3.5 text-gray-400 absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                    </svg>
+                </div>
                 <div id="create-recipients-box"
                      class="space-y-2 max-h-48 overflow-y-auto border border-gray-200 rounded-lg p-3">
                     @forelse($assignableUsers as $user)
-                        <label class="flex items-center gap-3 cursor-pointer hover:bg-gray-50 p-1.5 rounded-lg">
+                        <label class="recipient-item flex items-center gap-3 cursor-pointer hover:bg-gray-50 p-1.5 rounded-lg"
+                               data-search="{{ strtolower($user->name) }}">
                             <input type="checkbox" name="user_ids[]" value="{{ $user->id }}"
                                    class="create-recipient-checkbox h-4 w-4 text-primary-600 border-gray-300 rounded">
                             <p class="text-sm font-medium text-gray-700">{{ $user->name }}</p>
@@ -227,6 +237,9 @@
                             Tidak ada HR Assistant aktif.
                         </p>
                     @endforelse
+                    <div class="recipient-no-result hidden py-3 text-center text-xs text-gray-400">
+                        Tidak ada asisten yang cocok.
+                    </div>
                 </div>
                 <p id="create-recipient-error"
                    class="hidden mt-1.5 text-xs text-red-500 flex items-center gap-1">
@@ -302,17 +315,30 @@
                 <p class="text-[11px] text-gray-400 mt-1">Jika dipilih, asisten akan terhubung ke kantor ini saat mencatat presensi hari ini.</p>
             </div>
             <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">
+                <label class="block text-sm font-medium text-gray-700 mb-1.5">
                     Pilih HR Assistant <span class="text-red-500">*</span>
                 </label>
-                <div class="space-y-2 max-h-48 overflow-y-auto border border-gray-200 rounded-lg p-3">
+                <div class="relative mb-2">
+                    <input type="text"
+                           placeholder="Cari nama asisten..."
+                           oninput="filterRecipients(this.value, 'edit-recipients-box')"
+                           class="w-full pl-8 pr-3 py-1.5 border border-gray-200 rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-primary-500 bg-gray-50 focus:bg-white transition">
+                    <svg class="w-3.5 h-3.5 text-gray-400 absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                    </svg>
+                </div>
+                <div id="edit-recipients-box" class="space-y-2 max-h-48 overflow-y-auto border border-gray-200 rounded-lg p-3">
                     @foreach($assignableUsers as $user)
-                        <label class="flex items-center gap-3 cursor-pointer hover:bg-gray-50 p-1.5 rounded-lg">
+                        <label class="recipient-item flex items-center gap-3 cursor-pointer hover:bg-gray-50 p-1.5 rounded-lg"
+                               data-search="{{ strtolower($user->name) }}">
                             <input type="checkbox" name="user_ids[]" value="{{ $user->id }}"
                                    class="edit-user-checkbox h-4 w-4 text-primary-600 border-gray-300 rounded">
                             <p class="text-sm font-medium text-gray-700">{{ $user->name }}</p>
                         </label>
                     @endforeach
+                    <div class="recipient-no-result hidden py-3 text-center text-xs text-gray-400">
+                        Tidak ada asisten yang cocok.
+                    </div>
                 </div>
             </div>
             <div class="flex justify-end gap-3 pt-2">
@@ -399,6 +425,27 @@
 
 {{-- ── JavaScript ──────────────────────────────────────── --}}
 <script>
+    function filterRecipients(query, containerId) {
+        const container = document.getElementById(containerId);
+        if (!container) return;
+        const q = query.toLowerCase().trim();
+        const items = container.querySelectorAll('.recipient-item');
+        let visibleCount = 0;
+        items.forEach(item => {
+            const text = item.getAttribute('data-search') || item.textContent.toLowerCase();
+            if (!q || text.includes(q)) {
+                item.classList.remove('hidden');
+                visibleCount++;
+            } else {
+                item.classList.add('hidden');
+            }
+        });
+        const noResult = container.querySelector('.recipient-no-result');
+        if (noResult) {
+            noResult.classList.toggle('hidden', visibleCount > 0);
+        }
+    }
+
     function openDetailModal(title, description, date, assignees) {
         document.getElementById('detail-title').textContent = title;
         document.getElementById('detail-date').textContent  = 'Tanggal: ' + date;

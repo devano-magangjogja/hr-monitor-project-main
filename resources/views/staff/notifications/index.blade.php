@@ -21,7 +21,13 @@
                   x-data="{
                       recipients: 'all',
                       users: {{ $users->map(fn($u) => ['id' => $u->id, 'name' => $u->name])->values()->toJson() }},
-                      selected: []
+                      selected: [],
+                      userSearch: '',
+                      get filteredUsers() {
+                          if (!this.userSearch) return this.users;
+                          const q = this.userSearch.toLowerCase();
+                          return this.users.filter(u => u.name && u.name.toLowerCase().includes(q));
+                      }
                   }">
                 @csrf
 
@@ -65,22 +71,27 @@
                 {{-- Pilih pengguna spesifik --}}
                 <div x-show="recipients === 'specific'" x-transition class="space-y-2">
                     <label class="block text-xs font-medium text-gray-700 mb-1">Pilih HR Assistant</label>
+                    <div class="relative mb-2">
+                        <input type="text" x-model="userSearch" placeholder="Cari nama HR Assistant..."
+                               class="w-full pl-8 pr-3 py-1.5 border border-gray-200 rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-primary-500 bg-gray-50 focus:bg-white transition">
+                        <svg class="w-3.5 h-3.5 text-gray-400 absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                        </svg>
+                    </div>
                     <div class="border border-gray-300 rounded-lg divide-y divide-gray-100 max-h-52 overflow-y-auto">
-                        @forelse($users as $u)
+                        <template x-for="u in filteredUsers" :key="u.id">
                             <label class="flex items-center gap-3 px-3 py-2.5 hover:bg-gray-50 cursor-pointer">
-                                <input type="checkbox" name="user_ids[]" value="{{ $u->id }}"
-                                       class="w-4 h-4 rounded border-gray-300 text-primary-600
-                                              focus:ring-primary-500">
+                                <input type="checkbox" name="user_ids[]" :value="u.id" x-model="selected"
+                                       class="w-4 h-4 rounded border-gray-300 text-primary-600 focus:ring-primary-500">
                                 <div class="flex-1 min-w-0">
-                                    <p class="text-sm font-medium text-gray-800 truncate">{{ $u->name }}</p>
+                                    <p class="text-sm font-medium text-gray-800 truncate" x-text="u.name"></p>
                                     <p class="text-xs text-gray-400">HR Assistant</p>
                                 </div>
                             </label>
-                        @empty
-                            <div class="px-3 py-4 text-center text-xs text-gray-400">
-                                Tidak ada HR Assistant aktif.
-                            </div>
-                        @endforelse
+                        </template>
+                        <div x-show="filteredUsers.length === 0" class="px-3 py-4 text-center text-xs text-gray-400">
+                            Tidak ada HR Assistant yang cocok.
+                        </div>
                     </div>
                     @error('user_ids')
                         <p class="text-xs text-red-500">{{ $message }}</p>

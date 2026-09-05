@@ -39,8 +39,8 @@ class PresensiController extends Controller
             $search = $request->input('search');
             $baseQuery->whereHas('pemagang', function ($q) use ($search) {
                 $q->where('nama_lengkap', 'like', "%{$search}%")
-                  ->orWhere('no_hp', 'like', "%{$search}%")
-                  ->orWhere('kampus', 'like', "%{$search}%");
+                    ->orWhere('no_hp', 'like', "%{$search}%")
+                    ->orWhere('kampus', 'like', "%{$search}%");
             });
         }
 
@@ -82,18 +82,18 @@ class PresensiController extends Controller
         $stats = [
             'total_pemagang' => Pemagang::count(),
             'total_presensi' => (clone $statsQuery)->count(),
-            'datang_awal'    => (clone $statsQuery)->where('keterangan', 'Lebih Awal')->count(),
-            'tepat_waktu'    => (clone $statsQuery)->where('keterangan', 'Tepat Waktu')->count(),
-            'terlambat'      => (clone $statsQuery)->where('keterangan', 'Terlambat')->count(),
-            'tidak_hadir'    => (clone $statsQuery)->where('keterangan', 'Tidak Hadir')->count(),
-            'total_hadir'    => (clone $statsQuery)->whereIn('keterangan', ['Lebih Awal', 'Tepat Waktu', 'Terlambat'])->count(),
+            'datang_awal' => (clone $statsQuery)->where('keterangan', 'Lebih Awal')->count(),
+            'tepat_waktu' => (clone $statsQuery)->where('keterangan', 'Tepat Waktu')->count(),
+            'terlambat' => (clone $statsQuery)->where('keterangan', 'Terlambat')->count(),
+            'tidak_hadir' => (clone $statsQuery)->where('keterangan', 'Tidak Hadir')->count(),
+            'total_hadir' => (clone $statsQuery)->whereIn('keterangan', ['Lebih Awal', 'Tepat Waktu', 'Terlambat'])->count(),
         ];
 
         // List semua pemagang untuk dropdown modal
         $pemagangs = Pemagang::orderBy('nama_lengkap', 'asc')->get();
 
-        // List opsi divisi unik
-        $divisiList = Pemagang::select('divisi')->distinct()->orderBy('divisi')->pluck('divisi');
+        // List opsi divisi lengkap
+        $divisiList = Pemagang::getAllDivisi();
 
         // Monitoring Asisten yang sedang bertugas di masing-masing kantor pada tanggal ini
         // Hanya tampilkan user dengan role hr_assistant / base_type assistant yang bertugas mengelola presensi
@@ -106,7 +106,7 @@ class PresensiController extends Controller
                     ->filter(fn($u) => $u->isHrAssistant())
                     ->map(function ($u) use ($task) {
                         return [
-                            'name'   => $u->name,
+                            'name' => $u->name,
                             'kantor' => $task->kantor,
                         ];
                     });
@@ -137,18 +137,18 @@ class PresensiController extends Controller
 
         $validated = $request->validate([
             'pemagang_id' => ['required', 'exists:pemagang,id'],
-            'shift'       => ['required', 'in:Pagi,Middle,Siang'],
-            'kantor'      => ['nullable', 'string', 'in:Kantor 1,Kantor 2,Kantor 3,Kantor 4'],
+            'shift' => ['required', 'in:Pagi,Middle,Siang'],
+            'kantor' => ['nullable', 'string', 'in:Kantor 1,Kantor 2,Kantor 3,Kantor 4'],
             'waktu_masuk' => ['required'],
-            'keterangan'  => ['required', 'in:Lebih Awal,Tepat Waktu,Terlambat,Tidak Hadir'],
-            'notes'       => ['nullable', 'string', 'max:500'],
+            'keterangan' => ['required', 'in:Lebih Awal,Tepat Waktu,Terlambat,Tidak Hadir'],
+            'notes' => ['nullable', 'string', 'max:500'],
         ]);
 
         // Tanggal otomatis dikunci pada hari ini
-        $validated['tanggal']    = $today;
-        $validated['kantor']     = $validated['kantor'] ?? 'Kantor 1';
+        $validated['tanggal'] = $today;
+        $validated['kantor'] = $validated['kantor'] ?? 'Kantor 1';
         $validated['created_by'] = Auth::id();
-        $validated['notes']      = $validated['notes'] ?? ($validated['keterangan'] === 'Tidak Hadir' ? 'Tidak hadir tanpa keterangan' : 'Presensi tercatat');
+        $validated['notes'] = $validated['notes'] ?? ($validated['keterangan'] === 'Tidak Hadir' ? 'Tidak hadir tanpa keterangan' : 'Presensi tercatat');
 
         Presensi::create($validated);
 
@@ -162,11 +162,11 @@ class PresensiController extends Controller
     public function update(Request $request, Presensi $presensi)
     {
         $validated = $request->validate([
-            'shift'       => ['required', 'in:Pagi,Middle,Siang'],
-            'kantor'      => ['nullable', 'string', 'in:Kantor 1,Kantor 2,Kantor 3,Kantor 4'],
+            'shift' => ['required', 'in:Pagi,Middle,Siang'],
+            'kantor' => ['nullable', 'string', 'in:Kantor 1,Kantor 2,Kantor 3,Kantor 4'],
             'waktu_masuk' => ['required'],
-            'keterangan'  => ['required', 'in:Lebih Awal,Tepat Waktu,Terlambat,Tidak Hadir'],
-            'notes'       => ['nullable', 'string', 'max:500'],
+            'keterangan' => ['required', 'in:Lebih Awal,Tepat Waktu,Terlambat,Tidak Hadir'],
+            'notes' => ['nullable', 'string', 'max:500'],
         ]);
 
         $validated['notes'] = $validated['notes'] ?? '-';
@@ -207,8 +207,8 @@ class PresensiController extends Controller
             $search = $request->input('search');
             $queryPemagang->where(function ($q) use ($search) {
                 $q->where('nama_lengkap', 'like', "%{$search}%")
-                  ->orWhere('no_hp', 'like', "%{$search}%")
-                  ->orWhere('kampus', 'like', "%{$search}%");
+                    ->orWhere('no_hp', 'like', "%{$search}%")
+                    ->orWhere('kampus', 'like', "%{$search}%");
             });
         }
 
@@ -238,13 +238,13 @@ class PresensiController extends Controller
             $rate = $total > 0 ? round(($hadirDisiplin / $total) * 100, 1) : 0;
 
             return (object) [
-                'pemagang'     => $p,
-                'total'        => $total,
-                'datang_awal'  => $awal,
-                'tepat_waktu'  => $tepat,
-                'terlambat'    => $terlambat,
-                'tidak_hadir'  => $tidakHadir,
-                'rate'         => $rate,
+                'pemagang' => $p,
+                'total' => $total,
+                'datang_awal' => $awal,
+                'tepat_waktu' => $tepat,
+                'terlambat' => $terlambat,
+                'tidak_hadir' => $tidakHadir,
+                'rate' => $rate,
             ];
         });
 
@@ -262,13 +262,13 @@ class PresensiController extends Controller
         $avgDisiplinRate = $totalPresensi > 0 ? round((($totalAwal + $totalTepat) / $totalPresensi) * 100, 1) : 0;
 
         $stats = [
-            'total_pemagang'  => Pemagang::count(),
-            'total_presensi'  => $totalPresensi,
-            'datang_awal'     => $totalAwal,
-            'tepat_waktu'     => $totalTepat,
-            'terlambat'       => $totalTerlambat,
-            'tidak_hadir'     => $totalTidakHadir,
-            'avg_rate'        => $avgDisiplinRate,
+            'total_pemagang' => Pemagang::count(),
+            'total_presensi' => $totalPresensi,
+            'datang_awal' => $totalAwal,
+            'tepat_waktu' => $totalTepat,
+            'terlambat' => $totalTerlambat,
+            'tidak_hadir' => $totalTidakHadir,
+            'avg_rate' => $avgDisiplinRate,
         ];
 
         // Tabel 2: Riwayat detail log presensi (10 per halaman)
@@ -292,7 +292,7 @@ class PresensiController extends Controller
             $search = $request->input('search');
             $logQuery->whereHas('pemagang', function ($q) use ($search) {
                 $q->where('nama_lengkap', 'like', "%{$search}%")
-                  ->orWhere('no_hp', 'like', "%{$search}%");
+                    ->orWhere('no_hp', 'like', "%{$search}%");
             });
         }
 
@@ -302,7 +302,7 @@ class PresensiController extends Controller
             ->withQueryString()
             ->fragment('tabel-log-presensi');
 
-        $divisiList = Pemagang::select('divisi')->distinct()->orderBy('divisi')->pluck('divisi');
+        $divisiList = Pemagang::getAllDivisi();
         $kantorList = ['Kantor 1', 'Kantor 2', 'Kantor 3', 'Kantor 4'];
 
         return view('staff.presensi.laporan-presensi', compact('rekapPemagang', 'stats', 'logs', 'divisiList', 'kantorList'));
