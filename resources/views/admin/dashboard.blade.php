@@ -12,12 +12,12 @@
     @include('components.notification-popup')
 
     {{-- ── Stat Card ──────────────────────────────────────── --}}
-    <x-responsive-grid :cols="'grid-cols-2 sm:grid-cols-3 lg:grid-cols-5'" :gap="'gap-3 sm:gap-4 md:gap-5'" class="mb-8">
+    <x-responsive-grid :cols="'grid-cols-2 lg:grid-cols-4'" :gap="'gap-3 sm:gap-4 md:gap-5'" class="mb-8">
 
         {{-- Total Tugas --}}
-        <x-responsive-card :padding="'p-3 sm:p-4 md:p-5'">
-            <div class="flex items-center justify-between mb-3">
-                <p class="text-xs sm:text-sm font-medium text-gray-500">Total Tugas Hari Ini</p>
+        <x-responsive-card :padding="'p-3.5 sm:p-4 md:p-5'" class="h-full flex flex-col justify-between hover:shadow-md transition-shadow duration-200">
+            <div class="flex items-center justify-between mb-3 gap-2">
+                <p class="text-xs sm:text-sm font-medium text-gray-500 truncate" title="Total Tugas Hari Ini">Total Tugas</p>
                 <div class="w-8 h-8 sm:w-9 sm:h-9 rounded-lg bg-primary-50 flex items-center justify-center flex-shrink-0">
                     <svg class="w-4 sm:w-5 h-4 sm:h-5 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -25,28 +25,32 @@
                     </svg>
                 </div>
             </div>
-            <p class="text-2xl sm:text-3xl font-bold text-gray-800">{{ $stats['total'] }}</p>
-            <p class="text-xs text-gray-400 mt-1">assignment aktif hari ini</p>
+            <div>
+                <p class="text-2xl sm:text-3xl font-bold text-gray-800">{{ $stats['total'] }}</p>
+                <p class="text-[11px] sm:text-xs text-gray-400 mt-1 truncate">assignment aktif hari ini</p>
+            </div>
         </x-responsive-card>
 
         {{-- Selesai --}}
-        <x-responsive-card :padding="'p-3 sm:p-4 md:p-5'">
-            <div class="flex items-center justify-between mb-3">
-                <p class="text-xs sm:text-sm font-medium text-gray-500">Selesai</p>
+        <x-responsive-card :padding="'p-3.5 sm:p-4 md:p-5'" class="h-full flex flex-col justify-between hover:shadow-md transition-shadow duration-200">
+            <div class="flex items-center justify-between mb-3 gap-2">
+                <p class="text-xs sm:text-sm font-medium text-gray-500 truncate" title="Selesai">Selesai</p>
                 <div class="w-8 h-8 sm:w-9 sm:h-9 rounded-lg bg-green-50 flex items-center justify-center flex-shrink-0">
                     <svg class="w-4 sm:w-5 h-4 sm:h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
                     </svg>
                 </div>
             </div>
-            <p class="text-2xl sm:text-3xl font-bold text-green-600">{{ $stats['completed'] }}</p>
-            <p class="text-xs text-gray-400 mt-1">sudah diselesaikan</p>
+            <div>
+                <p class="text-2xl sm:text-3xl font-bold text-green-600">{{ $stats['completed'] }}</p>
+                <p class="text-[11px] sm:text-xs text-gray-400 mt-1 truncate">sudah diselesaikan</p>
+            </div>
         </x-responsive-card>
 
         {{-- Belum Selesai --}}
-        <x-responsive-card :padding="'p-3 sm:p-4 md:p-5'">
-            <div class="flex items-center justify-between mb-3">
-                <p class="text-xs sm:text-sm font-medium text-gray-500">Belum Selesai</p>
+        <x-responsive-card :padding="'p-3.5 sm:p-4 md:p-5'" class="h-full flex flex-col justify-between hover:shadow-md transition-shadow duration-200">
+            <div class="flex items-center justify-between mb-3 gap-2">
+                <p class="text-xs sm:text-sm font-medium text-gray-500 truncate" title="Belum Selesai">Belum Selesai</p>
                 <div class="w-8 h-8 sm:w-9 sm:h-9 rounded-lg bg-yellow-50 flex items-center justify-center flex-shrink-0">
                     <svg class="w-4 sm:w-5 h-4 sm:h-5 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -54,14 +58,16 @@
                     </svg>
                 </div>
             </div>
-            <p class="text-2xl sm:text-3xl font-bold text-yellow-600">{{ $stats['pending'] }}</p>
-            <p class="text-xs text-gray-400 mt-1">masih dalam pengerjaan</p>
+            <div>
+                <p class="text-2xl sm:text-3xl font-bold text-yellow-600">{{ $stats['pending'] }}</p>
+                <p class="text-[11px] sm:text-xs text-gray-400 mt-1 truncate">masih dalam pengerjaan</p>
+            </div>
         </x-responsive-card>
 
         {{-- Tidak Dikerjakan --}}
-        <x-responsive-card :padding="'p-3 sm:p-4 md:p-5'">
-            <div class="flex items-center justify-between mb-3">
-                <p class="text-xs sm:text-sm font-medium text-gray-500">Tidak Dikerjakan</p>
+        <x-responsive-card :padding="'p-3.5 sm:p-4 md:p-5'" class="h-full flex flex-col justify-between hover:shadow-md transition-shadow duration-200">
+            <div class="flex items-center justify-between mb-3 gap-2">
+                <p class="text-xs sm:text-sm font-medium text-gray-500 truncate" title="Tidak Dikerjakan">Tidak Dikerjakan</p>
                 <div class="w-8 h-8 sm:w-9 sm:h-9 rounded-lg bg-red-50 flex items-center justify-center flex-shrink-0">
                     <svg class="w-4 sm:w-5 h-4 sm:h-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -69,8 +75,10 @@
                     </svg>
                 </div>
             </div>
-            <p class="text-2xl sm:text-3xl font-bold text-red-600">{{ $stats['not_done'] }}</p>
-            <p class="text-xs text-gray-400 mt-1">melewati batas waktu</p>
+            <div>
+                <p class="text-2xl sm:text-3xl font-bold text-red-600">{{ $stats['not_done'] }}</p>
+                <p class="text-[11px] sm:text-xs text-gray-400 mt-1 truncate">melewati batas waktu</p>
+            </div>
         </x-responsive-card>
     </x-responsive-grid> 
 

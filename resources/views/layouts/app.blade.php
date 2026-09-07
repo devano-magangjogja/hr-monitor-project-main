@@ -37,12 +37,12 @@
                 @endphp
                 @if($useStorageLogo)
                     <img src="{{ asset('storage/' . $appLogo) }}" alt="{{ $appName }}"
-                         class="w-8 sm:w-9 h-8 sm:h-9 object-contain flex-shrink-0">
+                         class="w-9 h-9 sm:w-10 sm:h-10 object-contain flex-shrink-0 rounded-md">
                 @else
-                    <img src="{{ asset('images/seveninc_logo.png') }}" alt="{{ $appName }}"
-                         class="w-8 sm:w-9 h-8 sm:h-9 object-contain flex-shrink-0">
+                    <img src="{{ asset('images/logo_square.jpg') }}" alt="{{ $appName }}"
+                         class="w-9 h-9 sm:w-10 sm:h-10 object-contain flex-shrink-0 rounded-md">
                 @endif
-                <span class="text-white font-bold text-lg sm:text-2xl tracking-tight truncate">
+                <span class="text-white font-bold text-lg sm:text-xl tracking-tight truncate">
                     {{ $appName }}
                 </span>
             </div>

@@ -79,62 +79,70 @@
     $totalCompleted  = $assistants->sum('completed_tasks');
 @endphp
 
-<div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
-    <div class="bg-white rounded-xl border border-gray-200 p-5">
-        <div class="flex items-center justify-between mb-3">
-            <p class="text-sm font-medium text-gray-500">Total Assistant</p>
-            <div class="w-9 h-9 rounded-lg bg-purple-50 flex items-center justify-center">
-                <svg class="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-6">
+    <div class="bg-white rounded-xl border border-gray-200 p-4 sm:p-5 h-full flex flex-col justify-between hover:shadow-md transition-shadow duration-200">
+        <div class="flex items-center justify-between mb-3 gap-2">
+            <p class="text-xs sm:text-sm font-medium text-gray-500 truncate" title="Total Assistant">Total Assistant</p>
+            <div class="w-8 h-8 sm:w-9 sm:h-9 rounded-lg sm:rounded-xl bg-purple-50 flex items-center justify-center flex-shrink-0">
+                <svg class="w-4 sm:w-5 h-4 sm:h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                           d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>
                 </svg>
             </div>
         </div>
-        <p class="text-3xl font-bold text-gray-800">{{ $totalAssistants }}</p>
-        <p class="text-xs text-gray-400 mt-1">HR Assistant aktif</p>
+        <div>
+            <p class="text-2xl sm:text-3xl font-bold text-gray-800">{{ $totalAssistants }}</p>
+            <p class="text-[11px] sm:text-xs text-gray-400 mt-1 truncate">HR Assistant aktif</p>
+        </div>
     </div>
 
-    <div class="bg-white rounded-xl border border-gray-200 p-5">
-        <div class="flex items-center justify-between mb-3">
-            <p class="text-sm font-medium text-gray-500">Semua Selesai</p>
-            <div class="w-9 h-9 rounded-lg bg-green-50 flex items-center justify-center">
-                <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <div class="bg-white rounded-xl border border-gray-200 p-4 sm:p-5 h-full flex flex-col justify-between hover:shadow-md transition-shadow duration-200">
+        <div class="flex items-center justify-between mb-3 gap-2">
+            <p class="text-xs sm:text-sm font-medium text-gray-500 truncate" title="Semua Selesai">Semua Selesai</p>
+            <div class="w-8 h-8 sm:w-9 sm:h-9 rounded-lg sm:rounded-xl bg-green-50 flex items-center justify-center flex-shrink-0">
+                <svg class="w-4 sm:w-5 h-4 sm:h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
                 </svg>
             </div>
         </div>
-        <p class="text-3xl font-bold text-green-600">{{ $allDone }}</p>
-        <p class="text-xs text-gray-400 mt-1">dari {{ $totalAssistants }} assistant</p>
+        <div>
+            <p class="text-2xl sm:text-3xl font-bold text-green-600">{{ $allDone }}</p>
+            <p class="text-[11px] sm:text-xs text-gray-400 mt-1 truncate">dari {{ $totalAssistants }} assistant</p>
+        </div>
     </div>
 
-    <div class="bg-white rounded-xl border border-gray-200 p-5">
-        <div class="flex items-center justify-between mb-3">
-            <p class="text-sm font-medium text-gray-500">Total Tugas</p>
-            <div class="w-9 h-9 rounded-lg bg-primary-50 flex items-center justify-center">
-                <svg class="w-5 h-5 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <div class="bg-white rounded-xl border border-gray-200 p-4 sm:p-5 h-full flex flex-col justify-between hover:shadow-md transition-shadow duration-200">
+        <div class="flex items-center justify-between mb-3 gap-2">
+            <p class="text-xs sm:text-sm font-medium text-gray-500 truncate" title="Total Tugas">Total Tugas</p>
+            <div class="w-8 h-8 sm:w-9 sm:h-9 rounded-lg sm:rounded-xl bg-primary-50 flex items-center justify-center flex-shrink-0">
+                <svg class="w-4 sm:w-5 h-4 sm:h-5 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                           d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
                 </svg>
             </div>
         </div>
-        <p class="text-3xl font-bold text-gray-800">{{ $totalTasks }}</p>
-        <p class="text-xs text-gray-400 mt-1">total assignment</p>
+        <div>
+            <p class="text-2xl sm:text-3xl font-bold text-gray-800">{{ $totalTasks }}</p>
+            <p class="text-[11px] sm:text-xs text-gray-400 mt-1 truncate">total assignment</p>
+        </div>
     </div>
 
-    <div class="bg-white rounded-xl border border-gray-200 p-5">
-        <div class="flex items-center justify-between mb-3">
-            <p class="text-sm font-medium text-gray-500">Sudah Diselesaikan</p>
-            <div class="w-9 h-9 rounded-lg bg-green-50 flex items-center justify-center">
-                <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <div class="bg-white rounded-xl border border-gray-200 p-4 sm:p-5 h-full flex flex-col justify-between hover:shadow-md transition-shadow duration-200">
+        <div class="flex items-center justify-between mb-3 gap-2">
+            <p class="text-xs sm:text-sm font-medium text-gray-500 truncate" title="Sudah Diselesaikan">Sudah Diselesaikan</p>
+            <div class="w-8 h-8 sm:w-9 sm:h-9 rounded-lg sm:rounded-xl bg-green-50 flex items-center justify-center flex-shrink-0">
+                <svg class="w-4 sm:w-5 h-4 sm:h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                           d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
                 </svg>
             </div>
         </div>
-        <p class="text-3xl font-bold text-green-600">{{ $totalCompleted }}</p>
-        <p class="text-xs text-gray-400 mt-1">
-            {{ $totalTasks > 0 ? round(($totalCompleted / $totalTasks) * 100) : 0 }}% dari total
-        </p>
+        <div>
+            <p class="text-2xl sm:text-3xl font-bold text-green-600">{{ $totalCompleted }}</p>
+            <p class="text-[11px] sm:text-xs text-gray-400 mt-1 truncate">
+                {{ $totalTasks > 0 ? round(($totalCompleted / $totalTasks) * 100) : 0 }}% dari total
+            </p>
+        </div>
     </div>
 </div>
 

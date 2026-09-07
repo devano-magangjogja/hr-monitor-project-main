@@ -21,51 +21,51 @@
 @endphp
 
 {{-- Stat ringkas --}}
-<div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
-    <div class="bg-white rounded-xl border border-gray-200 px-4 py-3 flex items-center gap-3">
+<div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-6">
+    <div class="bg-white rounded-xl border border-gray-200 px-4 py-3 flex items-center gap-3 h-full hover:shadow-md transition-shadow duration-200">
         <div class="w-8 h-8 rounded-lg bg-primary-50 flex items-center justify-center flex-shrink-0">
             <svg class="w-4 h-4 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                       d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
             </svg>
         </div>
-        <div>
-            <p class="text-xs text-gray-400">Total Tugas</p>
+        <div class="min-w-0">
+            <p class="text-xs text-gray-400 truncate">Total Tugas</p>
             <p class="text-lg font-bold text-gray-800">{{ $total }}</p>
         </div>
     </div>
-    <div class="bg-white rounded-xl border border-gray-200 px-4 py-3 flex items-center gap-3">
+    <div class="bg-white rounded-xl border border-gray-200 px-4 py-3 flex items-center gap-3 h-full hover:shadow-md transition-shadow duration-200">
         <div class="w-8 h-8 rounded-lg bg-emerald-50 flex items-center justify-center flex-shrink-0">
             <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
             </svg>
         </div>
-        <div>
-            <p class="text-xs text-gray-400">Selesai</p>
+        <div class="min-w-0">
+            <p class="text-xs text-gray-400 truncate">Selesai</p>
             <p class="text-lg font-bold text-emerald-600">{{ $completed }}</p>
         </div>
     </div>
-    <div class="bg-white rounded-xl border border-gray-200 px-4 py-3 flex items-center gap-3">
+    <div class="bg-white rounded-xl border border-gray-200 px-4 py-3 flex items-center gap-3 h-full hover:shadow-md transition-shadow duration-200">
         <div class="w-8 h-8 rounded-lg bg-yellow-50 flex items-center justify-center flex-shrink-0">
             <svg class="w-4 h-4 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                       d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
             </svg>
         </div>
-        <div>
-            <p class="text-xs text-gray-400">Pending / Berjalan</p>
+        <div class="min-w-0">
+            <p class="text-xs text-gray-400 truncate">Pending / Berjalan</p>
             <p class="text-lg font-bold text-yellow-600">{{ $pending }}</p>
         </div>
     </div>
-    <div class="bg-white rounded-xl border border-gray-200 px-4 py-3 flex items-center gap-3">
+    <div class="bg-white rounded-xl border border-gray-200 px-4 py-3 flex items-center gap-3 h-full hover:shadow-md transition-shadow duration-200">
         <div class="w-8 h-8 rounded-lg bg-red-50 flex items-center justify-center flex-shrink-0">
             <svg class="w-4 h-4 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                       d="M6 18L18 6M6 6l12 12"/>
             </svg>
         </div>
-        <div>
-            <p class="text-xs text-gray-400">Tidak Dikerjakan</p>
+        <div class="min-w-0">
+            <p class="text-xs text-gray-400 truncate">Tidak Dikerjakan</p>
             <p class="text-lg font-bold text-red-600">{{ $notDone }}</p>
         </div>
     </div>
@@ -74,18 +74,18 @@
 {{-- Tabel Semua Tugas --}}
 <div class="bg-white rounded-xl border border-gray-200 overflow-hidden shadow-sm">
     <div class="overflow-x-auto">
-        <table class="w-full text-sm min-w-[640px]">
+        <table class="w-full text-sm text-left border-collapse min-w-[700px]">
             <thead>
-                <tr class="bg-gray-50 border-b border-gray-200 text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                    <th class="text-left px-6 py-3.5 w-48">Judul</th>
-                    <th class="text-left px-6 py-3.5 w-28">Kantor</th>
-                    <th class="text-left px-6 py-3.5">Deskripsi</th>
-                    <th class="text-left px-6 py-3.5 w-28">Sumber</th>
-                    <th class="text-left px-6 py-3.5 w-36">Status</th>
-                    <th class="text-right px-6 py-3.5 w-28">Aksi</th>
+                <tr class="bg-gray-50/80 border-b border-gray-200 text-xs font-semibold uppercase tracking-wider text-gray-500">
+                    <th scope="col" class="px-5 py-3.5 w-[30%] min-w-[150px] text-left">Judul</th>
+                    <th scope="col" class="px-5 py-3.5 w-[10%] min-w-[80px] text-left">Kantor</th>
+                    <th scope="col" class="px-5 py-3.5 text-left">Deskripsi</th>
+                    <th scope="col" class="px-5 py-3.5 w-[14%] min-w-[90px] text-left">Sumber</th>
+                    <th scope="col" class="px-5 py-3.5 w-[16%] min-w-[110px] text-left">Status</th>
+                    <th scope="col" class="px-5 py-3.5 w-[10%] min-w-[70px] text-center">Aksi</th>
                 </tr>
             </thead>
-            <tbody class="divide-y divide-gray-100">
+            <tbody class="divide-y divide-gray-100 bg-white">
                 @forelse($tasks as $task)
                     @php
                         $assignment = $task->assignments->first();
@@ -93,7 +93,7 @@
                         $isSosmed   = !empty($task->is_sosmed);
                         $isPastUnapproved = !empty($task->is_past_unapproved);
                     @endphp
-                    <tr class="hover:bg-gray-50 transition {{ $isPastUnapproved ? 'bg-amber-50/20' : '' }}"
+                    <tr class="hover:bg-gray-50/80 transition-colors duration-150 {{ $isPastUnapproved ? 'bg-amber-50/30' : '' }}"
                         data-task="{{ json_encode([
                             'title'          => $task->title,
                             'kantor'         => $task->kantor,
@@ -109,11 +109,11 @@
                         ]) }}">
 
                         {{-- Judul --}}
-                        <td class="px-6 py-4 w-52">
-                            <div class="font-medium text-gray-800 truncate max-w-[210px]" title="{{ $task->title }}">
+                        <td class="px-5 py-3.5">
+                            <div class="font-medium text-gray-900 truncate max-w-[220px]" title="{{ $task->title }}">
                                 {{ $task->title }}
                             </div>
-                            <div class="flex items-center gap-1.5 flex-wrap mt-1">
+                            <div class="flex items-center gap-1.5 flex-wrap mt-0.5">
                                 @if(!empty($task->platform))
                                     <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-medium border {{ $task->platform_color ?? 'bg-gray-100 text-gray-700 border-gray-200' }}">
                                         {{ $task->platform }}
@@ -129,19 +129,19 @@
                         </td>
 
                         {{-- Kantor --}}
-                        <td class="px-6 py-4 w-28">
+                        <td class="px-5 py-3.5 whitespace-nowrap">
                             @if($task->kantor)
-                                <span class="text-xs text-gray-700 bg-gray-100 px-2 py-1 rounded font-medium">
+                                <span class="inline-block text-xs text-gray-700 bg-gray-100 px-2 py-0.5 rounded font-medium whitespace-nowrap">
                                     {{ $task->kantor }}
                                 </span>
                             @else
-                                <span class="text-xs text-gray-400 pl-1">-</span>
+                                <span class="text-xs text-gray-400">-</span>
                             @endif
                         </td>
 
                         {{-- Deskripsi --}}
-                        <td class="px-6 py-4">
-                            <div class="truncate max-w-[240px] text-gray-500 text-xs" title="{{ $task->description ?? '-' }}">
+                        <td class="px-5 py-3.5">
+                            <div class="truncate max-w-[280px] text-gray-500 text-xs" title="{{ strip_tags($task->description ?? '-') }}">
                                 @if($task->description)
                                     {!! linkify(e($task->description)) !!}
                                 @else
@@ -151,7 +151,7 @@
                         </td>
 
                         {{-- Sumber --}}
-                        <td class="px-6 py-4 w-28">
+                        <td class="px-5 py-3.5 whitespace-nowrap">
                             @if($isSosmed)
                                 <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-pink-50 text-pink-700 border border-pink-200">
                                     <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 24 24">
@@ -182,13 +182,13 @@
                         </td>
 
                         {{-- Status --}}
-                        <td class="px-6 py-4 w-36">
+                        <td class="px-5 py-3.5 whitespace-nowrap">
                             <x-task-status-badge :status="$status" :completedAt="$assignment?->completed_at" />
                         </td>
 
                         {{-- Aksi --}}
-                        <td class="px-6 py-4 w-28">
-                            <div class="flex items-center justify-end gap-1.5 whitespace-nowrap">
+                        <td class="px-5 py-3.5 whitespace-nowrap text-center">
+                            <div class="inline-flex items-center justify-center gap-1">
                                 {{-- Tombol Detail --}}
                                 <button onclick="openDetailModal(JSON.parse(this.closest('tr').dataset.task))"
                                         class="p-1.5 text-gray-400 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition"
@@ -236,10 +236,10 @@
 
                                     @if($status === 'pending')
                                         <button onclick="openCompleteModal({{ $task->id }}, '{{ addslashes($task->title) }}')"
-                                                class="p-1.5 text-gray-400 hover:text-green-600 hover:bg-green-50 rounded-lg transition"
+                                                class="p-1.5 text-gray-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors"
                                                 title="Tandai Selesai">
                                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M5 13l4 4L19 7"/>
                                             </svg>
                                         </button>
                                     @endif

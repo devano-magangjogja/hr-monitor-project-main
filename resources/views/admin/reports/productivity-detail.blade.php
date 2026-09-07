@@ -57,54 +57,54 @@
 </div>
 
 {{-- Stat Cards --}}
-<div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
-    <div class="bg-white rounded-xl border border-gray-200 px-4 py-3 flex items-center gap-3">
+<div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-6">
+    <div class="bg-white rounded-xl border border-gray-200 px-4 py-3 flex items-center gap-3 h-full hover:shadow-md transition-shadow duration-200">
         <div class="w-8 h-8 rounded-lg bg-primary-50 flex items-center justify-center flex-shrink-0">
             <svg class="w-4 h-4 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                       d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
             </svg>
         </div>
-        <div>
-            <p class="text-xs text-gray-400">Total Tugas</p>
+        <div class="min-w-0">
+            <p class="text-xs text-gray-400 truncate">Total Tugas</p>
             <p class="text-xl font-bold text-gray-800">{{ $total }}</p>
         </div>
     </div>
 
-    <div class="bg-white rounded-xl border border-gray-200 px-4 py-3 flex items-center gap-3">
+    <div class="bg-white rounded-xl border border-gray-200 px-4 py-3 flex items-center gap-3 h-full hover:shadow-md transition-shadow duration-200">
         <div class="w-8 h-8 rounded-lg bg-green-50 flex items-center justify-center flex-shrink-0">
             <svg class="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
             </svg>
         </div>
-        <div>
-            <p class="text-xs text-gray-400">Selesai</p>
+        <div class="min-w-0">
+            <p class="text-xs text-gray-400 truncate">Selesai</p>
             <p class="text-xl font-bold text-green-600">{{ $completed }}</p>
         </div>
     </div>
 
-    <div class="bg-white rounded-xl border border-gray-200 px-4 py-3 flex items-center gap-3">
+    <div class="bg-white rounded-xl border border-gray-200 px-4 py-3 flex items-center gap-3 h-full hover:shadow-md transition-shadow duration-200">
         <div class="w-8 h-8 rounded-lg bg-yellow-50 flex items-center justify-center flex-shrink-0">
             <svg class="w-4 h-4 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                       d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
             </svg>
         </div>
-        <div>
-            <p class="text-xs text-gray-400">Pending</p>
+        <div class="min-w-0">
+            <p class="text-xs text-gray-400 truncate">Pending</p>
             <p class="text-xl font-bold text-yellow-600">{{ $pending }}</p>
         </div>
     </div>
 
-    <div class="bg-white rounded-xl border border-gray-200 px-4 py-3 flex items-center gap-3">
+    <div class="bg-white rounded-xl border border-gray-200 px-4 py-3 flex items-center gap-3 h-full hover:shadow-md transition-shadow duration-200">
         <div class="w-8 h-8 rounded-lg bg-red-50 flex items-center justify-center flex-shrink-0">
             <svg class="w-4 h-4 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                       d="M6 18L18 6M6 6l12 12"/>
             </svg>
         </div>
-        <div>
-            <p class="text-xs text-gray-400">Tdk Dikerjakan</p>
+        <div class="min-w-0">
+            <p class="text-xs text-gray-400 truncate">Tdk Dikerjakan</p>
             <p class="text-xl font-bold text-red-600">{{ $notDone }}</p>
         </div>
     </div>

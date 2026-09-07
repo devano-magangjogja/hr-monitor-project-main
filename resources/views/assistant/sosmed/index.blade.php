@@ -24,32 +24,40 @@
     </div>
 
     {{-- ═══ STAT CARDS ════════════════════════════════════════════════════════ --}}
-    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
-        <div class="bg-white rounded-xl border {{ $stats['pending'] > 0 ? 'border-orange-300 bg-orange-50/30 ring-2 ring-orange-400/30' : 'border-gray-200' }} p-4 shadow-sm relative">
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-6">
+        <div class="bg-white rounded-xl border {{ $stats['pending'] > 0 ? 'border-orange-300 bg-orange-50/30 ring-2 ring-orange-400/30' : 'border-gray-200' }} p-4 shadow-sm relative h-full flex flex-col justify-between hover:shadow-md transition-shadow duration-200">
             @if($stats['pending'] > 0)
                 <span class="absolute top-3 right-3 flex h-2 w-2">
                     <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-orange-400 opacity-75"></span>
                     <span class="relative inline-flex rounded-full h-2 w-2 bg-orange-500"></span>
                 </span>
             @endif
-            <p class="text-xs font-medium text-gray-500 mb-1">Perlu Diverifikasi</p>
-            <p class="text-2xl font-bold text-orange-600">{{ $stats['pending'] }}</p>
-            <p class="text-[11px] text-orange-500 mt-0.5">menunggu approval</p>
+            <div>
+                <p class="text-xs font-medium text-gray-500 mb-1 truncate" title="Perlu Diverifikasi">Perlu Diverifikasi</p>
+                <p class="text-2xl font-bold text-orange-600">{{ $stats['pending'] }}</p>
+            </div>
+            <p class="text-[11px] text-orange-500 mt-1 truncate">menunggu approval</p>
         </div>
-        <div class="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
-            <p class="text-xs font-medium text-gray-500 mb-1">Menunggu HR Staff</p>
-            <p class="text-2xl font-bold text-indigo-600">{{ $stats['approved'] }}</p>
-            <p class="text-[11px] text-gray-400 mt-0.5">lolos verif level 1</p>
+        <div class="bg-white rounded-xl border border-gray-200 p-4 shadow-sm h-full flex flex-col justify-between hover:shadow-md transition-shadow duration-200">
+            <div>
+                <p class="text-xs font-medium text-gray-500 mb-1 truncate" title="Menunggu HR Staff">Menunggu HR Staff</p>
+                <p class="text-2xl font-bold text-indigo-600">{{ $stats['approved'] }}</p>
+            </div>
+            <p class="text-[11px] text-gray-400 mt-1 truncate">lolos verif level 1</p>
         </div>
-        <div class="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
-            <p class="text-xs font-medium text-gray-500 mb-1">Disetujui Final</p>
-            <p class="text-2xl font-bold text-emerald-600">{{ $stats['final_ok'] }}</p>
-            <p class="text-[11px] text-emerald-500 mt-0.5">selesai 100%</p>
+        <div class="bg-white rounded-xl border border-gray-200 p-4 shadow-sm h-full flex flex-col justify-between hover:shadow-md transition-shadow duration-200">
+            <div>
+                <p class="text-xs font-medium text-gray-500 mb-1 truncate" title="Disetujui Final">Disetujui Final</p>
+                <p class="text-2xl font-bold text-emerald-600">{{ $stats['final_ok'] }}</p>
+            </div>
+            <p class="text-[11px] text-emerald-500 mt-1 truncate">selesai 100%</p>
         </div>
-        <div class="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
-            <p class="text-xs font-medium text-gray-500 mb-1">Ditolak</p>
-            <p class="text-2xl font-bold text-rose-600">{{ $stats['rejected'] }}</p>
-            <p class="text-[11px] text-gray-400 mt-0.5">perlu revisi</p>
+        <div class="bg-white rounded-xl border border-gray-200 p-4 shadow-sm h-full flex flex-col justify-between hover:shadow-md transition-shadow duration-200">
+            <div>
+                <p class="text-xs font-medium text-gray-500 mb-1 truncate" title="Ditolak">Ditolak</p>
+                <p class="text-2xl font-bold text-rose-600">{{ $stats['rejected'] }}</p>
+            </div>
+            <p class="text-[11px] text-gray-400 mt-1 truncate">perlu revisi</p>
         </div>
     </div>
 

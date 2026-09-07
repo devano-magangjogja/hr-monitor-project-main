@@ -1,4 +1,4 @@
-@extends('layouts.app')
+﻿@extends('layouts.app')
 @section('title', 'Tugas Mandiri')
 @section('page-title', 'Tugas Mandiri')
 @section('page-subtitle', 'Catat pekerjaan yang kamu inisiasi sendiri hari ini')
@@ -20,26 +20,26 @@
         </button>
     </div>
 
-    <div class="bg-white rounded-xl border border-gray-200 overflow-hidden">
+    <div class="bg-white rounded-xl border border-gray-200 overflow-hidden shadow-sm">
         <div class="overflow-x-auto">
-            <table class="w-full text-sm min-w-[580px]">
+            <table class="w-full text-sm text-left border-collapse min-w-[700px]">
                 <thead>
-                    <tr class="bg-gray-50 border-b border-gray-200">
-                        <th class="text-left px-6 py-3.5 font-semibold text-gray-600 w-48">Judul</th>
-                        <th class="text-left px-6 py-3.5 font-semibold text-gray-600 w-28">Kantor</th>
-                        <th class="text-left px-6 py-3.5 font-semibold text-gray-600">Deskripsi</th>
-                        <th class="text-left px-6 py-3.5 font-semibold text-gray-600 w-32">Sumber</th>
-                        <th class="text-left px-6 py-3.5 font-semibold text-gray-600 w-28">Status</th>
-                        <th class="text-right px-6 py-3.5 font-semibold text-gray-600 w-32">Aksi</th>
+                    <tr class="bg-gray-50/80 border-b border-gray-200 text-xs font-semibold uppercase tracking-wider text-gray-500">
+                        <th scope="col" class="px-5 py-3.5 w-[28%] min-w-[140px] text-left">Judul</th>
+                        <th scope="col" class="px-5 py-3.5 w-[12%] min-w-[80px] text-left">Kantor</th>
+                        <th scope="col" class="px-5 py-3.5 text-left">Deskripsi</th>
+                        <th scope="col" class="px-5 py-3.5 w-[14%] min-w-[90px] text-left">Sumber</th>
+                        <th scope="col" class="px-5 py-3.5 w-[12%] min-w-[80px] text-left">Status</th>
+                        <th scope="col" class="px-5 py-3.5 w-[10%] min-w-[60px] text-center">Aksi</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-gray-100">
+                <tbody class="divide-y divide-gray-100 bg-white">
                     @forelse($tasks as $task)
                         @php
                             $assignment = $task->assignments->first();
                             $status = $assignment?->is_completed ?? 'pending';
                         @endphp
-                        <tr class="hover:bg-gray-50 transition" data-task="{{ json_encode([
+                        <tr class="hover:bg-gray-50/80 transition-colors duration-150" data-task="{{ json_encode([
                             'title' => $task->title,
                             'kantor'      => $task->kantor,
                             'description' => $task->description ?? '',
@@ -50,28 +50,28 @@
                             'note' => $assignment?->note ?? '',
                             'assignees' => [],
                         ]) }}" data-edit-title="{{ $task->title }}" data-edit-desc="{{ $task->description ?? '' }}">
-                            <td class="px-6 py-4 w-48">
-                                <div class="truncate max-w-[170px] font-medium text-gray-800" title="{{ $task->title }}">
+                            <td class="px-5 py-3.5 whitespace-nowrap">
+                                <div class="truncate max-w-[200px] font-medium text-gray-900" title="{{ $task->title }}">
                                     {{ $task->title }}
                                 </div>
                             </td>
-                            <td class="px-6 py-4 w-28">
+                            <td class="px-5 py-3.5 whitespace-nowrap">
                                 <span class="text-sm text-gray-600">{{ $task->kantor ?: '-' }}</span>
                             </td>
-                            <td class="px-6 py-4">
-                                <div class="truncate max-w-[220px] text-gray-500" title="{{ $task->description ?? '-' }}">
+                            <td class="px-5 py-3.5">
+                                <div class="truncate max-w-[260px] text-gray-500" title="{{ $task->description ?? '-' }}">
                                     {{ $task->description ?? '-' }}
                                 </div>
                             </td>
-                            <td class="px-6 py-4 w-32">
+                            <td class="px-5 py-3.5 whitespace-nowrap">
                                 <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-600">
                                     Mandiri
                                 </span>
                             </td>
-                            <td class="px-6 py-4 w-28">
+                            <td class="px-5 py-3.5 whitespace-nowrap">
                                 <x-task-status-badge :status="$status" :completedAt="$assignment?->completed_at" />
                             </td>
-                            <td class="px-6 py-4 w-32">
+                            <td class="px-5 py-3.5 whitespace-nowrap">
                                 <div class="flex items-center justify-end gap-1.5 whitespace-nowrap">
                                     <button onclick="openDetailModal(JSON.parse(this.closest('tr').dataset.task))"
                                         class="p-1.5 text-gray-400 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition" title="Lihat Detail">
@@ -79,7 +79,7 @@
                                     </button>
                                     @if($status === 'pending')
                                         <button onclick="openCompleteModal({{ $task->id }}, '{{ addslashes($task->title) }}')"
-                                            class="p-1.5 text-gray-400 hover:text-green-600 hover:bg-green-50 rounded-lg transition" title="Tandai Selesai">
+                                            class="p-1.5 text-gray-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition" title="Tandai Selesai">
                                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
                                         </button>
                                         <button onclick="openEditModal({{ $task->id }}, this.closest('tr').dataset.editTitle, this.closest('tr').dataset.editDesc)"
@@ -87,7 +87,7 @@
                                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
                                         </button>
                                         <button onclick="openDeleteModal({{ $task->id }}, '{{ addslashes($task->title) }}')"
-                                            class="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition" title="Hapus">
+                                            class="p-1.5 text-gray-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition" title="Hapus">
                                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
                                         </button>
                                     @endif
