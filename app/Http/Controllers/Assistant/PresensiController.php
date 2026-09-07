@@ -86,11 +86,11 @@ class PresensiController extends Controller
         $stats = [
             'total_pemagang' => Pemagang::count(),
             'total_presensi' => (clone $statsQuery)->count(),
-            'datang_awal'    => (clone $statsQuery)->where('keterangan', 'Lebih Awal')->count(),
-            'tepat_waktu'    => (clone $statsQuery)->where('keterangan', 'Tepat Waktu')->count(),
-            'terlambat'      => (clone $statsQuery)->where('keterangan', 'Terlambat')->count(),
-            'tidak_hadir'    => (clone $statsQuery)->where('keterangan', 'Tidak Hadir')->count(),
-            'total_hadir'    => (clone $statsQuery)->whereIn('keterangan', ['Lebih Awal', 'Tepat Waktu', 'Terlambat'])->count(),
+            'datang_awal' => (clone $statsQuery)->where('keterangan', 'Lebih Awal')->count(),
+            'tepat_waktu' => (clone $statsQuery)->where('keterangan', 'Tepat Waktu')->count(),
+            'terlambat' => (clone $statsQuery)->where('keterangan', 'Terlambat')->count(),
+            'tidak_hadir' => (clone $statsQuery)->where('keterangan', 'Tidak Hadir')->count(),
+            'total_hadir' => (clone $statsQuery)->whereIn('keterangan', ['Lebih Awal', 'Tepat Waktu', 'Terlambat'])->count(),
         ];
 
         // List pemagang untuk dropdown modal
@@ -98,7 +98,7 @@ class PresensiController extends Controller
         if ($selectedKantor) {
             $pemagangQuery->whereDoesntHave('presensis', function ($q) use ($tanggal, $selectedKantor) {
                 $q->where('tanggal', $tanggal)
-                  ->where('kantor', '!=', $selectedKantor);
+                    ->where('kantor', '!=', $selectedKantor);
             });
         }
         $pemagangs = $pemagangQuery->orderBy('nama_lengkap', 'asc')->get();
@@ -106,7 +106,7 @@ class PresensiController extends Controller
         // List opsi divisi lengkap
         $divisiList = Pemagang::getAllDivisi();
 
-        $kantorList = ['Kantor 1', 'Kantor 2', 'Kantor 3', 'Kantor 4'];
+        $kantorList = ['Kantor 1', 'Kantor 2', 'Kantor 3', 'Kantor 4', 'Kantor 5', 'Kantor 6', 'Kantor 7', 'Kantor 8', 'Kantor 9', 'Kantor 10'];
 
         return view('assistant.presensi.presensi', compact(
             'presensiHadir',
@@ -129,7 +129,7 @@ class PresensiController extends Controller
     public function setKantor(Request $request)
     {
         $validated = $request->validate([
-            'kantor' => ['required', 'string', 'in:Kantor 1,Kantor 2,Kantor 3,Kantor 4'],
+            'kantor' => ['required', 'string', 'in:Kantor 1,Kantor 2,Kantor 3,Kantor 4,Kantor 5,Kantor 6,Kantor 7,Kantor 8,Kantor 9,Kantor 10'],
         ]);
 
         $this->ensureAssistantKantorTask(Auth::id(), $validated['kantor']);
@@ -147,11 +147,11 @@ class PresensiController extends Controller
 
         $validated = $request->validate([
             'pemagang_id' => ['required', 'exists:pemagang,id'],
-            'shift'       => ['required', 'in:Pagi,Middle,Siang'],
+            'shift' => ['required', 'in:Pagi,Middle,Siang'],
             'waktu_masuk' => ['required'],
-            'keterangan'  => ['required', 'in:Lebih Awal,Tepat Waktu,Terlambat,Tidak Hadir'],
-            'notes'       => ['nullable', 'string', 'max:500'],
-            'kantor'      => ['required', 'string', 'in:Kantor 1,Kantor 2,Kantor 3,Kantor 4'],
+            'keterangan' => ['required', 'in:Lebih Awal,Tepat Waktu,Terlambat,Tidak Hadir'],
+            'notes' => ['nullable', 'string', 'max:500'],
+            'kantor' => ['required', 'string', 'in:Kantor 1,Kantor 2,Kantor 3,Kantor 4,Kantor 5,Kantor 6,Kantor 7,Kantor 8,Kantor 9,Kantor 10'],
         ]);
 
         $kantorTujuan = $validated['kantor'];
@@ -170,10 +170,10 @@ class PresensiController extends Controller
         }
 
         // Tanggal otomatis dikunci pada hari ini
-        $validated['tanggal']    = $today;
-        $validated['kantor']     = $kantorTujuan;
+        $validated['tanggal'] = $today;
+        $validated['kantor'] = $kantorTujuan;
         $validated['created_by'] = Auth::id();
-        $validated['notes']      = $validated['notes'] ?? ($validated['keterangan'] === 'Tidak Hadir' ? 'Tidak hadir tanpa keterangan' : 'Presensi tercatat');
+        $validated['notes'] = $validated['notes'] ?? ($validated['keterangan'] === 'Tidak Hadir' ? 'Tidak hadir tanpa keterangan' : 'Presensi tercatat');
 
         Presensi::create($validated);
 
@@ -187,10 +187,10 @@ class PresensiController extends Controller
     public function update(Request $request, Presensi $presensi)
     {
         $validated = $request->validate([
-            'shift'       => ['required', 'in:Pagi,Middle,Siang'],
+            'shift' => ['required', 'in:Pagi,Middle,Siang'],
             'waktu_masuk' => ['required'],
-            'keterangan'  => ['required', 'in:Lebih Awal,Tepat Waktu,Terlambat,Tidak Hadir'],
-            'notes'       => ['nullable', 'string', 'max:500'],
+            'keterangan' => ['required', 'in:Lebih Awal,Tepat Waktu,Terlambat,Tidak Hadir'],
+            'notes' => ['nullable', 'string', 'max:500'],
         ]);
 
         $validated['notes'] = $validated['notes'] ?? '-';
@@ -234,11 +234,13 @@ class PresensiController extends Controller
         // Tabel 1: Rekapitulasi Pemagang HANYA untuk pemagang yang presensi di kantor tersebut pada hari itu
         $queryPemagang = Pemagang::whereHas('presensis', function ($q) use ($tanggal, $selectedKantor) {
             $q->where('tanggal', $tanggal)
-              ->where('kantor', $selectedKantor);
-        })->with(['presensis' => function ($q) use ($tanggal, $selectedKantor) {
-            $q->where('tanggal', $tanggal)
-              ->where('kantor', $selectedKantor);
-        }]);
+                ->where('kantor', $selectedKantor);
+        })->with([
+                    'presensis' => function ($q) use ($tanggal, $selectedKantor) {
+                        $q->where('tanggal', $tanggal)
+                            ->where('kantor', $selectedKantor);
+                    }
+                ]);
 
         if ($request->filled('search')) {
             $search = $request->input('search');
@@ -272,13 +274,13 @@ class PresensiController extends Controller
             $rate = $total > 0 ? round(($hadirDisiplin / $total) * 100, 1) : 0;
 
             return (object) [
-                'pemagang'     => $p,
-                'total'        => $total,
-                'datang_awal'  => $awal,
-                'tepat_waktu'  => $tepat,
-                'terlambat'    => $terlambat,
-                'tidak_hadir'  => $tidakHadir,
-                'rate'         => $rate,
+                'pemagang' => $p,
+                'total' => $total,
+                'datang_awal' => $awal,
+                'tepat_waktu' => $tepat,
+                'terlambat' => $terlambat,
+                'tidak_hadir' => $tidakHadir,
+                'rate' => $rate,
             ];
         });
 
@@ -292,13 +294,13 @@ class PresensiController extends Controller
         $avgDisiplinRate = $totalPresensi > 0 ? round((($totalAwal + $totalTepat) / $totalPresensi) * 100, 1) : 0;
 
         $stats = [
-            'total_pemagang'  => $totalPemagang,
-            'total_presensi'  => $totalPresensi,
-            'datang_awal'     => $totalAwal,
-            'tepat_waktu'     => $totalTepat,
-            'terlambat'       => $totalTerlambat,
-            'tidak_hadir'     => $totalTidakHadir,
-            'avg_rate'        => $avgDisiplinRate,
+            'total_pemagang' => $totalPemagang,
+            'total_presensi' => $totalPresensi,
+            'datang_awal' => $totalAwal,
+            'tepat_waktu' => $totalTepat,
+            'terlambat' => $totalTerlambat,
+            'tidak_hadir' => $totalTidakHadir,
+            'avg_rate' => $avgDisiplinRate,
         ];
 
         // Tabel 2: Riwayat detail log presensi HANYA untuk hari itu dan kantor tersebut
@@ -333,7 +335,7 @@ class PresensiController extends Controller
 
         $divisiList = Pemagang::getAllDivisi();
 
-        $kantorList = ['Kantor 1', 'Kantor 2', 'Kantor 3', 'Kantor 4'];
+        $kantorList = ['Kantor 1', 'Kantor 2', 'Kantor 3', 'Kantor 4', 'Kantor 5', 'Kantor 6', 'Kantor 7', 'Kantor 8', 'Kantor 9', 'Kantor 10'];
 
         return view('assistant.presensi.laporan-presensi', compact('rekapPemagang', 'stats', 'logs', 'divisiList', 'assignedKantor', 'selectedKantor', 'tanggal', 'formattedDate', 'kantorList'));
     }
@@ -355,7 +357,7 @@ class PresensiController extends Controller
             if ($existingTask->assignments()->count() === 1) {
                 $existingTask->update([
                     'kantor' => $kantor,
-                    'title'  => "Presensi Pemagang - {$kantor}",
+                    'title' => "Presensi Pemagang - {$kantor}",
                 ]);
                 return $existingTask;
             }
@@ -369,19 +371,19 @@ class PresensiController extends Controller
         $userName = $user ? $user->name : 'HR Assistant';
 
         $task = Task::create([
-            'title'       => "Presensi Pemagang - {$kantor}",
+            'title' => "Presensi Pemagang - {$kantor}",
             'description' => "Penugasan presensi pemagang di {$kantor} (Ditentukan mandiri oleh {$userName})",
-            'task_date'   => $today,
-            'type'        => 'assigned',
-            'kantor'      => $kantor,
-            'created_by'  => $userId,
+            'task_date' => $today,
+            'type' => 'assigned',
+            'kantor' => $kantor,
+            'created_by' => $userId,
         ]);
 
         $task->assignments()->create([
-            'user_id'      => $userId,
+            'user_id' => $userId,
             'is_completed' => 'pending',
         ]);
 
         return $task;
     }
-}
+}

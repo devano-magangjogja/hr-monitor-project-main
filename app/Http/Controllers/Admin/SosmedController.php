@@ -17,7 +17,7 @@ class SosmedController extends Controller
         $tab = $request->query('tab', 'accounts');
 
         // Seluruh Akun Sosmed di Sistem
-        $accounts = SosmedAccount::with(['pmUser', 'staffUser', 'creator'])
+        $accounts = SosmedAccount::with(['pmUser', 'staffUser', 'assistantUser', 'creator'])
             ->orderBy('platform')
             ->get();
 
@@ -37,6 +37,14 @@ class SosmedController extends Controller
             ->where('users.is_active', true)
             ->select('users.*')
             ->orderBy('users.name')
+            ->get();
+
+        $assistants = User::where(function ($q) {
+                $q->where('role', 'hr_assistant')
+                  ->orWhereHas('roleModel', fn($r) => $r->where('base_type', 'assistant'));
+            })
+            ->where('is_active', true)
+            ->orderBy('name')
             ->get();
 
         $executors = User::whereIn('role', ['sosmed', 'pm'])
@@ -62,6 +70,7 @@ class SosmedController extends Controller
             'tasks',
             'logs',
             'pms',
+            'assistants',
             'staffs',
             'executors',
             'stats'
@@ -75,6 +84,7 @@ class SosmedController extends Controller
             'platform' => ['required', 'string', 'max:50'],
             'link' => ['nullable', 'url', 'max:500'],
             'pm_id' => ['nullable', 'exists:users,id'],
+            'assistant_id' => ['nullable', 'exists:users,id'],
             'staff_id' => ['nullable', 'exists:users,id'],
             'notes' => ['nullable', 'string'],
         ]);
@@ -102,6 +112,7 @@ class SosmedController extends Controller
             'platform' => ['required', 'string', 'max:50'],
             'link' => ['nullable', 'url', 'max:500'],
             'pm_id' => ['nullable', 'exists:users,id'],
+            'assistant_id' => ['nullable', 'exists:users,id'],
             'staff_id' => ['nullable', 'exists:users,id'],
             'notes' => ['nullable', 'string'],
         ]);
@@ -123,6 +134,7 @@ class SosmedController extends Controller
     {
         $validated = $request->validate([
             'pm_id' => ['nullable', 'exists:users,id'],
+            'assistant_id' => ['nullable', 'exists:users,id'],
             'staff_id' => ['nullable', 'exists:users,id'],
         ]);
 

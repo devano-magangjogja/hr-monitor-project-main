@@ -18,7 +18,7 @@ class SosmedController extends Controller
         $tab = $request->query('tab', 'accounts');
 
         // All accounts (Staff sees everything)
-        $accounts = SosmedAccount::with(['pmUser', 'staffUser', 'creator'])
+        $accounts = SosmedAccount::with(['pmUser', 'staffUser', 'assistantUser', 'creator'])
             ->orderBy('platform')
             ->get();
 
@@ -46,6 +46,15 @@ class SosmedController extends Controller
             ->orderBy('users.name')
             ->get();
 
+        // Asisten HR list for account assignment & approval authority
+        $assistants = User::where(function ($q) {
+                $q->where('role', 'hr_assistant')
+                  ->orWhereHas('roleModel', fn($r) => $r->where('base_type', 'assistant'));
+            })
+            ->where('is_active', true)
+            ->orderBy('name')
+            ->get();
+
         // Eksekutor Akun: Staff Sosmed, Digital Marketing, atau PM (Mandiri)
         $executors = User::whereIn('role', ['sosmed', 'pm'])
             ->where('is_active', true)
@@ -68,6 +77,7 @@ class SosmedController extends Controller
             'allTasks',
             'approvalLogs',
             'pms',
+            'assistants',
             'staffs',
             'executors',
             'stats'
@@ -75,7 +85,7 @@ class SosmedController extends Controller
     }
 
     /**
-     * HR Staff assign pm_id AND staff_id on a SosmedAccount.
+     * HR Staff assign pm_id, assistant_id, AND staff_id on a SosmedAccount.
      *
      * Enforcement rule: if a staff_id is selected, the pm_id MUST match
      * whoever oversees that sosmed user in pm_sosmed_oversight.
@@ -85,11 +95,13 @@ class SosmedController extends Controller
     {
         $validated = $request->validate([
             'pm_id' => ['nullable', 'exists:users,id'],
+            'assistant_id' => ['nullable', 'exists:users,id'],
             'staff_id' => ['nullable', 'exists:users,id'],
         ]);
 
         $newStaffId = $validated['staff_id'] ?? null;
         $newPmId = $validated['pm_id'] ?? null;
+        $newAssistantId = $validated['assistant_id'] ?? null;
 
         // Enforce: if a sosmed user is selected and they have an oversight PM,
         // the pm_id on this account must match that oversight PM.
@@ -104,6 +116,7 @@ class SosmedController extends Controller
 
         $account->update([
             'pm_id' => $newPmId,
+            'assistant_id' => $newAssistantId,
             'staff_id' => $newStaffId,
         ]);
 

@@ -112,7 +112,7 @@ class PresensiController extends Controller
                     });
             })->unique(fn($item) => $item['name'] . $item['kantor'])->values();
 
-        $kantorList = ['Kantor 1', 'Kantor 2', 'Kantor 3', 'Kantor 4'];
+        $kantorList = ['Kantor 1', 'Kantor 2', 'Kantor 3', 'Kantor 4', 'Kantor 5', 'Kantor 6', 'Kantor 7', 'Kantor 8', 'Kantor 9', 'Kantor 10'];
 
         return view('staff.presensi.presensi', compact(
             'presensiHadir',
@@ -138,7 +138,7 @@ class PresensiController extends Controller
         $validated = $request->validate([
             'pemagang_id' => ['required', 'exists:pemagang,id'],
             'shift' => ['required', 'in:Pagi,Middle,Siang'],
-            'kantor' => ['nullable', 'string', 'in:Kantor 1,Kantor 2,Kantor 3,Kantor 4'],
+            'kantor' => ['nullable', 'string', 'in:Kantor 1,Kantor 2,Kantor 3,Kantor 4,Kantor 5,Kantor 6,Kantor 7,Kantor 8,Kantor 9,Kantor 10'],
             'waktu_masuk' => ['required'],
             'keterangan' => ['required', 'in:Lebih Awal,Tepat Waktu,Terlambat,Tidak Hadir'],
             'notes' => ['nullable', 'string', 'max:500'],
@@ -163,7 +163,7 @@ class PresensiController extends Controller
     {
         $validated = $request->validate([
             'shift' => ['required', 'in:Pagi,Middle,Siang'],
-            'kantor' => ['nullable', 'string', 'in:Kantor 1,Kantor 2,Kantor 3,Kantor 4'],
+            'kantor' => ['nullable', 'string', 'in:Kantor 1,Kantor 2,Kantor 3,Kantor 4,Kantor 5,Kantor 6,Kantor 7,Kantor 8,Kantor 9,Kantor 10'],
             'waktu_masuk' => ['required'],
             'keterangan' => ['required', 'in:Lebih Awal,Tepat Waktu,Terlambat,Tidak Hadir'],
             'notes' => ['nullable', 'string', 'max:500'],
@@ -303,7 +303,7 @@ class PresensiController extends Controller
             ->fragment('tabel-log-presensi');
 
         $divisiList = Pemagang::getAllDivisi();
-        $kantorList = ['Kantor 1', 'Kantor 2', 'Kantor 3', 'Kantor 4'];
+        $kantorList = ['Kantor 1', 'Kantor 2', 'Kantor 3', 'Kantor 4', 'Kantor 5', 'Kantor 6', 'Kantor 7', 'Kantor 8', 'Kantor 9', 'Kantor 10'];
 
         return view('staff.presensi.laporan-presensi', compact('rekapPemagang', 'stats', 'logs', 'divisiList', 'kantorList'));
     }

@@ -18,20 +18,20 @@
                 <h2 class="text-sm font-semibold text-gray-800 mb-5">Buat Notifikasi Baru</h2>
 
                 <form action="{{ route('admin.notifications.store') }}" method="POST" class="space-y-4" x-data="{
-                          recipients: 'all',
-                          users: {{ $users->map(fn($u) => ['id' => $u->id, 'name' => $u->name, 'role' => $u->role, 'role_label' => $u->role_label])->values()->toJson() }},
-                          selected: [],
-                          userSearch: '',
-                          get filteredUsers() {
-                              if (!this.userSearch) return this.users;
-                              const q = this.userSearch.toLowerCase();
-                              return this.users.filter(u =>
-                                  (u.name && u.name.toLowerCase().includes(q)) ||
-                                  (u.role_label && u.role_label.toLowerCase().includes(q)) ||
-                                  (u.role && u.role.toLowerCase().includes(q))
-                              );
-                          }
-                      }">
+                              recipients: 'all',
+                              users: {{ $users->map(fn($u) => ['id' => $u->id, 'name' => $u->name, 'role' => $u->role, 'role_label' => $u->role_label])->values()->toJson() }},
+                              selected: [],
+                              userSearch: '',
+                              get filteredUsers() {
+                                  if (!this.userSearch) return this.users;
+                                  const q = this.userSearch.toLowerCase();
+                                  return this.users.filter(u =>
+                                      (u.name && u.name.toLowerCase().includes(q)) ||
+                                      (u.role_label && u.role_label.toLowerCase().includes(q)) ||
+                                      (u.role && u.role.toLowerCase().includes(q))
+                                  );
+                              }
+                          }">
                     @csrf
 
                     {{-- Judul --}}
@@ -39,8 +39,8 @@
                         <label class="block text-xs font-medium text-gray-700 mb-1">Judul Notifikasi</label>
                         <input type="text" name="title" value="{{ old('title') }}" required maxlength="100"
                             placeholder="Contoh: Pengumuman Rapat Tim" class="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm
-                                       focus:outline-none focus:ring-2 focus:ring-primary-500
-                                       @error('title') border-red-400 @enderror">
+                                           focus:outline-none focus:ring-2 focus:ring-primary-500
+                                           @error('title') border-red-400 @enderror">
                         @error('title')
                             <p class="mt-1 text-xs text-red-500">{{ $message }}</p>
                         @enderror
@@ -51,8 +51,8 @@
                         <label class="block text-xs font-medium text-gray-700 mb-1">Isi Pesan</label>
                         <textarea name="message" rows="3" required maxlength="500"
                             placeholder="Tuliskan pesan notifikasi yang ingin disampaikan..." class="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm
-                                         focus:outline-none focus:ring-2 focus:ring-primary-500 resize-none
-                                         @error('message') border-red-400 @enderror">{{ old('message') }}</textarea>
+                                             focus:outline-none focus:ring-2 focus:ring-primary-500 resize-none
+                                             @error('message') border-red-400 @enderror">{{ old('message') }}</textarea>
                         @error('message')
                             <p class="mt-1 text-xs text-red-500">{{ $message }}</p>
                         @enderror
@@ -62,7 +62,7 @@
                     <div>
                         <label class="block text-xs font-medium text-gray-700 mb-1">Kirim Ke</label>
                         <select name="recipients" x-model="recipients" class="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm
-                                       focus:outline-none focus:ring-2 focus:ring-primary-500">
+                                           focus:outline-none focus:ring-2 focus:ring-primary-500">
                             <option value="all">Semua (Seluruh Anggota Tim)</option>
                             @foreach($roles as $r)
                                 <option value="{{ $r->name }}">Semua {{ $r->label }}</option>
@@ -76,16 +76,18 @@
                         <label class="block text-xs font-medium text-gray-700 mb-1">Pilih Pengguna</label>
                         <div class="relative mb-2">
                             <input type="text" x-model="userSearch" placeholder="Cari nama atau role pengguna..."
-                                   class="w-full pl-8 pr-3 py-1.5 border border-gray-200 rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-primary-500 bg-gray-50 focus:bg-white transition">
-                            <svg class="w-3.5 h-3.5 text-gray-400 absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                                class="w-full pl-8 pr-3 py-1.5 border border-gray-200 rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-primary-500 bg-gray-50 focus:bg-white transition">
+                            <svg class="w-3.5 h-3.5 text-gray-400 absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none"
+                                fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                             </svg>
                         </div>
                         <div class="border border-gray-300 rounded-lg divide-y divide-gray-100 max-h-52 overflow-y-auto">
                             <template x-for="user in filteredUsers" :key="user.id">
                                 <label class="flex items-center gap-3 px-3 py-2.5 hover:bg-gray-50 cursor-pointer">
                                     <input type="checkbox" name="user_ids[]" :value="user.id" x-model="selected" class="w-4 h-4 rounded border-gray-300 text-primary-600
-                                                  focus:ring-primary-500">
+                                                      focus:ring-primary-500">
                                     <div class="flex-1 min-w-0">
                                         <p class="text-sm font-medium text-gray-800 truncate" x-text="user.name"></p>
                                         <p class="text-xs text-gray-400" x-text="user.role_label || user.role"></p>
@@ -99,12 +101,11 @@
                         @error('user_ids')
                             <p class="text-xs text-red-500">{{ $message }}</p>
                         @enderror
-                    </div>              @enderror
                     </div>
 
                     <button type="submit" class="w-full flex items-center justify-center gap-2 px-4 py-2.5
-                                   bg-primary-600 hover:bg-primary-700 text-white text-sm font-medium
-                                   rounded-lg transition">
+                                       bg-primary-600 hover:bg-primary-700 text-white text-sm font-medium
+                                       rounded-lg transition">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
@@ -158,13 +159,15 @@
                                     <div class="flex flex-wrap items-center gap-x-2 gap-y-1 mt-2">
                                         <span class="text-xs text-gray-400">Ke:</span>
                                         @if($item->is_bulk)
-                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-primary-50 text-primary-700 border border-primary-200">
+                                            <span
+                                                class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-primary-50 text-primary-700 border border-primary-200">
                                                 {{ $item->audience_label ?: 'Semua Penerima' }}
                                             </span>
                                             <span class="text-xs text-gray-400">&bull; {{ $item->recipient_count }} orang</span>
                                         @elseif($item->recipients->isNotEmpty())
                                             @foreach($item->recipients->take(3) as $recipient)
-                                                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium {{ $recipient->role_badge_class }}">
+                                                <span
+                                                    class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium {{ $recipient->role_badge_class }}">
                                                     {{ $recipient->name }} ({{ $recipient->role_label }})
                                                 </span>
                                             @endforeach
@@ -180,11 +183,13 @@
                                         <span class="text-xs font-semibold text-gray-700 flex items-center gap-1">
                                             {{ $item->sender_name ?: 'Admin' }}
                                             @if($item->sender_role)
-                                                <span class="font-normal text-[11px] text-gray-500 bg-gray-100 px-1.5 py-0.5 rounded">({{ $item->sender_role }})</span>
+                                                <span
+                                                    class="font-normal text-[11px] text-gray-500 bg-gray-100 px-1.5 py-0.5 rounded">({{ $item->sender_role }})</span>
                                             @endif
                                         </span>
                                         @if($item->is_bulk || $item->group_size > 1)
-                                            <span class="text-xs text-gray-400">&bull; {{ $item->read_count }}/{{ $item->group_size }} dibaca</span>
+                                            <span class="text-xs text-gray-400">&bull;
+                                                {{ $item->read_count }}/{{ $item->group_size }} dibaca</span>
                                         @elseif(!is_null($item->read_at))
                                             <span class="text-xs text-green-600 font-medium">&bull; Dibaca</span>
                                         @else

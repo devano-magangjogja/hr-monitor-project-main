@@ -80,6 +80,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin'])->grou
         Route::get('/productivity', [ReportController::class, 'productivity'])->name('productivity');
         Route::get('/productivity/{user}', [ReportController::class, 'productivityDetail'])->name('productivity.detail');
         Route::get('/history', [ReportController::class, 'history'])->name('history');
+        Route::post('/history/purge', [ReportController::class, 'purgeHistory'])->name('history.purge');
         Route::get('/ranking', [ReportController::class, 'ranking'])->name('ranking');
         // Admin kelola assignment bawahan
         Route::patch('/assignments/{assignmentId}/complete', [ReportController::class, 'completeAssignment'])->name('assignments.complete');
@@ -105,8 +106,11 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin'])->grou
     Route::delete('/presensi/{presensi}', [AdminPresensiController::class, 'destroy'])->name('presensi.destroy');
     Route::get('/presensi/laporan', [AdminPresensiController::class, 'laporan'])->name('presensi.laporan');
 
-    // Tambah Pemagang
+    // Kelola Pemagang
+    Route::get('/pemagang', [PemagangController::class, 'index'])->name('pemagang.index');
     Route::post('/pemagang', [PemagangController::class, 'store'])->name('pemagang.store');
+    Route::patch('/pemagang/{pemagang}', [PemagangController::class, 'update'])->name('pemagang.update');
+    Route::delete('/pemagang/{pemagang}', [PemagangController::class, 'destroy'])->name('pemagang.destroy');
 
     // Manajemen Akun & Monitoring Sosmed
     Route::get('/sosmed', [AdminSosmedController::class, 'index'])->name('sosmed.index');
@@ -151,8 +155,11 @@ Route::prefix('staff')->name('staff.')->middleware(['auth', 'role:hr_staff'])->g
     Route::delete('/presensi/{presensi}', [StaffPresensiController::class, 'destroy'])->name('presensi.destroy');
     Route::get('/presensi/laporan', [StaffPresensiController::class, 'laporan'])->name('presensi.laporan');
 
-    // Tambah Pemagang
+    // Kelola Pemagang
+    Route::get('/pemagang', [PemagangController::class, 'index'])->name('pemagang.index');
     Route::post('/pemagang', [PemagangController::class, 'store'])->name('pemagang.store');
+    Route::patch('/pemagang/{pemagang}', [PemagangController::class, 'update'])->name('pemagang.update');
+    Route::delete('/pemagang/{pemagang}', [PemagangController::class, 'destroy'])->name('pemagang.destroy');
 
     // Manajemen Sosmed & Approval Level 2
     Route::get('/sosmed', [StaffSosmedController::class, 'index'])->name('sosmed.index');

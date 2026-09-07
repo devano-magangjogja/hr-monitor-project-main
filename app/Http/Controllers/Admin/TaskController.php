@@ -29,7 +29,7 @@ class TaskController extends Controller
         $validated = $request->validate([
             'title' => ['required', 'string', 'max:200'],
             'description' => ['nullable', 'string'],
-            'kantor' => ['nullable', 'string', 'in:Kantor 1,Kantor 2,Kantor 3,Kantor 4'],
+            'kantor' => ['nullable', 'string', 'in:Kantor 1,Kantor 2,Kantor 3,Kantor 4,Kantor 5,Kantor 6,Kantor 7,Kantor 8,Kantor 9,Kantor 10'],
             'user_ids' => ['required', 'array', 'min:1'],
             'user_ids.*' => ['integer', 'exists:users,id'],
         ]);
@@ -48,7 +48,7 @@ class TaskController extends Controller
         $validated = $request->validate([
             'title' => ['required', 'string', 'max:200'],
             'description' => ['nullable', 'string'],
-            'kantor' => ['nullable', 'string', 'in:Kantor 1,Kantor 2,Kantor 3,Kantor 4'],
+            'kantor' => ['nullable', 'string', 'in:Kantor 1,Kantor 2,Kantor 3,Kantor 4,Kantor 5,Kantor 6,Kantor 7,Kantor 8,Kantor 9,Kantor 10'],
             'user_ids' => ['required', 'array', 'min:1'],
             'user_ids.*' => ['integer', 'exists:users,id'],
         ]);

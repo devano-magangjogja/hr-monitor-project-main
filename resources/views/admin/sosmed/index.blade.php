@@ -110,11 +110,12 @@
                     <div class="hidden md:block overflow-x-auto rounded-lg border border-gray-100">
                         <table class="w-full table-fixed text-sm">
                             <colgroup>
-                                <col class="w-[24%]"> {{-- Nama Akun & Catatan --}}
-                                <col class="w-32">     {{-- Platform --}}
-                                <col class="w-40">     {{-- Link URL --}}
-                                <col class="w-48">     {{-- Eksekutor --}}
-                                <col class="w-44">     {{-- Supervisor PM --}}
+                                <col class="w-[20%]"> {{-- Nama Akun & Catatan --}}
+                                <col class="w-28">     {{-- Platform --}}
+                                <col class="w-36">     {{-- Link URL --}}
+                                <col class="w-40">     {{-- Eksekutor --}}
+                                <col class="w-40">     {{-- Supervisor PM --}}
+                                <col class="w-40">     {{-- Asisten Pengawas --}}
                                 <col class="w-28">     {{-- Aksi --}}
                             </colgroup>
                             <thead>
@@ -125,6 +126,7 @@
                                     <th class="px-4 py-3 text-left">Link URL</th>
                                     <th class="px-4 py-3 text-left">Eksekutor (Dikelola Oleh)</th>
                                     <th class="px-4 py-3 text-left">Supervisor (Diawasi PM)</th>
+                                    <th class="px-4 py-3 text-left">Asisten Pengawas</th>
                                     <th class="px-4 py-3 text-center">Aksi</th>
                                 </tr>
                             </thead>
@@ -207,10 +209,32 @@
                                                 </span>
                                             @endif
                                         </td>
+                                        {{-- Asisten Pengawas --}}
+                                        <td class="px-4 py-3 text-xs min-w-0">
+                                            @if($acc->assistantUser)
+                                                <div class="flex items-start gap-2 min-w-0">
+                                                    <div class="w-6 h-6 rounded-full bg-teal-100 text-teal-700 font-bold flex items-center justify-center text-[10px] flex-shrink-0 mt-0.5">
+                                                        {{ strtoupper(substr($acc->assistantUser->name, 0, 1)) }}
+                                                    </div>
+                                                    <div class="min-w-0 flex-1">
+                                                        <span class="font-semibold text-gray-800 block truncate" title="{{ $acc->assistantUser->name }}">
+                                                            {{ $acc->assistantUser->name }}
+                                                        </span>
+                                                        <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold mt-0.5 bg-teal-50 text-teal-700 border border-teal-200">
+                                                            Asisten HR
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            @else
+                                                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-400 whitespace-nowrap">
+                                                    Tanpa Asisten
+                                                </span>
+                                            @endif
+                                        </td>
                                         <td class="px-4 py-3.5 text-center">
                                             <div class="flex items-center justify-center gap-1">
                                                 <button type="button"
-                                                    onclick="openEditAccountModal({{ $acc->id }}, '{{ addslashes($acc->name) }}', '{{ addslashes($acc->platform) }}', '{{ addslashes($acc->link ?? '') }}', {{ $acc->pm_id ?? 'null' }}, {{ $acc->staff_id ?? 'null' }}, '{{ addslashes(str_replace(["\r", "\n"], [' ', ' '], $acc->notes ?? '')) }}')"
+                                                    onclick="openEditAccountModal({{ $acc->id }}, '{{ addslashes($acc->name) }}', '{{ addslashes($acc->platform) }}', '{{ addslashes($acc->link ?? '') }}', {{ $acc->pm_id ?? 'null' }}, {{ $acc->staff_id ?? 'null' }}, '{{ addslashes(str_replace(["\r", "\n"], [' ', ' '], $acc->notes ?? '')) }}', {{ $acc->assistant_id ?? 'null' }})"
                                                     class="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition"
                                                     title="Edit Akun">
                                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -219,7 +243,7 @@
                                                     </svg>
                                                 </button>
                                                 <button
-                                                    onclick="openAssignModal({{ $acc->id }}, '{{ addslashes($acc->name) }}', {{ $acc->pm_id ?? 'null' }}, {{ $acc->staff_id ?? 'null' }})"
+                                                    onclick="openAssignModal({{ $acc->id }}, '{{ addslashes($acc->name) }}', {{ $acc->pm_id ?? 'null' }}, {{ $acc->staff_id ?? 'null' }}, {{ $acc->assistant_id ?? 'null' }})"
                                                     class="p-1.5 text-gray-400 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition"
                                                     title="Atur Eksekutor & Supervisor">
                                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -244,7 +268,7 @@
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="6" class="px-4 py-8 text-center text-sm text-gray-400">Belum ada akun sosial media
+                                        <td colspan="7" class="px-4 py-8 text-center text-sm text-gray-400">Belum ada akun sosial media
                                             yang didaftarkan.</td>
                                     </tr>
                                 @endforelse
@@ -688,6 +712,25 @@
                         Jika eksekutor adalah PM mandiri, bagian ini otomatis dinonaktifkan.</p>
                 </div>
                 <div>
+                    <label class="block text-xs font-semibold text-gray-700 mb-1">3. Asisten Pengawas (Wewenang Verifikasi Asisten)</label>
+                    <div class="relative mb-1.5">
+                        <input type="text" id="search-create-acc-ast" placeholder="Cari asisten..."
+                               oninput="filterSelectOptions(this.value, 'create-acc-ast')"
+                               class="w-full pl-7 pr-2.5 py-1 text-xs border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-primary-500 bg-gray-50 focus:bg-white transition">
+                        <svg class="w-3 h-3 text-gray-400 absolute left-2 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                        </svg>
+                    </div>
+                    <select name="assistant_id" id="create-acc-ast"
+                        class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 focus:outline-none">
+                        <option value="">-- Tanpa Asisten / Belum Diberi Wewenang --</option>
+                        @foreach($assistants as $ast)
+                            <option value="{{ $ast->id }}">{{ $ast->name }} (Asisten)</option>
+                        @endforeach
+                    </select>
+                    <p class="text-[11px] text-gray-400 mt-1">Asisten HR yang berwenang meninjau & approve tugas akun ini sebagai backup PM.</p>
+                </div>
+                <div>
                     <label class="block text-xs font-semibold text-gray-600 mb-1.5">Catatan / Briefing</label>
                     <textarea name="notes" rows="2" placeholder="Catatan seputar akun..."
                         class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 focus:outline-none"></textarea>
@@ -796,6 +839,25 @@
                         mandiri, bagian ini otomatis dinonaktifkan.</p>
                 </div>
                 <div>
+                    <label class="block text-xs font-semibold text-gray-700 mb-1">3. Asisten Pengawas (Wewenang Verifikasi Asisten)</label>
+                    <div class="relative mb-1.5">
+                        <input type="text" id="search-edit-acc-ast" placeholder="Cari asisten..."
+                               oninput="filterSelectOptions(this.value, 'edit-acc-ast')"
+                               class="w-full pl-7 pr-2.5 py-1 text-xs border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-primary-500 bg-gray-50 focus:bg-white transition">
+                        <svg class="w-3 h-3 text-gray-400 absolute left-2 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                        </svg>
+                    </div>
+                    <select name="assistant_id" id="edit-acc-ast"
+                        class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 focus:outline-none">
+                        <option value="">-- Tanpa Asisten / Belum Diberi Wewenang --</option>
+                        @foreach($assistants as $ast)
+                            <option value="{{ $ast->id }}">{{ $ast->name }} (Asisten)</option>
+                        @endforeach
+                    </select>
+                    <p class="text-[11px] text-gray-400 mt-1">Asisten HR yang berwenang meninjau & approve tugas akun ini sebagai backup PM.</p>
+                </div>
+                <div>
                     <label class="block text-xs font-semibold text-gray-600 mb-1.5">Catatan / Briefing</label>
                     <textarea name="notes" id="edit-acc-notes" rows="3" placeholder="Catatan seputar akun..."
                         class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 focus:outline-none"></textarea>
@@ -883,6 +945,25 @@
                     <p id="assign-pm-hint" class="text-[11px] text-gray-400 mt-1">PM yang berwenang meninjau & approve bukti pengerjaan Staff.
                         Jika eksekutor adalah PM mandiri, bagian ini otomatis dinonaktifkan.
                     </p>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-gray-700 mb-1">3. Asisten Pengawas (Wewenang Verifikasi Asisten)</label>
+                    <div class="relative mb-1.5">
+                        <input type="text" id="search-assign-ast-sel" placeholder="Cari asisten..."
+                               oninput="filterSelectOptions(this.value, 'assign-ast-sel')"
+                               class="w-full pl-7 pr-2.5 py-1 text-xs border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-primary-500 bg-gray-50 focus:bg-white transition">
+                        <svg class="w-3 h-3 text-gray-400 absolute left-2 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                        </svg>
+                    </div>
+                    <select name="assistant_id" id="assign-ast-sel"
+                        class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 focus:outline-none">
+                        <option value="">-- Tanpa Asisten / Belum Diberi Wewenang --</option>
+                        @foreach($assistants as $ast)
+                            <option value="{{ $ast->id }}">{{ $ast->name }} (Asisten)</option>
+                        @endforeach
+                    </select>
+                    <p class="text-[11px] text-gray-400 mt-1">Asisten HR yang berwenang meninjau & approve tugas akun ini sebagai backup PM.</p>
                 </div>
                 <div class="flex gap-3 pt-2">
                     <button type="button" onclick="document.getElementById('modal-assign').classList.add('hidden')"
@@ -972,35 +1053,42 @@
         function openCreateAccountModal() {
             resetSearchFilter('search-create-acc-staff', 'create-acc-staff');
             resetSearchFilter('search-create-acc-pm', 'create-acc-pm');
+            resetSearchFilter('search-create-acc-ast', 'create-acc-ast');
             const staffSel = document.getElementById('create-acc-staff');
             if (staffSel) {
                 staffSel.value = '';
                 syncSupervisorState(staffSel, 'create-acc-pm', 'create-pm-hint');
             }
+            const astSel = document.getElementById('create-acc-ast');
+            if (astSel) astSel.value = '';
             document.getElementById('modal-create-account').classList.remove('hidden');
         }
 
-        function openEditAccountModal(accId, accName, platform, link, currentPmId, currentStaffId, notes) {
+        function openEditAccountModal(accId, accName, platform, link, currentPmId, currentStaffId, notes, currentAssistantId) {
             resetSearchFilter('search-edit-acc-staff', 'edit-acc-staff');
             resetSearchFilter('search-edit-acc-pm', 'edit-acc-pm');
+            resetSearchFilter('search-edit-acc-ast', 'edit-acc-ast');
             document.getElementById('form-edit-account').action = `/admin/sosmed/accounts/${accId}`;
             document.getElementById('edit-acc-name').value = accName;
             document.getElementById('edit-acc-platform').value = platform;
             document.getElementById('edit-acc-link').value = link || '';
             document.getElementById('edit-acc-staff').value = currentStaffId ?? '';
             document.getElementById('edit-acc-pm').value = currentPmId ?? '';
+            document.getElementById('edit-acc-ast').value = currentAssistantId ?? '';
             document.getElementById('edit-acc-notes').value = notes || '';
             syncSupervisorState(document.getElementById('edit-acc-staff'), 'edit-acc-pm', 'edit-pm-hint');
             document.getElementById('modal-edit-account').classList.remove('hidden');
         }
 
-        function openAssignModal(accId, accName, currentPmId, currentStaffId) {
+        function openAssignModal(accId, accName, currentPmId, currentStaffId, currentAssistantId) {
             resetSearchFilter('search-assign-staff-sel', 'assign-staff-sel');
             resetSearchFilter('search-assign-pm-sel', 'assign-pm-sel');
+            resetSearchFilter('search-assign-ast-sel', 'assign-ast-sel');
             document.getElementById('assign-acc-name').textContent = accName;
             document.getElementById('form-assign').action = `/admin/sosmed/accounts/${accId}/assign`;
             document.getElementById('assign-staff-sel').value = currentStaffId ?? '';
             document.getElementById('assign-pm-sel').value = currentPmId ?? '';
+            document.getElementById('assign-ast-sel').value = currentAssistantId ?? '';
             syncSupervisorState(document.getElementById('assign-staff-sel'), 'assign-pm-sel', 'assign-pm-hint');
             document.getElementById('modal-assign').classList.remove('hidden');
         }

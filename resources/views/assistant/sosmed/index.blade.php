@@ -100,8 +100,7 @@
                     <div>
                         <h3 class="text-sm font-semibold text-gray-800">Tugas Sosmed Menunggu Verifikasi Level-1</h3>
                         <p class="mt-0.5 text-xs text-gray-500">
-                            Tugas ini sudah diselesaikan oleh tim Sosmed dan menunggu persetujuan dari PM.
-                            Anda bisa menyetujuinya sebagai <strong>pengganti PM</strong>.
+                            Menampilkan tugas sosmed dari akun yang wewenang pengawasannya didelegasikan kepada Anda oleh Staff/Admin.
                         </p>
                     </div>
                     <div class="shrink-0 rounded-lg border border-orange-200 bg-orange-50 px-3 py-1.5 text-xs font-medium text-orange-700">
@@ -117,8 +116,8 @@
                             </svg>
                         </div>
                         <p class="text-sm font-semibold text-gray-700">Tidak Ada Tugas yang Perlu Diverifikasi</p>
-                        <p class="text-xs text-gray-400 mt-1 max-w-xs">
-                            Semua tugas Sosmed sudah diverifikasi atau belum ada yang diselesaikan tim.
+                        <p class="text-xs text-gray-400 mt-1 max-w-sm">
+                            Tidak ada tugas yang menunggu verifikasi dari akun yang ditugaskan kepada Anda, atau belum ada akun sosmed yang didelegasikan wewenangnya oleh Staff.
                         </p>
                     </div>
                 @else

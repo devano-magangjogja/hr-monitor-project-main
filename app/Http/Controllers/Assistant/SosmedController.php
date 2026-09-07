@@ -17,26 +17,31 @@ class SosmedController extends Controller
     public function index(Request $request)
     {
         $tab = $request->query('tab', 'pending');
+        $currentUserId = Auth::id();
 
-        // Tugas yang perlu diverifikasi: status done_by_staff
+        // Ambil ID akun sosmed yang didelegasikan ke asisten ini oleh Staff/Admin
+        $assignedAccountIds = \App\Models\SosmedAccount::where('assistant_id', $currentUserId)->pluck('id');
+
+        // Tugas yang perlu diverifikasi: status done_by_staff HANYA dari akun yang wewenangnya diberikan ke asisten ini
         $pendingVerification = SosmedTask::with(['account.staffUser', 'account.pmUser', 'assignedUser', 'assignedBy'])
+            ->whereIn('sosmed_account_id', $assignedAccountIds)
             ->where('status', 'done_by_staff')
             ->orderBy('updated_at', 'desc')
             ->get();
 
-        // Riwayat yang pernah di-approve oleh asisten (role_name like 'HR Assistant')
+        // Riwayat yang pernah di-approve oleh asisten ini
         $approvalHistory = SosmedApprovalLog::with(['task.account', 'user'])
-            ->where('role_name', 'like', '%HR Assistant%')
+            ->where('user_id', $currentUserId)
             ->latest()
             ->take(50)
             ->get();
 
-        // Statistik
+        // Statistik khusus akun di bawah wewenang asisten ini
         $stats = [
             'pending'   => $pendingVerification->count(),
-            'approved'  => SosmedTask::where('status', 'verified_by_pm')->count(),
-            'final_ok'  => SosmedTask::where('status', 'approved_hr')->count(),
-            'rejected'  => SosmedTask::where('status', 'rejected')->count(),
+            'approved'  => SosmedTask::whereIn('sosmed_account_id', $assignedAccountIds)->where('status', 'verified_by_pm')->count(),
+            'final_ok'  => SosmedTask::whereIn('sosmed_account_id', $assignedAccountIds)->where('status', 'approved_hr')->count(),
+            'rejected'  => SosmedTask::whereIn('sosmed_account_id', $assignedAccountIds)->where('status', 'rejected')->count(),
         ];
 
         return view('assistant.sosmed.index', compact(
@@ -50,6 +55,11 @@ class SosmedController extends Controller
      */
     public function verifyTask(Request $request, SosmedTask $task)
     {
+        // Pastikan akun ini berada di bawah wewenang asisten yang login
+        if (!$task->account || $task->account->assistant_id !== Auth::id()) {
+            return back()->withErrors(['error' => 'Anda tidak memiliki wewenang untuk memverifikasi tugas akun ini.']);
+        }
+
         // Hanya boleh verifikasi tugas yang masih done_by_staff
         if ($task->status !== 'done_by_staff') {
             return back()->withErrors(['error' => 'Tugas ini tidak dalam status yang bisa diverifikasi.']);

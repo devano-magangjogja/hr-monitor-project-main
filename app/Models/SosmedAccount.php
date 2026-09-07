@@ -13,6 +13,7 @@ class SosmedAccount extends Model
         'platform',
         'link',
         'pm_id',
+        'assistant_id',
         'staff_id',
         'assigned_to', // fallback compatibility
         'created_by',
@@ -24,6 +25,11 @@ class SosmedAccount extends Model
     public function pmUser()
     {
         return $this->belongsTo(User::class, 'pm_id');
+    }
+
+    public function assistantUser()
+    {
+        return $this->belongsTo(User::class, 'assistant_id');
     }
 
     public function staffUser()
