@@ -332,6 +332,7 @@
                     <th class="px-6 py-3.5 print:px-3 print:py-2">Status</th>
                     <th class="px-6 py-3.5 print:px-3 print:py-2">Pencatat</th>
                     <th class="px-6 py-3.5 print:px-3 print:py-2">Catatan</th>
+                    <th class="px-6 py-3.5 print:hidden text-right">Aksi</th>
                 </tr>
             </thead>
             <tbody class="divide-y divide-gray-100 print:divide-gray-200">
@@ -386,10 +387,25 @@
                         <td class="px-6 py-3 print:px-3 print:py-1.5 text-xs text-gray-500 max-w-[200px] truncate">
                             {{ $log->notes ?: '-' }}
                         </td>
+                        <td class="px-6 py-3 print:hidden text-right">
+                            <form method="POST" action="{{ route('admin.presensi.destroy', $log) }}"
+                                  onsubmit="return confirm('Apakah Anda yakin ingin menghapus catatan presensi ini?')">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit"
+                                        class="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition"
+                                        title="Hapus Presensi">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                              d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                    </svg>
+                                </button>
+                            </form>
+                        </td>
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="8" class="px-6 py-6 text-center text-gray-400 text-xs">
+                        <td colspan="9" class="px-6 py-6 text-center text-gray-400 text-xs">
                             Belum ada riwayat log presensi.
                         </td>
                     </tr>

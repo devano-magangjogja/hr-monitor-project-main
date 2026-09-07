@@ -9,6 +9,23 @@
 @endsection
 
 @section('content')
+{{-- Top Action Bar --}}
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
+    <div>
+        <h2 class="text-sm font-bold text-gray-800">Daftar Arsip & Riwayat Aktivitas</h2>
+        <p class="text-xs text-gray-400 mt-0.5">Total {{ $tasks->count() }} catatan riwayat ditampilkan</p>
+    </div>
+    <div>
+        <button type="button" onclick="openPurgeModal()"
+                class="inline-flex items-center gap-2 px-3.5 py-2 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 text-xs font-semibold rounded-lg transition shadow-sm">
+            <svg class="w-4 h-4 text-rose-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+            </svg>
+            <span>Bersihkan Riwayat</span>
+        </button>
+    </div>
+</div>
 
 {{-- Filter --}}
 <div class="bg-white rounded-xl border border-gray-200 p-4 sm:p-5 mb-6 shadow-sm">
@@ -404,13 +421,334 @@
         }
     }
 
-    document.addEventListener('click', function(e) {
-        const container = document.getElementById('user-filter-container');
-        const menu = document.getElementById('user-filter-menu');
-        if (container && menu && !container.contains(e.target)) {
-            menu.classList.add('hidden');
+
+    function openPurgeModal() {
+        document.getElementById('modal-purge-history').classList.remove('hidden');
+    }
+
+    function closePurgeModal() {
+        document.getElementById('modal-purge-history').classList.add('hidden');
+        // Close all open custom dropdowns
+        document.querySelectorAll('[id$="-options"]').forEach(el => el.classList.add('hidden'));
+        document.querySelectorAll('[id$="-chevron"]').forEach(el => el.classList.remove('rotate-180'));
+    }
+
+    // Generic toggle for small dropdowns (year, month, role)
+    function toggleDropdown(optionsId, chevronId) {
+        const opts = document.getElementById(optionsId);
+        const chev = document.getElementById(chevronId);
+        // Close others first
+        document.querySelectorAll('[id$="-options"]').forEach(el => {
+            if (el.id !== optionsId) { el.classList.add('hidden'); }
+        });
+        document.querySelectorAll('[id$="-chevron"]').forEach(el => {
+            if (el.id !== chevronId) { el.classList.remove('rotate-180'); }
+        });
+        opts.classList.toggle('hidden');
+        chev.classList.toggle('rotate-180');
+    }
+
+    // Generic select for small dropdowns
+    function selectOption(optionsId, hiddenId, labelId, chevronId, value, label) {
+        document.getElementById(hiddenId).value = value;
+        document.getElementById(labelId).textContent = label;
+        document.getElementById(optionsId).classList.add('hidden');
+        document.getElementById(chevronId).classList.remove('rotate-180');
+    }
+
+    // Toggle for the main period dropdown
+    function togglePurgeDropdown() {
+        const opts = document.getElementById('purge-period-options');
+        const chev = document.getElementById('purge-period-chevron');
+        // Close others first
+        document.querySelectorAll('[id$="-options"]').forEach(el => {
+            if (el.id !== 'purge-period-options') { el.classList.add('hidden'); }
+        });
+        document.querySelectorAll('[id$="-chevron"]').forEach(el => {
+            if (el.id !== 'purge-period-chevron') { el.classList.remove('rotate-180'); }
+        });
+        opts.classList.toggle('hidden');
+        chev.classList.toggle('rotate-180');
+    }
+
+    // Select a period option
+    function selectPurgePeriod(val, label, colorClass) {
+        document.getElementById('purge-period-type-value').value = val;
+        const labelEl = document.getElementById('purge-period-label');
+        labelEl.innerHTML = `<span class="w-2 h-2 rounded-full ${colorClass} flex-shrink-0"></span><span class="truncate text-gray-700 font-medium">${label}</span>`;
+        document.getElementById('purge-period-options').classList.add('hidden');
+        document.getElementById('purge-period-chevron').classList.remove('rotate-180');
+        updatePurgePeriodFields(val);
+    }
+
+    function updatePurgePeriodFields(val) {
+        const wrapYear    = document.getElementById('purge-wrap-year');
+        const wrapMonth   = document.getElementById('purge-wrap-month');
+        const wrapDate    = document.getElementById('purge-wrap-date');
+        const wrapConfirm = document.getElementById('purge-wrap-confirm');
+
+        wrapYear.classList.add('hidden');
+        wrapMonth.classList.add('hidden');
+        wrapDate.classList.add('hidden');
+        wrapConfirm.classList.add('hidden');
+
+        if (val === 'by_year') {
+            wrapYear.classList.remove('hidden');
+        } else if (val === 'by_month') {
+            wrapYear.classList.remove('hidden');
+            wrapMonth.classList.remove('hidden');
+        } else if (val === 'before_date') {
+            wrapDate.classList.remove('hidden');
+        } else if (val === 'all') {
+            wrapConfirm.classList.remove('hidden');
         }
+    }
+
+    // Close dropdowns when clicking outside
+    document.addEventListener('click', function(e) {
+        const dropdownIds = ['purge-period-dropdown', 'purge-year-dropdown', 'purge-month-dropdown', 'purge-role-dropdown'];
+        dropdownIds.forEach(id => {
+            const wrap = document.getElementById(id);
+            if (wrap && !wrap.contains(e.target)) {
+                const opts = wrap.querySelector('[id$="-options"]');
+                const chev = wrap.querySelector('[id$="-chevron"]');
+                if (opts) opts.classList.add('hidden');
+                if (chev) chev.classList.remove('rotate-180');
+            }
+        });
     });
 </script>
+
+{{-- ── MODAL: BERSIHKAN / HAPUS RIWAYAT MASSAL ──────────────────── --}}
+<div id="modal-purge-history" class="hidden fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4">
+    <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" onclick="closePurgeModal()"></div>
+    <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-sm sm:max-w-lg z-10 flex flex-col max-h-[90vh]">
+        <div class="flex items-center justify-between px-4 sm:px-6 py-3 sm:py-4 border-b border-rose-100 bg-rose-50/70">
+            <div class="flex items-center gap-2.5">
+                <div class="w-8 h-8 rounded-lg bg-rose-100 text-rose-600 flex items-center justify-center">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                              d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                    </svg>
+                </div>
+                <div>
+                    <h3 class="text-sm sm:text-base font-bold text-gray-800">Bersihkan / Hapus Riwayat Massal</h3>
+                    <p class="text-[11px] text-gray-500 mt-0.5">Hapus data riwayat lama untuk optimasi database</p>
+                </div>
+            </div>
+            <button type="button" onclick="closePurgeModal()" class="text-gray-400 hover:text-gray-600">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+            </button>
+        </div>
+
+        <form method="POST" action="{{ route('admin.reports.history.purge') }}" class="overflow-y-auto flex-1 p-4 sm:p-6 space-y-5">
+            @csrf
+
+            {{-- 1. Pilihan Periode --}}
+            <div>
+                <label class="block text-xs font-semibold text-gray-700 mb-1.5">1. Rentang / Periode Riwayat</label>
+                {{-- Hidden real select for form submission --}}
+                <input type="hidden" name="period_type" id="purge-period-type-value" value="older_than_year">
+                {{-- Custom Dropdown --}}
+                <div class="relative" id="purge-period-dropdown">
+                    <button type="button" id="purge-period-btn"
+                            onclick="togglePurgeDropdown()"
+                            class="w-full flex items-center justify-between gap-2 border border-gray-300 rounded-xl px-3.5 py-2.5 text-xs sm:text-sm bg-white hover:border-rose-400 focus:outline-none focus:ring-2 focus:ring-rose-400 focus:border-rose-400 transition text-left">
+                        <span id="purge-period-label" class="flex items-center gap-2 min-w-0">
+                            <span class="w-2 h-2 rounded-full bg-rose-400 flex-shrink-0"></span>
+                            <span class="truncate text-gray-700 font-medium">Lebih dari 1 Tahun yang Lalu</span>
+                        </span>
+                        <svg id="purge-period-chevron" class="w-4 h-4 text-gray-400 flex-shrink-0 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                        </svg>
+                    </button>
+                    <div id="purge-period-options"
+                         class="hidden absolute left-0 right-0 top-full mt-1.5 bg-white border border-gray-200 rounded-xl shadow-2xl overflow-hidden z-[100]">
+                        @php
+                            $periodOptions = [
+                                'older_than_year'   => ['label' => 'Lebih dari 1 Tahun yang Lalu',   'color' => 'bg-red-400'],
+                                'older_than_months' => ['label' => 'Lebih dari 6 Bulan yang Lalu',    'color' => 'bg-orange-400'],
+                                'by_year'           => ['label' => 'Tahun Tertentu',                   'color' => 'bg-amber-400'],
+                                'by_month'          => ['label' => 'Bulan & Tahun Tertentu',           'color' => 'bg-yellow-400'],
+                                'before_date'       => ['label' => 'Sebelum Tanggal Tertentu',         'color' => 'bg-sky-400'],
+                                'all'               => ['label' => 'Semua Riwayat (Sebelum Hari Ini)','color' => 'bg-purple-500'],
+                            ];
+                        @endphp
+                        @foreach($periodOptions as $val => $opt)
+                            <button type="button"
+                                    onclick="selectPurgePeriod('{{ $val }}', '{{ $opt['label'] }}', '{{ $opt['color'] }}')"
+                                    class="w-full flex items-center gap-3 px-4 py-2.5 text-xs sm:text-sm text-left hover:bg-rose-50 transition group border-b border-gray-50 last:border-0">
+                                <span class="w-2 h-2 rounded-full {{ $opt['color'] }} flex-shrink-0"></span>
+                                <span class="text-gray-700 group-hover:text-rose-700 font-medium">{{ $opt['label'] }}</span>
+                            </button>
+                        @endforeach
+                    </div>
+                </div>
+            </div>
+
+            {{-- Dynamic Fields --}}
+            <div class="grid grid-cols-2 gap-3">
+                {{-- Field Tahun --}}
+                <div id="purge-wrap-year" class="hidden col-span-1">
+                    <label class="block text-xs font-semibold text-gray-700 mb-1.5">Tahun</label>
+                    <div class="relative" id="purge-year-dropdown">
+                        @php $curYear = (int) date('Y'); @endphp
+                        <input type="hidden" name="year" id="purge-year-value" value="{{ $curYear }}">
+                        <button type="button" id="purge-year-btn"
+                                onclick="toggleDropdown('purge-year-options','purge-year-chevron')"
+                                class="w-full flex items-center justify-between gap-1 border border-gray-300 rounded-xl px-3 py-2.5 text-xs sm:text-sm bg-white hover:border-rose-400 focus:outline-none focus:ring-2 focus:ring-rose-400 transition text-left">
+                            <span id="purge-year-label" class="text-gray-700 font-medium">{{ $curYear }}</span>
+                            <svg id="purge-year-chevron" class="w-3.5 h-3.5 text-gray-400 flex-shrink-0 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                            </svg>
+                        </button>
+                        <div id="purge-year-options" class="hidden absolute left-0 right-0 top-full mt-1.5 bg-white border border-gray-200 rounded-xl shadow-2xl overflow-y-auto max-h-40 z-[100]">
+                            @for($y = $curYear; $y >= $curYear - 5; $y--)
+                                <button type="button"
+                                        onclick="selectOption('purge-year-options','purge-year-value','purge-year-label','purge-year-chevron', '{{ $y }}', '{{ $y }}')"
+                                        class="w-full px-4 py-2 text-xs sm:text-sm text-left text-gray-700 hover:bg-rose-50 hover:text-rose-700 font-medium transition border-b border-gray-50 last:border-0">
+                                    {{ $y }}
+                                </button>
+                            @endfor
+                        </div>
+                    </div>
+                </div>
+
+                {{-- Field Bulan --}}
+                <div id="purge-wrap-month" class="hidden col-span-1">
+                    <label class="block text-xs font-semibold text-gray-700 mb-1.5">Bulan</label>
+                    <div class="relative" id="purge-month-dropdown">
+                        @php
+                            $months = [
+                                1 => 'Januari', 2 => 'Februari', 3 => 'Maret', 4 => 'April',
+                                5 => 'Mei', 6 => 'Juni', 7 => 'Juli', 8 => 'Agustus',
+                                9 => 'September', 10 => 'Oktober', 11 => 'November', 12 => 'Desember'
+                            ];
+                        @endphp
+                        <input type="hidden" name="month" id="purge-month-value" value="1">
+                        <button type="button" id="purge-month-btn"
+                                onclick="toggleDropdown('purge-month-options','purge-month-chevron')"
+                                class="w-full flex items-center justify-between gap-1 border border-gray-300 rounded-xl px-3 py-2.5 text-xs sm:text-sm bg-white hover:border-rose-400 focus:outline-none focus:ring-2 focus:ring-rose-400 transition text-left">
+                            <span id="purge-month-label" class="text-gray-700 font-medium truncate">Januari</span>
+                            <svg id="purge-month-chevron" class="w-3.5 h-3.5 text-gray-400 flex-shrink-0 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                            </svg>
+                        </button>
+                        <div id="purge-month-options" class="hidden absolute left-0 right-0 top-full mt-1.5 bg-white border border-gray-200 rounded-xl shadow-2xl overflow-y-auto max-h-40 z-[100]">
+                            @foreach($months as $mNum => $mName)
+                                <button type="button"
+                                        onclick="selectOption('purge-month-options','purge-month-value','purge-month-label','purge-month-chevron','{{ $mNum }}','{{ $mName }}')"
+                                        class="w-full px-4 py-2 text-xs sm:text-sm text-left text-gray-700 hover:bg-rose-50 hover:text-rose-700 font-medium transition border-b border-gray-50 last:border-0">
+                                    {{ $mName }}
+                                </button>
+                            @endforeach
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {{-- Field Sebelum Tanggal --}}
+            <div id="purge-wrap-date" class="hidden">
+                <label class="block text-xs font-semibold text-gray-700 mb-1">Sebelum Tanggal (Data sebelum tgl ini dihapus)</label>
+                <input type="date" name="before_date" max="{{ date('Y-m-d', strtotime('-1 day')) }}"
+                       class="w-full border border-gray-300 rounded-lg px-3 py-2 text-xs sm:text-sm focus:ring-2 focus:ring-rose-500 focus:outline-none">
+            </div>
+
+            {{-- Field Konfirmasi Teks untuk 'all' --}}
+            <div id="purge-wrap-confirm" class="hidden bg-rose-50 border border-rose-200 rounded-lg p-3">
+                <label class="block text-xs font-bold text-rose-800 mb-1">Ketik kata "HAPUS" untuk konfirmasi:</label>
+                <input type="text" name="confirm_phrase" placeholder="Ketik HAPUS..."
+                       class="w-full border border-rose-300 rounded-lg px-3 py-2 text-xs sm:text-sm focus:ring-2 focus:ring-rose-500 focus:outline-none uppercase font-mono">
+                <p class="text-[11px] text-rose-600 mt-1">Perhatian: Seluruh riwayat aktivitas sebelum hari ini akan dihapus permanen.</p>
+            </div>
+
+            {{-- 2. Cakupan Data yang Dihapus --}}
+            <div>
+                <label class="block text-xs font-semibold text-gray-700 mb-2">2. Cakupan Data yang Dihapus</label>
+                <div class="space-y-2 bg-gray-50 p-3 rounded-lg border border-gray-200">
+                    <label class="flex items-center gap-2 text-xs font-medium text-gray-700 cursor-pointer">
+                        <input type="checkbox" name="targets[]" value="tasks" checked
+                               class="w-4 h-4 rounded text-rose-600 focus:ring-rose-500 border-gray-300">
+                        <span>Riwayat Tugas & Penugasan Seluruh Role (Tasks)</span>
+                    </label>
+                    <label class="flex items-center gap-2 text-xs font-medium text-gray-700 cursor-pointer">
+                        <input type="checkbox" name="targets[]" value="sosmed" checked
+                               class="w-4 h-4 rounded text-rose-600 focus:ring-rose-500 border-gray-300">
+                        <span>Riwayat Konten & Log Approval Sosmed</span>
+                    </label>
+                    <label class="flex items-center gap-2 text-xs font-medium text-gray-700 cursor-pointer">
+                        <input type="checkbox" name="targets[]" value="presensi"
+                               class="w-4 h-4 rounded text-rose-600 focus:ring-rose-500 border-gray-300">
+                        <span>Riwayat Log Presensi Pemagang (Opsional)</span>
+                    </label>
+                </div>
+            </div>
+
+            {{-- 3. Filter Role (Opsional) --}}
+            <div>
+                <label class="block text-xs font-semibold text-gray-700 mb-1.5">3. Filter Role (Khusus Riwayat Tugas)</label>
+                <input type="hidden" name="role" id="purge-role-value" value="all">
+                <div class="relative" id="purge-role-dropdown">
+                    <button type="button" id="purge-role-btn"
+                            onclick="toggleDropdown('purge-role-options','purge-role-chevron')"
+                            class="w-full flex items-center justify-between gap-2 border border-gray-300 rounded-xl px-3.5 py-2.5 text-xs sm:text-sm bg-white hover:border-rose-400 focus:outline-none focus:ring-2 focus:ring-rose-400 transition text-left">
+                        <span id="purge-role-label" class="text-gray-700 font-medium truncate">Semua Role (Seluruh Pengguna)</span>
+                        <svg id="purge-role-chevron" class="w-4 h-4 text-gray-400 flex-shrink-0 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                        </svg>
+                    </button>
+                    <div id="purge-role-options"
+                         class="hidden absolute left-0 right-0 top-full mt-1.5 bg-white border border-gray-200 rounded-xl shadow-2xl overflow-y-auto max-h-48 z-[100]">
+                        @php
+                            $roleOptions = [
+                                'all'          => 'Semua Role (Seluruh Pengguna)',
+                                'hr_staff'     => 'HR Staff',
+                                'hr_assistant' => 'HR Assistant',
+                                'pm'           => 'Project Manager',
+                                'sosmed'       => 'Sosmed Specialist',
+                                'programmer'   => 'Programmer',
+                                'dg'           => 'Desain Grafis (DG)',
+                                'vg'           => 'Video Grafis (VG)',
+                                'cs'           => 'Customer Service (CS)',
+                                'ob'           => 'Office Boy (OB)',
+                            ];
+                        @endphp
+                        @foreach($roleOptions as $rVal => $rLabel)
+                            <button type="button"
+                                    onclick="selectOption('purge-role-options','purge-role-value','purge-role-label','purge-role-chevron','{{ $rVal }}','{{ $rLabel }}')"
+                                    class="w-full px-4 py-2.5 text-xs sm:text-sm text-left text-gray-700 hover:bg-rose-50 hover:text-rose-700 font-medium transition border-b border-gray-50 last:border-0">
+                                {{ $rLabel }}
+                            </button>
+                        @endforeach
+                    </div>
+                </div>
+            </div>
+
+            {{-- Safety Warning Alert --}}
+            <div class="flex items-start gap-2.5 p-3 rounded-lg bg-amber-50 border border-amber-200 text-amber-800 text-xs">
+                <svg class="w-4 h-4 text-amber-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                </svg>
+                <span><strong>Penting:</strong> Data yang dihapus bersifat permanen. Tugas hari ini dan tugas mendatang tidak akan pernah terhapus.</span>
+            </div>
+
+            {{-- Buttons --}}
+            <div class="flex gap-3 pt-2">
+                <button type="button" onclick="closePurgeModal()"
+                        class="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-xs sm:text-sm font-semibold text-gray-700 hover:bg-gray-50 transition">
+                    Batal
+                </button>
+                <button type="submit"
+                        onclick="return confirm('Apakah Anda yakin ingin menghapus data riwayat ini secara permanen?')"
+                        class="flex-1 px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-lg text-xs sm:text-sm font-semibold shadow-sm transition">
+                    Hapus
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
 
 @endsection

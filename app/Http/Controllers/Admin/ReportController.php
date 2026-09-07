@@ -127,4 +127,129 @@ class ReportController extends Controller
                 ->with('error', array_values($e->errors())[0][0] ?? 'Gagal menghapus riwayat.');
         }
     }
+
+    /**
+     * Admin bersihkan / hapus riwayat aktivitas massal berdasarkan periode & kategori.
+     * Route: POST /admin/reports/history/purge
+     */
+    public function purgeHistory(Request $request)
+    {
+        $validated = $request->validate([
+            'period_type'    => ['required', 'in:older_than_year,older_than_months,by_year,by_month,before_date,all'],
+            'year'           => ['nullable', 'integer', 'min:2020', 'max:2099'],
+            'month'          => ['nullable', 'integer', 'min:1', 'max:12'],
+            'before_date'    => ['nullable', 'date'],
+            'targets'        => ['required', 'array', 'min:1'],
+            'targets.*'      => ['in:tasks,sosmed,presensi'],
+            'role'           => ['nullable', 'string'],
+            'confirm_phrase' => ['nullable', 'string'],
+        ]);
+
+        $periodType = $validated['period_type'];
+        $today = Carbon::today()->toDateString();
+        $dateStart = null;
+        $dateEnd = null;
+
+        if ($periodType === 'older_than_year') {
+            $dateEnd = Carbon::now()->subYear()->toDateString();
+        } elseif ($periodType === 'older_than_months') {
+            $dateEnd = Carbon::now()->subMonths(6)->toDateString();
+        } elseif ($periodType === 'by_year') {
+            if (empty($validated['year'])) {
+                return back()->with('error', 'Silakan pilih tahun yang ingin dihapus.');
+            }
+            $dateStart = Carbon::createFromDate($validated['year'], 1, 1)->startOfYear()->toDateString();
+            $dateEnd   = Carbon::createFromDate($validated['year'], 1, 1)->endOfYear()->toDateString();
+            if ($dateEnd >= $today) {
+                $dateEnd = Carbon::yesterday()->toDateString();
+            }
+        } elseif ($periodType === 'by_month') {
+            if (empty($validated['year']) || empty($validated['month'])) {
+                return back()->with('error', 'Silakan pilih bulan dan tahun yang ingin dihapus.');
+            }
+            $dt = Carbon::createFromDate($validated['year'], $validated['month'], 1);
+            $dateStart = $dt->copy()->startOfMonth()->toDateString();
+            $dateEnd   = $dt->copy()->endOfMonth()->toDateString();
+            if ($dateEnd >= $today) {
+                $dateEnd = Carbon::yesterday()->toDateString();
+            }
+        } elseif ($periodType === 'before_date') {
+            if (empty($validated['before_date'])) {
+                return back()->with('error', 'Silakan tentukan batas tanggal penghapusan.');
+            }
+            $dateEnd = min($validated['before_date'], Carbon::yesterday()->toDateString());
+        } elseif ($periodType === 'all') {
+            if (trim(strtoupper($request->input('confirm_phrase', ''))) !== 'HAPUS') {
+                return back()->with('error', 'Konfirmasi keamanan gagal. Ketik kata "HAPUS" untuk menghapus seluruh riwayat.');
+            }
+            $dateEnd = Carbon::yesterday()->toDateString();
+        }
+
+        // Jangan pernah hapus data hari ini / masa depan
+        if ($dateEnd && $dateEnd >= $today) {
+            $dateEnd = Carbon::yesterday()->toDateString();
+        }
+
+        $targets = $validated['targets'];
+        $role = $validated['role'] ?? null;
+        $deletedSummary = [];
+
+        // 1. Tasks & Task Assignments
+        if (in_array('tasks', $targets)) {
+            $taskQuery = \App\Models\Task::query();
+
+            // Filter date
+            if ($dateStart && $dateEnd) {
+                $taskQuery->whereBetween('task_date', [$dateStart, $dateEnd]);
+            } elseif ($dateEnd) {
+                $taskQuery->where('task_date', '<=', $dateEnd);
+            }
+
+            // Filter role
+            if (!empty($role) && $role !== 'all') {
+                $taskQuery->whereHas('assignments.user', function ($q) use ($role) {
+                    $q->where('role', $role);
+                });
+            }
+
+            $countTasks = $taskQuery->count();
+            $taskQuery->delete();
+            $deletedSummary[] = "{$countTasks} riwayat tugas";
+        }
+
+        // 2. Sosmed Tasks & Logs
+        if (in_array('sosmed', $targets)) {
+            $sosmedQuery = \App\Models\SosmedTask::query();
+
+            if ($dateStart && $dateEnd) {
+                $sosmedQuery->whereBetween('task_date', [$dateStart, $dateEnd]);
+            } elseif ($dateEnd) {
+                $sosmedQuery->where('task_date', '<=', $dateEnd);
+            }
+
+            $countSosmed = $sosmedQuery->count();
+            $sosmedQuery->delete();
+            $deletedSummary[] = "{$countSosmed} riwayat sosmed";
+        }
+
+        // 3. Presensi Pemagang
+        if (in_array('presensi', $targets)) {
+            $presensiQuery = \App\Models\Presensi::query();
+
+            if ($dateStart && $dateEnd) {
+                $presensiQuery->whereBetween('tanggal', [$dateStart, $dateEnd]);
+            } elseif ($dateEnd) {
+                $presensiQuery->where('tanggal', '<=', $dateEnd);
+            }
+
+            $countPresensi = $presensiQuery->count();
+            $presensiQuery->delete();
+            $deletedSummary[] = "{$countPresensi} log presensi";
+        }
+
+        $summaryText = !empty($deletedSummary) ? implode(', ', $deletedSummary) : '0 data';
+
+        return redirect()->route('admin.reports.history')
+            ->with('success', "Pembersihan riwayat berhasil! Berhasil menghapus {$summaryText}.");
+    }
 }

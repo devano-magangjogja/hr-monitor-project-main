@@ -291,6 +291,24 @@ class TaskService
             }
         }
 
+        // C. Jika user adalah Asisten HR, ambil juga tugas verifikasi konten staff dari akun yang didelegasikan ke asisten ini
+        if ($user->role === 'hr_assistant' || ($user->roleModel && $user->roleModel->base_type === 'assistant')) {
+            $supervisedAccountIds = SosmedAccount::where('assistant_id', $userId)
+                ->pluck('id');
+
+            if ($supervisedAccountIds->isNotEmpty()) {
+                $tasksNeedAssistantVerify = SosmedTask::with(['account', 'assignedUser'])
+                    ->whereIn('sosmed_account_id', $supervisedAccountIds)
+                    ->where('status', 'done_by_staff')
+                    ->orderByDesc('task_date')
+                    ->get();
+
+                foreach ($tasksNeedAssistantVerify as $tv) {
+                    $items->push($this->formatAssistantVerificationTaskItem($tv, $userId));
+                }
+            }
+        }
+
         return $items;
     }
 
@@ -412,6 +430,46 @@ class TaskService
         $item->platform = $acc?->platform;
         $item->platform_color = $acc?->platform_color;
         $item->action_url = route('pm.sosmed.index', ['tab' => 'oversight']);
+        $item->links = is_array($tv->link_upload) ? $tv->link_upload : ($tv->link_upload ? json_decode($tv->link_upload, true) : []);
+        $item->rejection_note = $tv->rejection_note;
+        $item->account = $acc;
+
+        return $item;
+    }
+
+    private function formatAssistantVerificationTaskItem(SosmedTask $tv, int $userId): Task
+    {
+        $acc = $tv->account;
+        $staffName = $tv->assignedUser?->name ?? 'Staff Sosmed';
+
+        $item = new Task([
+            'title'       => 'Verifikasi Konten: ' . ($acc?->name ?? 'Akun Sosmed') . " ({$staffName})",
+            'kantor'      => null,
+            'description' => "Bukti konten telah disubmit oleh {$staffName}. Menunggu verifikasi Anda sebagai Asisten HR.",
+            'type'        => 'sosmed',
+        ]);
+        $item->id = $tv->id;
+        $item->task_date = Carbon::parse($tv->task_date);
+
+        $item->setRelation('creator', (object)['name' => $staffName]);
+
+        $item->setRelation('assignments', collect([
+            (object)[
+                'id'           => $tv->id,
+                'task_id'      => $tv->id,
+                'user_id'      => $userId,
+                'is_completed' => 'done_by_staff',
+                'completed_at' => null,
+                'note'         => $tv->description ?? '',
+            ]
+        ]));
+
+        $item->is_sosmed = true;
+        $item->sosmed_status = 'done_by_staff';
+        $item->is_assistant_verification = true;
+        $item->platform = $acc?->platform;
+        $item->platform_color = $acc?->platform_color;
+        $item->action_url = route('assistant.sosmed.index');
         $item->links = is_array($tv->link_upload) ? $tv->link_upload : ($tv->link_upload ? json_decode($tv->link_upload, true) : []);
         $item->rejection_note = $tv->rejection_note;
         $item->account = $acc;

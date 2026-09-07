@@ -93,7 +93,10 @@
 
 {{-- Approval Tugas Sosmed --}}
 @php
-    $sosmedPending = \App\Models\SosmedTask::where('status', 'done_by_staff')->count();
+    $assignedAccIds = \App\Models\SosmedAccount::where('assistant_id', auth()->id())->pluck('id');
+    $sosmedPending = $assignedAccIds->isNotEmpty()
+        ? \App\Models\SosmedTask::whereIn('sosmed_account_id', $assignedAccIds)->where('status', 'done_by_staff')->count()
+        : 0;
 @endphp
 <a href="{{ route('assistant.sosmed.index') }}"
     class="flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-all
