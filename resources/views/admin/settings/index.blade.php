@@ -56,14 +56,13 @@
                     @enderror
                 </div>
 
-                {{-- Logo --}}
+                {{-- Logo Sidebar (Square) --}}
                 <div>
-                    <label class="block text-xs font-medium text-gray-700 mb-2">Logo Aplikasi</label>
+                    <label class="block text-xs font-medium text-gray-700 mb-1">Logo Sidebar <span class="text-gray-400 font-normal">(kotak, untuk sidebar)</span></label>
                     <div class="flex items-start gap-4">
                         {{-- Preview --}}
-                        <div
-                            class="w-16 h-16 rounded-xl border border-gray-200 bg-gray-50
-                                                            flex items-center justify-center overflow-hidden flex-shrink-0">
+                        <div class="w-16 h-16 rounded-xl border border-gray-200 bg-gray-50
+                                    flex items-center justify-center overflow-hidden flex-shrink-0">
                             <template x-if="hasLogo && previewUrl">
                                 <img :src="previewUrl" class="w-full h-full object-contain p-1">
                             </template>
@@ -77,28 +76,28 @@
                         <div class="flex-1 space-y-2">
                             <div class="flex flex-wrap gap-2">
                                 <label class="cursor-pointer inline-flex items-center gap-1.5 px-3 py-1.5
-                                                                      text-xs font-medium text-primary-600 border border-primary-300
-                                                                      hover:bg-primary-50 rounded-lg transition">
+                                              text-xs font-medium text-primary-600 border border-primary-300
+                                              hover:bg-primary-50 rounded-lg transition">
                                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                             d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
                                     </svg>
-                                    Pilih Logo
+                                    Pilih Logo Kotak
                                     <input type="file" name="logo" x-ref="fileInput"
                                         accept="image/png,image/jpg,image/jpeg,image/webp,image/svg+xml"
                                         @change="handleFile($event)" class="hidden">
                                 </label>
                                 <button type="button" x-show="hasLogo" @click="triggerRemove()"
                                     class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium
-                                                                       text-red-600 border border-red-200 hover:bg-red-50 rounded-lg transition">
+                                           text-red-600 border border-red-200 hover:bg-red-50 rounded-lg transition">
                                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                             d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                                     </svg>
-                                    Hapus Logo
+                                    Hapus
                                 </button>
                             </div>
-                            <p class="text-xs text-gray-400">PNG, JPG, WebP, SVG. Maks 2 MB.</p>
+                            <p class="text-xs text-gray-400">PNG, JPG, WebP, SVG. Rasio 1:1 (kotak). Maks 2 MB.</p>
                             <input type="hidden" name="remove_logo" :value="removeLogo ? '1' : '0'">
                         </div>
                     </div>
@@ -107,12 +106,80 @@
                     @enderror
                 </div>
 
+                {{-- Logo Banner (Horizontal / Login) --}}
+                <div x-data="{
+                    hasBanner: {{ !empty($settings['app_logo_banner']) ? 'true' : 'false' }},
+                    removeBanner: false,
+                    bannerUrl: '{{ !empty($settings['app_logo_banner']) ? asset('storage/' . $settings['app_logo_banner']) : '' }}',
+                    handleBanner(e) {
+                        const f = e.target.files[0];
+                        if (!f) return;
+                        this.bannerUrl = URL.createObjectURL(f);
+                        this.hasBanner = true;
+                        this.removeBanner = false;
+                    },
+                    triggerRemoveBanner() {
+                        this.removeBanner = true;
+                        this.hasBanner = false;
+                        this.bannerUrl = '';
+                        this.$refs.bannerInput.value = '';
+                    }
+                }">
+                    <label class="block text-xs font-medium text-gray-700 mb-1">Logo Banner <span class="text-gray-400 font-normal">(horizontal, untuk halaman login)</span></label>
+                    <div class="flex items-start gap-4">
+                        {{-- Preview Banner --}}
+                        <div class="w-32 h-16 rounded-xl border border-gray-200 bg-gray-800
+                                    flex items-center justify-center overflow-hidden flex-shrink-0">
+                            <template x-if="hasBanner && bannerUrl">
+                                <img :src="bannerUrl" class="w-full h-full object-contain p-1">
+                            </template>
+                            <template x-if="!hasBanner || !bannerUrl">
+                                <svg class="w-7 h-7 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                                        d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                </svg>
+                            </template>
+                        </div>
+                        <div class="flex-1 space-y-2">
+                            <div class="flex flex-wrap gap-2">
+                                <label class="cursor-pointer inline-flex items-center gap-1.5 px-3 py-1.5
+                                              text-xs font-medium text-primary-600 border border-primary-300
+                                              hover:bg-primary-50 rounded-lg transition">
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                                    </svg>
+                                    Pilih Logo Banner
+                                    <input type="file" name="logo_banner" x-ref="bannerInput"
+                                        accept="image/png,image/jpg,image/jpeg,image/webp"
+                                        @change="handleBanner($event)" class="hidden">
+                                </label>
+                                <button type="button" x-show="hasBanner" @click="triggerRemoveBanner()"
+                                    class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium
+                                           text-red-600 border border-red-200 hover:bg-red-50 rounded-lg transition">
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                    </svg>
+                                    Hapus
+                                </button>
+                            </div>
+                            <p class="text-xs text-gray-400">PNG, JPG, WebP. Rasio 16:9 atau landscape. Maks 4 MB.</p>
+                            <input type="hidden" name="remove_logo_banner" :value="removeBanner ? '1' : '0'">
+                        </div>
+                    </div>
+                    @error('logo_banner')
+                        <p class="mt-1.5 text-xs text-red-500">{{ $message }}</p>
+                    @enderror
+                </div>
+
                 <button type="submit" class="w-full py-2.5 bg-primary-600 hover:bg-primary-700 text-white
-                                                       text-sm font-medium rounded-lg transition">
+                                             text-sm font-medium rounded-lg transition">
                     Simpan Informasi Aplikasi
                 </button>
             </form>
         </div>
+
 
         {{-- ── Kartu: Template Pesan WhatsApp (Tidak Hadir) ───────────── --}}
         <div class="bg-white rounded-xl border border-gray-200 p-6 flex flex-col justify-between" x-data="{

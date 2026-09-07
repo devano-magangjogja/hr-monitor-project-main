@@ -22,12 +22,13 @@ class SettingService
         return $this->settingRepo->all();
     }
 
-    public function updateAppInfo(array $data, ?UploadedFile $logoFile = null): void
+    public function updateAppInfo(array $data, ?UploadedFile $logoFile = null, ?UploadedFile $logoBannerFile = null): void
     {
         if (isset($data['app_name'])) {
             $this->settingRepo->set('app_name', trim($data['app_name']));
         }
 
+        // Square/sidebar logo
         if ($logoFile) {
             $oldLogo = $this->settingRepo->get('app_logo');
             if ($oldLogo && Storage::disk('public')->exists($oldLogo)) {
@@ -43,6 +44,24 @@ class SettingService
                 Storage::disk('public')->delete($oldLogo);
             }
             $this->settingRepo->set('app_logo', null);
+        }
+
+        // Banner/login logo
+        if ($logoBannerFile) {
+            $oldBanner = $this->settingRepo->get('app_logo_banner');
+            if ($oldBanner && Storage::disk('public')->exists($oldBanner)) {
+                Storage::disk('public')->delete($oldBanner);
+            }
+            $path = $logoBannerFile->store('app', 'public');
+            $this->settingRepo->set('app_logo_banner', $path);
+        }
+
+        if (!empty($data['remove_logo_banner']) && $data['remove_logo_banner'] === '1') {
+            $oldBanner = $this->settingRepo->get('app_logo_banner');
+            if ($oldBanner && Storage::disk('public')->exists($oldBanner)) {
+                Storage::disk('public')->delete($oldBanner);
+            }
+            $this->settingRepo->set('app_logo_banner', null);
         }
     }
 

@@ -9,60 +9,68 @@
     @include('components.notification-popup')
 
     {{-- Stats Cards --}}
-    <x-responsive-grid :cols="'grid-cols-2 sm:grid-cols-4'" :gap="'gap-3 sm:gap-4 md:gap-5'" class="mb-4 md:mb-5">
-        <x-responsive-card :padding="'p-3 sm:p-4 md:p-5'">
-            <div class="flex items-center justify-between mb-3">
-                <p class="text-xs sm:text-sm font-medium text-gray-500">Akun Dikelola</p>
-                <div class="w-8 h-8 sm:w-9 sm:h-9 rounded-lg bg-pink-50 flex items-center justify-center flex-shrink-0">
+    <x-responsive-grid :cols="'grid-cols-2 lg:grid-cols-4'" :gap="'gap-3 sm:gap-4 md:gap-5'" class="mb-4 md:mb-5">
+        <x-responsive-card :padding="'p-3.5 sm:p-4 md:p-5'" class="h-full flex flex-col justify-between hover:shadow-md transition-shadow duration-200">
+            <div class="flex items-center justify-between mb-3 gap-2">
+                <p class="text-xs sm:text-sm font-medium text-gray-500 truncate" title="Akun Dikelola">Akun Dikelola</p>
+                <div class="w-8 h-8 sm:w-9 sm:h-9 rounded-lg sm:rounded-xl bg-pink-50 flex items-center justify-center flex-shrink-0">
                     <svg class="w-4 sm:w-5 h-4 sm:h-5 text-pink-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M8 12H8.01M12 12H12.01M16 12H16.01M21.0039 12C21.0039 16.9706 16.9745 21 12.0039 21C9.9675 21 3.00463 21 3.00463 21C3.00463 21 4.56382 17.2561 3.93982 16.0008C3.34076 14.7956 3.00391 13.4372 3.00391 12C3.00391 7.02944 7.03334 3 12.0039 3C16.9745 3 21.0039 7.02944 21.0039 12Z" />
                     </svg>
                 </div>
             </div>
-            <p class="text-2xl sm:text-3xl font-bold text-pink-600">{{ $sosmedStats['accounts_count'] }}</p>
-            <p class="text-xs text-gray-400 mt-1">tanggung jawab saya</p>
+            <div>
+                <p class="text-2xl sm:text-3xl font-bold text-pink-600">{{ $sosmedStats['accounts_count'] }}</p>
+                <p class="text-[11px] sm:text-xs text-gray-400 mt-1 truncate">tanggung jawab saya</p>
+            </div>
         </x-responsive-card>
 
-        <x-responsive-card :padding="'p-3 sm:p-4 md:p-5'">
-            <div class="flex items-center justify-between mb-3">
-                <p class="text-xs sm:text-sm font-medium text-gray-500">Perlu Submit Bukti</p>
-                <div class="w-8 h-8 sm:w-9 sm:h-9 rounded-lg bg-amber-50 flex items-center justify-center flex-shrink-0">
+        <x-responsive-card :padding="'p-3.5 sm:p-4 md:p-5'" class="h-full flex flex-col justify-between hover:shadow-md transition-shadow duration-200">
+            <div class="flex items-center justify-between mb-3 gap-2">
+                <p class="text-xs sm:text-sm font-medium text-gray-500 truncate" title="Perlu Submit Bukti">Perlu Submit Bukti</p>
+                <div class="w-8 h-8 sm:w-9 sm:h-9 rounded-lg sm:rounded-xl bg-amber-50 flex items-center justify-center flex-shrink-0">
                     <svg class="w-4 sm:w-5 h-4 sm:h-5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
                 </div>
             </div>
-            <p class="text-2xl sm:text-3xl font-bold text-amber-600">{{ $sosmedStats['pending_upload'] }}</p>
-            <p class="text-xs text-gray-400 mt-1">belum dikerjakan</p>
+            <div>
+                <p class="text-2xl sm:text-3xl font-bold text-amber-600">{{ $sosmedStats['pending_upload'] }}</p>
+                <p class="text-[11px] sm:text-xs text-gray-400 mt-1 truncate">belum dikerjakan</p>
+            </div>
         </x-responsive-card>
 
-        <x-responsive-card :padding="'p-3 sm:p-4 md:p-5'">
-            <div class="flex items-center justify-between mb-3">
-                <p class="text-xs sm:text-sm font-medium text-gray-500">Menunggu Verif PM</p>
-                <div class="w-8 h-8 sm:w-9 sm:h-9 rounded-lg bg-blue-50 flex items-center justify-center flex-shrink-0">
+        <x-responsive-card :padding="'p-3.5 sm:p-4 md:p-5'" class="h-full flex flex-col justify-between hover:shadow-md transition-shadow duration-200">
+            <div class="flex items-center justify-between mb-3 gap-2">
+                <p class="text-xs sm:text-sm font-medium text-gray-500 truncate" title="Menunggu Verif PM">Menunggu Verif PM</p>
+                <div class="w-8 h-8 sm:w-9 sm:h-9 rounded-lg sm:rounded-xl bg-blue-50 flex items-center justify-center flex-shrink-0">
                     <svg class="w-4 sm:w-5 h-4 sm:h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
                 </div>
             </div>
-            <p class="text-2xl sm:text-3xl font-bold text-blue-600">{{ $sosmedStats['waiting_pm'] }}</p>
-            <p class="text-xs text-gray-400 mt-1">sudah submit link</p>
+            <div>
+                <p class="text-2xl sm:text-3xl font-bold text-blue-600">{{ $sosmedStats['waiting_pm'] }}</p>
+                <p class="text-[11px] sm:text-xs text-gray-400 mt-1 truncate">sudah submit link</p>
+            </div>
         </x-responsive-card>
 
-        <x-responsive-card :padding="'p-3 sm:p-4 md:p-5'">
-            <div class="flex items-center justify-between mb-3">
-                <p class="text-xs sm:text-sm font-medium text-gray-500">Disetujui Final</p>
-                <div class="w-8 h-8 sm:w-9 sm:h-9 rounded-lg bg-green-50 flex items-center justify-center flex-shrink-0">
+        <x-responsive-card :padding="'p-3.5 sm:p-4 md:p-5'" class="h-full flex flex-col justify-between hover:shadow-md transition-shadow duration-200">
+            <div class="flex items-center justify-between mb-3 gap-2">
+                <p class="text-xs sm:text-sm font-medium text-gray-500 truncate" title="Disetujui Final">Disetujui Final</p>
+                <div class="w-8 h-8 sm:w-9 sm:h-9 rounded-lg sm:rounded-xl bg-green-50 flex items-center justify-center flex-shrink-0">
                     <svg class="w-4 sm:w-5 h-4 sm:h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                     </svg>
                 </div>
             </div>
-            <p class="text-2xl sm:text-3xl font-bold text-green-600">{{ $sosmedStats['approved_final'] }}</p>
-            <p class="text-xs text-gray-400 mt-1">tuntas diverifikasi</p>
+            <div>
+                <p class="text-2xl sm:text-3xl font-bold text-green-600">{{ $sosmedStats['approved_final'] }}</p>
+                <p class="text-[11px] sm:text-xs text-gray-400 mt-1 truncate">tuntas diverifikasi</p>
+            </div>
         </x-responsive-card>
     </x-responsive-grid>
 

@@ -7,56 +7,64 @@
 @endsection
 @section('content')
     @include('components.notification-popup')
-    <x-responsive-grid :cols="'grid-cols-2 sm:grid-cols-4'" :gap="'gap-3 sm:gap-4 md:gap-5'" class="mb-4 md:mb-5">
-        <x-responsive-card :padding="'p-3 sm:p-4 md:p-5'">
-            <div class="flex items-center justify-between mb-3">
-                <p class="text-xs sm:text-sm font-medium text-gray-500">Total Tugas</p>
-                <div class="w-8 h-8 sm:w-9 sm:h-9 rounded-lg bg-primary-50 flex items-center justify-center flex-shrink-0">
+    <x-responsive-grid :cols="'grid-cols-2 lg:grid-cols-4'" :gap="'gap-3 sm:gap-4 md:gap-5'" class="mb-4 md:mb-5">
+        <x-responsive-card :padding="'p-3.5 sm:p-4 md:p-5'" class="h-full flex flex-col justify-between hover:shadow-md transition-shadow duration-200">
+            <div class="flex items-center justify-between mb-3 gap-2">
+                <p class="text-xs sm:text-sm font-medium text-gray-500 truncate" title="Total Tugas">Total Tugas</p>
+                <div class="w-8 h-8 sm:w-9 sm:h-9 rounded-lg sm:rounded-xl bg-primary-50 flex items-center justify-center flex-shrink-0">
                     <svg class="w-4 sm:w-5 h-4 sm:h-5 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
                     </svg>
                 </div>
             </div>
-            <p class="text-2xl sm:text-3xl font-bold text-gray-800">{{ $stats['total'] }}</p>
-            <p class="text-xs text-gray-400 mt-1">tugas hari ini</p>
+            <div>
+                <p class="text-2xl sm:text-3xl font-bold text-gray-800">{{ $stats['total'] }}</p>
+                <p class="text-[11px] sm:text-xs text-gray-400 mt-1 truncate">tugas hari ini</p>
+            </div>
         </x-responsive-card>
-        <x-responsive-card :padding="'p-3 sm:p-4 md:p-5'">
-            <div class="flex items-center justify-between mb-3">
-                <p class="text-xs sm:text-sm font-medium text-gray-500">Selesai</p>
-                <div class="w-8 h-8 sm:w-9 sm:h-9 rounded-lg bg-green-50 flex items-center justify-center flex-shrink-0">
+        <x-responsive-card :padding="'p-3.5 sm:p-4 md:p-5'" class="h-full flex flex-col justify-between hover:shadow-md transition-shadow duration-200">
+            <div class="flex items-center justify-between mb-3 gap-2">
+                <p class="text-xs sm:text-sm font-medium text-gray-500 truncate" title="Selesai">Selesai</p>
+                <div class="w-8 h-8 sm:w-9 sm:h-9 rounded-lg sm:rounded-xl bg-green-50 flex items-center justify-center flex-shrink-0">
                     <svg class="w-4 sm:w-5 h-4 sm:h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                     </svg>
                 </div>
             </div>
-            <p class="text-2xl sm:text-3xl font-bold text-green-600">{{ $stats['completed'] }}</p>
-            <p class="text-xs text-gray-400 mt-1">sudah diselesaikan</p>
+            <div>
+                <p class="text-2xl sm:text-3xl font-bold text-green-600">{{ $stats['completed'] }}</p>
+                <p class="text-[11px] sm:text-xs text-gray-400 mt-1 truncate">sudah diselesaikan</p>
+            </div>
         </x-responsive-card>
-        <x-responsive-card :padding="'p-3 sm:p-4 md:p-5'">
-            <div class="flex items-center justify-between mb-3">
-                <p class="text-xs sm:text-sm font-medium text-gray-500">Belum Selesai</p>
-                <div class="w-8 h-8 sm:w-9 sm:h-9 rounded-lg bg-yellow-50 flex items-center justify-center flex-shrink-0">
+        <x-responsive-card :padding="'p-3.5 sm:p-4 md:p-5'" class="h-full flex flex-col justify-between hover:shadow-md transition-shadow duration-200">
+            <div class="flex items-center justify-between mb-3 gap-2">
+                <p class="text-xs sm:text-sm font-medium text-gray-500 truncate" title="Belum Selesai">Belum Selesai</p>
+                <div class="w-8 h-8 sm:w-9 sm:h-9 rounded-lg sm:rounded-xl bg-yellow-50 flex items-center justify-center flex-shrink-0">
                     <svg class="w-4 sm:w-5 h-4 sm:h-5 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
                 </div>
             </div>
-            <p class="text-2xl sm:text-3xl font-bold text-yellow-600">{{ $stats['pending'] }}</p>
-            <p class="text-xs text-gray-400 mt-1">masih dalam pengerjaan</p>
+            <div>
+                <p class="text-2xl sm:text-3xl font-bold text-yellow-600">{{ $stats['pending'] }}</p>
+                <p class="text-[11px] sm:text-xs text-gray-400 mt-1 truncate">masih dalam pengerjaan</p>
+            </div>
         </x-responsive-card>
-        <x-responsive-card :padding="'p-3 sm:p-4 md:p-5'">
-            <div class="flex items-center justify-between mb-3">
-                <p class="text-xs sm:text-sm font-medium text-gray-500">Tidak Dikerjakan</p>
-                <div class="w-8 h-8 sm:w-9 sm:h-9 rounded-lg bg-red-50 flex items-center justify-center flex-shrink-0">
+        <x-responsive-card :padding="'p-3.5 sm:p-4 md:p-5'" class="h-full flex flex-col justify-between hover:shadow-md transition-shadow duration-200">
+            <div class="flex items-center justify-between mb-3 gap-2">
+                <p class="text-xs sm:text-sm font-medium text-gray-500 truncate" title="Tidak Dikerjakan">Tidak Dikerjakan</p>
+                <div class="w-8 h-8 sm:w-9 sm:h-9 rounded-lg sm:rounded-xl bg-red-50 flex items-center justify-center flex-shrink-0">
                     <svg class="w-4 sm:w-5 h-4 sm:h-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                     </svg>
                 </div>
             </div>
-            <p class="text-2xl sm:text-3xl font-bold text-red-600">{{ $stats['not_done'] }}</p>
-            <p class="text-xs text-gray-400 mt-1">melewati batas waktu</p>
+            <div>
+                <p class="text-2xl sm:text-3xl font-bold text-red-600">{{ $stats['not_done'] }}</p>
+                <p class="text-[11px] sm:text-xs text-gray-400 mt-1 truncate">melewati batas waktu</p>
+            </div>
         </x-responsive-card>
     </x-responsive-grid>
 

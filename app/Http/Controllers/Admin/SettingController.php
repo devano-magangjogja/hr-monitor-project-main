@@ -26,15 +26,22 @@ class SettingController extends Controller
     public function updateAppInfo(Request $request)
     {
         $request->validate([
-            'app_name'    => ['required', 'string', 'max:60'],
-            'logo'        => ['nullable', 'image', 'mimes:png,jpg,jpeg,webp,svg', 'max:2048'],
-            'remove_logo' => ['nullable', 'in:0,1'],
+            'app_name'          => ['required', 'string', 'max:60'],
+            'logo'              => ['nullable', 'image', 'mimes:png,jpg,jpeg,webp,svg', 'max:2048'],
+            'logo_banner'       => ['nullable', 'image', 'mimes:png,jpg,jpeg,webp', 'max:4096'],
+            'remove_logo'       => ['nullable', 'in:0,1'],
+            'remove_logo_banner'=> ['nullable', 'in:0,1'],
         ]);
 
         try {
             $this->settingService->updateAppInfo(
-                ['app_name' => $request->app_name, 'remove_logo' => $request->remove_logo],
-                $request->hasFile('logo') ? $request->file('logo') : null
+                [
+                    'app_name'           => $request->app_name,
+                    'remove_logo'        => $request->remove_logo,
+                    'remove_logo_banner' => $request->remove_logo_banner,
+                ],
+                $request->hasFile('logo')        ? $request->file('logo')        : null,
+                $request->hasFile('logo_banner') ? $request->file('logo_banner') : null
             );
 
             return back()->with('success', 'Informasi aplikasi berhasil diperbarui.');

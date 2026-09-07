@@ -18,14 +18,18 @@
 
         <div class="relative z-20 flex flex-col items-center text-center">
             @php
-                $useStorageLogo = !empty($appLogo) && \Illuminate\Support\Facades\Storage::disk('public')->exists($appLogo);
+                $useStorageBanner = !empty($appLogoBanner) && \Illuminate\Support\Facades\Storage::disk('public')->exists($appLogoBanner);
+                $useStorageLogo   = !empty($appLogo) && \Illuminate\Support\Facades\Storage::disk('public')->exists($appLogo);
             @endphp
-            @if($useStorageLogo)
+            @if($useStorageBanner)
+                <img src="{{ asset('storage/' . $appLogoBanner) }}" alt="{{ $appName }}"
+                     class="w-80 max-w-xs drop-shadow-xl object-contain">
+            @elseif($useStorageLogo)
                 <img src="{{ asset('storage/' . $appLogo) }}" alt="{{ $appName }}"
-                     class="w-80 drop-shadow-xl object-contain">
+                     class="w-48 drop-shadow-xl object-contain">
             @else
-                <img src="{{ asset('images/seveninc_logo.png') }}" alt="{{ $appName }}"
-                     class="w-80 drop-shadow-xl">
+                <img src="{{ asset('images/logo_banner.jpg') }}" alt="{{ $appName }}"
+                     class="w-80 max-w-xs drop-shadow-xl object-contain rounded-xl">
             @endif
         </div>
     </section>
@@ -37,14 +41,18 @@
             {{-- Header Form --}}
             <div class="mb-8 text-center">
                 @php
-                    $useStorageLogo = !empty($appLogo) && \Illuminate\Support\Facades\Storage::disk('public')->exists($appLogo);
+                    $useStorageBanner = !empty($appLogoBanner) && \Illuminate\Support\Facades\Storage::disk('public')->exists($appLogoBanner);
+                    $useStorageLogo   = !empty($appLogo) && \Illuminate\Support\Facades\Storage::disk('public')->exists($appLogo);
                 @endphp
-                @if($useStorageLogo)
+                @if($useStorageBanner)
+                    <img src="{{ asset('storage/' . $appLogoBanner) }}" alt="{{ $appName }}"
+                         class="h-14 mx-auto lg:hidden mb-4 object-contain">
+                @elseif($useStorageLogo)
                     <img src="{{ asset('storage/' . $appLogo) }}" alt="{{ $appName }}"
                          class="w-24 mx-auto lg:hidden mb-4 object-contain">
                 @else
-                    <img src="{{ asset('images/seveninc_logo.png') }}" alt="{{ $appName }}"
-                         class="w-24 mx-auto lg:hidden mb-4">
+                    <img src="{{ asset('images/logo_banner.jpg') }}" alt="{{ $appName }}"
+                         class="h-14 mx-auto lg:hidden mb-4 object-contain rounded-lg">
                 @endif
                 <div class="flex justify-center mb-3">
                     <div class="w-14 h-14 bg-blue-50 rounded-2xl flex items-center justify-center">

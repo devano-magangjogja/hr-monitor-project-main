@@ -12,92 +12,73 @@
     @include('components.notification-popup')
 
     {{-- ── Stat Cards ──────────────────────────────────────── --}}
-    <x-responsive-grid :cols="'grid-cols-2 sm:grid-cols-3 lg:grid-cols-5'" :gap="'gap-4'" class="mb-8">
-        <div class="bg-white rounded-xl border border-gray-200 p-5">
-            <div class="flex items-center justify-between mb-3">
-                <p class="text-sm font-medium text-gray-500">Total Tugas</p>
-                <div class="w-9 h-9 rounded-lg bg-primary-50 flex items-center justify-center">
-                    <svg class="w-5 h-5 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <x-responsive-grid :cols="'grid-cols-2 lg:grid-cols-4'" :gap="'gap-3 sm:gap-4 md:gap-5'" class="mb-8">
+        {{-- Total Tugas --}}
+        <x-responsive-card :padding="'p-3.5 sm:p-4 md:p-5'" class="h-full flex flex-col justify-between hover:shadow-md transition-shadow duration-200">
+            <div class="flex items-center justify-between mb-3 gap-2">
+                <p class="text-xs sm:text-sm font-medium text-gray-500 truncate" title="Total Tugas">Total Tugas</p>
+                <div class="w-8 h-8 sm:w-9 sm:h-9 rounded-lg sm:rounded-xl bg-primary-50 flex items-center justify-center flex-shrink-0">
+                    <svg class="w-4 sm:w-5 h-4 sm:h-5 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                               d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
                     </svg>
                 </div>
             </div>
-            <p class="text-3xl font-bold text-gray-800">{{ $stats['total'] }}</p>
-            <p class="text-xs text-gray-400 mt-1">tugas hari ini</p>
-        </div>
+            <div>
+                <p class="text-2xl sm:text-3xl font-bold text-gray-800">{{ $stats['total'] }}</p>
+                <p class="text-[11px] sm:text-xs text-gray-400 mt-1 truncate">tugas hari ini</p>
+            </div>
+        </x-responsive-card>
 
         {{-- Selesai --}}
-        <div class="bg-white rounded-xl border border-gray-200 p-5">
-            <div class="flex items-center justify-between mb-3">
-                <p class="text-sm font-medium text-gray-500">Selesai</p>
-                <div class="w-9 h-9 rounded-lg bg-green-50 flex items-center justify-center">
-                    <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <x-responsive-card :padding="'p-3.5 sm:p-4 md:p-5'" class="h-full flex flex-col justify-between hover:shadow-md transition-shadow duration-200">
+            <div class="flex items-center justify-between mb-3 gap-2">
+                <p class="text-xs sm:text-sm font-medium text-gray-500 truncate" title="Selesai">Selesai</p>
+                <div class="w-8 h-8 sm:w-9 sm:h-9 rounded-lg sm:rounded-xl bg-green-50 flex items-center justify-center flex-shrink-0">
+                    <svg class="w-4 sm:w-5 h-4 sm:h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
                     </svg>
                 </div>
             </div>
-            <p class="text-3xl font-bold text-green-600">{{ $stats['completed'] }}</p>
-            <p class="text-xs text-gray-400 mt-1">sudah diselesaikan</p>
-        </div>
+            <div>
+                <p class="text-2xl sm:text-3xl font-bold text-green-600">{{ $stats['completed'] }}</p>
+                <p class="text-[11px] sm:text-xs text-gray-400 mt-1 truncate">sudah diselesaikan</p>
+            </div>
+        </x-responsive-card>
 
         {{-- Belum Selesai --}}
-        <div class="bg-white rounded-xl border border-gray-200 p-5">
-            <div class="flex items-center justify-between mb-3">
-                <p class="text-sm font-medium text-gray-500">Belum Selesai</p>
-                <div class="w-9 h-9 rounded-lg bg-yellow-50 flex items-center justify-center">
-                    <svg class="w-5 h-5 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <x-responsive-card :padding="'p-3.5 sm:p-4 md:p-5'" class="h-full flex flex-col justify-between hover:shadow-md transition-shadow duration-200">
+            <div class="flex items-center justify-between mb-3 gap-2">
+                <p class="text-xs sm:text-sm font-medium text-gray-500 truncate" title="Belum Selesai">Belum Selesai</p>
+                <div class="w-8 h-8 sm:w-9 sm:h-9 rounded-lg sm:rounded-xl bg-yellow-50 flex items-center justify-center flex-shrink-0">
+                    <svg class="w-4 sm:w-5 h-4 sm:h-5 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
                     </svg>
                 </div>
             </div>
-            <p class="text-3xl font-bold text-yellow-600">{{ $stats['pending'] }}</p>
-            <p class="text-xs text-gray-400 mt-1">masih dalam pengerjaan</p>
-        </div>
+            <div>
+                <p class="text-2xl sm:text-3xl font-bold text-yellow-600">{{ $stats['pending'] }}</p>
+                <p class="text-[11px] sm:text-xs text-gray-400 mt-1 truncate">masih dalam pengerjaan</p>
+            </div>
+        </x-responsive-card>
 
         {{-- Tidak Dikerjakan --}}
-        <div class="bg-white rounded-xl border border-gray-200 p-5">
-            <div class="flex items-center justify-between mb-3">
-                <p class="text-sm font-medium text-gray-500">Tidak Dikerjakan</p>
-                <div class="w-9 h-9 rounded-lg bg-red-50 flex items-center justify-center">
-                    <svg class="w-5 h-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <x-responsive-card :padding="'p-3.5 sm:p-4 md:p-5'" class="h-full flex flex-col justify-between hover:shadow-md transition-shadow duration-200">
+            <div class="flex items-center justify-between mb-3 gap-2">
+                <p class="text-xs sm:text-sm font-medium text-gray-500 truncate" title="Tidak Dikerjakan">Tidak Dikerjakan</p>
+                <div class="w-8 h-8 sm:w-9 sm:h-9 rounded-lg sm:rounded-xl bg-red-50 flex items-center justify-center flex-shrink-0">
+                    <svg class="w-4 sm:w-5 h-4 sm:h-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M6 18L18 6M6 6l12 12"/>
                     </svg>
                 </div>
             </div>
-            <p class="text-3xl font-bold text-red-600">{{ $stats['not_done'] }}</p>
-            <p class="text-xs text-gray-400 mt-1">melewati batas waktu</p>
-        </div>
-
-        {{--<div class="bg-white rounded-xl border border-gray-200 p-5">
-            <div class="flex items-center justify-between mb-3">
-                <p class="text-sm font-medium text-gray-500">Skor Minggu Ini</p>
-                <div class="w-9 h-9 rounded-lg bg-yellow-50 flex items-center justify-center">
-                    <svg class="w-5 h-5 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                              d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/>
-                    </svg>
-                </div>
+            <div>
+                <p class="text-2xl sm:text-3xl font-bold text-red-600">{{ $stats['not_done'] }}</p>
+                <p class="text-[11px] sm:text-xs text-gray-400 mt-1 truncate">melewati batas waktu</p>
             </div>
-            <p class="text-3xl font-bold text-yellow-600">{{ $scoreWeek }}</p>
-            <p class="text-xs text-gray-400 mt-1">poin minggu ini</p>
-        </div>
-
-        <div class="bg-white rounded-xl border border-gray-200 p-5">
-            <div class="flex items-center justify-between mb-3">
-                <p class="text-sm font-medium text-gray-500">Skor Bulan Ini</p>
-                <div class="w-9 h-9 rounded-lg bg-purple-50 flex items-center justify-center">
-                    <svg class="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                              d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
-                    </svg>
-                </div>
-            </div>
-            <p class="text-3xl font-bold text-purple-600">{{ $scoreMonth }}</p>
-            <p class="text-xs text-gray-400 mt-1">poin bulan ini</p>
-        </div>--}}
+        </x-responsive-card>
     </x-responsive-grid>
 
     {{-- ── Tugas Hari Ini ──────────────────────────────────── --}}
