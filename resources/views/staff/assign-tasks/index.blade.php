@@ -207,6 +207,12 @@
                     <option value="Kantor 2" {{ old('kantor') == 'Kantor 2' ? 'selected' : '' }}>Kantor 2</option>
                     <option value="Kantor 3" {{ old('kantor') == 'Kantor 3' ? 'selected' : '' }}>Kantor 3</option>
                     <option value="Kantor 4" {{ old('kantor') == 'Kantor 4' ? 'selected' : '' }}>Kantor 4</option>
+                    <option value="Kantor 5" {{ old('kantor') == 'Kantor 5' ? 'selected' : '' }}>Kantor 5</option>
+                    <option value="Kantor 6" {{ old('kantor') == 'Kantor 6' ? 'selected' : '' }}>Kantor 6</option>
+                    <option value="Kantor 7" {{ old('kantor') == 'Kantor 7' ? 'selected' : '' }}>Kantor 7</option>
+                    <option value="Kantor 8" {{ old('kantor') == 'Kantor 8' ? 'selected' : '' }}>Kantor 8</option>
+                    <option value="Kantor 9" {{ old('kantor') == 'Kantor 9' ? 'selected' : '' }}>Kantor 9</option>
+                    <option value="Kantor 10" {{ old('kantor') == 'Kantor 10' ? 'selected' : '' }}>Kantor 10</option>
                 </select>
                 <p class="text-[11px] text-gray-400 mt-1">Jika dipilih, asisten akan terhubung ke kantor ini saat mencatat presensi hari ini.</p>
             </div>
@@ -311,6 +317,12 @@
                     <option value="Kantor 2">Kantor 2</option>
                     <option value="Kantor 3">Kantor 3</option>
                     <option value="Kantor 4">Kantor 4</option>
+                    <option value="Kantor 5">Kantor 5</option>
+                    <option value="Kantor 6">Kantor 6</option>
+                    <option value="Kantor 7">Kantor 7</option>
+                    <option value="Kantor 8">Kantor 8</option>
+                    <option value="Kantor 9">Kantor 9</option>
+                    <option value="Kantor 10">Kantor 10</option>
                 </select>
                 <p class="text-[11px] text-gray-400 mt-1">Jika dipilih, asisten akan terhubung ke kantor ini saat mencatat presensi hari ini.</p>
             </div>
