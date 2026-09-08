@@ -130,9 +130,9 @@
 </div>
 
 {{-- Tabel --}}
-<div class="bg-white rounded-xl border border-gray-200 overflow-hidden">
-    {{-- Desktop / Mobile Table --}}
-    <div class="overflow-x-auto">
+<div class="bg-white rounded-xl border border-gray-200 overflow-hidden flex flex-col">
+    {{-- Desktop / Mobile Table (dengan fixed height dan scrollbar internal) --}}
+    <div class="overflow-x-auto overflow-y-auto max-h-[600px]" style="scrollbar-gutter: stable;">
         <table class="w-full table-fixed text-xs sm:text-sm">
             <thead>
                 <tr class="bg-gray-50 border-b border-gray-200">
@@ -302,6 +302,21 @@
                 @endforelse
             </tbody>
         </table>
+    </div>
+
+    {{-- Pagination di bawah table --}}
+    <div class="px-4 sm:px-6 py-4 border-t border-gray-100 bg-gray-50/50">
+        <div class="flex flex-col sm:flex-row items-center justify-between gap-3">
+            {{-- Info jumlah data --}}
+            <div class="text-xs sm:text-sm text-gray-600">
+                Menampilkan <span class="font-semibold">{{ $tasks->count() }}</span> dari <span class="font-semibold">{{ $tasks->total() }}</span> data
+            </div>
+
+            {{-- Links pagination --}}
+            <div class="flex justify-center">
+                {{ $tasks->links() }}
+            </div>
+        </div>
     </div>
 </div>
 

@@ -33,15 +33,10 @@
         <div class="flex items-center justify-between px-3 sm:px-6 py-3 sm:py-5 border-b border-white/10 flex-shrink-0 gap-2">
             <div class="flex items-center gap-2 sm:gap-3 min-w-0">
                 @php
-                    $useStorageLogo = !empty($appLogo) && \Illuminate\Support\Facades\Storage::disk('public')->exists($appLogo);
+                    $useStorageLogo = false; // Disable custom logo for now
                 @endphp
-                @if($useStorageLogo)
-                    <img src="{{ asset('storage/' . $appLogo) }}" alt="{{ $appName }}"
-                         class="w-9 h-9 sm:w-10 sm:h-10 object-contain flex-shrink-0 rounded-md">
-                @else
-                    <img src="{{ asset('images/logo_square.jpg') }}" alt="{{ $appName }}"
-                         class="w-9 h-9 sm:w-10 sm:h-10 object-contain flex-shrink-0 rounded-md">
-                @endif
+                <img src="{{ asset('images/logo_square.jpg') }}" alt="{{ $appName }}" onerror="this.style.display='none'"
+                     class="w-9 h-9 sm:w-10 sm:h-10 object-contain flex-shrink-0 rounded-md">
                 <span class="text-white font-bold text-lg sm:text-xl tracking-tight truncate">
                     {{ $appName }}
                 </span>

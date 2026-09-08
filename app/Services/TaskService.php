@@ -553,9 +553,9 @@ class TaskService
         return $this->taskRepository->getHistoryForUser($userId, $date, $search);
     }
 
-    public function getHistoryForAdmin(?int $userId = null, ?string $date = null, ?string $search = null): Collection
+    public function getHistoryForAdmin(?int $userId = null, ?string $date = null, ?string $search = null, int $perPage = 10)
     {
-        return $this->taskRepository->getHistoryForAdmin($userId, $date, $search);
+        return $this->taskRepository->getHistoryForAdmin($userId, $date, $search, $perPage);
     }
 
     public function getTasksByStaff(): Collection

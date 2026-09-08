@@ -16,7 +16,7 @@ class SettingController extends Controller
     public function index()
     {
         $settings = $this->settingService->getAll();
-        $waGroups = $this->settingService->getAllWaGroups();
+        $waGroups = collect(); // WA Groups feature disabled
 
         return view('admin.settings.index', compact('settings', 'waGroups'));
     }

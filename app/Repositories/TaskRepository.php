@@ -243,7 +243,7 @@ class TaskRepository
             ->orderByDesc('created_at')
             ->get();
     }
-    public function getHistoryForAdmin(?int $userId = null, ?string $date = null, ?string $search = null): Collection
+    public function getHistoryForAdmin(?int $userId = null, ?string $date = null, ?string $search = null, int $perPage = 10)
     {
         /** @var Builder $query */
         $query = $this->model->newQuery();
@@ -274,7 +274,7 @@ class TaskRepository
             })
             ->orderByDesc('task_date')
             ->orderByDesc('created_at')
-            ->get();
+            ->paginate($perPage);
     }
 
     public function getTasksCreatedByAdmin(): Collection
