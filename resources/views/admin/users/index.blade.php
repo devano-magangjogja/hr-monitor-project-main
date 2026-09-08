@@ -18,7 +18,7 @@
             </p>
         </div>
         <button onclick="document.getElementById('modal-create').classList.remove('hidden')" class="flex items-center gap-2 px-4 py-2 bg-primary-600 hover:bg-primary-700
-                                       text-white text-sm font-medium rounded-lg transition">
+                                               text-white text-sm font-medium rounded-lg transition">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
             </svg>
@@ -41,90 +41,91 @@
                 </thead>
                 <tbody class="divide-y divide-gray-100">
                     @forelse($users as $user)
-                                    <tr class="hover:bg-gray-50 transition">
-                                        {{-- Nama --}}
-                                        <td class="px-6 py-4">
-                                            <div class="flex items-center gap-3">
-                                                {{-- Avatar: foto atau inisial --}}
-                                                <div class="w-8 h-8 rounded-full overflow-hidden flex-shrink-0">
-                                                    @if($user->image)
-                                                        <img src="{{ asset('storage/' . $user->image) }}" alt="{{ $user->name }}"
-                                                            class="w-full h-full object-cover">
-                                                    @else
-                                                        <div class="w-full h-full bg-primary-100 flex items-center justify-center">
-                                                            <span class="text-xs font-semibold text-primary-600">
-                                                                {{ strtoupper(substr($user->name, 0, 1)) }}
-                                                            </span>
-                                                        </div>
-                                                    @endif
-                                                </div>
-                                                <span class="font-medium text-gray-800">{{ $user->name }}</span>
+                        <tr class="hover:bg-gray-50 transition">
+                            {{-- Nama --}}
+                            <td class="px-6 py-4">
+                                <div class="flex items-center gap-3">
+                                    {{-- Avatar: foto atau inisial --}}
+                                    <div class="w-8 h-8 rounded-full overflow-hidden flex-shrink-0">
+                                        @if($user->image)
+                                            <img src="{{ asset('storage/' . $user->image) }}" alt="{{ $user->name }}"
+                                                class="w-full h-full object-cover">
+                                        @else
+                                            <div class="w-full h-full bg-primary-100 flex items-center justify-center">
+                                                <span class="text-xs font-semibold text-primary-600">
+                                                    {{ strtoupper(substr($user->name, 0, 1)) }}
+                                                </span>
                                             </div>
-                                        </td>
+                                        @endif
+                                    </div>
+                                    <span class="font-medium text-gray-800">{{ $user->name }}</span>
+                                </div>
+                            </td>
 
-                                        {{-- Email --}}
-                                        <td class="px-6 py-4 text-gray-600">{{ $user->email }}</td>
+                            {{-- Email --}}
+                            <td class="px-6 py-4 text-gray-600">{{ $user->email }}</td>
 
-                                        {{-- Role --}}
-                                        <td class="px-6 py-4">
-                                            <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold {{ $user->role_badge_class }}">
-                                                {{ $user->role_label }}
-                                            </span>
-                                        </td>
+                            {{-- Role --}}
+                            <td class="px-6 py-4">
+                                <span
+                                    class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold {{ $user->role_badge_class }}">
+                                    {{ $user->role_label }}
+                                </span>
+                            </td>
 
-                                        {{-- Status --}}
-                                        <td class="px-6 py-4">
-                                            <span
-                                                class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium
-                                                                                                                                {{ $user->is_active ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700' }}">
-                                                {{ $user->is_active ? 'Aktif' : 'Nonaktif' }}
-                                            </span>
-                                        </td>
+                            {{-- Status --}}
+                            <td class="px-6 py-4">
+                                <span
+                                    class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium
+                                                                                                                                                {{ $user->is_active ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700' }}">
+                                    {{ $user->is_active ? 'Aktif' : 'Nonaktif' }}
+                                </span>
+                            </td>
 
-                                        {{-- Aksi --}}
-                                        <td class="px-6 py-4">
-                                            <div class="flex items-center justify-end gap-2">
+                            {{-- Aksi --}}
+                            <td class="px-6 py-4">
+                                <div class="flex items-center justify-end gap-2">
 
-                                                {{-- Edit --}}
-                                                <button onclick="openEditModal(
-                                                                                                                                        {{ $user->id }},
-                                                                                                                                        '{{ addslashes($user->name) }}',
-                                                                                                                                        '{{ $user->email }}',
-                                                                                                                                        '{{ $user->role }}',
-                                                                                                                                        {{ $user->is_active ? 1 : 0 }},
-                                                                                                                                        '{{ $user->image ? asset('storage/' . $user->image) : '' }}'
-                                                                                                                                    )"
-                                                    class="p-1.5 text-gray-400 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition"
-                                                    title="Edit">
-                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                            d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                                                    </svg>
-                                                </button>
+                                    {{-- Edit --}}
+                                    <button
+                                        onclick="openEditModal(
+                                                                                                                                                        {{ $user->id }},
+                                                                                                                                                        '{{ addslashes($user->name) }}',
+                                                                                                                                                        '{{ $user->email }}',
+                                                                                                                                                        '{{ $user->role }}',
+                                                                                                                                                        {{ $user->is_active ? 1 : 0 }},
+                                                                                                                                                        '{{ $user->image ? asset('storage/' . $user->image) : '' }}'
+                                                                                                                                                    )"
+                                        class="p-1.5 text-gray-400 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition"
+                                        title="Edit">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                        </svg>
+                                    </button>
 
-                                                {{-- Ganti Password --}}
-                                                <button onclick="openPasswordModal({{ $user->id }}, '{{ $user->name }}')"
-                                                    class="p-1.5 text-gray-400 hover:text-yellow-600 hover:bg-yellow-50 rounded-lg transition"
-                                                    title="Ganti Password">
-                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                            d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
-                                                    </svg>
-                                                </button>
+                                    {{-- Ganti Password --}}
+                                    <button onclick="openPasswordModal({{ $user->id }}, '{{ $user->name }}')"
+                                        class="p-1.5 text-gray-400 hover:text-yellow-600 hover:bg-yellow-50 rounded-lg transition"
+                                        title="Ganti Password">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
+                                        </svg>
+                                    </button>
 
-                                                {{-- Hapus --}}
-                                                <button
-                                                    onclick="openDeleteModal({{ $user->id }}, '{{ addslashes($user->name) }}')"
-                                                    class="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition"
-                                                    title="Hapus">
-                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                                    </svg>
-                                                </button>
-                                            </div>
-                                        </td>
-                                    </tr>
+                                    {{-- Hapus --}}
+                                    <button onclick="openDeleteModal({{ $user->id }}, '{{ addslashes($user->name) }}')"
+                                        class="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition"
+                                        title="Hapus">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                        </svg>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
                     @empty
                         <tr>
                             <td colspan="5" class="px-6 py-12 text-center text-gray-400 text-sm">
@@ -149,28 +150,28 @@
             </button>
         </div>
         <form action="{{ route('admin.users.store') }}" method="POST" enctype="multipart/form-data"
-            class="px-3 sm:px-6 py-5 space-y-4 overflow-y-auto flex-1">
+            class="px-3 sm:px-6 py-5 pt-1 space-y-4 overflow-y-auto flex-1">
             @csrf
             <div>
                 <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-1">Nama Lengkap</label>
                 <input type="text" name="name" value="{{ old('name') }}" required maxlength="100" class="w-full px-3 sm:px-4 py-2 sm:py-2.5 border border-gray-300 rounded-lg text-xs sm:text-sm
-                                              focus:outline-none focus:ring-2 focus:ring-primary-500">
+                                                      focus:outline-none focus:ring-2 focus:ring-primary-500">
             </div>
             <div>
                 <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-1">Email</label>
                 <input type="email" name="email" value="{{ old('email') }}" required maxlength="100" class="w-full px-3 sm:px-4 py-2 sm:py-2.5 border border-gray-300 rounded-lg text-xs sm:text-sm
-                                              focus:outline-none focus:ring-2 focus:ring-primary-500">
+                                                      focus:outline-none focus:ring-2 focus:ring-primary-500">
             </div>
             <div x-data="{ show: false }">
                 <div class="flex items-center justify-between mb-1">
-                    <label class="block text-xs sm:text-sm font-medium text-gray-700">Password <span class="text-red-500">*</span></label>
+                    <label class="block text-xs sm:text-sm font-medium text-gray-700">Password <span
+                            class="text-red-500">*</span></label>
                     <span id="admin-create-pwd-len" class="text-[11px] text-gray-400 font-medium">Min. 8 karakter</span>
                 </div>
                 <div class="relative">
-                    <input :type="show ? 'text' : 'password'" id="admin-create-password" name="password" required minlength="8"
-                        placeholder="Minimal 8 karakter"
-                        class="w-full px-3 sm:px-4 py-2 sm:py-2.5 pr-10 border border-gray-300 rounded-lg text-xs sm:text-sm transition
-                               focus:outline-none focus:ring-2 focus:ring-primary-500">
+                    <input :type="show ? 'text' : 'password'" id="admin-create-password" name="password" required
+                        minlength="8" placeholder="Minimal 8 karakter" class="w-full px-3 sm:px-4 py-2 sm:py-2.5 pr-10 border border-gray-300 rounded-lg text-xs sm:text-sm transition
+                                       focus:outline-none focus:ring-2 focus:ring-primary-500">
                     <button type="button" @click="show = !show"
                         class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition"
                         title="Tampilkan / Sembunyikan Password">
@@ -180,7 +181,8 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                         </svg>
-                        <svg x-show="show" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="display:none">
+                        <svg x-show="show" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                            style="display:none">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
                         </svg>
@@ -189,14 +191,14 @@
             </div>
             <div x-data="{ show: false }">
                 <div class="flex items-center justify-between mb-1">
-                    <label class="block text-xs sm:text-sm font-medium text-gray-700">Konfirmasi Password <span class="text-red-500">*</span></label>
+                    <label class="block text-xs sm:text-sm font-medium text-gray-700">Konfirmasi Password <span
+                            class="text-red-500">*</span></label>
                     <span id="admin-create-pwd-match" class="text-[11px] font-semibold hidden"></span>
                 </div>
                 <div class="relative">
-                    <input :type="show ? 'text' : 'password'" id="admin-create-password-confirmation" name="password_confirmation" required
-                        placeholder="Ulangi password di atas"
-                        class="w-full px-3 sm:px-4 py-2 sm:py-2.5 pr-10 border border-gray-300 rounded-lg text-xs sm:text-sm transition
-                               focus:outline-none focus:ring-2 focus:ring-primary-500">
+                    <input :type="show ? 'text' : 'password'" id="admin-create-password-confirmation"
+                        name="password_confirmation" required placeholder="Ulangi password di atas" class="w-full px-3 sm:px-4 py-2 sm:py-2.5 pr-10 border border-gray-300 rounded-lg text-xs sm:text-sm transition
+                                       focus:outline-none focus:ring-2 focus:ring-primary-500">
                     <button type="button" @click="show = !show"
                         class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition"
                         title="Tampilkan / Sembunyikan Password">
@@ -206,7 +208,8 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                         </svg>
-                        <svg x-show="show" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="display:none">
+                        <svg x-show="show" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                            style="display:none">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
                         </svg>
@@ -217,10 +220,12 @@
                 <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-1">Role</label>
                 <div class="relative mb-1.5">
                     <input type="text" id="search-create-user-role" placeholder="Cari role..."
-                           oninput="filterSelectOptions(this.value, 'create-user-role')"
-                           class="w-full pl-7 pr-2.5 py-1 text-xs border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-primary-500 bg-gray-50 focus:bg-white transition">
-                    <svg class="w-3 h-3 text-gray-400 absolute left-2 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                        oninput="filterSelectOptions(this.value, 'create-user-role')"
+                        class="w-full pl-7 pr-2.5 py-1 text-xs border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-primary-500 bg-gray-50 focus:bg-white transition">
+                    <svg class="w-3 h-3 text-gray-400 absolute left-2 top-1/2 -translate-y-1/2 pointer-events-none"
+                        fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                     </svg>
                 </div>
                 <select name="role" id="create-user-role" required
@@ -271,14 +276,14 @@
             <div>
                 <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-1">Nama Lengkap</label>
                 <input type="text" id="edit-name" name="name" required maxlength="100" class="w-full px-3 sm:px-4 py-2 sm:py-2.5 border border-gray-300 rounded-lg text-xs sm:text-sm
-                                              focus:outline-none focus:ring-2 focus:ring-primary-500">
+                                                      focus:outline-none focus:ring-2 focus:ring-primary-500">
             </div>
 
             {{-- Email --}}
             <div>
                 <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-1">Email</label>
                 <input type="email" id="edit-email" name="email" required maxlength="100" class="w-full px-3 sm:px-4 py-2 sm:py-2.5 border border-gray-300 rounded-lg text-xs sm:text-sm
-                                              focus:outline-none focus:ring-2 focus:ring-primary-500">
+                                                      focus:outline-none focus:ring-2 focus:ring-primary-500">
             </div>
 
             {{-- Role --}}
@@ -286,14 +291,16 @@
                 <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-1">Role</label>
                 <div class="relative mb-1.5">
                     <input type="text" id="search-edit-user-role" placeholder="Cari role..."
-                           oninput="filterSelectOptions(this.value, 'edit-role')"
-                           class="w-full pl-7 pr-2.5 py-1 text-xs border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-primary-500 bg-gray-50 focus:bg-white transition">
-                    <svg class="w-3 h-3 text-gray-400 absolute left-2 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                        oninput="filterSelectOptions(this.value, 'edit-role')"
+                        class="w-full pl-7 pr-2.5 py-1 text-xs border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-primary-500 bg-gray-50 focus:bg-white transition">
+                    <svg class="w-3 h-3 text-gray-400 absolute left-2 top-1/2 -translate-y-1/2 pointer-events-none"
+                        fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                     </svg>
                 </div>
                 <select id="edit-role" name="role" required class="w-full px-3 sm:px-4 py-2 sm:py-2.5 border border-gray-300 rounded-lg text-xs sm:text-sm
-                                               focus:outline-none focus:ring-2 focus:ring-primary-500">
+                                                       focus:outline-none focus:ring-2 focus:ring-primary-500">
                     @foreach($roles as $r)
                         <option value="{{ $r->name }}">{{ $r->label }}</option>
                     @endforeach
@@ -304,7 +311,7 @@
             <div>
                 <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-1">Status</label>
                 <select id="edit-status" name="is_active" class="w-full px-3 sm:px-4 py-2 sm:py-2.5 border border-gray-300 rounded-lg text-xs sm:text-sm
-                                               focus:outline-none focus:ring-2 focus:ring-primary-500">
+                                                       focus:outline-none focus:ring-2 focus:ring-primary-500">
                     <option value="1">Aktif</option>
                     <option value="0">Nonaktif</option>
                 </select>
@@ -312,37 +319,37 @@
 
             {{-- Foto Profil --}}
             <div x-data="{
-                                    hasPhoto: false,
-                                    removePhoto: false,
-                                    previewUrl: '',
-                                    init() {
-                                        // Inisialisasi dari JS saat modal dibuka
-                                    },
-                                    handleFile(event) {
-                                        const file = event.target.files[0];
-                                        if (!file) return;
-                                        this.previewUrl = URL.createObjectURL(file);
-                                        this.hasPhoto = true;
-                                        this.removePhoto = false;
-                                    },
-                                    triggerRemove() {
-                                        this.removePhoto = true;
-                                        this.hasPhoto = false;
-                                        this.previewUrl = '';
-                                        this.$refs.fileInput.value = '';
-                                    }
-                                }" id="edit-photo-area">
+                                            hasPhoto: false,
+                                            removePhoto: false,
+                                            previewUrl: '',
+                                            init() {
+                                                // Inisialisasi dari JS saat modal dibuka
+                                            },
+                                            handleFile(event) {
+                                                const file = event.target.files[0];
+                                                if (!file) return;
+                                                this.previewUrl = URL.createObjectURL(file);
+                                                this.hasPhoto = true;
+                                                this.removePhoto = false;
+                                            },
+                                            triggerRemove() {
+                                                this.removePhoto = true;
+                                                this.hasPhoto = false;
+                                                this.previewUrl = '';
+                                                this.$refs.fileInput.value = '';
+                                            }
+                                        }" id="edit-photo-area">
                 <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-1.5">Foto Profil</label>
                 <div class="flex items-start gap-3">
                     {{-- Thumbnail --}}
                     <div class="w-14 h-14 rounded-xl overflow-hidden border border-gray-200
-                                                bg-gray-50 flex-shrink-0">
+                                                        bg-gray-50 flex-shrink-0">
                         <template x-if="hasPhoto && previewUrl">
                             <img :src="previewUrl" class="w-full h-full object-cover">
                         </template>
                         <template x-if="!hasPhoto || !previewUrl">
                             <div id="edit-avatar-initials"
-                                 class="w-full h-full bg-primary-100 flex items-center justify-center">
+                                class="w-full h-full bg-primary-100 flex items-center justify-center">
                                 <span id="edit-avatar-letter" class="text-lg font-bold text-primary-600"></span>
                             </div>
                         </template>
@@ -351,8 +358,8 @@
                     <div class="flex-1">
                         <div class="flex items-center gap-2 flex-wrap">
                             <label class="cursor-pointer inline-flex items-center gap-1.5 px-2 sm:px-3 py-1 sm:py-1.5
-                                                          text-xs sm:text-xs font-medium text-primary-600 border border-primary-300
-                                                          hover:bg-primary-50 rounded-lg transition">
+                                                                  text-xs sm:text-xs font-medium text-primary-600 border border-primary-300
+                                                                  hover:bg-primary-50 rounded-lg transition">
                                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                         d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
@@ -364,7 +371,7 @@
                             </label>
                             <button type="button" x-show="hasPhoto" @click="triggerRemove()"
                                 class="inline-flex items-center gap-1.5 px-2 sm:px-3 py-1 sm:py-1.5 text-xs font-medium
-                                                           text-red-600 border border-red-200 hover:bg-red-50 rounded-lg transition">
+                                                                   text-red-600 border border-red-200 hover:bg-red-50 rounded-lg transition">
                                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                         d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -412,12 +419,13 @@
             @method('PATCH')
             <div x-data="{ show: false }">
                 <div class="flex items-center justify-between mb-1">
-                    <label class="block text-xs sm:text-sm font-medium text-gray-700">Password Baru <span class="text-red-500">*</span></label>
+                    <label class="block text-xs sm:text-sm font-medium text-gray-700">Password Baru <span
+                            class="text-red-500">*</span></label>
                     <span id="admin-reset-pwd-len" class="text-[11px] text-gray-400 font-medium">Min. 8 karakter</span>
                 </div>
                 <div class="relative">
-                    <input :type="show ? 'text' : 'password'" id="admin-reset-password" name="password" required minlength="8"
-                        placeholder="Minimal 8 karakter"
+                    <input :type="show ? 'text' : 'password'" id="admin-reset-password" name="password" required
+                        minlength="8" placeholder="Minimal 8 karakter"
                         class="w-full px-3 sm:px-4 py-2 sm:py-2.5 pr-10 border border-gray-300 rounded-lg text-xs sm:text-sm transition focus:outline-none focus:ring-2 focus:ring-primary-500">
                     <button type="button" @click="show = !show"
                         class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition"
@@ -428,7 +436,8 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                         </svg>
-                        <svg x-show="show" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="display:none">
+                        <svg x-show="show" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                            style="display:none">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
                         </svg>
@@ -437,12 +446,13 @@
             </div>
             <div x-data="{ show: false }">
                 <div class="flex items-center justify-between mb-1">
-                    <label class="block text-xs sm:text-sm font-medium text-gray-700">Konfirmasi Password Baru <span class="text-red-500">*</span></label>
+                    <label class="block text-xs sm:text-sm font-medium text-gray-700">Konfirmasi Password Baru <span
+                            class="text-red-500">*</span></label>
                     <span id="admin-reset-pwd-match" class="text-[11px] font-semibold hidden"></span>
                 </div>
                 <div class="relative">
-                    <input :type="show ? 'text' : 'password'" id="admin-reset-password-confirmation" name="password_confirmation" required
-                        placeholder="Ulangi password baru"
+                    <input :type="show ? 'text' : 'password'" id="admin-reset-password-confirmation"
+                        name="password_confirmation" required placeholder="Ulangi password baru"
                         class="w-full px-3 sm:px-4 py-2 sm:py-2.5 pr-10 border border-gray-300 rounded-lg text-xs sm:text-sm transition focus:outline-none focus:ring-2 focus:ring-primary-500">
                     <button type="button" @click="show = !show"
                         class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition"
@@ -453,7 +463,8 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                         </svg>
-                        <svg x-show="show" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="display:none">
+                        <svg x-show="show" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                            style="display:none">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
                         </svg>
@@ -557,7 +568,7 @@
             confirmInput.addEventListener('input', validate);
 
             if (formEl) {
-                formEl.addEventListener('submit', function(e) {
+                formEl.addEventListener('submit', function (e) {
                     if (pwdInput.value !== confirmInput.value) {
                         e.preventDefault();
                         validate();
@@ -567,7 +578,7 @@
             }
         }
 
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             const createForm = document.querySelector('#modal-create form');
             setupPasswordMatchValidation('admin-create-password', 'admin-create-password-confirmation', 'admin-create-pwd-match', 'admin-create-pwd-len', createForm);
 

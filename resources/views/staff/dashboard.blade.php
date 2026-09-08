@@ -84,7 +84,7 @@
         </x-responsive-grid>
 
         {{-- ── Main Cards Grid ────────────────────────────── --}}
-        <x-responsive-grid :cols="'grid-cols-1 lg:grid-cols-2'" :gap="'gap-4 md:gap-6'">
+        <x-responsive-grid :cols="'grid-cols-1 lg:grid-cols-2'" :gap="'gap-4 md:gap-6'" class="mt-6">
 
             {{-- ── Tugas Hari Ini ──────────────────────────────── --}}
             <x-responsive-card class="flex flex-col h-full">
