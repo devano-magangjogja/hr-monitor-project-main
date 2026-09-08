@@ -21,15 +21,40 @@ class SosmedController extends Controller
             ->orderBy('platform')
             ->get();
 
+        // Filter date for tasks
+        $taskDateFilter = $request->query('task_date');
+        if (!$taskDateFilter) {
+            $taskDateFilter = now()->toDateString(); // By default, current date
+        }
+
         // Seluruh Tugas Sosmed
         $tasks = SosmedTask::with(['account', 'assignedUser', 'assignedBy', 'verifiedBy', 'hrVerifiedBy'])
+            ->when($taskDateFilter, function ($q) use ($taskDateFilter) {
+                $q->whereDate('task_date', $taskDateFilter);
+            })
             ->orderBy('task_date', 'desc')
             ->get();
 
+        // Date filter and time ranges for audit logs
+        $logDateFilter = $request->query('log_date');
+        $logRangeFilter = $request->query('log_range'); // 'weekly', 'monthly', 'yearly'
+
         // Seluruh Approval Logs (Audit Trail Lengkap)
-        $logs = SosmedApprovalLog::with(['task.account', 'user'])
-            ->latest()
-            ->paginate(30);
+        $logsQuery = SosmedApprovalLog::with(['task.account', 'user'])->latest();
+
+        if ($logDateFilter) {
+            $logsQuery->whereDate('created_at', $logDateFilter);
+        } elseif ($logRangeFilter) {
+            if ($logRangeFilter === 'weekly') {
+                $logsQuery->where('created_at', '>=', now()->startOfWeek());
+            } elseif ($logRangeFilter === 'monthly') {
+                $logsQuery->where('created_at', '>=', now()->startOfMonth());
+            } elseif ($logRangeFilter === 'yearly') {
+                $logsQuery->where('created_at', '>=', now()->startOfYear());
+            }
+        }
+
+        $logs = $logsQuery->paginate(30)->appends($request->all());
 
         // List user untuk penugasan
         $pms = User::join('roles', 'users.role', '=', 'roles.name')
@@ -68,7 +93,10 @@ class SosmedController extends Controller
             'tab',
             'accounts',
             'tasks',
+            'taskDateFilter',
             'logs',
+            'logDateFilter',
+            'logRangeFilter',
             'pms',
             'assistants',
             'staffs',
@@ -156,5 +184,49 @@ class SosmedController extends Controller
         $account->delete();
         return redirect()->route('admin.sosmed.index', ['tab' => 'accounts'])
             ->with('success', 'Akun sosial media berhasil dihapus.');
+    }
+
+    public function purgeTasks(Request $request)
+    {
+        $range = $request->input('range'); // 'weekly', 'monthly', 'yearly'
+
+        $query = SosmedTask::query();
+        if ($range === 'weekly') {
+            $query->where('task_date', '<', now()->startOfWeek());
+        } elseif ($range === 'monthly') {
+            $query->where('task_date', '<', now()->startOfMonth());
+        } elseif ($range === 'yearly') {
+            $query->where('task_date', '<', now()->startOfYear());
+        } else {
+            return redirect()->back()->with('error', 'Rentang waktu tidak valid.');
+        }
+
+        $count = $query->count();
+        $query->delete();
+
+        return redirect()->route('admin.sosmed.index', ['tab' => 'tasks'])
+            ->with('success', "Berhasil menghapus {$count} tugas lama.");
+    }
+
+    public function purgeLogs(Request $request)
+    {
+        $range = $request->input('range'); // 'weekly', 'monthly', 'yearly'
+
+        $query = SosmedApprovalLog::query();
+        if ($range === 'weekly') {
+            $query->where('created_at', '<', now()->startOfWeek());
+        } elseif ($range === 'monthly') {
+            $query->where('created_at', '<', now()->startOfMonth());
+        } elseif ($range === 'yearly') {
+            $query->where('created_at', '<', now()->startOfYear());
+        } else {
+            return redirect()->back()->with('error', 'Rentang waktu tidak valid.');
+        }
+
+        $count = $query->count();
+        $query->delete();
+
+        return redirect()->route('admin.sosmed.index', ['tab' => 'logs'])
+            ->with('success', "Berhasil menghapus {$count} log persetujuan lama.");
     }
 }

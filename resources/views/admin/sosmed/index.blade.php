@@ -120,12 +120,12 @@
                             </colgroup>
                             <thead>
                                 <tr
-                                    class="bg-gray-50 border-b border-gray-200 text-xs font-semibold text-gray-500 uppercase tracking-wide">
-                                    <th class="px-4 py-3 text-left">Nama Akun & Deskripsi</th>
+                                    class="bg-gray-50 border-b border-gray-200 text-xs font-semibold text-gray-500 tracking-wide">
+                                    <th class="px-4 py-3 text-left">Nama Akun</th>
                                     <th class="px-4 py-3 text-left">Platform</th>
-                                    <th class="px-4 py-3 text-left">Link URL</th>
-                                    <th class="px-4 py-3 text-left">Eksekutor (Dikelola Oleh)</th>
-                                    <th class="px-4 py-3 text-left">Supervisor (Diawasi PM)</th>
+                                    <th class="px-4 py-3 text-left">URL</th>
+                                    <th class="px-4 py-3 text-left">Dikelola</th>
+                                    <th class="px-4 py-3 text-left">PM</th>
                                     <th class="px-4 py-3 text-left">Asisten Pengawas</th>
                                     <th class="px-4 py-3 text-center">Aksi</th>
                                 </tr>
@@ -192,7 +192,7 @@
                                         </td>
                                         <td class="px-4 py-3 text-xs min-w-0">
                                             @if($acc->staffUser && $acc->staffUser->role === 'pm')
-                                                <span class="text-gray-400 italic text-[11px] block">— (Langsung ke HR)</span>
+                                                <span class="text-gray-400 text-[11px] block">Langsung ke HR</span>
                                             @elseif($acc->pmUser)
                                                 <div class="min-w-0">
                                                     <span class="font-semibold text-gray-800 block truncate"
@@ -240,15 +240,6 @@
                                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                             d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                                                    </svg>
-                                                </button>
-                                                <button
-                                                    onclick="openAssignModal({{ $acc->id }}, '{{ addslashes($acc->name) }}', {{ $acc->pm_id ?? 'null' }}, {{ $acc->staff_id ?? 'null' }}, {{ $acc->assistant_id ?? 'null' }})"
-                                                    class="p-1.5 text-gray-400 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition"
-                                                    title="Atur Eksekutor & Supervisor">
-                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                            d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                                                     </svg>
                                                 </button>
                                                 <form method="POST" action="{{ route('admin.sosmed.accounts.destroy', $acc) }}"
@@ -304,12 +295,6 @@
                                                     d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                                             </svg>
                                         </button>
-                                        <button
-                                            onclick="openAssignModal({{ $acc->id }}, '{{ addslashes($acc->name) }}', {{ $acc->pm_id ?? 'null' }}, {{ $acc->staff_id ?? 'null' }})"
-                                            class="p-1.5 bg-primary-50 text-primary-600 rounded-lg text-xs font-medium transition"
-                                            title="Atur Eksekutor & Supervisor">
-                                            Atur
-                                        </button>
                                         <form method="POST" action="{{ route('admin.sosmed.accounts.destroy', $acc) }}"
                                             onsubmit="return confirm('Hapus akun ini?')">
                                             @csrf @method('DELETE')
@@ -359,9 +344,79 @@
     {{-- ── TAB 2: MONITORING SELURUH TUGAS ────────────────────────── --}}
     @if($tab === 'tasks')
         <div class="p-4 sm:p-5">
-            <div class="mb-4">
-                <h3 class="text-sm font-semibold text-gray-800">Laporan & Status Pengerjaan Tugas Sosmed</h3>
-                <p class="text-xs text-gray-500 mt-0.5">Monitoring nama user pelaksana, penanggung jawab PM, dan verifikator</p>
+            <div class="mb-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div>
+                    <h3 class="text-sm font-semibold text-gray-800">Laporan & Status Pengerjaan Tugas Sosmed</h3>
+                    <p class="text-xs text-gray-500 mt-0.5">Monitoring nama user pelaksana, penanggung jawab PM, dan verifikator</p>
+                </div>
+                <div class="flex items-center gap-2 shrink-0">
+                    {{-- Filter Tanggal --}}
+                    <form action="{{ route('admin.sosmed.index') }}" method="GET">
+                        <input type="hidden" name="tab" value="tasks">
+                        <input type="date" name="task_date" value="{{ $taskDateFilter }}"
+                               class="h-9 px-3 text-xs bg-white border border-gray-300 rounded-lg shadow-sm
+                                      focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500
+                                      text-gray-700 transition w-[8.5rem] sm:w-auto"
+                               onchange="this.form.submit()">
+                    </form>
+
+                    {{-- Cetak PDF --}}
+                    <button onclick="window.print()"
+                            class="inline-flex items-center gap-2 h-9 px-3 sm:px-3.5 bg-primary-600 hover:bg-primary-700 active:bg-primary-800
+                                   text-white text-xs font-medium rounded-lg transition shadow-sm">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+                        </svg>
+                        <span class="hidden sm:inline">Cetak PDF</span>
+                    </button>
+
+                    {{-- Hapus Data --}}
+                    <div class="relative" id="purgeDropdown">
+                        <button type="button" onclick="togglePurgeDropdown()"
+                                class="inline-flex items-center gap-2 h-9 px-3 sm:px-3.5 bg-white border border-red-200 text-red-600
+                                       hover:bg-red-50 hover:border-red-300 active:bg-red-100
+                                       text-xs font-medium rounded-lg transition shadow-sm">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                            </svg>
+                            <span class="hidden sm:inline">Hapus Data</span>
+                            <svg id="purgeChevron" class="w-3.5 h-3.5 text-red-400 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                            </svg>
+                        </button>
+
+                        {{-- Dropdown --}}
+                        <div id="purgeMenu"
+                             class="absolute right-0 mt-2 w-56 bg-white border border-gray-100 rounded-xl shadow-lg
+                                    opacity-0 invisible translate-y-1
+                                    transition-all duration-150 z-20 overflow-hidden">
+                            <div class="px-3.5 py-2.5 bg-gray-50 border-b border-gray-100">
+                                <p class="text-[10px] font-semibold text-gray-400 uppercase tracking-wider">Hapus data tugas</p>
+                            </div>
+                            <div class="p-1.5 space-y-0.5">
+                                <form action="{{ route('admin.sosmed.tasks.purge') }}" method="POST">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" name="range" value="weekly"
+                                            class="w-full text-left px-3 py-2 text-xs text-red-600 hover:bg-red-50 rounded-lg transition"
+                                            onclick="return confirm('Hapus data sebelum minggu ini?')">
+                                        Lebih lama dari 1 Minggu
+                                    </button>
+                                    <button type="submit" name="range" value="monthly"
+                                            class="w-full text-left px-3 py-2 text-xs text-red-600 hover:bg-red-50 rounded-lg transition"
+                                            onclick="return confirm('Hapus data sebelum bulan ini?')">
+                                        Lebih lama dari 1 Bulan
+                                    </button>
+                                    <button type="submit" name="range" value="yearly"
+                                            class="w-full text-left px-3 py-2 text-xs text-red-600 hover:bg-red-50 rounded-lg transition"
+                                            onclick="return confirm('Hapus data sebelum tahun ini?')">
+                                        Lebih lama dari 1 Tahun
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             {{-- Desktop Table (md+) --}}
@@ -378,7 +433,7 @@
                     </colgroup>
                     <thead>
                         <tr
-                            class="bg-gray-50 border-b border-gray-200 text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                            class="bg-gray-50 border-b border-gray-200 text-xs font-semibold text-gray-500 tracking-wide">
                             <th class="px-4 py-3 text-left">Judul Tugas</th>
                             <th class="px-4 py-3 text-left">Akun</th>
                             <th class="px-4 py-3 text-left">PJ PM</th>
@@ -515,10 +570,89 @@
     {{-- ── TAB 3: AUDIT TRAIL LOG APPROVAL ─────────────────────────── --}}
     @if($tab === 'logs')
         <div class="p-4 sm:p-5">
-            <div class="mb-4">
-                <h3 class="text-sm font-semibold text-gray-800">Transparansi Audit Trail & Riwayat Approval</h3>
-                <p class="text-xs text-gray-500 mt-0.5">Sistem merekam setiap aksi pengerjaan, approval PM, approval HR Staff,
-                    hingga penolakan tugas</p>
+            <div class="mb-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div>
+                    <h3 class="text-sm font-semibold text-gray-800">Transparansi Audit Trail & Riwayat Approval</h3>
+                    <p class="text-xs text-gray-500 mt-0.5">Sistem merekam setiap aksi pengerjaan, approval PM, approval HR Staff, hingga penolakan tugas</p>
+                </div>
+                <div class="flex items-center gap-2 shrink-0">
+                    {{-- Filter --}}
+                    <form action="{{ route('admin.sosmed.index') }}" method="GET" class="flex items-center gap-2">
+                        <input type="hidden" name="tab" value="logs">
+                        <select name="log_range"
+                                class="h-9 pl-3 pr-8 text-xs bg-white border border-gray-300 rounded-lg shadow-sm
+                                    focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500
+                                    text-gray-700 transition"
+                                onchange="this.form.submit()">
+                            <option value="">Semua Waktu</option>
+                            <option value="weekly" {{ request('log_range') === 'weekly' ? 'selected' : '' }}>Minggu Ini</option>
+                            <option value="monthly" {{ request('log_range') === 'monthly' ? 'selected' : '' }}>Bulan Ini</option>
+                            <option value="yearly" {{ request('log_range') === 'yearly' ? 'selected' : '' }}>Tahun Ini</option>
+                        </select>
+                        <input type="date" name="log_date" value="{{ request('log_date') }}"
+                            class="h-9 px-3 text-xs bg-white border border-gray-300 rounded-lg shadow-sm
+                                    focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500
+                                    text-gray-700 transition w-[8.5rem] sm:w-auto"
+                            onchange="this.form.submit()">
+                    </form>
+
+                    {{-- Cetak PDF --}}
+                    <button onclick="window.print()"
+                            class="inline-flex items-center gap-2 h-9 px-3 sm:px-3.5 bg-primary-600 hover:bg-primary-700 active:bg-primary-800
+                                text-white text-xs font-medium rounded-lg transition shadow-sm">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+                        </svg>
+                        <span class="hidden sm:inline">Cetak PDF</span>
+                    </button>
+
+                    {{-- Hapus Data --}}
+                    <div class="relative" id="logsPurgeDropdown">
+                        <button type="button" onclick="toggleLogsPurgeDropdown()"
+                                class="inline-flex items-center gap-2 h-9 px-3 sm:px-3.5 bg-white border border-red-200 text-red-600
+                                    hover:bg-red-50 hover:border-red-300 active:bg-red-100
+                                    text-xs font-medium rounded-lg transition shadow-sm">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                            </svg>
+                            <span class="hidden sm:inline">Hapus Data</span>
+                            <svg id="logsPurgeChevron" class="w-3.5 h-3.5 text-red-400 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                            </svg>
+                        </button>
+
+                        {{-- Dropdown --}}
+                        <div id="logsPurgeMenu"
+                            class="absolute right-0 mt-2 w-56 bg-white border border-gray-100 rounded-xl shadow-lg
+                                    opacity-0 invisible translate-y-1
+                                    transition-all duration-150 z-20 overflow-hidden">
+                            <div class="px-3.5 py-2.5 bg-gray-50 border-b border-gray-100">
+                                <p class="text-[10px] font-semibold text-gray-400 uppercase tracking-wider">Hapus data log</p>
+                            </div>
+                            <div class="p-1.5 space-y-0.5">
+                                <form action="{{ route('admin.sosmed.logs.purge') }}" method="POST">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" name="range" value="weekly"
+                                            class="w-full text-left px-3 py-2 text-xs text-red-600 hover:bg-red-50 rounded-lg transition"
+                                            onclick="return confirm('Hapus data sebelum minggu ini?')">
+                                        Lebih lama dari 1 Minggu
+                                    </button>
+                                    <button type="submit" name="range" value="monthly"
+                                            class="w-full text-left px-3 py-2 text-xs text-red-600 hover:bg-red-50 rounded-lg transition"
+                                            onclick="return confirm('Hapus data sebelum bulan ini?')">
+                                        Lebih lama dari 1 Bulan
+                                    </button>
+                                    <button type="submit" name="range" value="yearly"
+                                            class="w-full text-left px-3 py-2 text-xs text-red-600 hover:bg-red-50 rounded-lg transition"
+                                            onclick="return confirm('Hapus data sebelum tahun ini?')">
+                                        Lebih lama dari 1 Tahun
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             {{-- Desktop Table (md+) --}}
@@ -534,9 +668,9 @@
                     </colgroup>
                     <thead>
                         <tr
-                            class="bg-gray-50 border-b border-gray-200 text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                            class="bg-gray-50 border-b border-gray-200 text-xs font-semibold text-gray-500 tracking-wide">
                             <th class="px-4 py-3 text-left">Waktu</th>
-                            <th class="px-4 py-3 text-left">Pelaku</th>
+                            <th class="px-4 py-3 text-left">Assign</th>
                             <th class="px-4 py-3 text-left">Role</th>
                             <th class="px-4 py-3 text-left">Aksi</th>
                             <th class="px-4 py-3 text-left">Tugas & Akun</th>
@@ -625,7 +759,7 @@
     <div id="modal-create-account" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4">
         <div class="absolute inset-0 bg-black/50 backdrop-blur-sm"
             onclick="document.getElementById('modal-create-account').classList.add('hidden')"></div>
-        <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-md z-10">
+        <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-md z-10 max-h-[90vh] flex flex-col">
             <div class="flex items-center justify-between px-6 py-4 border-b border-gray-200">
                 <h3 class="text-base font-bold text-gray-800">Tambah Akun Sosial Media Baru</h3>
                 <button onclick="document.getElementById('modal-create-account').classList.add('hidden')"
@@ -635,7 +769,7 @@
                     </svg>
                 </button>
             </div>
-            <form method="POST" action="{{ route('admin.sosmed.accounts.store') }}" class="p-6 pt-1 space-y-4">
+            <form method="POST" action="{{ route('admin.sosmed.accounts.store') }}" class="p-6 pt-1 space-y-4 overflow-y-auto">
                 @csrf
                 <div>
                     <label class="block text-xs font-semibold text-gray-600 mb-1.5">Nama Akun / Username <span
@@ -660,16 +794,8 @@
                         class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 focus:outline-none">
                 </div>
                 <div>
-                    <label class="block text-xs font-semibold text-gray-700 mb-1">1. Eksekutor Akun (Dikelola Oleh) <span
+                    <label class="block text-xs font-semibold text-gray-700 mb-1">Dikelola Oleh <span
                             class="text-gray-400 font-normal">(Opsional)</span></label>
-                    <div class="relative mb-1.5">
-                        <input type="text" id="search-create-acc-staff" placeholder="Cari eksekutor..."
-                               oninput="filterSelectOptions(this.value, 'create-acc-staff')"
-                               class="w-full pl-7 pr-2.5 py-1 text-xs border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-primary-500 bg-gray-50 focus:bg-white transition">
-                        <svg class="w-3 h-3 text-gray-400 absolute left-2 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-                        </svg>
-                    </div>
                     <select name="staff_id" id="create-acc-staff" onchange="syncSupervisorState(this, 'create-acc-pm', 'create-pm-hint')"
                         class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 focus:outline-none">
                         <option value="" data-role="">-- Belum Ditugaskan --</option>
@@ -691,44 +817,27 @@
                         eksekutor mandiri.</p>
                 </div>
                 <div>
-                    <label class="block text-xs font-semibold text-gray-700 mb-1">2. Supervisor Approval (Diawasi Oleh PM)
-                        <span class="text-gray-400 font-normal">(Opsional)</span></label>
-                    <div class="relative mb-1.5">
-                        <input type="text" id="search-create-acc-pm" placeholder="Cari supervisor PM..."
-                               oninput="filterSelectOptions(this.value, 'create-acc-pm')"
-                               class="w-full pl-7 pr-2.5 py-1 text-xs border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-primary-500 bg-gray-50 focus:bg-white transition">
-                        <svg class="w-3 h-3 text-gray-400 absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-                        </svg>
-                    </div>
+                    <label class="block text-xs font-semibold text-gray-700 mb-1">Diawasi Oleh PM
+                        <span class="text-gray-400 font-normal"> (Opsional)</span></label>
                     <select name="pm_id" id="create-acc-pm"
                         class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 focus:outline-none">
-                        <option value="">-- Tanpa Supervisor / Langsung ke HR --</option>
+                        <option value="">-- Tanpa Supervisor --</option>
                         @foreach($pms as $pm)
                             <option value="{{ $pm->id }}">{{ $pm->name }} (PM)</option>
                         @endforeach
                     </select>
-                    <p id="create-pm-hint" class="text-[11px] text-gray-400 mt-1">PM yang berwenang meninjau & approve bukti postingan Staff.
-                        Jika eksekutor adalah PM mandiri, bagian ini otomatis dinonaktifkan.</p>
+                    <p id="create-pm-hint" class="text-[11px] text-gray-400 mt-1">PM yang berwenang meninjau & approve bukti postingan Staff.</p>
                 </div>
                 <div>
-                    <label class="block text-xs font-semibold text-gray-700 mb-1">3. Asisten Pengawas (Wewenang Verifikasi Asisten)</label>
-                    <div class="relative mb-1.5">
-                        <input type="text" id="search-create-acc-ast" placeholder="Cari asisten..."
-                               oninput="filterSelectOptions(this.value, 'create-acc-ast')"
-                               class="w-full pl-7 pr-2.5 py-1 text-xs border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-primary-500 bg-gray-50 focus:bg-white transition">
-                        <svg class="w-3 h-3 text-gray-400 absolute left-2 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-                        </svg>
-                    </div>
+                    <label class="block text-xs font-semibold text-gray-700 mb-1">Wewenang Verifikasi Asisten </label>
                     <select name="assistant_id" id="create-acc-ast"
                         class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 focus:outline-none">
-                        <option value="">-- Tanpa Asisten / Belum Diberi Wewenang --</option>
+                        <option value="">-- Tanpa Asisten --</option>
                         @foreach($assistants as $ast)
                             <option value="{{ $ast->id }}">{{ $ast->name }} (Asisten)</option>
                         @endforeach
                     </select>
-                    <p class="text-[11px] text-gray-400 mt-1">Asisten HR yang berwenang meninjau & approve tugas akun ini sebagai backup PM.</p>
+                    <p class="text-[11px] text-gray-400 mt-1">Asisten HR yang berwenang approve tugas sebagai backup PM.</p>
                 </div>
                 <div>
                     <label class="block text-xs font-semibold text-gray-600 mb-1.5">Catatan / Briefing</label>
@@ -789,15 +898,7 @@
                         class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 focus:outline-none">
                 </div>
                 <div>
-                    <label class="block text-xs font-semibold text-gray-700 mb-1">1. Eksekutor Akun (Dikelola Oleh)</label>
-                    <div class="relative mb-1.5">
-                        <input type="text" id="search-edit-acc-staff" placeholder="Cari eksekutor..."
-                               oninput="filterSelectOptions(this.value, 'edit-acc-staff')"
-                               class="w-full pl-7 pr-2.5 py-1 text-xs border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-primary-500 bg-gray-50 focus:bg-white transition">
-                        <svg class="w-3 h-3 text-gray-400 absolute left-2 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-                        </svg>
-                    </div>
+                    <label class="block text-xs font-semibold text-gray-700 mb-1">Dikelola Oleh</label>
                     <select name="staff_id" id="edit-acc-staff" onchange="syncSupervisorState(this, 'edit-acc-pm', 'edit-pm-hint')"
                         class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 focus:outline-none">
                         <option value="" data-role="">-- Belum Ditugaskan --</option>
@@ -818,16 +919,8 @@
                     <p class="text-[11px] text-gray-400 mt-1">Pelaksana harian akun (Staff Sosmed atau PM mandiri).</p>
                 </div>
                 <div>
-                    <label class="block text-xs font-semibold text-gray-700 mb-1">2. Supervisor Approval (Diawasi Oleh
-                        PM)</label>
-                    <div class="relative mb-1.5">
-                        <input type="text" id="search-edit-acc-pm" placeholder="Cari supervisor PM..."
-                               oninput="filterSelectOptions(this.value, 'edit-acc-pm')"
-                               class="w-full pl-7 pr-2.5 py-1 text-xs border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-primary-500 bg-gray-50 focus:bg-white transition">
-                        <svg class="w-3 h-3 text-gray-400 absolute left-2 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-                        </svg>
-                    </div>
+                    <label class="block text-xs font-semibold text-gray-700 mb-1">Diawasi Oleh
+                        PM</label>
                     <select name="pm_id" id="edit-acc-pm"
                         class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 focus:outline-none">
                         <option value="">-- Tanpa Supervisor / Langsung ke HR --</option>
@@ -835,19 +928,10 @@
                             <option value="{{ $pm->id }}">{{ $pm->name }} (PM)</option>
                         @endforeach
                     </select>
-                    <p id="edit-pm-hint" class="text-[11px] text-gray-400 mt-1">PM yang meng-approve tugas staff. Jika eksekutor adalah PM
-                        mandiri, bagian ini otomatis dinonaktifkan.</p>
+                    <p id="edit-pm-hint" class="text-[11px] text-gray-400 mt-1">PM yang berwenang meninjau & approve bukti postingan Staff.</p>
                 </div>
                 <div>
-                    <label class="block text-xs font-semibold text-gray-700 mb-1">3. Asisten Pengawas (Wewenang Verifikasi Asisten)</label>
-                    <div class="relative mb-1.5">
-                        <input type="text" id="search-edit-acc-ast" placeholder="Cari asisten..."
-                               oninput="filterSelectOptions(this.value, 'edit-acc-ast')"
-                               class="w-full pl-7 pr-2.5 py-1 text-xs border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-primary-500 bg-gray-50 focus:bg-white transition">
-                        <svg class="w-3 h-3 text-gray-400 absolute left-2 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-                        </svg>
-                    </div>
+                    <label class="block text-xs font-semibold text-gray-700 mb-1">Wewenang Verifikasi Asisten</label>
                     <select name="assistant_id" id="edit-acc-ast"
                         class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 focus:outline-none">
                         <option value="">-- Tanpa Asisten / Belum Diberi Wewenang --</option>
@@ -873,108 +957,7 @@
         </div>
     </div>
 
-    {{-- ── MODAL ASSIGN ACCOUNT (ADMIN) ─────────────────────────────── --}}
-    <div id="modal-assign" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4">
-        <div class="absolute inset-0 bg-black/50 backdrop-blur-sm"
-            onclick="document.getElementById('modal-assign').classList.add('hidden')"></div>
-        <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-md z-10">
-            <div class="flex items-center justify-between px-6 py-4 border-b border-gray-200">
-                <div>
-                    <h3 class="text-base font-bold text-gray-800">Atur Penugasan Akun</h3>
-                    <p class="text-xs text-gray-400 mt-0.5">Tentukan eksekutor harian dan supervisor approver</p>
-                </div>
-                <button onclick="document.getElementById('modal-assign').classList.add('hidden')"
-                    class="text-gray-400 hover:text-gray-600">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                </button>
-            </div>
-            <form id="form-assign" method="POST" action="" class="p-6 space-y-4">
-                @csrf @method('PATCH')
-                <div class="bg-gray-50 p-3 rounded-lg border border-gray-200">
-                    <p class="text-xs text-gray-500 mb-0.5">Nama Akun Sosial Media</p>
-                    <p id="assign-acc-name" class="text-sm font-bold text-gray-800"></p>
-                </div>
-                <div>
-                    <label class="block text-xs font-semibold text-gray-700 mb-1">1. Eksekutor (Dikelola Oleh)</label>
-                    <div class="relative mb-1.5">
-                        <input type="text" id="search-assign-staff-sel" placeholder="Cari eksekutor..."
-                               oninput="filterSelectOptions(this.value, 'assign-staff-sel')"
-                               class="w-full pl-7 pr-2.5 py-1 text-xs border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-primary-500 bg-gray-50 focus:bg-white transition">
-                        <svg class="w-3 h-3 text-gray-400 absolute left-2 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-                        </svg>
-                    </div>
-                    <select name="staff_id" id="assign-staff-sel" onchange="syncSupervisorState(this, 'assign-pm-sel', 'assign-pm-hint')"
-                        class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 focus:outline-none">
-                        <option value="" data-role="">-- Belum Ditugaskan --</option>
-                        @foreach($executors as $ex)
-                            @php
-                                $exRoleLabel = match($ex->role) {
-                                    'pm' => 'PM Mandiri',
-                                    'sosmed' => 'Staff Sosmed',
-                                    'digital_marketing' => 'Digital Marketing',
-                                    default => $ex->role_label ?? strtoupper($ex->role)
-                                };
-                            @endphp
-                            <option value="{{ $ex->id }}" data-role="{{ $ex->role }}">
-                                {{ $ex->name }} ({{ $exRoleLabel }})
-                            </option>
-                        @endforeach
-                    </select>
-                    <p class="text-[11px] text-gray-400 mt-1">User yang bertugas memposting & mengunggah bukti konten.</p>
-                </div>
-                <div>
-                    <label class="block text-xs font-semibold text-gray-700 mb-1">2. Supervisor (Diawasi Oleh PM)</label>
-                    <div class="relative mb-1.5">
-                        <input type="text" id="search-assign-pm-sel" placeholder="Cari supervisor PM..."
-                               oninput="filterSelectOptions(this.value, 'assign-pm-sel')"
-                               class="w-full pl-7 pr-2.5 py-1 text-xs border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-primary-500 bg-gray-50 focus:bg-white transition">
-                        <svg class="w-3 h-3 text-gray-400 absolute left-2 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-                        </svg>
-                    </div>
-                    <select name="pm_id" id="assign-pm-sel"
-                        class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 focus:outline-none">
-                        <option value="">-- Tanpa Supervisor / Langsung ke HR --</option>
-                        @foreach($pms as $pm)
-                            <option value="{{ $pm->id }}">{{ $pm->name }} (PM)</option>
-                        @endforeach
-                    </select>
-                    <p id="assign-pm-hint" class="text-[11px] text-gray-400 mt-1">PM yang berwenang meninjau & approve bukti pengerjaan Staff.
-                        Jika eksekutor adalah PM mandiri, bagian ini otomatis dinonaktifkan.
-                    </p>
-                </div>
-                <div>
-                    <label class="block text-xs font-semibold text-gray-700 mb-1">3. Asisten Pengawas (Wewenang Verifikasi Asisten)</label>
-                    <div class="relative mb-1.5">
-                        <input type="text" id="search-assign-ast-sel" placeholder="Cari asisten..."
-                               oninput="filterSelectOptions(this.value, 'assign-ast-sel')"
-                               class="w-full pl-7 pr-2.5 py-1 text-xs border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-primary-500 bg-gray-50 focus:bg-white transition">
-                        <svg class="w-3 h-3 text-gray-400 absolute left-2 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-                        </svg>
-                    </div>
-                    <select name="assistant_id" id="assign-ast-sel"
-                        class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 focus:outline-none">
-                        <option value="">-- Tanpa Asisten / Belum Diberi Wewenang --</option>
-                        @foreach($assistants as $ast)
-                            <option value="{{ $ast->id }}">{{ $ast->name }} (Asisten)</option>
-                        @endforeach
-                    </select>
-                    <p class="text-[11px] text-gray-400 mt-1">Asisten HR yang berwenang meninjau & approve tugas akun ini sebagai backup PM.</p>
-                </div>
-                <div class="flex gap-3 pt-2">
-                    <button type="button" onclick="document.getElementById('modal-assign').classList.add('hidden')"
-                        class="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-sm text-gray-700 hover:bg-gray-50 transition">Batal</button>
-                    <button type="submit"
-                        class="flex-1 px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-lg text-sm font-semibold shadow-sm transition">Simpan
-                        Penugasan</button>
-                </div>
-            </form>
-        </div>
-    </div>
+
 
     {{-- ── MODAL: DETAIL LINKS POPUP ────────────────────────────────── --}}
     <div id="modal-links" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4">
@@ -1001,29 +984,202 @@
 
 @push('scripts')
     <script>
-        function filterSelectOptions(query, selectId) {
-            const select = document.getElementById(selectId);
-            if (!select) return;
-            const q = (query || '').toLowerCase().trim();
-            const options = select.options;
-            for (let i = 0; i < options.length; i++) {
-                const opt = options[i];
-                if (!opt.value) {
-                    opt.hidden = false;
-                    continue;
-                }
-                const text = opt.text.toLowerCase();
-                opt.hidden = q ? !text.includes(q) : false;
-            }
-        }
+        document.addEventListener('DOMContentLoaded', () => {
+            // Auto-upgrade select elements to have an integrated search dropdown
+            const selectsToUpgrade = document.querySelectorAll(
+                'select[id="create-acc-staff"], select[id="create-acc-pm"], select[id="create-acc-ast"], ' +
+                'select[id="edit-acc-staff"], select[id="edit-acc-pm"], select[id="edit-acc-ast"]'
+            );
 
-        function resetSearchFilter(inputId, selectId) {
-            const input = document.getElementById(inputId);
-            if (input) {
-                input.value = '';
-                filterSelectOptions('', selectId);
+            selectsToUpgrade.forEach(select => {
+                if (select.dataset.customDropdownInit) return;
+                select.dataset.customDropdownInit = "true";
+
+                // Remove the old separate search input block if it exists right before the select
+                const prev = select.previousElementSibling;
+                if (prev && prev.classList.contains('relative') && prev.querySelector('input')) {
+                    prev.remove();
+                }
+
+                const wrapper = document.createElement('div');
+                wrapper.className = 'relative custom-select-wrapper';
+                wrapper.style.zIndex = '10';
+
+                const button = document.createElement('button');
+                button.type = 'button';
+                button.className = 'w-full border border-gray-300 rounded-lg px-3 py-2 text-sm text-left flex justify-between items-center transition ' +
+                                   (select.disabled ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 'bg-white text-gray-800 focus:ring-2 focus:ring-primary-500 focus:outline-none');
+
+                const label = document.createElement('span');
+                label.className = 'truncate block';
+                label.textContent = select.options[select.selectedIndex]?.text || '';
+
+                button.innerHTML = `<svg class="w-4 h-4 text-gray-500 shrink-0 ml-2 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>`;
+                button.prepend(label);
+
+                const dropdown = document.createElement('div');
+                dropdown.className = 'absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-xl flex flex-col hidden';
+
+                const searchBox = document.createElement('div');
+                searchBox.className = 'p-2 border-b border-gray-100 sticky top-0 bg-white rounded-t-lg';
+                searchBox.innerHTML = `
+                    <div class="relative">
+                        <input type="text" placeholder="Cari..." class="w-full pl-8 pr-2 py-1.5 text-xs border border-gray-200 rounded-md focus:outline-none focus:ring-1 focus:ring-primary-500 bg-gray-50 transition">
+                        <svg class="w-3.5 h-3.5 text-gray-400 absolute left-2.5 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                    </div>
+                `;
+                const searchInput = searchBox.querySelector('input');
+
+                const list = document.createElement('ul');
+                list.className = 'max-h-48 overflow-y-auto p-1';
+
+                const renderOptions = (filter = '') => {
+                    list.innerHTML = '';
+                    let hasMatch = false;
+                    Array.from(select.options).forEach(opt => {
+                        const text = opt.text;
+                        if (filter && !text.toLowerCase().includes(filter.toLowerCase())) return;
+                        hasMatch = true;
+
+                        const li = document.createElement('li');
+                        li.className = 'px-3 py-1.5 text-sm cursor-pointer rounded-md mb-0.5 transition-colors ' +
+                                       (select.value === opt.value ? 'bg-primary-50 text-primary-700 font-medium' : 'hover:bg-gray-100 text-gray-700');
+                        li.textContent = text;
+                        li.addEventListener('click', (e) => {
+                            e.stopPropagation();
+                            select.value = opt.value;
+                            label.textContent = text;
+                            dropdown.classList.add('hidden');
+                            select.dispatchEvent(new Event('change', { bubbles: true }));
+                        });
+                        list.appendChild(li);
+                    });
+                    if (!hasMatch) {
+                        list.innerHTML = '<li class="px-3 py-2 text-xs text-gray-400 text-center pointer-events-none">Tidak ditemukan</li>';
+                    }
+                };
+
+                searchInput.addEventListener('input', (e) => renderOptions(e.target.value));
+
+                dropdown.appendChild(searchBox);
+                dropdown.appendChild(list);
+
+                wrapper.appendChild(button);
+                wrapper.appendChild(dropdown);
+
+                select.parentNode.insertBefore(wrapper, select);
+                wrapper.appendChild(select);
+                select.style.display = 'none';
+
+                button.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    if (select.disabled) return;
+
+                    const isHidden = dropdown.classList.contains('hidden');
+                    document.querySelectorAll('.custom-select-wrapper .absolute').forEach(d => d.classList.add('hidden'));
+                    document.querySelectorAll('.custom-select-wrapper').forEach(w => {
+                        w.style.zIndex = '10';
+                        if (w.parentElement) w.parentElement.style.zIndex = '';
+                        if (w.parentElement) w.parentElement.style.position = '';
+                    });
+
+                    if (isHidden) {
+                        wrapper.style.zIndex = '9999';
+                        if (wrapper.parentElement) {
+                            wrapper.parentElement.style.position = 'relative';
+                            wrapper.parentElement.style.zIndex = '9999';
+                        }
+                        dropdown.classList.remove('hidden');
+                        searchInput.value = '';
+                        renderOptions();
+                        setTimeout(() => searchInput.focus(), 50);
+                    }
+                });
+
+                document.addEventListener('click', (e) => {
+                    if (!wrapper.contains(e.target)) {
+                        dropdown.classList.add('hidden');
+                        wrapper.style.zIndex = '10';
+                        if (wrapper.parentElement) {
+                            wrapper.parentElement.style.zIndex = '';
+                            wrapper.parentElement.style.position = '';
+                        }
+                    }
+                });
+
+                select.addEventListener('change', () => {
+                    label.textContent = select.options[select.selectedIndex]?.text || '';
+                });
+
+                const observer = new MutationObserver(() => {
+                    if (select.disabled) {
+                        button.className = 'w-full border border-gray-300 rounded-lg px-3 py-2 text-sm text-left flex justify-between items-center transition bg-gray-100 text-gray-400 cursor-not-allowed';
+                    } else {
+                        button.className = 'w-full border border-gray-300 rounded-lg px-3 py-2 text-sm text-left flex justify-between items-center transition bg-white text-gray-800 focus:ring-2 focus:ring-primary-500 focus:outline-none';
+                    }
+                });
+                observer.observe(select, { attributes: true, attributeFilter: ['disabled'] });
+            });
+        });
+
+        function toggleLogsPurgeDropdown() {
+                const menu = document.getElementById('logsPurgeMenu');
+                const chevron = document.getElementById('logsPurgeChevron');
+                const isOpen = !menu.classList.contains('invisible');
+
+                if (isOpen) {
+                    closeLogsPurgeDropdown();
+                } else {
+                    menu.classList.remove('opacity-0', 'invisible', 'translate-y-1');
+                    chevron.classList.add('rotate-180');
+                }
             }
-        }
+
+            function closeLogsPurgeDropdown() {
+                const menu = document.getElementById('logsPurgeMenu');
+                const chevron = document.getElementById('logsPurgeChevron');
+                menu.classList.add('opacity-0', 'invisible', 'translate-y-1');
+                chevron.classList.remove('rotate-180');
+            }
+
+            document.addEventListener('click', function (event) {
+                const dropdown = document.getElementById('logsPurgeDropdown');
+                if (dropdown && !dropdown.contains(event.target)) {
+                    closeLogsPurgeDropdown();
+                }
+            });
+
+        function togglePurgeDropdown() {
+                const menu = document.getElementById('purgeMenu');
+                const chevron = document.getElementById('purgeChevron');
+                const isOpen = !menu.classList.contains('invisible');
+
+                if (isOpen) {
+                    closePurgeDropdown();
+                } else {
+                    menu.classList.remove('opacity-0', 'invisible', 'translate-y-1');
+                    chevron.classList.add('rotate-180');
+                }
+            }
+
+            function closePurgeDropdown() {
+                const menu = document.getElementById('purgeMenu');
+                const chevron = document.getElementById('purgeChevron');
+                menu.classList.add('opacity-0', 'invisible', 'translate-y-1');
+                chevron.classList.remove('rotate-180');
+            }
+
+            // Tutup dropdown kalau klik di luar area dropdown
+            document.addEventListener('click', function (event) {
+                const dropdown = document.getElementById('purgeDropdown');
+                if (dropdown && !dropdown.contains(event.target)) {
+                    closePurgeDropdown();
+                }
+            });
+
+        // The old functions are now deprecated but kept empty to avoid breaking legacy onclick handlers
+        function filterSelectOptions(query, selectId) {}
+        function resetSearchFilter(inputId, selectId) {}
 
         function syncSupervisorState(staffSelect, pmSelectId, hintId) {
             if (!staffSelect) return;
@@ -1039,58 +1195,62 @@
                 pmSelect.disabled = true;
                 pmSelect.classList.add('bg-gray-100', 'text-gray-400', 'cursor-not-allowed');
                 if (hint) {
-                    hint.innerHTML = '<span class="text-indigo-600 font-semibold">🔒 PM Mandiri:</span> Akun dikelola langsung oleh PM. Hasil pengerjaan otomatis lolos Level 1 dan langsung diverifikasi HR Staff (supervisor otomatis dinonaktifkan).';
+                    hint.innerHTML = '<span class="text-red-700 font-semibold"> Akun dikelola langsung oleh PM.</span>';
                 }
             } else {
                 pmSelect.disabled = false;
                 pmSelect.classList.remove('bg-gray-100', 'text-gray-400', 'cursor-not-allowed');
                 if (hint) {
-                    hint.innerHTML = 'PM yang berwenang meninjau & approve bukti postingan Staff. Jika eksekutor adalah PM mandiri, bagian ini otomatis dinonaktifkan.';
+                    hint.innerHTML = 'PM yang berwenang meninjau & approve bukti postingan Staff.';
                 }
             }
         }
 
         function openCreateAccountModal() {
-            resetSearchFilter('search-create-acc-staff', 'create-acc-staff');
-            resetSearchFilter('search-create-acc-pm', 'create-acc-pm');
-            resetSearchFilter('search-create-acc-ast', 'create-acc-ast');
             const staffSel = document.getElementById('create-acc-staff');
             if (staffSel) {
                 staffSel.value = '';
                 syncSupervisorState(staffSel, 'create-acc-pm', 'create-pm-hint');
+                staffSel.dispatchEvent(new Event('change', { bubbles: true }));
+            }
+            const pmSel = document.getElementById('create-acc-pm');
+            if (pmSel) {
+                pmSel.value = '';
+                pmSel.dispatchEvent(new Event('change', { bubbles: true }));
             }
             const astSel = document.getElementById('create-acc-ast');
-            if (astSel) astSel.value = '';
+            if (astSel) {
+                astSel.value = '';
+                astSel.dispatchEvent(new Event('change', { bubbles: true }));
+            }
             document.getElementById('modal-create-account').classList.remove('hidden');
         }
 
         function openEditAccountModal(accId, accName, platform, link, currentPmId, currentStaffId, notes, currentAssistantId) {
-            resetSearchFilter('search-edit-acc-staff', 'edit-acc-staff');
-            resetSearchFilter('search-edit-acc-pm', 'edit-acc-pm');
-            resetSearchFilter('search-edit-acc-ast', 'edit-acc-ast');
             document.getElementById('form-edit-account').action = `/admin/sosmed/accounts/${accId}`;
             document.getElementById('edit-acc-name').value = accName;
             document.getElementById('edit-acc-platform').value = platform;
             document.getElementById('edit-acc-link').value = link || '';
-            document.getElementById('edit-acc-staff').value = currentStaffId ?? '';
-            document.getElementById('edit-acc-pm').value = currentPmId ?? '';
-            document.getElementById('edit-acc-ast').value = currentAssistantId ?? '';
-            document.getElementById('edit-acc-notes').value = notes || '';
-            syncSupervisorState(document.getElementById('edit-acc-staff'), 'edit-acc-pm', 'edit-pm-hint');
-            document.getElementById('modal-edit-account').classList.remove('hidden');
-        }
 
-        function openAssignModal(accId, accName, currentPmId, currentStaffId, currentAssistantId) {
-            resetSearchFilter('search-assign-staff-sel', 'assign-staff-sel');
-            resetSearchFilter('search-assign-pm-sel', 'assign-pm-sel');
-            resetSearchFilter('search-assign-ast-sel', 'assign-ast-sel');
-            document.getElementById('assign-acc-name').textContent = accName;
-            document.getElementById('form-assign').action = `/admin/sosmed/accounts/${accId}/assign`;
-            document.getElementById('assign-staff-sel').value = currentStaffId ?? '';
-            document.getElementById('assign-pm-sel').value = currentPmId ?? '';
-            document.getElementById('assign-ast-sel').value = currentAssistantId ?? '';
-            syncSupervisorState(document.getElementById('assign-staff-sel'), 'assign-pm-sel', 'assign-pm-hint');
-            document.getElementById('modal-assign').classList.remove('hidden');
+            const staffSel = document.getElementById('edit-acc-staff');
+            staffSel.value = currentStaffId ?? '';
+
+            const pmSel = document.getElementById('edit-acc-pm');
+            pmSel.value = currentPmId ?? '';
+
+            const astSel = document.getElementById('edit-acc-ast');
+            astSel.value = currentAssistantId ?? '';
+
+            document.getElementById('edit-acc-notes').value = notes || '';
+
+            syncSupervisorState(staffSel, 'edit-acc-pm', 'edit-pm-hint');
+
+            // Dispatch change event to update custom dropdown labels
+            staffSel.dispatchEvent(new Event('change', { bubbles: true }));
+            pmSel.dispatchEvent(new Event('change', { bubbles: true }));
+            astSel.dispatchEvent(new Event('change', { bubbles: true }));
+
+            document.getElementById('modal-edit-account').classList.remove('hidden');
         }
 
         // Enable any disabled select before submitting forms so payload isn't dropped

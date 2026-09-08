@@ -82,17 +82,17 @@
             <span class="text-xs text-gray-400">{{ $report->count() }} pengguna</span>
         </div>
         <div class="overflow-x-auto">
-            <table class="w-full text-sm min-w-[640px]">
+            <table class="w-full text-xs sm:text-sm min-w-[640px]">
                 <thead>
                     <tr class="bg-gray-50 border-b border-gray-200">
-                        <th class="text-left px-4 sm:px-6 py-3.5 font-semibold text-gray-600">Nama</th>
-                        <th class="text-left px-4 sm:px-6 py-3.5 font-semibold text-gray-600 w-24">Role</th>
-                        <th class="text-left px-4 sm:px-6 py-3.5 font-semibold text-gray-600 w-20">Total</th>
-                        <th class="text-left px-4 sm:px-6 py-3.5 font-semibold text-gray-600 w-24">Selesai</th>
-                        <th class="text-left px-4 sm:px-6 py-3.5 font-semibold text-gray-600 w-24">Pending</th>
-                        <th class="text-left px-4 sm:px-6 py-3.5 font-semibold text-gray-600 w-28">Tdk Dikerjakan</th>
-                        <th class="text-left px-4 sm:px-6 py-3.5 font-semibold text-gray-600 w-36">Produktivitas</th>
-                        <th class="text-right px-4 sm:px-6 py-3.5 font-semibold text-gray-600 w-20">Aksi</th>
+                        <th class="text-left px-3 sm:px-6 py-2.5 sm:py-3.5 font-semibold text-gray-600 whitespace-nowrap">Nama</th>
+                        <th class="text-left px-3 sm:px-6 py-2.5 sm:py-3.5 font-semibold text-gray-600 w-32 sm:w-36 whitespace-nowrap">Role</th>
+                        <th class="text-center px-3 sm:px-6 py-2.5 sm:py-3.5 font-semibold text-gray-600 w-16 sm:w-20 whitespace-nowrap">Total</th>
+                        <th class="text-center px-3 sm:px-6 py-2.5 sm:py-3.5 font-semibold text-gray-600 w-16 sm:w-24 whitespace-nowrap">Selesai</th>
+                        <th class="text-center px-3 sm:px-6 py-2.5 sm:py-3.5 font-semibold text-gray-600 w-16 sm:w-24 whitespace-nowrap">Pending</th>
+                        <th class="text-center px-3 sm:px-6 py-2.5 sm:py-3.5 font-semibold text-gray-600 w-24 sm:w-28 whitespace-nowrap">Tdk Dikerjakan</th>
+                        <th class="text-left px-3 sm:px-6 py-2.5 sm:py-3.5 font-semibold text-gray-600 whitespace-nowrap">Produktivitas</th>
+                        <th class="text-right px-3 sm:px-6 py-2.5 sm:py-3.5 font-semibold text-gray-600 w-14 sm:w-20 whitespace-nowrap">Aksi</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-100">
@@ -106,47 +106,50 @@
                                 : ($item['pct'] >= 50 ? 'text-primary-600' : 'text-yellow-600');
                         @endphp
                         <tr class="hover:bg-gray-50 transition">
-                            <td class="px-4 sm:px-6 py-3.5">
-                                <div class="flex items-center gap-3 min-w-0">
-                                    <div
-                                        class="w-8 h-8 rounded-full bg-primary-100 flex items-center justify-center flex-shrink-0">
-                                        <span class="text-xs font-semibold text-primary-600">
+                            {{-- Nama --}}
+                            <td class="px-3 sm:px-6 py-3 sm:py-3.5">
+                                <div class="flex items-center gap-2 sm:gap-3 min-w-0">
+                                    <div class="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-primary-100 flex items-center justify-center flex-shrink-0">
+                                        <span class="text-[10px] sm:text-xs font-semibold text-primary-600">
                                             {{ strtoupper(substr($item['user']->name, 0, 1)) }}
                                         </span>
                                     </div>
-                                    <span class="font-medium text-gray-800 truncate">{{ $item['user']->name }}</span>
+                                    <span class="font-medium text-gray-800 truncate max-w-[10rem]">{{ $item['user']->name }}</span>
                                 </div>
                             </td>
-                            <td class="px-4 sm:px-6 py-3.5 w-36">
-                                <span
-                                    class="inline-flex px-2 py-0.5 rounded-full text-xs font-medium {{ $item['user']->role_badge_class }}">
+                            {{-- Role --}}
+                            <td class="px-3 sm:px-6 py-3 sm:py-3.5">
+                                <span class="inline-flex items-center whitespace-nowrap px-2 py-0.5 sm:py-1 rounded-full text-[10px] sm:text-xs font-medium {{ $item['user']->role_badge_class }}">
                                     {{ $item['user']->role_label }}
                                 </span>
                             </td>
-                            <td class="px-4 sm:px-6 py-3.5 w-20">
+                            {{-- Total --}}
+                            <td class="px-3 sm:px-6 py-3 sm:py-3.5 text-center">
                                 <span class="text-gray-700 font-medium">{{ $item['total'] }}</span>
                             </td>
-                            <td class="px-4 sm:px-6 py-3.5 w-24">
+                            {{-- Selesai --}}
+                            <td class="px-3 sm:px-6 py-3 sm:py-3.5 text-center">
                                 <span class="text-green-600 font-semibold">{{ $item['completed'] }}</span>
                             </td>
-                            <td class="px-4 sm:px-6 py-3.5 w-24">
+                            {{-- Pending --}}
+                            <td class="px-3 sm:px-6 py-3 sm:py-3.5 text-center">
                                 <span class="text-yellow-600 font-medium">{{ $item['pending'] }}</span>
                             </td>
-                            <td class="px-4 sm:px-6 py-3.5 w-28">
+                            {{-- Tdk Dikerjakan --}}
+                            <td class="px-3 sm:px-6 py-3 sm:py-3.5 text-center">
                                 <span class="text-red-500 font-medium">{{ $item['notDone'] }}</span>
                             </td>
-                            <td class="px-4 sm:px-6 py-3.5 w-36">
+                            {{-- Produktivitas --}}
+                            <td class="px-3 sm:px-6 py-3 sm:py-3.5">
                                 <div class="flex items-center gap-2">
-                                    <div class="flex-1 h-1.5 bg-gray-100 rounded-full overflow-hidden min-w-[50px]">
-                                        <div class="{{ $barColor }} h-full rounded-full" style="width: {{ $item['pct'] }}%">
-                                        </div>
+                                    <div class="flex-1 h-1.5 sm:h-2 bg-gray-100 rounded-full overflow-hidden min-w-[50px] max-w-[150px]">
+                                        <div class="{{ $barColor }} h-full rounded-full transition-all duration-300" style="width: {{ $item['pct'] }}%"></div>
                                     </div>
-                                    <span class="text-xs font-bold {{ $pctColor }} w-8 text-right">
-                                        {{ $item['pct'] }}%
-                                    </span>
+                                    <span class="text-[10px] sm:text-xs font-bold {{ $pctColor }} w-8 text-right">{{ $item['pct'] }}%</span>
                                 </div>
                             </td>
-                            <td class="px-4 sm:px-6 py-3.5 w-20 text-right">
+                            {{-- Aksi --}}
+                            <td class="px-3 sm:px-6 py-3 sm:py-3.5 text-right">
                                 <a href="{{ route('admin.reports.productivity.detail', $item['user']->id) }}?date_from={{ $dateFrom }}&date_to={{ $dateTo }}"
                                     class="p-1.5 inline-flex text-gray-400 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition"
                                     title="Lihat Detail Tugas">
@@ -155,14 +158,14 @@
                                             d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                             d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943
-                                                                                     9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                               9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                                     </svg>
                                 </a>
                             </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="8" class="px-6 py-12 text-center text-gray-400 text-sm">
+                            <td colspan="8" class="px-3 sm:px-6 py-8 sm:py-12 text-center text-gray-400 text-xs sm:text-sm">
                                 Tidak ada data pengguna aktif.
                             </td>
                         </tr>

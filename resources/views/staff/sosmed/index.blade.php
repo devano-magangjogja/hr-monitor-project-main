@@ -520,7 +520,7 @@
     <div id="modal-assign" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4">
         <div class="absolute inset-0 bg-black/50 backdrop-blur-sm"
             onclick="document.getElementById('modal-assign').classList.add('hidden')"></div>
-        <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-md z-10">
+        <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-md z-10 overflow-visible">
             <div class="flex items-center justify-between px-6 py-4 border-b border-gray-200">
                 <div>
                     <h3 class="text-base font-bold text-gray-800">Atur Penugasan Akun Sosmed</h3>
@@ -533,22 +533,14 @@
                     </svg>
                 </button>
             </div>
-            <form id="form-assign" method="POST" action="" class="p-6 pt-2 space-y-4">
+            <form id="form-assign" method="POST" action="" class="p-6 pt-4 space-y-4">
                 @csrf @method('PATCH')
                 <div class="bg-gray-50 p-3 rounded-lg border border-gray-200">
                     <p class="text-xs text-gray-500 mb-0.5">Nama Akun Sosial Media</p>
                     <p id="assign-acc-name" class="text-sm font-bold text-gray-800"></p>
                 </div>
                 <div>
-                    <label class="block text-xs font-semibold text-gray-700 mb-1">1. Eksekutor (Dikelola Oleh)</label>
-                    <div class="relative mb-1.5">
-                        <input type="text" id="search-assign-staff-sel" placeholder="Cari eksekutor..."
-                               oninput="filterSelectOptions(this.value, 'assign-staff-sel')"
-                               class="w-full pl-7 pr-2.5 py-1 text-xs border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-primary-500 bg-gray-50 focus:bg-white transition">
-                        <svg class="w-3 h-3 text-gray-400 absolute left-2 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-                        </svg>
-                    </div>
+                    <label class="block text-xs font-semibold text-gray-700 mb-1">1. Eksekutor Akun (Dikelola Oleh)</label>
                     <select name="staff_id" id="assign-staff-sel" onchange="syncSupervisorState(this, 'assign-pm-sel', 'assign-pm-hint')"
                         class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 focus:outline-none">
                         <option value="" data-role="">-- Belum Ditugaskan --</option>
@@ -570,14 +562,6 @@
                 </div>
                 <div>
                     <label class="block text-xs font-semibold text-gray-700 mb-1">2. Supervisor (Diawasi Oleh PM)</label>
-                    <div class="relative mb-1.5">
-                        <input type="text" id="search-assign-pm-sel" placeholder="Cari supervisor PM..."
-                               oninput="filterSelectOptions(this.value, 'assign-pm-sel')"
-                               class="w-full pl-7 pr-2.5 py-1 text-xs border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-primary-500 bg-gray-50 focus:bg-white transition">
-                        <svg class="w-3 h-3 text-gray-400 absolute left-2 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-                        </svg>
-                    </div>
                     <select name="pm_id" id="assign-pm-sel"
                         class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 focus:outline-none">
                         <option value="">-- Tanpa Supervisor / Langsung ke HR --</option>
@@ -589,14 +573,6 @@
                 </div>
                 <div>
                     <label class="block text-xs font-semibold text-gray-700 mb-1">3. Asisten Pengawas (Wewenang Verifikasi Asisten)</label>
-                    <div class="relative mb-1.5">
-                        <input type="text" id="search-assign-assistant-sel" placeholder="Cari asisten..."
-                               oninput="filterSelectOptions(this.value, 'assign-assistant-sel')"
-                               class="w-full pl-7 pr-2.5 py-1 text-xs border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-primary-500 bg-gray-50 focus:bg-white transition">
-                        <svg class="w-3 h-3 text-gray-400 absolute left-2 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-                        </svg>
-                    </div>
                     <select name="assistant_id" id="assign-assistant-sel"
                         class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 focus:outline-none">
                         <option value="">-- Tanpa Asisten / Belum Diberi Wewenang --</option>
@@ -750,29 +726,146 @@
 
 @push('scripts')
     <script>
-        function filterSelectOptions(query, selectId) {
-            const select = document.getElementById(selectId);
-            if (!select) return;
-            const q = (query || '').toLowerCase().trim();
-            const options = select.options;
-            for (let i = 0; i < options.length; i++) {
-                const opt = options[i];
-                if (!opt.value) {
-                    opt.hidden = false;
-                    continue;
-                }
-                const text = opt.text.toLowerCase();
-                opt.hidden = q ? !text.includes(q) : false;
-            }
-        }
+        document.addEventListener('DOMContentLoaded', () => {
+            // Auto-upgrade select elements to have an integrated search dropdown
+            const selectsToUpgrade = document.querySelectorAll(
+                'select[id="assign-staff-sel"], select[id="assign-pm-sel"], select[id="assign-assistant-sel"]'
+            );
+            
+            selectsToUpgrade.forEach(select => {
+                if (select.dataset.customDropdownInit) return;
+                select.dataset.customDropdownInit = "true";
 
-        function resetSearchFilter(inputId, selectId) {
-            const input = document.getElementById(inputId);
-            if (input) {
-                input.value = '';
-                filterSelectOptions('', selectId);
-            }
-        }
+                // Remove the old separate search input block if it exists right before the select
+                const prev = select.previousElementSibling;
+                if (prev && prev.classList.contains('relative') && prev.querySelector('input')) {
+                    prev.remove();
+                }
+
+                const wrapper = document.createElement('div');
+                wrapper.className = 'relative custom-select-wrapper';
+                wrapper.style.zIndex = '10';
+                
+                const button = document.createElement('button');
+                button.type = 'button';
+                button.className = 'w-full border border-gray-300 rounded-lg px-3 py-2 text-sm text-left flex justify-between items-center transition ' + 
+                                   (select.disabled ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 'bg-white text-gray-800 focus:ring-2 focus:ring-primary-500 focus:outline-none');
+                
+                const label = document.createElement('span');
+                label.className = 'truncate block';
+                label.textContent = select.options[select.selectedIndex]?.text || '';
+                
+                button.innerHTML = `<svg class="w-4 h-4 text-gray-500 shrink-0 ml-2 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>`;
+                button.prepend(label);
+                
+                const dropdown = document.createElement('div');
+                dropdown.className = 'absolute mt-1 z-50 w-full bg-white border border-gray-200 rounded-lg shadow-xl flex flex-col hidden';
+                
+                const searchBox = document.createElement('div');
+                searchBox.className = 'p-2 border-b border-gray-100 sticky top-0 bg-white rounded-t-lg';
+                searchBox.innerHTML = `
+                    <div class="relative">
+                        <input type="text" placeholder="Cari..." class="w-full pl-8 pr-2 py-1.5 text-xs border border-gray-200 rounded-md focus:outline-none focus:ring-1 focus:ring-primary-500 bg-gray-50 transition">
+                        <svg class="w-3.5 h-3.5 text-gray-400 absolute left-2.5 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                    </div>
+                `;
+                const searchInput = searchBox.querySelector('input');
+                
+                const list = document.createElement('ul');
+                list.className = 'max-h-48 overflow-y-auto p-1';
+                
+                const renderOptions = (filter = '') => {
+                    list.innerHTML = '';
+                    let hasMatch = false;
+                    Array.from(select.options).forEach(opt => {
+                        const text = opt.text;
+                        if (filter && !text.toLowerCase().includes(filter.toLowerCase())) return;
+                        hasMatch = true;
+                        
+                        const li = document.createElement('li');
+                        li.className = 'px-3 py-1.5 text-sm cursor-pointer rounded-md mb-0.5 transition-colors ' + 
+                                       (select.value === opt.value ? 'bg-primary-50 text-primary-700 font-medium' : 'hover:bg-gray-100 text-gray-700');
+                        li.textContent = text;
+                        li.addEventListener('click', (e) => {
+                            e.stopPropagation();
+                            select.value = opt.value;
+                            label.textContent = text;
+                            dropdown.classList.add('hidden');
+                            select.dispatchEvent(new Event('change', { bubbles: true }));
+                        });
+                        list.appendChild(li);
+                    });
+                    if (!hasMatch) {
+                        list.innerHTML = '<li class="px-3 py-2 text-xs text-gray-400 text-center pointer-events-none">Tidak ditemukan</li>';
+                    }
+                };
+                
+                searchInput.addEventListener('input', (e) => renderOptions(e.target.value));
+                
+                dropdown.appendChild(searchBox);
+                dropdown.appendChild(list);
+                
+                wrapper.appendChild(button);
+                wrapper.appendChild(dropdown);
+                
+                select.parentNode.insertBefore(wrapper, select);
+                wrapper.appendChild(select);
+                select.style.display = 'none';
+                
+                button.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    if (select.disabled) return;
+                    
+                    const isHidden = dropdown.classList.contains('hidden');
+                    document.querySelectorAll('.custom-select-wrapper .absolute').forEach(d => d.classList.add('hidden'));
+                    document.querySelectorAll('.custom-select-wrapper').forEach(w => {
+                        w.style.zIndex = '10';
+                        if (w.parentElement) w.parentElement.style.zIndex = '';
+                        if (w.parentElement) w.parentElement.style.position = '';
+                    });
+                    
+                    if (isHidden) {
+                        wrapper.style.zIndex = '9999';
+                        if (wrapper.parentElement) {
+                            wrapper.parentElement.style.position = 'relative';
+                            wrapper.parentElement.style.zIndex = '9999';
+                        }
+                        dropdown.classList.remove('hidden');
+                        searchInput.value = '';
+                        renderOptions();
+                        setTimeout(() => searchInput.focus(), 50);
+                    }
+                });
+                
+                document.addEventListener('click', (e) => {
+                    if (!wrapper.contains(e.target)) {
+                        dropdown.classList.add('hidden');
+                        wrapper.style.zIndex = '10';
+                        if (wrapper.parentElement) {
+                            wrapper.parentElement.style.zIndex = '';
+                            wrapper.parentElement.style.position = '';
+                        }
+                    }
+                });
+                
+                select.addEventListener('change', () => {
+                    label.textContent = select.options[select.selectedIndex]?.text || '';
+                });
+                
+                const observer = new MutationObserver(() => {
+                    if (select.disabled) {
+                        button.className = 'w-full border border-gray-300 rounded-lg px-3 py-2 text-sm text-left flex justify-between items-center transition bg-gray-100 text-gray-400 cursor-not-allowed';
+                    } else {
+                        button.className = 'w-full border border-gray-300 rounded-lg px-3 py-2 text-sm text-left flex justify-between items-center transition bg-white text-gray-800 focus:ring-2 focus:ring-primary-500 focus:outline-none';
+                    }
+                });
+                observer.observe(select, { attributes: true, attributeFilter: ['disabled'] });
+            });
+        });
+
+        // Deprecated functions kept for compatibility
+        function filterSelectOptions(query, selectId) {}
+        function resetSearchFilter(inputId, selectId) {}
 
         function syncSupervisorState(staffSelect, pmSelectId, hintId) {
             if (!staffSelect) return;
@@ -800,15 +893,24 @@
         }
 
         function openAssignModal(accId, accName, currentPmId, currentStaffId, currentAssistantId) {
-            resetSearchFilter('search-assign-staff-sel', 'assign-staff-sel');
-            resetSearchFilter('search-assign-pm-sel', 'assign-pm-sel');
-            resetSearchFilter('search-assign-assistant-sel', 'assign-assistant-sel');
             document.getElementById('assign-acc-name').textContent = accName;
             document.getElementById('form-assign').action = `/staff/sosmed/accounts/${accId}/assign`;
-            document.getElementById('assign-staff-sel').value = currentStaffId ?? '';
-            document.getElementById('assign-pm-sel').value = currentPmId ?? '';
-            document.getElementById('assign-assistant-sel').value = currentAssistantId ?? '';
-            syncSupervisorState(document.getElementById('assign-staff-sel'), 'assign-pm-sel', 'assign-pm-hint');
+            
+            const staffSel = document.getElementById('assign-staff-sel');
+            staffSel.value = currentStaffId ?? '';
+            
+            const pmSel = document.getElementById('assign-pm-sel');
+            pmSel.value = currentPmId ?? '';
+            
+            const astSel = document.getElementById('assign-assistant-sel');
+            astSel.value = currentAssistantId ?? '';
+            
+            syncSupervisorState(staffSel, 'assign-pm-sel', 'assign-pm-hint');
+            
+            staffSel.dispatchEvent(new Event('change', { bubbles: true }));
+            pmSel.dispatchEvent(new Event('change', { bubbles: true }));
+            astSel.dispatchEvent(new Event('change', { bubbles: true }));
+            
             document.getElementById('modal-assign').classList.remove('hidden');
         }
 
