@@ -8,6 +8,7 @@ use App\Models\SosmedAccount;
 use App\Models\SosmedApprovalLog;
 use App\Models\SosmedTask;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 
 class SosmedController extends Controller
@@ -15,10 +16,10 @@ class SosmedController extends Controller
     public function index(Request $request)
     {
         $tab = $request->query('tab', 'accounts');
-        if ($tab === 'approvals') {
-            $tab = 'oversight';
-        }
         $currentUserId = Auth::id();
+
+        $approvalDateFrom = $request->query('approval_date_from');
+        $approvalDateTo   = $request->query('approval_date_to');
 
         // ── Kapasitas 1: Akun Mandiri yang Dikelola Sendiri oleh PM (Eksekutor) ────
         $myAccounts = SosmedAccount::with(['creator'])
@@ -132,10 +133,27 @@ class SosmedController extends Controller
             'oversight_count'   => $allSupervisedAccounts->count(),
         ];
 
+        $approvalHistoryQuery = SosmedTask::with(['account.staffUser', 'assignedUser', 'verifiedBy', 'hrVerifiedBy'])
+            ->whereIn('sosmed_account_id', $supervisedAccountIds)
+            ->where('assigned_to', '!=', $currentUserId)
+            ->whereIn('status', ['verified_by_pm', 'approved_hr', 'rejected'])
+            ->orderByDesc('updated_at');
+
+        if ($approvalDateFrom) {
+            $approvalHistoryQuery->whereDate('updated_at', '>=', $approvalDateFrom);
+        }
+        if ($approvalDateTo) {
+            $approvalHistoryQuery->whereDate('updated_at', '<=', $approvalDateTo);
+        }
+
+        $approvalHistoryPaginated = $approvalHistoryQuery->paginate(10)->appends($request->query());
+
         return view('pm.sosmed.index', compact(
             'tab', 'accounts', 'todayTasks',
             'oversightData', 'oversightLinks', 'allSupervisedAccounts',
-            'pendingVerification', 'approvalHistory', 'stats'
+            'pendingVerification', 'approvalHistory',
+            'approvalHistoryPaginated', 'approvalDateFrom', 'approvalDateTo',
+            'stats'
         ));
     }
 
@@ -258,5 +276,44 @@ class SosmedController extends Controller
             return redirect()->route('pm.sosmed.index', ['tab' => 'oversight'])
                 ->with('success', 'Tugas ditolak dan dikembalikan ke staff.');
         }
+    }
+
+    public function destroyApprovalHistory(Request $request)
+    {
+        $validated = $request->validate([
+            'period' => ['required', 'in:week,month,year'],
+        ]);
+
+        $currentUserId = Auth::id();
+        $supervisedAccountIds = SosmedAccount::where(function ($q) use ($currentUserId) {
+                $q->where('pm_id', $currentUserId)
+                   ->where('staff_id', '!=', $currentUserId)
+                   ->whereNotNull('staff_id');
+            })
+            ->orWhere(function ($q) use ($currentUserId) {
+                $q->whereIn('staff_id', function ($q2) use ($currentUserId) {
+                    $q2->select('sosmed_id')->from('pm_sosmed_oversights')->where('pm_id', $currentUserId);
+                })->where('staff_id', '!=', $currentUserId);
+            })
+            ->pluck('id')
+            ->unique();
+
+        $query = SosmedTask::whereIn('sosmed_account_id', $supervisedAccountIds)
+            ->where('assigned_to', '!=', $currentUserId)
+            ->whereIn('status', ['verified_by_pm', 'approved_hr', 'rejected']);
+
+        if ($validated['period'] === 'week') {
+            $query->where('updated_at', '<', Carbon::now()->subWeek());
+        } elseif ($validated['period'] === 'month') {
+            $query->where('updated_at', '<', Carbon::now()->subMonth());
+        } elseif ($validated['period'] === 'year') {
+            $query->where('updated_at', '<', Carbon::now()->subYear());
+        }
+
+        $deleted = $query->count();
+        $query->delete();
+
+        return redirect()->route('pm.sosmed.index', ['tab' => 'approvals'])
+            ->with('success', "Berhasil menghapus {$deleted} riwayat approval.");
     }
 }

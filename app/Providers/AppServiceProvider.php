@@ -3,7 +3,6 @@
 namespace App\Providers;
 
 use App\Models\AppSetting;
-use App\Models\WaGroup;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Pagination\Paginator;
@@ -26,19 +25,16 @@ class AppServiceProvider extends ServiceProvider
                 $appName       = AppSetting::get('app_name', 'Republikweb.net');
                 $appLogo       = AppSetting::get('app_logo');
                 $appLogoBanner = AppSetting::get('app_logo_banner');
-                $appWaGroups   = WaGroup::active()->get();
             } catch (\Exception $e) {
                 $appName       = 'Republikweb.net';
                 $appLogo       = null;
                 $appLogoBanner = null;
-                $appWaGroups   = collect();
             }
 
             $view->with([
                 'appName'       => $appName,
                 'appLogo'       => $appLogo,
                 'appLogoBanner' => $appLogoBanner,
-                'appWaGroups'   => $appWaGroups,
             ]);
         });
     }

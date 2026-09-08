@@ -12,6 +12,7 @@ use App\Repositories\UserRepository;
 use App\Services\DefaultTaskService;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Carbon;
 use Illuminate\Validation\ValidationException;
@@ -548,14 +549,14 @@ class TaskService
         ->take(3)
         ->values();
     }
-    public function getHistoryForUser(int $userId, ?string $date = null, ?string $search = null): Collection
+    public function getHistoryForUser(int $userId, ?string $date = null, ?string $search = null): LengthAwarePaginator
     {
         return $this->taskRepository->getHistoryForUser($userId, $date, $search);
     }
 
-    public function getHistoryForAdmin(?int $userId = null, ?string $date = null, ?string $search = null): Collection
+    public function getHistoryForAdmin(?int $userId = null, ?string $date = null, ?string $search = null, int $perPage = 10)
     {
-        return $this->taskRepository->getHistoryForAdmin($userId, $date, $search);
+        return $this->taskRepository->getHistoryForAdmin($userId, $date, $search, $perPage);
     }
 
     public function getTasksByStaff(): Collection

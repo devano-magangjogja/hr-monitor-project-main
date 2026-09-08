@@ -6,6 +6,7 @@ use App\Models\Task;
 use App\Models\TaskAssignment;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Carbon;
 
 class TaskRepository
@@ -218,7 +219,7 @@ class TaskRepository
             ->get();
     }
 
-    public function getHistoryForUser(int $userId, ?string $date = null, ?string $search = null): Collection
+    public function getHistoryForUser(int $userId, ?string $date = null, ?string $search = null): LengthAwarePaginator
     {
         /** @var Builder $query */
         $query = $this->model->newQuery();
@@ -241,9 +242,9 @@ class TaskRepository
             })
             ->orderByDesc('task_date')
             ->orderByDesc('created_at')
-            ->get();
+            ->paginate(10);
     }
-    public function getHistoryForAdmin(?int $userId = null, ?string $date = null, ?string $search = null): Collection
+    public function getHistoryForAdmin(?int $userId = null, ?string $date = null, ?string $search = null, int $perPage = 10)
     {
         /** @var Builder $query */
         $query = $this->model->newQuery();
@@ -274,7 +275,7 @@ class TaskRepository
             })
             ->orderByDesc('task_date')
             ->orderByDesc('created_at')
-            ->get();
+            ->paginate($perPage);
     }
 
     public function getTasksCreatedByAdmin(): Collection

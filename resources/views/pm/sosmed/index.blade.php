@@ -80,6 +80,17 @@
                     </span>
                 @endif
             </a>
+
+            {{-- Tab 3: Riwayat Approval --}}
+            <a href="{{ route('pm.sosmed.index', ['tab' => 'approvals']) }}"
+               class="flex items-center gap-2 px-5 py-3.5 text-sm font-medium whitespace-nowrap border-b-2 transition
+                      {{ $tab === 'approvals' ? 'border-primary-600 text-primary-600 bg-primary-50/50' : 'border-transparent text-gray-500 hover:text-gray-700' }}">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                </svg>
+                Riwayat Approval
+            </a>
         </div>
 
         {{-- ──────────────────────────────────────────────────────────────
@@ -490,114 +501,109 @@
                     @endforeach
                 </div>
             @endif
+        </div>
+        @endif
 
-            {{-- Riwayat Approval Tim Sosmed --}}
-            @if($approvalHistory->count() > 0)
-                <div class="mt-8 border-t border-gray-200 pt-6">
-                    <h4 class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">Riwayat Approval Tim Sosmed</h4>
+        {{-- ──────────────────────────────────────────────────────────────
+        TAB 3: RIWAYAT APPROVAL
+        ─────────────────────────────────────────────────────────────── --}}
+        @if($tab === 'approvals')
+        <div class="p-4 sm:p-5">
+            <div class="mb-4 flex flex-wrap items-start justify-between gap-3">
+                <div>
+                    <h3 class="text-sm font-semibold text-gray-800">Riwayat Approval Tim Sosmed</h3>
+                    <p class="mt-0.5 text-xs text-gray-500">Menampilkan 10 data terbaru. Gunakan filter tanggal untuk menyaring riwayat.</p>
+                </div>
+                <form method="POST" action="{{ route('pm.sosmed.approvals.purge') }}" onsubmit="return confirm('Hapus riwayat approval sesuai periode yang dipilih?');" class="flex items-center gap-2">
+                    @csrf
+                    <select name="period" class="text-xs border border-gray-300 rounded-lg px-2.5 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500">
+                        <option value="week">Hapus >1 Minggu</option>
+                        <option value="month">Hapus >1 Bulan</option>
+                        <option value="year">Hapus >1 Tahun</option>
+                    </select>
+                    <button type="submit" class="px-3 py-2 bg-rose-600 hover:bg-rose-700 text-white text-xs font-semibold rounded-lg transition shadow-sm">Hapus Riwayat</button>
+                </form>
+            </div>
 
-                    {{-- Desktop table (md+) --}}
-                    <div class="hidden md:block overflow-x-auto rounded-lg border border-gray-100">
-                        <table class="w-full text-sm table-fixed">
-                            <colgroup>
-                                <col class="w-2/5">
-                                <col class="w-1/5">
-                                <col class="w-24">
-                                <col class="w-28">
-                                <col class="w-36">
-                            </colgroup>
-                            <thead>
-                                <tr class="bg-gray-50 border-b border-gray-200 text-xs font-semibold text-gray-500 uppercase tracking-wide">
-                                    <th class="px-4 py-3 text-left">Tugas</th>
-                                    <th class="px-4 py-3 text-left">Dikerjakan</th>
-                                    <th class="px-4 py-3 text-left">Bukti</th>
-                                    <th class="px-4 py-3 text-left">Tanggal</th>
-                                    <th class="px-4 py-3 text-left">Status</th>
+            <form method="GET" action="{{ route('pm.sosmed.index', ['tab' => 'approvals']) }}" class="mb-4 flex flex-wrap items-end gap-2">
+                <div>
+                    <label class="block text-[11px] font-semibold text-gray-500 uppercase tracking-wider mb-1">Dari Tanggal</label>
+                    <input type="date" name="approval_date_from" value="{{ $approvalDateFrom ?? '' }}"
+                           class="px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-xs sm:text-sm font-medium text-gray-800 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:bg-white transition">
+                </div>
+                <div>
+                    <label class="block text-[11px] font-semibold text-gray-500 uppercase tracking-wider mb-1">Sampai Tanggal</label>
+                    <input type="date" name="approval_date_to" value="{{ $approvalDateTo ?? '' }}"
+                           class="px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-xs sm:text-sm font-medium text-gray-800 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:bg-white transition">
+                </div>
+                <div class="flex items-end gap-2">
+                    <button type="submit" class="px-3 py-2 bg-primary-600 hover:bg-primary-700 text-white text-xs font-semibold rounded-lg transition shadow-sm">Terapkan</button>
+                    <a href="{{ route('pm.sosmed.index', ['tab' => 'approvals']) }}" class="px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-semibold rounded-lg transition">Reset</a>
+                </div>
+            </form>
+
+            <div class="bg-white rounded-xl border border-gray-200 overflow-hidden">
+                <div class="overflow-x-auto overflow-y-auto max-h-[600px]" style="scrollbar-gutter: stable;">
+                    <table class="w-full text-xs sm:text-sm min-w-full">
+                        <thead>
+                            <tr class="bg-gray-50 border-b border-gray-200">
+                                <th class="text-left px-3 sm:px-6 py-2.5 sm:py-3.5 font-semibold text-gray-600">Tugas</th>
+                                <th class="text-left px-3 sm:px-6 py-2.5 sm:py-3.5 font-semibold text-gray-600">Dikerjakan</th>
+                                <th class="text-left px-3 sm:px-6 py-2.5 sm:py-3.5 font-semibold text-gray-600 hidden sm:table-cell">Bukti</th>
+                                <th class="text-left px-3 sm:px-6 py-2.5 sm:py-3.5 font-semibold text-gray-600">Tanggal</th>
+                                <th class="text-left px-3 sm:px-6 py-2.5 sm:py-3.5 font-semibold text-gray-600">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-100">
+                            @forelse($approvalHistoryPaginated as $t)
+                                <tr class="hover:bg-gray-50 transition">
+                                    <td class="px-3 sm:px-6 py-3 sm:py-4">
+                                        <p class="font-medium text-gray-800 truncate" title="{{ $t->title }}">{{ $t->title }}</p>
+                                        <p class="text-xs text-gray-400">{{ $t->account?->name }} ({{ $t->account?->platform }})</p>
+                                        @if($t->rejection_note)
+                                            <p class="text-xs text-rose-600 mt-0.5 truncate">↩ {{ $t->rejection_note }}</p>
+                                        @endif
+                                    </td>
+                                    <td class="px-3 sm:px-6 py-3 sm:py-4 text-xs text-gray-700">{{ $t->assignedUser?->name ?? '—' }}</td>
+                                    <td class="px-3 sm:px-6 py-3 sm:py-4 hidden sm:table-cell">
+                                        @if($t->hasLinks())
+                                            <button type="button" onclick="openLinksPopup({{ json_encode($t->link_upload) }}, '{{ addslashes($t->title) }}')" class="inline-flex items-center gap-1 text-xs text-primary-600 hover:underline font-medium">
+                                                <svg class="w-3 h-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/>
+                                                </svg>
+                                                {{ $t->link_count }} link
+                                            </button>
+                                        @else
+                                            <span class="text-xs text-gray-300">—</span>
+                                        @endif
+                                    </td>
+                                    <td class="px-3 sm:px-6 py-3 sm:py-4 text-xs text-gray-500 whitespace-nowrap">{{ $t->task_date->translatedFormat('d M Y') }}</td>
+                                    <td class="px-3 sm:px-6 py-3 sm:py-4">
+                                        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium {{ $t->status_badge_class }}">
+                                            {{ $t->status_label }}
+                                        </span>
+                                    </td>
                                 </tr>
-                            </thead>
-                            <tbody class="divide-y divide-gray-100">
-                                @foreach($approvalHistory as $t)
-                                    <tr class="hover:bg-gray-50/80 transition align-top">
-                                        <td class="px-4 py-3">
-                                            <p class="font-medium text-gray-800 truncate" title="{{ $t->title }}">{{ $t->title }}</p>
-                                            <p class="text-xs text-gray-400">{{ $t->account?->name }} ({{ $t->account?->platform }})</p>
-                                            @if($t->rejection_note)
-                                                <p class="text-xs text-rose-600 mt-0.5 truncate">↩ {{ $t->rejection_note }}</p>
-                                            @endif
-                                        </td>
-                                        <td class="px-4 py-3 text-xs text-gray-700">{{ $t->assignedUser?->name ?? '—' }}</td>
-                                        <td class="px-4 py-3">
-                                            @if($t->hasLinks())
-                                                <button type="button"
-                                                    onclick="openLinksPopup({{ json_encode($t->link_upload) }}, '{{ addslashes($t->title) }}')"
-                                                    class="inline-flex items-center gap-1 text-xs text-primary-600 hover:underline font-medium">
-                                                    <svg class="w-3 h-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/>
-                                                    </svg>
-                                                    {{ $t->link_count }} link
-                                                </button>
-                                            @else
-                                                <span class="text-xs text-gray-300">—</span>
-                                            @endif
-                                        </td>
-                                        <td class="px-4 py-3 text-xs text-gray-500">{{ $t->task_date->translatedFormat('d M Y') }}</td>
-                                        <td class="px-4 py-3">
-                                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium {{ $t->status_badge_class }}">
-                                                {{ $t->status_label }}
-                                            </span>
-                                        </td>
-                                    </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
-                    </div>
+                            @empty
+                                <tr>
+                                    <td colspan="5" class="px-3 sm:px-6 py-12 text-center text-sm text-gray-400">Belum ada riwayat approval.</td>
+                                </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
 
-                    {{-- Mobile cards (< md) --}}
-                    <div class="md:hidden space-y-3">
-                        @foreach($approvalHistory as $t)
-                        <div class="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
-                            <div class="flex items-start justify-between gap-2 mb-2">
-                                <div class="min-w-0">
-                                    <p class="font-semibold text-gray-800 truncate text-sm">{{ $t->title }}</p>
-                                    <p class="text-xs text-gray-400">{{ $t->account?->name }} ({{ $t->account?->platform }})</p>
-                                </div>
-                                <span class="flex-shrink-0 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium {{ $t->status_badge_class }}">
-                                    {{ $t->status_label }}
-                                </span>
-                            </div>
-                            <div class="grid grid-cols-2 gap-2 text-xs mt-2">
-                                <div>
-                                    <p class="text-gray-400 mb-0.5">Dikerjakan</p>
-                                    <p class="font-medium text-gray-700">{{ $t->assignedUser?->name ?? '—' }}</p>
-                                </div>
-                                <div>
-                                    <p class="text-gray-400 mb-0.5">Tanggal</p>
-                                    <p class="text-gray-700">{{ $t->task_date->translatedFormat('d M Y') }}</p>
-                                </div>
-                                @if($t->hasLinks())
-                                <div class="col-span-2">
-                                    <p class="text-gray-400 mb-0.5">Bukti</p>
-                                    <button type="button"
-                                        onclick="openLinksPopup({{ json_encode($t->link_upload) }}, '{{ addslashes($t->title) }}')"
-                                        class="inline-flex items-center gap-1 text-primary-600 font-medium hover:underline">
-                                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/>
-                                        </svg>
-                                        {{ $t->link_count }} link bukti
-                                    </button>
-                                </div>
-                                @endif
-                                @if($t->rejection_note)
-                                <div class="col-span-2">
-                                    <p class="text-xs text-rose-600 bg-rose-50 px-2 py-1 rounded border border-rose-200">↩ {{ $t->rejection_note }}</p>
-                                </div>
-                                @endif
-                            </div>
+                <div class="px-4 sm:px-6 py-4 border-t border-gray-100 bg-gray-50/50">
+                    <div class="flex flex-col sm:flex-row items-center justify-between gap-3">
+                        <div class="text-xs sm:text-sm text-gray-600">
+                            Menampilkan <span class="font-semibold">{{ $approvalHistoryPaginated->count() }}</span> dari <span class="font-semibold">{{ $approvalHistoryPaginated->total() }}</span> data
                         </div>
-                        @endforeach
+                        <div class="flex justify-center">
+                            {{ $approvalHistoryPaginated->appends(request()->query())->links() }}
+                        </div>
                     </div>
                 </div>
-            @endif
+            </div>
         </div>
         @endif
     </div>

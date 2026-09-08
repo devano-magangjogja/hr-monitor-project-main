@@ -1,4 +1,4 @@
-@if($appWaGroups->count() > 0)
+@if(isset($appWaGroups) && $appWaGroups->count() > 0)
 <div class="fixed bottom-6 right-6 z-40 flex flex-col items-end gap-2"
      x-data="{ open: false }">
 

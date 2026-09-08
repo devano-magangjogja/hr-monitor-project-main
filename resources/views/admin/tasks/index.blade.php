@@ -191,7 +191,7 @@
         </button>
     </div>
     <form action="{{ route('admin.tasks.store') }}" method="POST"
-          class="px-3 sm:px-6 py-5 space-y-4 overflow-y-auto flex-1"
+          class="px-3 pt-1 sm:px-6 py-5 space-y-4 overflow-y-auto flex-1"
           id="form-create-task"
           onsubmit="return validateCreateRecipients()">
         @csrf

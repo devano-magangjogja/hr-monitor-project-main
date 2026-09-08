@@ -80,7 +80,7 @@
                 <p class="text-[11px] sm:text-xs text-gray-400 mt-1 truncate">melewati batas waktu</p>
             </div>
         </x-responsive-card>
-    </x-responsive-grid> 
+    </x-responsive-grid>
 
     {{-- ── Ranking Minggu Ini ──────────────────────────────── --}}
     <div class="mb-8">
@@ -149,12 +149,24 @@
         <x-responsive-table-wrapper>
             <thead>
                 <tr class="bg-gray-50 border-b border-gray-200">
-                    <th class="text-left px-3 sm:px-6 py-2.5 sm:py-3.5 font-semibold text-gray-600 text-xs sm:text-sm">Nama</th>
-                    <th class="text-left px-3 sm:px-6 py-2.5 sm:py-3.5 font-semibold text-gray-600 text-xs sm:text-sm w-28 sm:w-36">Role</th>
-                    <th class="text-left px-3 sm:px-6 py-2.5 sm:py-3.5 font-semibold text-gray-600 text-xs sm:text-sm w-16 sm:w-24">Selesai</th>
-                    <th class="text-left px-3 sm:px-6 py-2.5 sm:py-3.5 font-semibold text-gray-600 text-xs sm:text-sm w-16 sm:w-24">Total</th>
-                    <th class="text-left px-3 sm:px-6 py-2.5 sm:py-3.5 font-semibold text-gray-600 text-xs sm:text-sm">Progress</th>
-                    <th class="text-right px-3 sm:px-6 py-2.5 sm:py-3.5 font-semibold text-gray-600 text-xs sm:text-sm w-20">Aksi</th>
+                    <th class="text-center px-3 sm:px-6 py-2.5 sm:py-3.5 font-semibold text-gray-600 text-xs sm:text-sm w-[28%] max-w-xs">
+                        Nama
+                    </th>
+                    <th class="text-center px-3 sm:px-6 py-2.5 sm:py-3.5 font-semibold text-gray-600 text-xs sm:text-sm w-28 sm:w-36 whitespace-nowrap">
+                        Role
+                    </th>
+                    <th class="text-center px-3 sm:px-6 py-2.5 sm:py-3.5 font-semibold text-gray-600 text-xs sm:text-sm w-16 sm:w-24 whitespace-nowrap">
+                        Selesai
+                    </th>
+                    <th class="text-center px-3 sm:px-6 py-2.5 sm:py-3.5 font-semibold text-gray-600 text-xs sm:text-sm w-16 sm:w-24 whitespace-nowrap">
+                        Total
+                    </th>
+                    <th class="text-center px-3 sm:px-6 py-2.5 sm:py-3.5 font-semibold text-gray-600 text-xs sm:text-sm">
+                        Progress
+                    </th>
+                    <th class="text-center px-3 sm:px-6 py-2.5 sm:py-3.5 font-semibold text-gray-600 text-xs sm:text-sm w-14 sm:w-20">
+                        Aksi
+                    </th>
                 </tr>
             </thead>
             <tbody class="divide-y divide-gray-100">
@@ -168,38 +180,38 @@
                             : ($pct >= 50 ? 'bg-primary-500' : 'bg-yellow-500');
                     @endphp
                     <tr class="hover:bg-gray-50 transition">
+                        <!-- Nama -->
                         <td class="px-3 sm:px-6 py-3 sm:py-4">
-                            <div class="flex items-center gap-2 sm:gap-3 min-w-0">
-                                <div class="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-primary-100 flex items-center
-                                            justify-center flex-shrink-0">
-                                    <span class="text-xs font-semibold text-primary-600">
-                                        {{ strtoupper(substr($user->name, 0, 1)) }}
-                                    </span>
-                                </div>
-                                <span class="text-xs sm:text-sm font-medium text-gray-800 truncate">{{ $user->name }}</span>
+                            <div class="flex items-center justify-center gap-2 sm:gap-3 min-w-0">
+                                <span class="text-xs sm:text-sm font-medium text-gray-800 truncate max-w-[10rem]">{{ $user->name }}</span>
                             </div>
                         </td>
-                        <td class="px-3 sm:px-6 py-3 sm:py-4 w-28 sm:w-36">
-                            <span class="inline-flex px-1.5 sm:px-2.5 py-0.5 sm:py-1 rounded-full text-xs font-medium {{ $user->role_badge_class }}">
+                        <!-- Role -->
+                        <td class="px-3 sm:px-6 py-3 sm:py-4 text-center">
+                            <span class="inline-flex whitespace-nowrap px-1.5 sm:px-2.5 py-0.5 sm:py-1 rounded-full text-xs font-medium {{ $user->role_badge_class }}">
                                 {{ $user->role_label }}
                             </span>
                         </td>
-                        <td class="px-3 sm:px-6 py-3 sm:py-4 w-16 sm:w-24">
+                        <!-- Selesai -->
+                        <td class="px-3 sm:px-6 py-3 sm:py-4 text-center">
                             <span class="text-xs sm:text-sm font-semibold text-green-600">{{ $user->completed_tasks }}</span>
                         </td>
-                        <td class="px-3 sm:px-6 py-3 sm:py-4 w-16 sm:w-24">
+                        <!-- Total -->
+                        <td class="px-3 sm:px-6 py-3 sm:py-4 text-center">
                             <span class="text-xs sm:text-sm text-gray-600">{{ $user->total_tasks }}</span>
                         </td>
+                        <!-- Progress -->
                         <td class="px-3 sm:px-6 py-3 sm:py-4">
-                            <div class="flex items-center gap-2 sm:gap-3">
-                                <div class="flex-1 h-1.5 sm:h-2 bg-gray-100 rounded-full overflow-hidden min-w-[50px]">
+                            <div class="flex items-center justify-center gap-2 sm:gap-3">
+                                <div class="flex-1 h-1.5 sm:h-2 bg-gray-100 rounded-full overflow-hidden min-w-[50px] max-w-[150px]">
                                     <div class="{{ $barColor }} h-full rounded-full transition-all duration-300"
                                          style="width: {{ $pct }}%"></div>
                                 </div>
                                 <span class="text-xs font-medium text-gray-600 w-8 text-right">{{ $pct }}%</span>
                             </div>
                         </td>
-                        <td class="px-3 sm:px-6 py-3 sm:py-4 w-20 text-right">
+                        <!-- Aksi -->
+                        <td class="px-3 sm:px-6 py-3 sm:py-4 text-center">
                             <a href="{{ route('admin.dashboard.team-progress-detail', $user->id) }}"
                                class="p-1.5 inline-flex text-gray-400 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition"
                                title="Lihat Detail Tugas">

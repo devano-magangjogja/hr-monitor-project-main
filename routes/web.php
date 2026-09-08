@@ -118,6 +118,8 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin'])->grou
     Route::patch('/sosmed/accounts/{account}', [AdminSosmedController::class, 'updateAccount'])->name('sosmed.accounts.update');
     Route::patch('/sosmed/accounts/{account}/assign', [AdminSosmedController::class, 'assignAccount'])->name('sosmed.accounts.assign');
     Route::delete('/sosmed/accounts/{account}', [AdminSosmedController::class, 'destroyAccount'])->name('sosmed.accounts.destroy');
+    Route::delete('/sosmed/tasks/purge', [AdminSosmedController::class, 'purgeTasks'])->name('sosmed.tasks.purge');
+    Route::delete('/sosmed/logs/purge', [AdminSosmedController::class, 'purgeLogs'])->name('sosmed.logs.purge');
 });
 
 // ── HR Staff ────────────────────────────────────────────────────────────────
@@ -285,6 +287,7 @@ Route::prefix('pm')->name('pm.')->middleware(['auth', 'role:pm'])->group(functio
     Route::get('/sosmed', [PMSosmedController::class, 'index'])->name('sosmed.index');
     Route::post('/sosmed/accounts/{account}/submit', [PMSosmedController::class, 'submitAccountTask'])->name('sosmed.accounts.submit');
     Route::patch('/sosmed/tasks/{task}/verify', [PMSosmedController::class, 'verifyTask'])->name('sosmed.tasks.verify');
+    Route::post('/sosmed/approvals/purge', [PMSosmedController::class, 'destroyApprovalHistory'])->name('sosmed.approvals.purge');
 });
 
 // ── Sosmed (Social Media Specialist) ─────────────────────────────────────────
