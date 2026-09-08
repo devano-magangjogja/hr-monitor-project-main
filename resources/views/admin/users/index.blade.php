@@ -218,23 +218,45 @@
             </div>
             <div>
                 <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-1">Role</label>
-                <div class="relative mb-1.5">
-                    <input type="text" id="search-create-user-role" placeholder="Cari role..."
-                        oninput="filterSelectOptions(this.value, 'create-user-role')"
-                        class="w-full pl-7 pr-2.5 py-1 text-xs border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-primary-500 bg-gray-50 focus:bg-white transition">
-                    <svg class="w-3 h-3 text-gray-400 absolute left-2 top-1/2 -translate-y-1/2 pointer-events-none"
-                        fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                    </svg>
+                <div class="relative" id="create-user-role-dropdown">
+                    <button type="button" onclick="toggleRoleDropdown('create-user-role')"
+                        class="w-full flex items-center justify-between gap-2 border border-gray-300 rounded-lg px-3 sm:px-4 py-2 sm:py-2.5 text-xs sm:text-sm bg-white hover:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500 transition text-left">
+                        <span id="create-user-role-label" class="truncate text-gray-700 font-medium">-- Pilih Role --</span>
+                        <svg class="w-3.5 h-3.5 text-gray-400 flex-shrink-0 ml-1.5 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                        </svg>
+                    </button>
+                    <div id="create-user-role-options" class="hidden absolute left-0 right-0 top-full mt-1.5 bg-white border border-gray-200 rounded-xl shadow-xl overflow-hidden z-[100]">
+                        <div class="p-2 border-b border-gray-100 bg-gray-50">
+                            <div class="relative">
+                                <input type="text" id="create-user-role-search" oninput="filterRoleOptions(this.value, 'create-user-role-options')"
+                                    placeholder="Cari role..."
+                                    class="w-full pl-8 pr-3 py-1.5 bg-white border border-gray-200 rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-primary-500">
+                                <svg class="w-3.5 h-3.5 text-gray-400 absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                                </svg>
+                            </div>
+                        </div>
+                        <div id="create-user-role-options-list" class="max-h-48 overflow-y-auto divide-y divide-gray-50">
+                            <div onclick="selectRole('create-user-role', '', '-- Pilih Role --')"
+                                data-search="pilih role"
+                                class="role-option px-3 py-2 hover:bg-primary-50 cursor-pointer text-xs font-semibold text-gray-600 hover:text-primary-700">
+                                -- Pilih Role --
+                            </div>
+                            @foreach($roles as $r)
+                                <div onclick="selectRole('create-user-role', '{{ $r->name }}', '{{ addslashes($r->label) }}')"
+                                    data-search="{{ strtolower($r->label . ' ' . $r->name) }}"
+                                    class="role-option px-3 py-2 hover:bg-primary-50 cursor-pointer flex items-center justify-between text-xs text-gray-700 hover:text-primary-700">
+                                    <span class="font-medium">{{ $r->label }}</span>
+                                </div>
+                            @endforeach
+                            <div id="create-user-role-no-result" class="hidden py-3 text-center text-xs text-gray-400">
+                                Tidak ada role yang cocok
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                <select name="role" id="create-user-role" required
-                    class="w-full px-3 sm:px-4 py-2 sm:py-2.5 border border-gray-300 rounded-lg text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-primary-500">
-                    <option value="">-- Pilih Role --</option>
-                    @foreach($roles as $r)
-                        <option value="{{ $r->name }}">{{ $r->label }}</option>
-                    @endforeach
-                </select>
+                <input type="hidden" name="role" id="create-user-role" value="">
             </div>
             <div>
                 <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-1">Status</label>
@@ -289,22 +311,45 @@
             {{-- Role --}}
             <div>
                 <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-1">Role</label>
-                <div class="relative mb-1.5">
-                    <input type="text" id="search-edit-user-role" placeholder="Cari role..."
-                        oninput="filterSelectOptions(this.value, 'edit-role')"
-                        class="w-full pl-7 pr-2.5 py-1 text-xs border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-primary-500 bg-gray-50 focus:bg-white transition">
-                    <svg class="w-3 h-3 text-gray-400 absolute left-2 top-1/2 -translate-y-1/2 pointer-events-none"
-                        fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                    </svg>
+                <div class="relative" id="edit-user-role-dropdown">
+                    <button type="button" onclick="toggleRoleDropdown('edit-role')"
+                        class="w-full flex items-center justify-between gap-2 border border-gray-300 rounded-lg px-3 sm:px-4 py-2 sm:py-2.5 text-xs sm:text-sm bg-white hover:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500 transition text-left">
+                        <span id="edit-role-label" class="truncate text-gray-700 font-medium">-- Pilih Role --</span>
+                        <svg class="w-3.5 h-3.5 text-gray-400 flex-shrink-0 ml-1.5 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                        </svg>
+                    </button>
+                    <div id="edit-role-options" class="hidden absolute left-0 right-0 top-full mt-1.5 bg-white border border-gray-200 rounded-xl shadow-xl overflow-hidden z-[100]">
+                        <div class="p-2 border-b border-gray-100 bg-gray-50">
+                            <div class="relative">
+                                <input type="text" id="edit-role-search" oninput="filterRoleOptions(this.value, 'edit-role-options')"
+                                    placeholder="Cari role..."
+                                    class="w-full pl-8 pr-3 py-1.5 bg-white border border-gray-200 rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-primary-500">
+                                <svg class="w-3.5 h-3.5 text-gray-400 absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                                </svg>
+                            </div>
+                        </div>
+                        <div id="edit-role-options-list" class="max-h-48 overflow-y-auto divide-y divide-gray-50">
+                            <div onclick="selectRole('edit-role', '', '-- Pilih Role --')"
+                                data-search="pilih role"
+                                class="role-option px-3 py-2 hover:bg-primary-50 cursor-pointer text-xs font-semibold text-gray-600 hover:text-primary-700">
+                                -- Pilih Role --
+                            </div>
+                            @foreach($roles as $r)
+                                <div onclick="selectRole('edit-role', '{{ $r->name }}', '{{ addslashes($r->label) }}')"
+                                    data-search="{{ strtolower($r->label . ' ' . $r->name) }}"
+                                    class="role-option px-3 py-2 hover:bg-primary-50 cursor-pointer flex items-center justify-between text-xs text-gray-700 hover:text-primary-700">
+                                    <span class="font-medium">{{ $r->label }}</span>
+                                </div>
+                            @endforeach
+                            <div id="edit-role-no-result" class="hidden py-3 text-center text-xs text-gray-400">
+                                Tidak ada role yang cocok
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                <select id="edit-role" name="role" required class="w-full px-3 sm:px-4 py-2 sm:py-2.5 border border-gray-300 rounded-lg text-xs sm:text-sm
-                                                       focus:outline-none focus:ring-2 focus:ring-primary-500">
-                    @foreach($roles as $r)
-                        <option value="{{ $r->name }}">{{ $r->label }}</option>
-                    @endforeach
-                </select>
+                <input type="hidden" name="role" id="edit-role" value="">
             </div>
 
             {{-- Status --}}
@@ -586,33 +631,107 @@
             setupPasswordMatchValidation('admin-reset-password', 'admin-reset-password-confirmation', 'admin-reset-pwd-match', 'admin-reset-pwd-len', resetForm);
         });
 
-        function filterSelectOptions(query, selectId) {
-            const select = document.getElementById(selectId);
-            if (!select) return;
-            const q = (query || '').toLowerCase().trim();
-            const options = select.options;
-            for (let i = 0; i < options.length; i++) {
-                const opt = options[i];
-                if (!opt.value) {
-                    opt.hidden = false;
-                    continue;
+        document.addEventListener('click', function(e) {
+            const dropdownIds = ['create-user-role-dropdown', 'edit-user-role-dropdown'];
+            dropdownIds.forEach(id => {
+                const wrap = document.getElementById(id);
+                if (wrap && !wrap.contains(e.target)) {
+                    const opts = wrap.querySelector('[id$="-options"]');
+                    const chev = wrap.querySelector('[id$="-chevron"]');
+                    if (opts) opts.classList.add('hidden');
+                    if (chev) chev.classList.remove('rotate-180');
                 }
-                const text = opt.text.toLowerCase();
-                opt.hidden = q ? !text.includes(q) : false;
+            });
+        });
+
+        function toggleRoleDropdown(selectId) {
+            const options = document.getElementById(selectId + '-options');
+            const searchInput = document.getElementById(selectId + '-search');
+            if (!options) return;
+            const isHidden = options.classList.contains('hidden');
+            
+            // Close all other dropdowns first
+            document.querySelectorAll('[id$="-options"]').forEach(el => {
+                if (el.id !== selectId + '-options') el.classList.add('hidden');
+            });
+            document.querySelectorAll('[id$="-chevron"]').forEach(el => {
+                el.classList.remove('rotate-180');
+            });
+            
+            options.classList.toggle('hidden');
+            if (isHidden && searchInput) {
+                searchInput.value = '';
+                filterRoleOptions('', selectId + '-options');
+                setTimeout(() => searchInput.focus(), 50);
+            }
+        }
+
+        function selectRole(selectId, value, label) {
+            const hiddenInput = document.getElementById(selectId);
+            const labelEl = document.getElementById(selectId + '-label');
+            const options = document.getElementById(selectId + '-options');
+            
+            if (hiddenInput) hiddenInput.value = value;
+            if (labelEl) labelEl.textContent = label;
+            if (options) options.classList.add('hidden');
+            
+            if (value) {
+                labelEl.classList.remove('text-gray-500');
+                labelEl.classList.add('text-gray-800');
+            } else {
+                labelEl.classList.remove('text-gray-800');
+                labelEl.classList.add('text-gray-500');
+            }
+        }
+
+        function filterRoleOptions(keyword, optionsId) {
+            const query = (keyword || '').toLowerCase().trim();
+            const options = document.querySelectorAll('#' + optionsId + ' .role-option');
+            const noResult = document.getElementById(optionsId.replace('-options', '-no-result'));
+            let visibleCount = 0;
+            
+            options.forEach(opt => {
+                const searchText = opt.getAttribute('data-search') || '';
+                const text = opt.textContent.toLowerCase();
+                const isVisible = !query || searchText.includes(query) || text.includes(query);
+                opt.classList.toggle('hidden', !isVisible);
+                if (isVisible) visibleCount++;
+            });
+            
+            if (noResult) {
+                noResult.classList.toggle('hidden', visibleCount > 0);
             }
         }
 
         function openEditModal(id, name, email, role, isActive, imageUrl = '') {
-            const searchInput = document.getElementById('search-edit-user-role');
+            const options = document.getElementById('edit-role-options');
+            const searchInput = document.getElementById('edit-role-search');
+            const labelEl = document.getElementById('edit-role-label');
+            
+            if (options) options.classList.add('hidden');
             if (searchInput) {
                 searchInput.value = '';
-                filterSelectOptions('', 'edit-role');
+                filterRoleOptions('', 'edit-role-options');
             }
+            
             document.getElementById('edit-name').value = name;
             document.getElementById('edit-email').value = email;
             document.getElementById('edit-role').value = role;
             document.getElementById('edit-status').value = isActive;
             document.getElementById('form-edit').action = `/admin/users/${id}`;
+
+            if (labelEl) {
+                const selectedOption = document.querySelector('#edit-role-options-list .role-option[data-search="' + role.toLowerCase() + '"]');
+                if (selectedOption) {
+                    labelEl.textContent = selectedOption.querySelector('span').textContent;
+                    labelEl.classList.remove('text-gray-500');
+                    labelEl.classList.add('text-gray-800');
+                } else {
+                    labelEl.textContent = '-- Pilih Role --';
+                    labelEl.classList.remove('text-gray-800');
+                    labelEl.classList.add('text-gray-500');
+                }
+            }
 
             const letter = document.getElementById('edit-avatar-letter');
             if (letter) letter.textContent = name.charAt(0).toUpperCase();

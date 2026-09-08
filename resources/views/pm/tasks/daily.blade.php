@@ -20,7 +20,8 @@
         <div class="overflow-x-auto">
             <table class="w-full text-sm text-left border-collapse min-w-[700px]">
                 <thead>
-                    <tr class="bg-gray-50/80 border-b border-gray-200 text-xs font-semibold uppercase tracking-wider text-gray-500">
+                    <tr
+                        class="bg-gray-50/80 border-b border-gray-200 text-xs font-semibold uppercase tracking-wider text-gray-500">
                         <th scope="col" class="px-5 py-3.5 w-[28%] min-w-[140px] text-left">Judul</th>
                         <th scope="col" class="px-5 py-3.5 w-[12%] min-w-[80px] text-left">Kantor</th>
                         <th scope="col" class="px-5 py-3.5 text-left">Deskripsi</th>
@@ -30,13 +31,13 @@
                 </thead>
                 <tbody class="divide-y divide-gray-100 bg-white">
                     @forelse($tasks as $task)
-                        @php
-                            $assignment = $task->assignments->first();
-                            $status = $assignment?->is_completed ?? 'pending';
-                        @endphp
-                        <tr class="hover:bg-gray-50/80 transition-colors duration-150" data-task="{{ json_encode([
-                           'title' => $task->title,
-                            'kantor'      => $task->kantor,
+                                    @php
+                                        $assignment = $task->assignments->first();
+                                        $status = $assignment?->is_completed ?? 'pending';
+                                    @endphp
+                                    <tr class="hover:bg-gray-50/80 transition-colors duration-150" data-task="{{ json_encode([
+                            'title' => $task->title,
+                            'kantor' => $task->kantor,
                             'description' => $task->description ?? '',
                             'type' => $task->type,
                             'date' => $task->task_date->translatedFormat('d M Y'),
@@ -45,54 +46,54 @@
                             'note' => $assignment?->note ?? '',
                             'assignees' => [],
                         ]) }}">
-                            <td class="px-5 py-3.5 whitespace-nowrap">
-                                <div class="truncate max-w-[200px] font-medium text-gray-900" title="{{ $task->title }}">
-                                    {{ $task->title }}
-                                </div>
-                            </td>
-                            <td class="px-5 py-3.5 whitespace-nowrap">
-                                <span class="text-sm text-gray-600">{{ $task->kantor ?: '-' }}</span>
-                            </td>
-                            <td class="px-5 py-3.5">
-                                <div class="truncate max-w-[260px] text-gray-500" title="{{ $task->description ?? '-' }}">
-                                    @if($task->description)
-                                        {!! linkify(e($task->description)) !!}
-                                    @else
-                                        -
-                                    @endif
-                                </div>
-                            </td>
-                            <td class="px-5 py-3.5 whitespace-nowrap">
-                                <x-task-status-badge :status="$status" :completedAt="$assignment?->completed_at" />
-                            </td>
-                            <td class="px-5 py-3.5 whitespace-nowrap">
-                                <div class="flex items-center justify-end gap-1.5 whitespace-nowrap">
-                                    {{-- Tombol Detail --}}
-                                    <button onclick="openDetailModal(JSON.parse(this.closest('tr').dataset.task))"
-                                        class="p-1.5 text-gray-400 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition"
-                                        title="Lihat Detail">
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                                        </svg>
-                                    </button>
+                                        <td class="px-5 py-3.5 whitespace-nowrap">
+                                            <div class="truncate max-w-[200px] font-medium text-gray-900" title="{{ $task->title }}">
+                                                {{ $task->title }}
+                                            </div>
+                                        </td>
+                                        <td class="px-5 py-3.5 whitespace-nowrap">
+                                            <span class="text-sm text-gray-600">{{ $task->kantor ?: '-' }}</span>
+                                        </td>
+                                        <td class="px-5 py-3.5">
+                                            <div class="truncate max-w-[260px] text-gray-500" title="{{ $task->description ?? '-' }}">
+                                                @if($task->description)
+                                                    {!! linkify(e($task->description)) !!}
+                                                @else
+                                                    -
+                                                @endif
+                                            </div>
+                                        </td>
+                                        <td class="px-5 py-3.5 whitespace-nowrap">
+                                            <x-task-status-badge :status="$status" :completedAt="$assignment?->completed_at" />
+                                        </td>
+                                        <td class="px-5 py-3.5 whitespace-nowrap">
+                                            <div class="flex items-center justify-end gap-1.5 whitespace-nowrap">
+                                                {{-- Tombol Detail --}}
+                                                <button onclick="openDetailModal(JSON.parse(this.closest('tr').dataset.task))"
+                                                    class="p-1.5 text-gray-400 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition"
+                                                    title="Lihat Detail">
+                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                            d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                            d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                                    </svg>
+                                                </button>
 
-                                    {{-- Tombol Selesai --}}
-                                    @if($status === 'pending')
-                                        <button onclick="openCompleteModal({{ $task->id }}, '{{ addslashes($task->title) }}')"
-                                            class="p-1.5 text-gray-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition"
-                                            title="Tandai Selesai">
-                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                    d="M5 13l4 4L19 7" />
-                                            </svg>
-                                        </button>
-                                    @endif
-                                </div>
-                            </td>
-                        </tr>
+                                                {{-- Tombol Selesai --}}
+                                                @if($status === 'pending')
+                                                    <button onclick="openCompleteModal({{ $task->id }}, '{{ addslashes($task->title) }}')"
+                                                        class="p-1.5 text-gray-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition"
+                                                        title="Tandai Selesai">
+                                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                                d="M5 13l4 4L19 7" />
+                                                        </svg>
+                                                    </button>
+                                                @endif
+                                            </div>
+                                        </td>
+                                    </tr>
                     @empty
                         <tr>
                             <td colspan="4" class="px-6 py-12 text-center text-gray-400 text-sm">
@@ -120,7 +121,7 @@
                     </svg>
                 </button>
             </div>
-            <form id="form-complete" action="" method="POST" class="px-6 py-5 space-y-4">
+            <form id="form-complete" action="" method="POST" class="px-6 py-5 pt-1 space-y-4">
                 @csrf
                 @method('PATCH')
                 <div>
@@ -130,7 +131,7 @@
                     </label>
                     <textarea name="note" rows="4"
                         placeholder="Tuliskan laporan singkat atau catatan penyelesaian tugas ini..." class="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm
-                                     focus:outline-none focus:ring-2 focus:ring-green-500 resize-none"></textarea>
+                                         focus:outline-none focus:ring-2 focus:ring-green-500 resize-none"></textarea>
                     <p class="mt-1 text-xs text-gray-400">
                         Setelah ditandai selesai, tugas tidak dapat diubah kembali.
                     </p>
@@ -141,7 +142,7 @@
                         Batal
                     </button>
                     <button type="submit" class="flex items-center gap-2 px-5 py-2 bg-green-600 hover:bg-green-700
-                                   text-white text-sm font-medium rounded-lg transition">
+                                       text-white text-sm font-medium rounded-lg transition">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                         </svg>

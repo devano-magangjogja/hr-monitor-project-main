@@ -47,7 +47,7 @@
                 <img id="avatar-preview" src="{{ $user->image ? asset('storage/' . $user->image) : '' }}"
                     alt="{{ $user->name }}" class="{{ $user->image ? '' : 'hidden' }} w-full h-full object-cover">
                 <div id="avatar-initials" class="{{ $user->image ? 'hidden' : '' }} w-full h-full bg-primary-600
-                                                    flex items-center justify-center">
+                                                            flex items-center justify-center">
                     <span class="text-2xl font-bold text-white">
                         {{ strtoupper(substr($user->name, 0, 1)) }}
                     </span>
@@ -59,7 +59,7 @@
                 <h2 class="text-xl font-bold text-gray-900 truncate">{{ $user->name }}</h2>
                 <p class="text-sm text-gray-500 mt-0.5">{{ $user->email }}</p>
                 <span class="inline-flex items-center mt-2 px-2.5 py-1 rounded-full text-xs font-medium
-                                                     border {{ $roleColor }}">
+                                                             border {{ $roleColor }}">
                     {{ $roleLabel }}
                 </span>
             </div>
@@ -109,7 +109,7 @@
             </div>
 
             <form action="{{ route('profile.update') }}" method="POST" enctype="multipart/form-data"
-                class="px-6 py-5 space-y-4">
+                class="px-6 py-5 pt-1 space-y-4">
                 @csrf
                 @method('PATCH')
 
@@ -120,8 +120,8 @@
                     </label>
                     <input type="text" name="name" value="{{ old('name', $user->name) }}" required maxlength="100"
                         class="w-full px-4 py-2.5 border rounded-lg text-sm transition
-                                                          focus:outline-none focus:ring-2 focus:ring-primary-500
-                                                          {{ $errors->has('name') ? 'border-red-400 bg-red-50' : 'border-gray-300' }}">
+                                                                  focus:outline-none focus:ring-2 focus:ring-primary-500
+                                                                  {{ $errors->has('name') ? 'border-red-400 bg-red-50' : 'border-gray-300' }}">
                     @error('name')
                         <p class="mt-1 text-xs text-red-500">{{ $message }}</p>
                     @enderror
@@ -134,8 +134,8 @@
                     </label>
                     <input type="email" name="email" value="{{ old('email', $user->email) }}" required maxlength="100"
                         class="w-full px-4 py-2.5 border rounded-lg text-sm transition
-                                                          focus:outline-none focus:ring-2 focus:ring-primary-500
-                                                          {{ $errors->has('email') ? 'border-red-400 bg-red-50' : 'border-gray-300' }}">
+                                                                  focus:outline-none focus:ring-2 focus:ring-primary-500
+                                                                  {{ $errors->has('email') ? 'border-red-400 bg-red-50' : 'border-gray-300' }}">
                     @error('email')
                         <p class="mt-1 text-xs text-red-500">{{ $message }}</p>
                     @enderror
@@ -143,34 +143,34 @@
 
                 {{-- Foto Profil --}}
                 <div x-data="{
-                                                hasPhoto: {{ $user->image ? 'true' : 'false' }},
-                                                removePhoto: false,
-                                                previewUrl: '{{ $user->image ? asset('storage/' . $user->image) : '' }}',
-                                                handleFile(event) {
-                                                    const file = event.target.files[0];
-                                                    if (!file) return;
-                                                    this.previewUrl = URL.createObjectURL(file);
-                                                    this.hasPhoto = true;
-                                                    this.removePhoto = false;
-                                                    document.getElementById('avatar-preview').src = this.previewUrl;
-                                                    document.getElementById('avatar-preview').classList.remove('hidden');
-                                                    document.getElementById('avatar-initials').classList.add('hidden');
-                                                },
-                                                triggerRemove() {
-                                                    this.removePhoto = true;
-                                                    this.hasPhoto = false;
-                                                    this.previewUrl = '';
-                                                    document.getElementById('avatar-preview').classList.add('hidden');
-                                                    document.getElementById('avatar-initials').classList.remove('hidden');
-                                                    this.$refs.fileInput.value = '';
-                                                }
-                                            }">
+                                                        hasPhoto: {{ $user->image ? 'true' : 'false' }},
+                                                        removePhoto: false,
+                                                        previewUrl: '{{ $user->image ? asset('storage/' . $user->image) : '' }}',
+                                                        handleFile(event) {
+                                                            const file = event.target.files[0];
+                                                            if (!file) return;
+                                                            this.previewUrl = URL.createObjectURL(file);
+                                                            this.hasPhoto = true;
+                                                            this.removePhoto = false;
+                                                            document.getElementById('avatar-preview').src = this.previewUrl;
+                                                            document.getElementById('avatar-preview').classList.remove('hidden');
+                                                            document.getElementById('avatar-initials').classList.add('hidden');
+                                                        },
+                                                        triggerRemove() {
+                                                            this.removePhoto = true;
+                                                            this.hasPhoto = false;
+                                                            this.previewUrl = '';
+                                                            document.getElementById('avatar-preview').classList.add('hidden');
+                                                            document.getElementById('avatar-initials').classList.remove('hidden');
+                                                            this.$refs.fileInput.value = '';
+                                                        }
+                                                    }">
                     <label class="block text-sm font-medium text-gray-700 mb-1.5">Foto Profil</label>
 
                     <div class="flex items-start gap-3">
                         {{-- Thumbnail --}}
                         <div class="w-14 h-14 rounded-xl overflow-hidden border border-gray-200
-                                                            bg-gray-50 flex-shrink-0">
+                                                                    bg-gray-50 flex-shrink-0">
                             <template x-if="hasPhoto && previewUrl">
                                 <img :src="previewUrl" class="w-full h-full object-cover">
                             </template>
@@ -188,8 +188,8 @@
                         <div class="flex-1">
                             <div class="flex items-center gap-2 flex-wrap">
                                 <label class="cursor-pointer inline-flex items-center gap-1.5 px-3 py-1.5
-                                                                      text-xs font-medium text-primary-600 border border-primary-300
-                                                                      hover:bg-primary-50 rounded-lg transition">
+                                                                              text-xs font-medium text-primary-600 border border-primary-300
+                                                                              hover:bg-primary-50 rounded-lg transition">
                                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                             d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
@@ -201,7 +201,7 @@
                                 </label>
                                 <button type="button" x-show="hasPhoto" @click="triggerRemove()"
                                     class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium
-                                                                       text-red-600 border border-red-200 hover:bg-red-50 rounded-lg transition">
+                                                                               text-red-600 border border-red-200 hover:bg-red-50 rounded-lg transition">
                                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                             d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -222,7 +222,7 @@
                 <div class="pt-1">
                     <button type="submit"
                         class="inline-flex items-center gap-2 px-5 py-2.5 bg-primary-600
-                                                           hover:bg-primary-700 text-white text-sm font-medium rounded-lg transition">
+                                                                   hover:bg-primary-700 text-white text-sm font-medium rounded-lg transition">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                         </svg>
@@ -247,7 +247,7 @@
                 </div>
             </div>
 
-            <form action="{{ route('profile.password') }}" method="POST" class="px-6 py-5 space-y-4">
+            <form action="{{ route('profile.password') }}" method="POST" class="px-6 py-5 pt-1 space-y-4">
                 @csrf
                 @method('PATCH')
 
@@ -259,8 +259,8 @@
                     <div class="relative">
                         <input :type="show ? 'text' : 'password'" name="current_password" required
                             class="w-full px-4 py-2.5 pr-10 border rounded-lg text-sm transition
-                                                              focus:outline-none focus:ring-2 focus:ring-primary-500
-                                                              {{ $errors->has('current_password') ? 'border-red-400 bg-red-50' : 'border-gray-300' }}">
+                                                                      focus:outline-none focus:ring-2 focus:ring-primary-500
+                                                                      {{ $errors->has('current_password') ? 'border-red-400 bg-red-50' : 'border-gray-300' }}">
                         <button type="button" @click="show = !show"
                             class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
                             <svg x-show="!show" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -288,8 +288,8 @@
                     <div class="relative">
                         <input :type="show ? 'text' : 'password'" name="password" required minlength="8"
                             class="w-full px-4 py-2.5 pr-10 border rounded-lg text-sm transition
-                                                              focus:outline-none focus:ring-2 focus:ring-primary-500
-                                                              {{ $errors->has('password') ? 'border-red-400 bg-red-50' : 'border-gray-300' }}">
+                                                                      focus:outline-none focus:ring-2 focus:ring-primary-500
+                                                                      {{ $errors->has('password') ? 'border-red-400 bg-red-50' : 'border-gray-300' }}">
                         <button type="button" @click="show = !show"
                             class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
                             <svg x-show="!show" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -317,7 +317,7 @@
                     <div class="relative">
                         <input :type="show ? 'text' : 'password'" name="password_confirmation" required
                             class="w-full px-4 py-2.5 pr-10 border border-gray-300 rounded-lg text-sm
-                                                              transition focus:outline-none focus:ring-2 focus:ring-primary-500">
+                                                                      transition focus:outline-none focus:ring-2 focus:ring-primary-500">
                         <button type="button" @click="show = !show"
                             class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
                             <svg x-show="!show" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -342,7 +342,7 @@
                 <div class="pt-1">
                     <button type="submit"
                         class="inline-flex items-center gap-2 px-5 py-2.5 bg-yellow-500
-                                                           hover:bg-yellow-600 text-white text-sm font-medium rounded-lg transition">
+                                                                   hover:bg-yellow-600 text-white text-sm font-medium rounded-lg transition">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />

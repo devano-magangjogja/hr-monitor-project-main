@@ -287,6 +287,7 @@ Route::prefix('pm')->name('pm.')->middleware(['auth', 'role:pm'])->group(functio
     Route::get('/sosmed', [PMSosmedController::class, 'index'])->name('sosmed.index');
     Route::post('/sosmed/accounts/{account}/submit', [PMSosmedController::class, 'submitAccountTask'])->name('sosmed.accounts.submit');
     Route::patch('/sosmed/tasks/{task}/verify', [PMSosmedController::class, 'verifyTask'])->name('sosmed.tasks.verify');
+    Route::post('/sosmed/approvals/purge', [PMSosmedController::class, 'destroyApprovalHistory'])->name('sosmed.approvals.purge');
 });
 
 // ── Sosmed (Social Media Specialist) ─────────────────────────────────────────
