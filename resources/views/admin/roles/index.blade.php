@@ -272,7 +272,7 @@
                     </svg>
                 </button>
             </div>
-            <form id="form-edit-role" action="" method="POST" class="px-6 py-5 space-y-4 overflow-y-auto flex-1">
+            <form id="form-edit-role" action="" method="POST" class="px-6 py-5 pt-1 space-y-4 overflow-y-auto flex-1">
                 @csrf
                 @method('PATCH')
                 

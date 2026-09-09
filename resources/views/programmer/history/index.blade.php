@@ -61,24 +61,25 @@
     </div>
 
     {{-- Tabel --}}
-    <div class="bg-white rounded-xl border border-gray-200 overflow-hidden">
-        <div class="overflow-x-auto">
-            <table class="w-full text-xs sm:text-sm min-w-full">
+    <div class="bg-white rounded-xl border border-gray-200 overflow-hidden flex flex-col">
+        <div class="overflow-x-auto overflow-y-auto max-h-[600px]" style="scrollbar-gutter: stable;">
+            <table class="w-full text-xs sm:text-sm" style="table-layout: fixed; min-width: 900px;">
+                <colgroup>
+                    <col style="width: 15%;"> {{-- Tanggal --}}
+                    <col style="width: 20%;"> {{-- Judul --}}
+                    <col style="width: 15%;"> {{-- Sumber --}}
+                    <col style="width: 30%;"> {{-- Catatan --}}
+                    <col style="width: 12%;"> {{-- Status --}}
+                    <col style="width: 8%;"> {{-- Detail --}}
+                </colgroup>
                 <thead>
                     <tr class="bg-gray-50 border-b border-gray-200">
-                        <th class="text-left px-3 sm:px-6 py-2.5 sm:py-3.5 font-semibold text-gray-600 w-20 sm:w-32">Tanggal
-                        </th>
-                        <th class="text-left px-3 sm:px-6 py-2.5 sm:py-3.5 font-semibold text-gray-600 w-32 sm:w-48">Judul
-                        </th>
-                        <th class="text-left px-3 sm:px-6 py-2.5 sm:py-3.5 font-semibold text-gray-600 w-20 sm:w-32">Sumber
-                        </th>
-                        <th
-                            class="text-left px-3 sm:px-6 py-2.5 sm:py-3.5 font-semibold text-gray-600 hidden sm:table-cell">
-                            Catatan</th>
-                        <th class="text-left px-3 sm:px-6 py-2.5 sm:py-3.5 font-semibold text-gray-600 w-20 sm:w-28">Status
-                        </th>
-                        <th class="text-right px-3 sm:px-6 py-2.5 sm:py-3.5 font-semibold text-gray-600 w-12 sm:w-16">Detail
-                        </th>
+                        <th class="text-center px-3 py-3 font-semibold text-gray-600 whitespace-nowrap">Tanggal</th>
+                        <th class="text-center px-3 py-3 font-semibold text-gray-600 whitespace-nowrap">Judul</th>
+                        <th class="text-center px-3 py-3 font-semibold text-gray-600 whitespace-nowrap">Sumber</th>
+                        <th class="text-center px-3 py-3 font-semibold text-gray-600 hidden sm:table-cell whitespace-nowrap">Catatan</th>
+                        <th class="text-center px-3 py-3 font-semibold text-gray-600 whitespace-nowrap">Status</th>
+                        <th class="text-center px-3 py-3 font-semibold text-gray-600 whitespace-nowrap">Detail</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-100">
@@ -87,58 +88,60 @@
                             $assignment = $task->assignments->first();
                         @endphp
                         <tr class="hover:bg-gray-50 transition">
-
                             {{-- Tanggal --}}
-                            <td class="px-3 sm:px-6 py-3 sm:py-4 w-20 sm:w-32 text-gray-500 text-xs">
+                            <td class="px-3 py-3 text-gray-500 text-xs text-center">
                                 {{ $task->task_date->translatedFormat('d M Y') }}
                             </td>
 
                             {{-- Judul --}}
-                            <td class="px-3 sm:px-6 py-3 sm:py-4 w-32 sm:w-48">
-                                <div class="truncate max-w-[100px] sm:max-w-[170px] font-medium text-gray-800 text-xs sm:text-sm"
-                                    title="{{ $task->title }}">
+                            <td class="px-3 py-3 text-center">
+                                <div class="font-medium text-gray-800 text-xs sm:text-sm overflow-hidden text-ellipsis"
+                                     style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;"
+                                     title="{{ $task->title }}">
                                     {{ $task->title }}
                                 </div>
                             </td>
 
                             {{-- Sumber --}}
-                            <td class="px-3 sm:px-6 py-3 sm:py-4 w-20 sm:w-32">
+                            <td class="px-3 py-3 text-center">
                                 @if($task->type === 'self')
-                                    <span class="inline-flex items-center px-1.5 sm:px-2.5 py-0.5 sm:py-1 rounded-full
-                                                                             text-xs font-medium bg-gray-100 text-gray-600">
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium whitespace-nowrap
+                                                 bg-gray-100 text-gray-600">
                                         Mandiri
                                     </span>
                                 @elseif($task->type === 'assigned')
-                                    <span class="inline-flex items-center px-1.5 sm:px-2.5 py-0.5 sm:py-1 rounded-full
-                                                                             text-xs font-medium bg-blue-50 text-blue-700"
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium whitespace-nowrap
+                                                 bg-blue-50 text-blue-700"
                                         title="Dari: {{ $task->creator?->name ?? 'Admin' }}">
                                         <span class="hidden sm:inline">{{ $task->creator?->name ?? 'Admin' }}</span>
                                         <span class="sm:hidden">Tugas</span>
                                     </span>
                                 @elseif($task->type === 'default')
-                                    <span class="inline-flex items-center px-1.5 sm:px-2.5 py-0.5 sm:py-1 rounded-full
-                                                                             text-xs font-medium bg-purple-50 text-purple-700">
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium whitespace-nowrap
+                                                 bg-purple-50 text-purple-700">
                                         Rutin
                                     </span>
                                 @endif
                             </td>
 
                             {{-- Catatan --}}
-                            <td class="px-3 sm:px-6 py-3 sm:py-4 hidden sm:table-cell">
-                                <div class="truncate max-w-[100px] sm:max-w-[220px] text-gray-500 text-xs"
-                                    title="{{ $assignment?->note ?? '-' }}">
+                            <td class="px-3 py-3 hidden sm:table-cell">
+                                <div class="text-gray-500 text-xs overflow-hidden text-ellipsis"
+                                     style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;"
+                                     title="{{ $assignment?->note ?? '-' }}">
                                     {{ $assignment?->note ?? '-' }}
                                 </div>
                             </td>
 
                             {{-- Status --}}
-                            <td class="px-3 sm:px-6 py-3 sm:py-4 w-20 sm:w-28">
+                            <td class="px-3 py-3 text-center">
                                 <x-task-status-badge :status="$assignment?->is_completed ?? 'pending'"
                                     :completedAt="$assignment?->completed_at" />
                             </td>
+
                             {{-- Detail --}}
-                            <td class="px-3 sm:px-6 py-3 sm:py-4 w-12 sm:w-16">
-                                <div class="flex justify-end">
+                            <td class="px-3 py-3 text-center">
+                                <div class="flex justify-center">
                                     <button
                                         onclick="openDetailModal(JSON.parse(this.dataset.detail))"
                                         data-detail="{{ json_encode([
@@ -152,10 +155,9 @@
                                             'note'        => $assignment?->note ?? '',
                                             'assignees'   => [],
                                         ]) }}"
-                                        class="p-1 sm:p-1.5 text-gray-400 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition"
+                                        class="p-1.5 text-gray-400 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition"
                                         title="Lihat Detail">
-                                        <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor"
-                                            viewBox="0 0 24 24">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                 d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -167,7 +169,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="6" class="px-3 sm:px-6 py-14 text-center">
+                            <td colspan="6" class="px-3 py-12 text-center">
                                 <div class="flex flex-col items-center gap-2">
                                     <svg class="w-10 h-10 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
@@ -185,6 +187,18 @@
                     @endforelse
                 </tbody>
             </table>
+        </div>
+
+        {{-- Pagination --}}
+        <div class="px-4 py-4 border-t border-gray-100 bg-gray-50/50">
+            <div class="flex flex-col sm:flex-row items-center justify-between gap-3">
+                <div class="text-xs sm:text-sm text-gray-600">
+                    Menampilkan <span class="font-semibold">{{ $tasks->count() }}</span> dari <span class="font-semibold">{{ $tasks->total() }}</span> data
+                </div>
+                <div class="flex justify-center">
+                    {{ $tasks->links() }}
+                </div>
+            </div>
         </div>
     </div>
 
