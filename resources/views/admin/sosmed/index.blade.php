@@ -166,7 +166,7 @@
                                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                             d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
                                                     </svg>
-                                                    <span class="truncate">{{ parse_url($acc->link, PHP_URL_HOST) ?? $acc->link }}</span>
+                                                    <span class="truncate">Buka</span>
                                                 </a>
                                             @else
                                                 <span class="text-xs text-gray-300">—</span>

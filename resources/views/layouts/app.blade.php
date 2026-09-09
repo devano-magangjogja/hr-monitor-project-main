@@ -4,7 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>@yield('title', $appName ?? 'Seven Inc') — {{ $appName ?? 'Seven Inc' }}</title>
+    <title>@yield('title', $appName ?? 'Republikweb.net') — {{ $appName ?? 'Republikweb.net' }}</title>
+    
+    {{-- Favicon/Tab Icon --}}
+    <link rel="icon" type="image/jpeg" href="{{ asset('images/logo_square.jpg') }}">
+    <link rel="shortcut icon" type="image/jpeg" href="{{ asset('images/logo_square.jpg') }}">
+    <link rel="apple-touch-icon" href="{{ asset('images/logo_square.jpg') }}">
+    
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body class="bg-[#F1F5F9] font-sans antialiased h-full">
@@ -30,7 +36,7 @@
            :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'">
 
         {{-- Logo --}}
-        <div class="flex items-center justify-between px-3 sm:px-6 py-3 sm:py-5 border-b border-white/10 flex-shrink-0 gap-2">
+        <div class="flex items-center justify-between px-3 sm:px-6 py-3 sm:py-4 border-b border-white/10 flex-shrink-0 gap-2 h-16 sm:h-[72px]">
             <div class="flex items-center gap-2 sm:gap-3 min-w-0">
                 @php
                     $useStorageLogo = false; // Disable custom logo for now
@@ -103,8 +109,8 @@
     <div class="flex-1 flex flex-col overflow-hidden min-w-0">
 
         {{-- Topbar --}}
-        <header class="bg-white border-b border-gray-200 px-3 sm:px-4 md:px-6 py-2.5 sm:py-3 md:py-3.5 flex items-center
-                       justify-between flex-shrink-0 shadow-sm gap-2 sm:gap-3 print:hidden">
+        <header class="bg-white border-b border-gray-200 px-3 sm:px-4 md:px-6 py-3 sm:py-4 flex items-center
+                       justify-between flex-shrink-0 shadow-sm gap-2 sm:gap-3 print:hidden h-16 sm:h-[72px]">
 
             <div class="flex items-center gap-2 sm:gap-3 min-w-0">
                 {{-- Hamburger (mobile only) --}}
