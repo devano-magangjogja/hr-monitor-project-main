@@ -10,35 +10,6 @@
 
 @section('content')
 
-{{-- ── Print Header / Kop Surat Resmi (Hanya muncul saat cetak) ── --}}
-<div class="hidden print:block mb-6 border-b-2 border-gray-800 pb-4">
-    <div class="flex items-center justify-between gap-4">
-        <div class="flex items-center gap-3.5">
-            @php
-                $useStorageLogo = !empty($appLogo) && \Illuminate\Support\Facades\Storage::disk('public')->exists($appLogo);
-            @endphp
-            @if($useStorageLogo)
-                <img src="{{ asset('storage/' . $appLogo) }}" alt="{{ $appName ?? 'Seven Inc' }}" class="w-12 h-12 object-contain">
-            @else
-                <img src="{{ asset('images/seveninc_logo.png') }}" alt="{{ $appName ?? 'Seven Inc' }}" class="w-12 h-12 object-contain">
-            @endif
-            <div>
-                <h1 class="text-base font-bold text-gray-900 uppercase tracking-wide">{{ $appName ?? 'Seven Inc' }}</h1>
-                <p class="text-xs font-semibold text-gray-700">HUMAN RESOURCES DEPARTMENT &bull; MONITORING PRESENSI MAGANG</p>
-                <p class="text-[11px] text-gray-500">Laporan Rekapitulasi Kedisiplinan & Log Presensi Pemagang</p>
-            </div>
-        </div>
-        <div class="text-right text-[11px] text-gray-600 leading-tight">
-            <p><span class="font-semibold text-gray-800">Tanggal Cetak:</span> {{ \Carbon\Carbon::now()->locale('id')->translatedFormat('d F Y, H:i') }} WIB</p>
-            <p><span class="font-semibold text-gray-800">Dicetak Oleh:</span> {{ Auth::user()->name }} ({{ Auth::user()->role_label }})</p>
-            <p><span class="font-semibold text-gray-800">Filter Lokasi:</span> {{ request('kantor') ?: 'Semua Lokasi Kantor' }}</p>
-            @if(request('divisi'))
-                <p><span class="font-semibold text-gray-800">Divisi:</span> {{ request('divisi') }}</p>
-            @endif
-        </div>
-    </div>
-</div>
-
 {{-- ── Action Header & Filter (Sembunyi saat Print) ─────────── --}}
 <div class="print:hidden flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
     <div>

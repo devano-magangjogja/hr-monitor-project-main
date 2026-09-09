@@ -11,6 +11,30 @@
     <link rel="shortcut icon" type="image/jpeg" href="{{ asset('images/logo_square.jpg') }}">
     <link rel="apple-touch-icon" href="{{ asset('images/logo_square.jpg') }}">
     
+    {{-- Print Styles --}}
+    <style>
+        @media print {
+            body {
+                background: white !important;
+                margin: 0 !important;
+                padding: 0 !important;
+            }
+            main {
+                padding: 20px !important;
+            }
+            table {
+                font-size: 11px !important;
+            }
+            /* Prevent page breaks inside tables/sections */
+            table tbody tr {
+                page-break-inside: avoid;
+            }
+            .page-break {
+                page-break-after: always;
+            }
+        }
+    </style>
+    
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body class="bg-[#F1F5F9] font-sans antialiased h-full">
@@ -109,12 +133,14 @@
     <div class="flex-1 flex flex-col overflow-hidden min-w-0">
 
         {{-- Print Header (Logo & Company Name - Visible Only When Printing) --}}
-        <div class="hidden print:flex items-center justify-center gap-3 bg-white p-4 border-b border-gray-300 print:border-b">
-            <img src="{{ asset('images/logo_square.jpg') }}" alt="{{ $appName }}" 
-                 class="w-10 h-10 object-contain rounded-md">
-            <div>
-                <h2 class="text-lg font-bold text-gray-800">{{ $appName }}</h2>
-                <p class="text-xs text-gray-500">Sistem Monitoring HR & Tugas</p>
+        <div class="hidden print:block print:mb-6 print:pb-4 print:border-b-2 print:border-gray-400">
+            <div class="flex items-center gap-4 print:gap-4 print:mb-3">
+                <img src="{{ asset('images/logo_square.jpg') }}" alt="{{ $appName }}" 
+                     class="print:w-12 print:h-12 object-contain rounded-md">
+                <div class="print:flex-1">
+                    <h1 class="print:text-xl print:font-bold print:text-gray-800 print:m-0">{{ strtoupper($appName) }}</h1>
+                    <p class="print:text-xs print:text-gray-600 print:m-0 print:mt-1">Laporan Sistem Monitoring HR & Tugas</p>
+                </div>
             </div>
         </div>
 
