@@ -183,6 +183,8 @@ class PresensiController extends Controller
 
     /**
      * Perbarui data presensi
+     * Asisten hanya dapat mengubah shift, waktu masuk, keterangan, dan notes
+     * Hanya admin/staff dapat mengubah kantor
      */
     public function update(Request $request, Presensi $presensi)
     {

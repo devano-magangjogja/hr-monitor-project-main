@@ -242,7 +242,7 @@ class TaskRepository
             })
             ->orderByDesc('task_date')
             ->orderByDesc('created_at')
-            ->paginate(10);
+            ->paginate(8);
     }
     public function getHistoryForAdmin(?int $userId = null, ?string $date = null, ?string $search = null, int $perPage = 10)
     {
@@ -383,7 +383,7 @@ class TaskRepository
      * Ambil semua tugas yang masuk ke role tertentu (cs, ob, programmer, vg, dg, pm, dst.)
      * dengan pola yang sama seperti getAllTasksForAssistant.
      */
-    public function getAllTasksForRole(string $role): Collection
+    public function getAllTasksForRole(string $role, int $perPage = 8)
     {
         $today = Carbon::today()->toDateString();
         /** @var Builder $query */
@@ -430,7 +430,7 @@ class TaskRepository
             })
             ->orderByDesc('task_date')
             ->orderByDesc('created_at')
-            ->get();
+            ->paginate($perPage);
     }
 
     public function isDefaultTaskAlreadyGenerated(int $defaultTaskId, string $date): bool

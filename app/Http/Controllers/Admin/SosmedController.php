@@ -17,9 +17,15 @@ class SosmedController extends Controller
         $tab = $request->query('tab', 'accounts');
 
         // Seluruh Akun Sosmed di Sistem
-        $accounts = SosmedAccount::with(['pmUser', 'staffUser', 'assistantUser', 'creator'])
-            ->orderBy('platform')
-            ->get();
+        $accountSearch = $request->query('account_search');
+        $accountsQuery = SosmedAccount::with(['pmUser', 'staffUser', 'assistantUser', 'creator'])
+            ->orderBy('platform');
+
+        if ($accountSearch) {
+            $accountsQuery->where('name', 'like', '%' . $accountSearch . '%');
+        }
+
+        $accounts = $accountsQuery->get();
 
         // Filter date for tasks
         $taskDateFilter = $request->query('task_date');
@@ -38,6 +44,8 @@ class SosmedController extends Controller
         // Date filter and time ranges for audit logs
         $logDateFilter = $request->query('log_date');
         $logRangeFilter = $request->query('log_range'); // 'weekly', 'monthly', 'yearly'
+        $logSearch = $request->query('log_search');
+        $logActionFilter = $request->query('log_action');
 
         // Seluruh Approval Logs (Audit Trail Lengkap)
         $logsQuery = SosmedApprovalLog::with(['task.account', 'user'])->latest();
@@ -52,6 +60,17 @@ class SosmedController extends Controller
             } elseif ($logRangeFilter === 'yearly') {
                 $logsQuery->where('created_at', '>=', now()->startOfYear());
             }
+        }
+
+        if ($logSearch) {
+            $logsQuery->where(function ($q) use ($logSearch) {
+                $q->where('user_name', 'like', '%' . $logSearch . '%')
+                  ->orWhereHas('user', fn($u) => $u->where('name', 'like', '%' . $logSearch . '%'));
+            });
+        }
+
+        if ($logActionFilter) {
+            $logsQuery->where('action', $logActionFilter);
         }
 
         $logs = $logsQuery->paginate(30)->appends($request->all());
@@ -92,6 +111,7 @@ class SosmedController extends Controller
         return view('admin.sosmed.index', compact(
             'tab',
             'accounts',
+            'accountSearch',
             'tasks',
             'taskDateFilter',
             'logs',

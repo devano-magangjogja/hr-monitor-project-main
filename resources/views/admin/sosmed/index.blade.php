@@ -61,7 +61,7 @@
         <div class="flex border-b border-gray-200 overflow-x-auto scrollbar-none">
             <a href="{{ route('admin.sosmed.index', ['tab' => 'accounts']) }}"
                 class="flex items-center gap-2 px-5 py-3.5 text-sm font-medium whitespace-nowrap border-b-2 transition
-                                    {{ $tab === 'accounts' ? 'border-primary-600 text-primary-600 bg-primary-50/50' : 'border-transparent text-gray-500 hover:text-gray-700' }}">
+                                                                    {{ $tab === 'accounts' ? 'border-primary-600 text-primary-600 bg-primary-50/50' : 'border-transparent text-gray-500 hover:text-gray-700' }}">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                         d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
@@ -70,7 +70,7 @@
             </a>
             <a href="{{ route('admin.sosmed.index', ['tab' => 'tasks']) }}"
                 class="flex items-center gap-2 px-5 py-3.5 text-sm font-medium whitespace-nowrap border-b-2 transition
-                                    {{ $tab === 'tasks' ? 'border-primary-600 text-primary-600 bg-primary-50/50' : 'border-transparent text-gray-500 hover:text-gray-700' }}">
+                                                                    {{ $tab === 'tasks' ? 'border-primary-600 text-primary-600 bg-primary-50/50' : 'border-transparent text-gray-500 hover:text-gray-700' }}">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                         d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
@@ -79,7 +79,7 @@
             </a>
             <a href="{{ route('admin.sosmed.index', ['tab' => 'logs']) }}"
                 class="flex items-center gap-2 px-5 py-3.5 text-sm font-medium whitespace-nowrap border-b-2 transition
-                                    {{ $tab === 'logs' ? 'border-primary-600 text-primary-600 bg-primary-50/50' : 'border-transparent text-gray-500 hover:text-gray-700' }}">
+                                                                    {{ $tab === 'logs' ? 'border-primary-600 text-primary-600 bg-primary-50/50' : 'border-transparent text-gray-500 hover:text-gray-700' }}">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                         d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
@@ -97,13 +97,22 @@
                             <p class="text-xs text-gray-500 mt-0.5">Admin memiliki kewenangan penuh menambah akun dan menunjuk
                                 penanggung jawab PM & Staff Sosmed</p>
                         </div>
-                        <button onclick="openCreateAccountModal()"
-                            class="inline-flex items-center justify-center gap-2 px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white text-xs sm:text-sm font-semibold rounded-lg transition shadow-sm w-full sm:w-auto">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-                            </svg>
-                            Tambah Akun Baru
-                        </button>
+                        <div class="flex items-center gap-2 flex-wrap">
+                            <form action="{{ route('admin.sosmed.index') }}" method="GET" class="flex items-center gap-2">
+                                <input type="hidden" name="tab" value="accounts">
+                                <input type="text" name="account_search" value="{{ $accountSearch ?? '' }}" placeholder="Cari nama akun..."
+                                    class="h-9 px-3 text-xs bg-white border border-gray-300 rounded-lg shadow-sm
+                                           focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500
+                                           text-gray-700 transition w-40 sm:w-auto">
+                            </form>
+                            <button onclick="openCreateAccountModal()"
+                                class="inline-flex items-center justify-center gap-2 px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white text-xs sm:text-sm font-semibold rounded-lg transition shadow-sm">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                                </svg>
+                                Tambah Akun Baru
+                            </button>
+                        </div>
                     </div>
 
                     {{-- Desktop Table (md+) --}}
@@ -111,16 +120,15 @@
                         <table class="w-full table-fixed text-sm">
                             <colgroup>
                                 <col class="w-[20%]"> {{-- Nama Akun & Catatan --}}
-                                <col class="w-28">     {{-- Platform --}}
-                                <col class="w-36">     {{-- Link URL --}}
-                                <col class="w-40">     {{-- Eksekutor --}}
-                                <col class="w-40">     {{-- Supervisor PM --}}
-                                <col class="w-40">     {{-- Asisten Pengawas --}}
-                                <col class="w-28">     {{-- Aksi --}}
+                                <col class="w-28"> {{-- Platform --}}
+                                <col class="w-36"> {{-- Link URL --}}
+                                <col class="w-40"> {{-- Eksekutor --}}
+                                <col class="w-40"> {{-- Supervisor PM --}}
+                                <col class="w-40"> {{-- Asisten Pengawas --}}
+                                <col class="w-28"> {{-- Aksi --}}
                             </colgroup>
                             <thead>
-                                <tr
-                                    class="bg-gray-50 border-b border-gray-200 text-xs font-semibold text-gray-500 tracking-wide">
+                                <tr class="bg-gray-50 border-b border-gray-200 text-xs font-semibold text-gray-500 tracking-wide">
                                     <th class="px-4 py-3 text-left">Nama Akun</th>
                                     <th class="px-4 py-3 text-left">Platform</th>
                                     <th class="px-4 py-3 text-left">URL</th>
@@ -158,7 +166,7 @@
                                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                             d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
                                                     </svg>
-                                                    <span class="truncate">{{ parse_url($acc->link, PHP_URL_HOST) ?? $acc->link }}</span>
+                                                    <span class="truncate">Buka</span>
                                                 </a>
                                             @else
                                                 <span class="text-xs text-gray-300">—</span>
@@ -167,7 +175,7 @@
                                         <td class="px-4 py-3 text-xs min-w-0">
                                             @if($acc->staffUser)
                                                 @php
-                                                    $staffRoleTag = match($acc->staffUser->role) {
+                                                    $staffRoleTag = match ($acc->staffUser->role) {
                                                         'pm' => 'PM Mandiri',
                                                         'sosmed' => 'Staff Sosmed',
                                                         'digital_marketing' => 'Digital Marketing',
@@ -179,7 +187,8 @@
                                                         title="{{ $acc->staffUser->name }}">
                                                         {{ $acc->staffUser->name }}
                                                     </span>
-                                                    <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold mt-1 {{ $acc->staffUser->role === 'pm' ? 'bg-indigo-50 text-indigo-700 border border-indigo-200' : 'bg-pink-50 text-pink-700 border border-pink-200' }}">
+                                                    <span
+                                                        class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold mt-1 {{ $acc->staffUser->role === 'pm' ? 'bg-indigo-50 text-indigo-700 border border-indigo-200' : 'bg-pink-50 text-pink-700 border border-pink-200' }}">
                                                         {{ $staffRoleTag }}
                                                     </span>
                                                 </div>
@@ -199,12 +208,14 @@
                                                         title="{{ $acc->pmUser->name }}">
                                                         {{ $acc->pmUser->name }}
                                                     </span>
-                                                    <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold mt-1 bg-purple-50 text-purple-700 border border-purple-200">
+                                                    <span
+                                                        class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold mt-1 bg-purple-50 text-purple-700 border border-purple-200">
                                                         Supervisor PM
                                                     </span>
                                                 </div>
                                             @else
-                                                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600 whitespace-nowrap">
+                                                <span
+                                                    class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600 whitespace-nowrap">
                                                     Belum Ada PM
                                                 </span>
                                             @endif
@@ -213,20 +224,24 @@
                                         <td class="px-4 py-3 text-xs min-w-0">
                                             @if($acc->assistantUser)
                                                 <div class="flex items-start gap-2 min-w-0">
-                                                    <div class="w-6 h-6 rounded-full bg-teal-100 text-teal-700 font-bold flex items-center justify-center text-[10px] flex-shrink-0 mt-0.5">
+                                                    <div
+                                                        class="w-6 h-6 rounded-full bg-teal-100 text-teal-700 font-bold flex items-center justify-center text-[10px] flex-shrink-0 mt-0.5">
                                                         {{ strtoupper(substr($acc->assistantUser->name, 0, 1)) }}
                                                     </div>
                                                     <div class="min-w-0 flex-1">
-                                                        <span class="font-semibold text-gray-800 block truncate" title="{{ $acc->assistantUser->name }}">
+                                                        <span class="font-semibold text-gray-800 block truncate"
+                                                            title="{{ $acc->assistantUser->name }}">
                                                             {{ $acc->assistantUser->name }}
                                                         </span>
-                                                        <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold mt-0.5 bg-teal-50 text-teal-700 border border-teal-200">
+                                                        <span
+                                                            class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold mt-0.5 bg-teal-50 text-teal-700 border border-teal-200">
                                                             Asisten HR
                                                         </span>
                                                     </div>
                                                 </div>
                                             @else
-                                                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-400 whitespace-nowrap">
+                                                <span
+                                                    class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-400 whitespace-nowrap">
                                                     Tanpa Asisten
                                                 </span>
                                             @endif
@@ -313,14 +328,15 @@
                                         <p class="font-medium text-gray-800 truncate">
                                             @if($acc->staffUser)
                                                 @php
-                                                    $mRoleTag = match($acc->staffUser->role) {
+                                                    $mRoleTag = match ($acc->staffUser->role) {
                                                         'pm' => 'PM Mandiri',
                                                         'sosmed' => 'Staff Sosmed',
                                                         'digital_marketing' => 'Digital Marketing',
                                                         default => $acc->staffUser->role_label ?? strtoupper($acc->staffUser->role)
                                                     };
                                                 @endphp
-                                                {{ $acc->staffUser->name }} <span class="text-[10px] text-gray-500 font-normal">({{ $mRoleTag }})</span>
+                                                {{ $acc->staffUser->name }} <span
+                                                    class="text-[10px] text-gray-500 font-normal">({{ $mRoleTag }})</span>
                                             @else
                                                 Belum Ditugaskan
                                             @endif
@@ -344,52 +360,50 @@
     {{-- ── TAB 2: MONITORING SELURUH TUGAS ────────────────────────── --}}
     @if($tab === 'tasks')
         <div class="p-4 sm:p-5">
-            <div class="mb-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
-                <div>
-                    <h3 class="text-sm font-semibold text-gray-800">Laporan & Status Pengerjaan Tugas Sosmed</h3>
-                    <p class="text-xs text-gray-500 mt-0.5">Monitoring nama user pelaksana, penanggung jawab PM, dan verifikator</p>
-                </div>
-                <div class="flex items-center gap-2 shrink-0">
-                    {{-- Filter Tanggal --}}
-                    <form action="{{ route('admin.sosmed.index') }}" method="GET">
-                        <input type="hidden" name="tab" value="tasks">
-                        <input type="date" name="task_date" value="{{ $taskDateFilter }}"
-                               class="h-9 px-3 text-xs bg-white border border-gray-300 rounded-lg shadow-sm
-                                      focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500
-                                      text-gray-700 transition w-[8.5rem] sm:w-auto"
-                               onchange="this.form.submit()">
-                    </form>
+            {{-- Top Bar Filter & Action Buttons --}}
+            <div class="mb-4 flex flex-col sm:flex-row items-stretch sm:items-center sm:justify-end gap-2.5 sm:gap-3">
 
+                {{-- Filter Tanggal --}}
+                <form action="{{ route('admin.sosmed.index') }}" method="GET" class="w-full sm:w-auto">
+                    <input type="hidden" name="tab" value="tasks">
+                    <input type="date" name="task_date" value="{{ $taskDateFilter }}" class="w-full sm:w-auto h-9 px-3 text-xs bg-white border border-gray-300 rounded-lg shadow-sm
+                                                           focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500
+                                                           text-gray-700 transition" onchange="this.form.submit()">
+                </form>
+
+                {{-- Action Buttons (Grid di Mobile, Inline di Tablet/Desktop) --}}
+                <div class="grid grid-cols-2 sm:flex sm:items-center gap-2">
                     {{-- Cetak PDF --}}
-                    <button onclick="window.print()"
-                            class="inline-flex items-center gap-2 h-9 px-3 sm:px-3.5 bg-primary-600 hover:bg-primary-700 active:bg-primary-800
-                                   text-white text-xs font-medium rounded-lg transition shadow-sm">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+                    <button onclick="window.print()" class="w-full sm:w-auto inline-flex items-center justify-center gap-2 h-9 px-3 sm:px-3.5 bg-primary-600 hover:bg-primary-700 active:bg-primary-800
+                                                           text-white text-xs font-medium rounded-lg transition shadow-sm">
+                        <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
                         </svg>
-                        <span class="hidden sm:inline">Cetak PDF</span>
+                        <span>Cetak PDF</span>
                     </button>
 
                     {{-- Hapus Data --}}
-                    <div class="relative" id="purgeDropdown">
-                        <button type="button" onclick="togglePurgeDropdown()"
-                                class="inline-flex items-center gap-2 h-9 px-3 sm:px-3.5 bg-white border border-red-200 text-red-600
-                                       hover:bg-red-50 hover:border-red-300 active:bg-red-100
-                                       text-xs font-medium rounded-lg transition shadow-sm">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                    <div class="relative w-full sm:w-auto" id="purgeDropdown">
+                        <button type="button" onclick="togglePurgeDropdown()" class="w-full sm:w-auto inline-flex items-center justify-center gap-2 h-9 px-3 sm:px-3.5 bg-white border border-red-200 text-red-600
+                                                               hover:bg-red-50 hover:border-red-300 active:bg-red-100
+                                                               text-xs font-medium rounded-lg transition shadow-sm">
+                            <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                             </svg>
-                            <span class="hidden sm:inline">Hapus Data</span>
-                            <svg id="purgeChevron" class="w-3.5 h-3.5 text-red-400 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <span>Hapus Data</span>
+                            <svg id="purgeChevron" class="w-3.5 h-3.5 text-red-400 transition-transform duration-200 shrink-0"
+                                fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                             </svg>
                         </button>
 
                         {{-- Dropdown --}}
                         <div id="purgeMenu"
-                             class="absolute right-0 mt-2 w-56 bg-white border border-gray-100 rounded-xl shadow-lg
-                                    opacity-0 invisible translate-y-1
-                                    transition-all duration-150 z-20 overflow-hidden">
+                            class="absolute right-0 mt-2 w-56 bg-white border border-gray-100 rounded-xl shadow-lg
+                                                                                opacity-0 invisible translate-y-1
+                                                                                transition-all duration-150 z-20 overflow-hidden">
                             <div class="px-3.5 py-2.5 bg-gray-50 border-b border-gray-100">
                                 <p class="text-[10px] font-semibold text-gray-400 uppercase tracking-wider">Hapus data tugas</p>
                             </div>
@@ -398,18 +412,18 @@
                                     @csrf
                                     @method('DELETE')
                                     <button type="submit" name="range" value="weekly"
-                                            class="w-full text-left px-3 py-2 text-xs text-red-600 hover:bg-red-50 rounded-lg transition"
-                                            onclick="return confirm('Hapus data sebelum minggu ini?')">
+                                        class="w-full text-left px-3 py-2 text-xs text-red-600 hover:bg-red-50 rounded-lg transition"
+                                        onclick="return confirm('Hapus data sebelum minggu ini?')">
                                         Lebih lama dari 1 Minggu
                                     </button>
                                     <button type="submit" name="range" value="monthly"
-                                            class="w-full text-left px-3 py-2 text-xs text-red-600 hover:bg-red-50 rounded-lg transition"
-                                            onclick="return confirm('Hapus data sebelum bulan ini?')">
+                                        class="w-full text-left px-3 py-2 text-xs text-red-600 hover:bg-red-50 rounded-lg transition"
+                                        onclick="return confirm('Hapus data sebelum bulan ini?')">
                                         Lebih lama dari 1 Bulan
                                     </button>
                                     <button type="submit" name="range" value="yearly"
-                                            class="w-full text-left px-3 py-2 text-xs text-red-600 hover:bg-red-50 rounded-lg transition"
-                                            onclick="return confirm('Hapus data sebelum tahun ini?')">
+                                        class="w-full text-left px-3 py-2 text-xs text-red-600 hover:bg-red-50 rounded-lg transition"
+                                        onclick="return confirm('Hapus data sebelum tahun ini?')">
                                         Lebih lama dari 1 Tahun
                                     </button>
                                 </form>
@@ -432,8 +446,7 @@
                         <col class="w-32"> {{-- Status --}}
                     </colgroup>
                     <thead>
-                        <tr
-                            class="bg-gray-50 border-b border-gray-200 text-xs font-semibold text-gray-500 tracking-wide">
+                        <tr class="bg-gray-50 border-b border-gray-200 text-xs font-semibold text-gray-500 tracking-wide">
                             <th class="px-4 py-3 text-left">Judul Tugas</th>
                             <th class="px-4 py-3 text-left">Akun</th>
                             <th class="px-4 py-3 text-left">PJ PM</th>
@@ -570,62 +583,97 @@
     {{-- ── TAB 3: AUDIT TRAIL LOG APPROVAL ─────────────────────────── --}}
     @if($tab === 'logs')
         <div class="p-4 sm:p-5">
-            <div class="mb-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
-                <div>
-                    <h3 class="text-sm font-semibold text-gray-800">Transparansi Audit Trail & Riwayat Approval</h3>
-                    <p class="text-xs text-gray-500 mt-0.5">Sistem merekam setiap aksi pengerjaan, approval PM, approval HR Staff, hingga penolakan tugas</p>
-                </div>
-                <div class="flex items-center gap-2 shrink-0">
-                    {{-- Filter --}}
-                    <form action="{{ route('admin.sosmed.index') }}" method="GET" class="flex items-center gap-2">
-                        <input type="hidden" name="tab" value="logs">
-                        <select name="log_range"
-                                class="h-9 pl-3 pr-8 text-xs bg-white border border-gray-300 rounded-lg shadow-sm
-                                    focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500
-                                    text-gray-700 transition"
-                                onchange="this.form.submit()">
-                            <option value="">Semua Waktu</option>
-                            <option value="weekly" {{ request('log_range') === 'weekly' ? 'selected' : '' }}>Minggu Ini</option>
-                            <option value="monthly" {{ request('log_range') === 'monthly' ? 'selected' : '' }}>Bulan Ini</option>
-                            <option value="yearly" {{ request('log_range') === 'yearly' ? 'selected' : '' }}>Tahun Ini</option>
-                        </select>
-                        <input type="date" name="log_date" value="{{ request('log_date') }}"
-                            class="h-9 px-3 text-xs bg-white border border-gray-300 rounded-lg shadow-sm
-                                    focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500
-                                    text-gray-700 transition w-[8.5rem] sm:w-auto"
-                            onchange="this.form.submit()">
-                    </form>
+            {{-- Top Bar Filter & Action Buttons --}}
+            <div class="mb-5 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3 sm:gap-4">
 
+                {{-- Form Filter --}}
+                <form action="{{ route('admin.sosmed.index') }}" method="GET"
+                    class="flex flex-col sm:flex-row sm:flex-wrap items-stretch sm:items-center gap-2">
+                    <input type="hidden" name="tab" value="logs">
+
+                    {{-- Search Assignee --}}
+                    <div class="relative w-full sm:w-auto">
+                        <input type="text" name="log_search" value="{{ $logSearch ?? '' }}" placeholder="Cari nama assignee..."
+                            class="w-full sm:w-44 h-9 px-3 text-xs bg-white border border-gray-300 rounded-lg shadow-sm
+                                               focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 text-gray-700 transition">
+                    </div>
+
+                    {{-- Filter Aksi --}}
+                    <select name="log_action"
+                        class="w-full sm:w-auto h-9 pl-3 pr-8 text-xs bg-white border border-gray-300 rounded-lg shadow-sm
+                                                                 focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 text-gray-700 transition"
+                        onchange="this.form.submit()">
+                        <option value="">Semua Aksi</option>
+                        <option value="submitted" {{ request('log_action') === 'submitted' ? 'selected' : '' }}>Selesai Dikerjakan
+                        </option>
+                        <option value="approved_pm" {{ request('log_action') === 'approved_pm' ? 'selected' : '' }}>Diverifikasi
+                            PM</option>
+                        <option value="approved_hr" {{ request('log_action') === 'approved_hr' ? 'selected' : '' }}>Disetujui HR
+                            Staff</option>
+                        <option value="rejected" {{ request('log_action') === 'rejected' ? 'selected' : '' }}>Ditolak / Revisi
+                        </option>
+                    </select>
+
+                    {{-- Filter Rentang Waktu --}}
+                    <select name="log_range"
+                        class="w-full sm:w-auto h-9 pl-3 pr-8 text-xs bg-white border border-gray-300 rounded-lg shadow-sm
+                                                                focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 text-gray-700 transition"
+                        onchange="this.form.submit()">
+                        <option value="">Semua Waktu</option>
+                        <option value="weekly" {{ request('log_range') === 'weekly' ? 'selected' : '' }}>Minggu Ini</option>
+                        <option value="monthly" {{ request('log_range') === 'monthly' ? 'selected' : '' }}>Bulan Ini</option>
+                        <option value="yearly" {{ request('log_range') === 'yearly' ? 'selected' : '' }}>Tahun Ini</option>
+                    </select>
+
+                    {{-- Filter Tanggal --}}
+                    <input type="date" name="log_date" value="{{ $logDateFilter ?? '' }}"
+                        class="w-full sm:w-auto h-9 px-3 text-xs bg-white border border-gray-300 rounded-lg shadow-sm
+                                           focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 text-gray-700 transition" onchange="this.form.submit()">
+
+                    {{-- Submit & Reset (Grouped di Mobile) --}}
+                    <div class="grid grid-cols-2 sm:flex items-center gap-2 mt-1 sm:mt-0">
+                        <button type="submit"
+                            class="h-9 px-3.5 bg-primary-600 hover:bg-primary-700 active:bg-primary-800 text-white text-xs font-medium rounded-lg transition shadow-sm text-center">
+                            Terapkan
+                        </button>
+                        <a href="{{ route('admin.sosmed.index', ['tab' => 'logs']) }}"
+                            class="h-9 px-3.5 bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-medium rounded-lg transition text-center inline-flex items-center justify-center">
+                            Reset
+                        </a>
+                    </div>
+                </form>
+
+                {{-- Action Buttons (Aksi Ekspor & Hapus) --}}
+                <div class="grid grid-cols-2 lg:flex lg:items-center gap-2 pt-2 lg:pt-0 border-t border-gray-100 lg:border-t-0">
                     {{-- Cetak PDF --}}
                     <button onclick="window.print()"
-                            class="inline-flex items-center gap-2 h-9 px-3 sm:px-3.5 bg-primary-600 hover:bg-primary-700 active:bg-primary-800
-                                text-white text-xs font-medium rounded-lg transition shadow-sm">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+                        class="w-full lg:w-auto inline-flex items-center justify-center gap-2 h-9 px-3.5 bg-primary-600 hover:bg-primary-700 active:bg-primary-800 text-white text-xs font-medium rounded-lg transition shadow-sm">
+                        <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
                         </svg>
-                        <span class="hidden sm:inline">Cetak PDF</span>
+                        <span>Cetak PDF</span>
                     </button>
 
-                    {{-- Hapus Data --}}
-                    <div class="relative" id="logsPurgeDropdown">
+                    {{-- Hapus Data Dropdown --}}
+                    <div class="relative w-full lg:w-auto" id="logsPurgeDropdown">
                         <button type="button" onclick="toggleLogsPurgeDropdown()"
-                                class="inline-flex items-center gap-2 h-9 px-3 sm:px-3.5 bg-white border border-red-200 text-red-600
-                                    hover:bg-red-50 hover:border-red-300 active:bg-red-100
-                                    text-xs font-medium rounded-lg transition shadow-sm">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                            class="w-full lg:w-auto inline-flex items-center justify-center gap-2 h-9 px-3.5 bg-white border border-red-200 text-red-600 hover:bg-red-50 hover:border-red-300 active:bg-red-100 text-xs font-medium rounded-lg transition shadow-sm">
+                            <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                             </svg>
-                            <span class="hidden sm:inline">Hapus Data</span>
-                            <svg id="logsPurgeChevron" class="w-3.5 h-3.5 text-red-400 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <span>Hapus Data</span>
+                            <svg id="logsPurgeChevron"
+                                class="w-3.5 h-3.5 text-red-400 transition-transform duration-200 shrink-0" fill="none"
+                                stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                             </svg>
                         </button>
 
-                        {{-- Dropdown --}}
+                        {{-- Dropdown Menu --}}
                         <div id="logsPurgeMenu"
-                            class="absolute right-0 mt-2 w-56 bg-white border border-gray-100 rounded-xl shadow-lg
-                                    opacity-0 invisible translate-y-1
-                                    transition-all duration-150 z-20 overflow-hidden">
+                            class="absolute right-0 mt-2 w-56 bg-white border border-gray-100 rounded-xl shadow-lg opacity-0 invisible translate-y-1 transition-all duration-150 z-20 overflow-hidden">
                             <div class="px-3.5 py-2.5 bg-gray-50 border-b border-gray-100">
                                 <p class="text-[10px] font-semibold text-gray-400 uppercase tracking-wider">Hapus data log</p>
                             </div>
@@ -634,18 +682,18 @@
                                     @csrf
                                     @method('DELETE')
                                     <button type="submit" name="range" value="weekly"
-                                            class="w-full text-left px-3 py-2 text-xs text-red-600 hover:bg-red-50 rounded-lg transition"
-                                            onclick="return confirm('Hapus data sebelum minggu ini?')">
+                                        class="w-full text-left px-3 py-2 text-xs text-red-600 hover:bg-red-50 rounded-lg transition"
+                                        onclick="return confirm('Hapus data sebelum minggu ini?')">
                                         Lebih lama dari 1 Minggu
                                     </button>
                                     <button type="submit" name="range" value="monthly"
-                                            class="w-full text-left px-3 py-2 text-xs text-red-600 hover:bg-red-50 rounded-lg transition"
-                                            onclick="return confirm('Hapus data sebelum bulan ini?')">
+                                        class="w-full text-left px-3 py-2 text-xs text-red-600 hover:bg-red-50 rounded-lg transition"
+                                        onclick="return confirm('Hapus data sebelum bulan ini?')">
                                         Lebih lama dari 1 Bulan
                                     </button>
                                     <button type="submit" name="range" value="yearly"
-                                            class="w-full text-left px-3 py-2 text-xs text-red-600 hover:bg-red-50 rounded-lg transition"
-                                            onclick="return confirm('Hapus data sebelum tahun ini?')">
+                                        class="w-full text-left px-3 py-2 text-xs text-red-600 hover:bg-red-50 rounded-lg transition"
+                                        onclick="return confirm('Hapus data sebelum tahun ini?')">
                                         Lebih lama dari 1 Tahun
                                     </button>
                                 </form>
@@ -667,8 +715,7 @@
                         <col class="w-1/3"> {{-- Catatan --}}
                     </colgroup>
                     <thead>
-                        <tr
-                            class="bg-gray-50 border-b border-gray-200 text-xs font-semibold text-gray-500 tracking-wide">
+                        <tr class="bg-gray-50 border-b border-gray-200 text-xs font-semibold text-gray-500 tracking-wide">
                             <th class="px-4 py-3 text-left">Waktu</th>
                             <th class="px-4 py-3 text-left">Assign</th>
                             <th class="px-4 py-3 text-left">Role</th>
@@ -725,7 +772,8 @@
                         <div class="flex items-start justify-between gap-2 mb-2">
                             <div class="min-w-0">
                                 <p class="font-semibold text-gray-800 text-xs">
-                                    {{ $log->user_name ?? $log->user?->name ?? 'System' }} <span
+                                    {{ $log->user_name ?? $log->user?->name ?? 'System' }}
+                                    <span
                                         class="text-gray-400 font-normal">({{ $log->role_name ?? $log->user?->role_label ?? '—' }})</span>
                                 </p>
                                 <p class="text-[10px] text-gray-400 mt-0.5">{{ $log->created_at->translatedFormat('d M Y, H:i') }}
@@ -748,12 +796,12 @@
                 @endforelse
         </div>
 
+        {{-- Pagination --}}
         <div class="mt-4">
             {{ $logs->links() }}
         </div>
         </div>
     @endif
-    </div>
 
     {{-- ── MODAL CREATE ACCOUNT (ADMIN ONLY) ───────────────────────── --}}
     <div id="modal-create-account" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4">
@@ -769,7 +817,8 @@
                     </svg>
                 </button>
             </div>
-            <form method="POST" action="{{ route('admin.sosmed.accounts.store') }}" class="p-6 pt-1 space-y-4 overflow-y-auto">
+            <form method="POST" action="{{ route('admin.sosmed.accounts.store') }}"
+                class="p-6 pt-1 space-y-4 overflow-y-auto">
                 @csrf
                 <div>
                     <label class="block text-xs font-semibold text-gray-600 mb-1.5">Nama Akun / Username <span
@@ -796,12 +845,13 @@
                 <div>
                     <label class="block text-xs font-semibold text-gray-700 mb-1">Dikelola Oleh <span
                             class="text-gray-400 font-normal">(Opsional)</span></label>
-                    <select name="staff_id" id="create-acc-staff" onchange="syncSupervisorState(this, 'create-acc-pm', 'create-pm-hint')"
+                    <select name="staff_id" id="create-acc-staff"
+                        onchange="syncSupervisorState(this, 'create-acc-pm', 'create-pm-hint')"
                         class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 focus:outline-none">
                         <option value="" data-role="">-- Belum Ditugaskan --</option>
                         @foreach($executors as $ex)
                             @php
-                                $exRoleLabel = match($ex->role) {
+                                $exRoleLabel = match ($ex->role) {
                                     'pm' => 'PM Mandiri',
                                     'sosmed' => 'Staff Sosmed',
                                     'digital_marketing' => 'Digital Marketing',
@@ -826,7 +876,8 @@
                             <option value="{{ $pm->id }}">{{ $pm->name }} (PM)</option>
                         @endforeach
                     </select>
-                    <p id="create-pm-hint" class="text-[11px] text-gray-400 mt-1">PM yang berwenang meninjau & approve bukti postingan Staff.</p>
+                    <p id="create-pm-hint" class="text-[11px] text-gray-400 mt-1">PM yang berwenang meninjau & approve bukti
+                        postingan Staff.</p>
                 </div>
                 <div>
                     <label class="block text-xs font-semibold text-gray-700 mb-1">Wewenang Verifikasi Asisten </label>
@@ -899,12 +950,13 @@
                 </div>
                 <div>
                     <label class="block text-xs font-semibold text-gray-700 mb-1">Dikelola Oleh</label>
-                    <select name="staff_id" id="edit-acc-staff" onchange="syncSupervisorState(this, 'edit-acc-pm', 'edit-pm-hint')"
+                    <select name="staff_id" id="edit-acc-staff"
+                        onchange="syncSupervisorState(this, 'edit-acc-pm', 'edit-pm-hint')"
                         class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 focus:outline-none">
                         <option value="" data-role="">-- Belum Ditugaskan --</option>
                         @foreach($executors as $ex)
                             @php
-                                $exRoleLabel = match($ex->role) {
+                                $exRoleLabel = match ($ex->role) {
                                     'pm' => 'PM Mandiri',
                                     'sosmed' => 'Staff Sosmed',
                                     'digital_marketing' => 'Digital Marketing',
@@ -928,7 +980,8 @@
                             <option value="{{ $pm->id }}">{{ $pm->name }} (PM)</option>
                         @endforeach
                     </select>
-                    <p id="edit-pm-hint" class="text-[11px] text-gray-400 mt-1">PM yang berwenang meninjau & approve bukti postingan Staff.</p>
+                    <p id="edit-pm-hint" class="text-[11px] text-gray-400 mt-1">PM yang berwenang meninjau & approve bukti
+                        postingan Staff.</p>
                 </div>
                 <div>
                     <label class="block text-xs font-semibold text-gray-700 mb-1">Wewenang Verifikasi Asisten</label>
@@ -939,7 +992,8 @@
                             <option value="{{ $ast->id }}">{{ $ast->name }} (Asisten)</option>
                         @endforeach
                     </select>
-                    <p class="text-[11px] text-gray-400 mt-1">Asisten HR yang berwenang meninjau & approve tugas akun ini sebagai backup PM.</p>
+                    <p class="text-[11px] text-gray-400 mt-1">Asisten HR yang berwenang meninjau & approve tugas akun ini
+                        sebagai backup PM.</p>
                 </div>
                 <div>
                     <label class="block text-xs font-semibold text-gray-600 mb-1.5">Catatan / Briefing</label>
@@ -1008,7 +1062,7 @@
                 const button = document.createElement('button');
                 button.type = 'button';
                 button.className = 'w-full border border-gray-300 rounded-lg px-3 py-2 text-sm text-left flex justify-between items-center transition ' +
-                                   (select.disabled ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 'bg-white text-gray-800 focus:ring-2 focus:ring-primary-500 focus:outline-none');
+                    (select.disabled ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 'bg-white text-gray-800 focus:ring-2 focus:ring-primary-500 focus:outline-none');
 
                 const label = document.createElement('span');
                 label.className = 'truncate block';
@@ -1023,11 +1077,11 @@
                 const searchBox = document.createElement('div');
                 searchBox.className = 'p-2 border-b border-gray-100 sticky top-0 bg-white rounded-t-lg';
                 searchBox.innerHTML = `
-                    <div class="relative">
-                        <input type="text" placeholder="Cari..." class="w-full pl-8 pr-2 py-1.5 text-xs border border-gray-200 rounded-md focus:outline-none focus:ring-1 focus:ring-primary-500 bg-gray-50 transition">
-                        <svg class="w-3.5 h-3.5 text-gray-400 absolute left-2.5 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
-                    </div>
-                `;
+                                                <div class="relative">
+                                                    <input type="text" placeholder="Cari..." class="w-full pl-8 pr-2 py-1.5 text-xs border border-gray-200 rounded-md focus:outline-none focus:ring-1 focus:ring-primary-500 bg-gray-50 transition">
+                                                    <svg class="w-3.5 h-3.5 text-gray-400 absolute left-2.5 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                                                </div>
+                                            `;
                 const searchInput = searchBox.querySelector('input');
 
                 const list = document.createElement('ul');
@@ -1043,7 +1097,7 @@
 
                         const li = document.createElement('li');
                         li.className = 'px-3 py-1.5 text-sm cursor-pointer rounded-md mb-0.5 transition-colors ' +
-                                       (select.value === opt.value ? 'bg-primary-50 text-primary-700 font-medium' : 'hover:bg-gray-100 text-gray-700');
+                            (select.value === opt.value ? 'bg-primary-50 text-primary-700 font-medium' : 'hover:bg-gray-100 text-gray-700');
                         li.textContent = text;
                         li.addEventListener('click', (e) => {
                             e.stopPropagation();
@@ -1123,67 +1177,68 @@
         });
 
         function toggleLogsPurgeDropdown() {
-                const menu = document.getElementById('logsPurgeMenu');
-                const chevron = document.getElementById('logsPurgeChevron');
-                const isOpen = !menu.classList.contains('invisible');
+            const menu = document.getElementById('logsPurgeMenu');
+            const chevron = document.getElementById('logsPurgeChevron');
+            const isOpen = !menu.classList.contains('invisible');
 
-                if (isOpen) {
-                    closeLogsPurgeDropdown();
-                } else {
-                    menu.classList.remove('opacity-0', 'invisible', 'translate-y-1');
-                    chevron.classList.add('rotate-180');
-                }
+            if (isOpen) {
+                closeLogsPurgeDropdown();
+            } else {
+                menu.classList.remove('opacity-0', 'invisible', 'translate-y-1');
+                chevron.classList.add('rotate-180');
             }
+        }
 
-            function closeLogsPurgeDropdown() {
-                const menu = document.getElementById('logsPurgeMenu');
-                const chevron = document.getElementById('logsPurgeChevron');
-                menu.classList.add('opacity-0', 'invisible', 'translate-y-1');
-                chevron.classList.remove('rotate-180');
+        function closeLogsPurgeDropdown() {
+            const menu = document.getElementById('logsPurgeMenu');
+            const chevron = document.getElementById('logsPurgeChevron');
+            menu.classList.add('opacity-0', 'invisible', 'translate-y-1');
+            chevron.classList.remove('rotate-180');
+        }
+
+        document.addEventListener('click', function (event) {
+            const dropdown = document.getElementById('logsPurgeDropdown');
+            if (dropdown && !dropdown.contains(event.target)) {
+                closeLogsPurgeDropdown();
             }
-
-            document.addEventListener('click', function (event) {
-                const dropdown = document.getElementById('logsPurgeDropdown');
-                if (dropdown && !dropdown.contains(event.target)) {
-                    closeLogsPurgeDropdown();
-                }
-            });
+        });
 
         function togglePurgeDropdown() {
-                const menu = document.getElementById('purgeMenu');
-                const chevron = document.getElementById('purgeChevron');
-                const isOpen = !menu.classList.contains('invisible');
+            const menu = document.getElementById('purgeMenu');
+            const chevron = document.getElementById('purgeChevron');
+            const isOpen = !menu.classList.contains('invisible');
 
-                if (isOpen) {
-                    closePurgeDropdown();
-                } else {
-                    menu.classList.remove('opacity-0', 'invisible', 'translate-y-1');
-                    chevron.classList.add('rotate-180');
-                }
+            if (isOpen) {
+                closePurgeDropdown();
+            } else {
+                menu.classList.remove('opacity-0', 'invisible', 'translate-y-1');
+                chevron.classList.add('rotate-180');
             }
+        }
 
-            function closePurgeDropdown() {
-                const menu = document.getElementById('purgeMenu');
-                const chevron = document.getElementById('purgeChevron');
-                menu.classList.add('opacity-0', 'invisible', 'translate-y-1');
-                chevron.classList.remove('rotate-180');
+        function closePurgeDropdown() {
+            const menu = document.getElementById('purgeMenu');
+            const chevron = document.getElementById('purgeChevron');
+            menu.classList.add('opacity-0', 'invisible', 'translate-y-1');
+            chevron.classList.remove('rotate-180');
+        }
+
+        // Tutup dropdown kalau klik di luar area dropdown
+        document.addEventListener('click', function (event) {
+            const dropdown = document.getElementById('purgeDropdown');
+            if (dropdown && !dropdown.contains(event.target)) {
+                closePurgeDropdown();
             }
-
-            // Tutup dropdown kalau klik di luar area dropdown
-            document.addEventListener('click', function (event) {
-                const dropdown = document.getElementById('purgeDropdown');
-                if (dropdown && !dropdown.contains(event.target)) {
-                    closePurgeDropdown();
-                }
-            });
+        });
 
         // The old functions are now deprecated but kept empty to avoid breaking legacy onclick handlers
-        function filterSelectOptions(query, selectId) {}
-        function resetSearchFilter(inputId, selectId) {}
+        function filterSelectOptions(query, selectId) { }
+        function resetSearchFilter(inputId, selectId) { }
 
         function syncSupervisorState(staffSelect, pmSelectId, hintId) {
             if (!staffSelect) return;
             const pmSelect = document.getElementById(pmSelectId);
+            const astSelect = document.getElementById(staffSelect.id.replace('staff', 'ast'));
             const hint = document.getElementById(hintId);
             if (!pmSelect) return;
 
@@ -1191,15 +1246,30 @@
             const role = selectedOption ? selectedOption.getAttribute('data-role') : null;
 
             if (role === 'pm') {
+                // Ketika PM langsung, disable PM dan Asisten dropdown
                 pmSelect.value = '';
                 pmSelect.disabled = true;
                 pmSelect.classList.add('bg-gray-100', 'text-gray-400', 'cursor-not-allowed');
+                
+                if (astSelect) {
+                    astSelect.value = '';
+                    astSelect.disabled = true;
+                    astSelect.classList.add('bg-gray-100', 'text-gray-400', 'cursor-not-allowed');
+                }
+                
                 if (hint) {
-                    hint.innerHTML = '<span class="text-red-700 font-semibold"> Akun dikelola langsung oleh PM.</span>';
+                    hint.innerHTML = '<span class="text-red-700 font-semibold"> Akun dikelola langsung oleh PM. Asisten tidak diperlukan.</span>';
                 }
             } else {
+                // Ketika Staff Sosmed, enable PM dan Asisten dropdown
                 pmSelect.disabled = false;
                 pmSelect.classList.remove('bg-gray-100', 'text-gray-400', 'cursor-not-allowed');
+                
+                if (astSelect) {
+                    astSelect.disabled = false;
+                    astSelect.classList.remove('bg-gray-100', 'text-gray-400', 'cursor-not-allowed');
+                }
+                
                 if (hint) {
                     hint.innerHTML = 'PM yang berwenang meninjau & approve bukti postingan Staff.';
                 }
@@ -1255,7 +1325,7 @@
 
         // Enable any disabled select before submitting forms so payload isn't dropped
         document.querySelectorAll('form').forEach(form => {
-            form.addEventListener('submit', function() {
+            form.addEventListener('submit', function () {
                 this.querySelectorAll('select:disabled').forEach(sel => {
                     sel.disabled = false;
                 });
@@ -1276,11 +1346,11 @@
                     item.rel = 'noopener noreferrer';
                     item.className = 'flex items-start gap-2.5 p-3 rounded-lg border border-gray-100 hover:border-primary-300 hover:bg-primary-50/50 transition group';
                     item.innerHTML = `
-                                <span class="flex-shrink-0 w-5 h-5 rounded-full bg-primary-100 text-primary-700 text-[10px] font-bold flex items-center justify-center mt-0.5">${i + 1}</span>
-                                <span class="text-xs text-primary-700 group-hover:underline break-all leading-relaxed">${url}</span>
-                                <svg class="w-3.5 h-3.5 flex-shrink-0 text-gray-400 group-hover:text-primary-600 mt-0.5 ml-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
-                                </svg>`;
+                                                            <span class="flex-shrink-0 w-5 h-5 rounded-full bg-primary-100 text-primary-700 text-[10px] font-bold flex items-center justify-center mt-0.5">${i + 1}</span>
+                                                            <span class="text-xs text-primary-700 group-hover:underline break-all leading-relaxed">${url}</span>
+                                                            <svg class="w-3.5 h-3.5 flex-shrink-0 text-gray-400 group-hover:text-primary-600 mt-0.5 ml-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+                                                            </svg>`;
                     body.appendChild(item);
                 });
             }

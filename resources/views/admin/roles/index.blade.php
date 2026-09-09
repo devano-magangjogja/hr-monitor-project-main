@@ -186,9 +186,9 @@
     </div>
 
     {{-- MODAL TAMBAH ROLE --}}
-    <div id="modal-create-role" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/50 overflow-y-auto p-4">
-        <div class="bg-white rounded-2xl shadow-xl w-full max-w-lg my-8">
-            <div class="flex items-center justify-between px-6 py-4 border-b border-gray-200">
+    <div id="modal-create-role" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+        <div class="bg-white rounded-2xl shadow-xl w-full max-w-lg max-h-[90vh] flex flex-col">
+            <div class="flex items-center justify-between px-6 py-4 border-b border-gray-200 flex-shrink-0">
                 <div>
                     <h3 class="text-base font-semibold text-gray-800">Tambah Role Baru</h3>
                     <p class="text-xs text-gray-400 mt-0.5">Tentukan nama role dan template peran antarmukanya</p>
@@ -200,7 +200,7 @@
                     </svg>
                 </button>
             </div>
-            <form action="{{ route('admin.roles.store') }}" method="POST" class="px-6 py-5 space-y-4">
+            <form action="{{ route('admin.roles.store') }}" method="POST" class="px-6 py-5 pt-1 space-y-4 overflow-y-auto flex-1">
                 @csrf
                 {{-- Nama Role --}}
                 <div>
@@ -258,9 +258,9 @@
     </div>
 
     {{-- MODAL EDIT ROLE --}}
-    <div id="modal-edit-role" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/50 overflow-y-auto p-4">
-        <div class="bg-white rounded-2xl shadow-xl w-full max-w-lg my-8">
-            <div class="flex items-center justify-between px-6 py-4 border-b border-gray-200">
+    <div id="modal-edit-role" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+        <div class="bg-white rounded-2xl shadow-xl w-full max-w-lg max-h-[90vh] flex flex-col">
+            <div class="flex items-center justify-between px-6 py-4 border-b border-gray-200 flex-shrink-0">
                 <div>
                     <h3 class="text-base font-semibold text-gray-800">Edit Role</h3>
                     <p id="edit-role-subtitle" class="text-xs text-gray-400 mt-0.5"></p>
@@ -272,7 +272,7 @@
                     </svg>
                 </button>
             </div>
-            <form id="form-edit-role" action="" method="POST" class="px-6 py-5 space-y-4">
+            <form id="form-edit-role" action="" method="POST" class="px-6 py-5 pt-1 space-y-4 overflow-y-auto flex-1">
                 @csrf
                 @method('PATCH')
                 

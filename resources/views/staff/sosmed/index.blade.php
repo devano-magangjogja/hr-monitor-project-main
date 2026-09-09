@@ -101,22 +101,22 @@
                     <div class="hidden md:block overflow-x-auto rounded-lg border border-gray-100">
                         <table class="w-full table-fixed text-sm">
                             <colgroup>
-                                <col class="w-1/5"> {{-- nama akun --}}
-                                <col class="w-28"> {{-- platform --}}
-                                <col class="w-1/5"> {{-- link --}}
-                                <col class="w-1/6"> {{-- Eksekutor --}}
-                                <col class="w-1/6"> {{-- Supervisor PM --}}
-                                <col class="w-1/6"> {{-- Asisten Pengawas --}}
-                                <col class="w-20"> {{-- aksi --}}
+                                <col class="w-[20%]"> {{-- Nama Akun & Catatan --}}
+                                <col class="w-28"> {{-- Platform --}}
+                                <col class="w-36"> {{-- Link URL --}}
+                                <col class="w-40"> {{-- Eksekutor --}}
+                                <col class="w-40"> {{-- Supervisor PM --}}
+                                <col class="w-40"> {{-- Asisten Pengawas --}}
+                                <col class="w-28"> {{-- Aksi --}}
                             </colgroup>
                             <thead>
                                 <tr
-                                    class="bg-gray-50 border-b border-gray-200 text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                                    class="bg-gray-50 border-b border-gray-200 text-xs font-semibold text-gray-500 tracking-wide">
                                     <th class="px-4 py-3 text-left">Nama Akun</th>
                                     <th class="px-4 py-3 text-left">Platform</th>
-                                    <th class="px-4 py-3 text-left">Link Akun</th>
-                                    <th class="px-4 py-3 text-left">Eksekutor</th>
-                                    <th class="px-4 py-3 text-left">Supervisor PM</th>
+                                    <th class="px-4 py-3 text-left">URL</th>
+                                    <th class="px-4 py-3 text-left">Dikelola</th>
+                                    <th class="px-4 py-3 text-left">PM</th>
                                     <th class="px-4 py-3 text-left">Asisten Pengawas</th>
                                     <th class="px-4 py-3 text-center">Aksi</th>
                                 </tr>
@@ -533,7 +533,7 @@
                     </svg>
                 </button>
             </div>
-            <form id="form-assign" method="POST" action="" class="p-6 pt-4 space-y-4">
+            <form id="form-assign" method="POST" action="" class="p-6 pt-1 space-y-4">
                 @csrf @method('PATCH')
                 <div class="bg-gray-50 p-3 rounded-lg border border-gray-200">
                     <p class="text-xs text-gray-500 mb-0.5">Nama Akun Sosial Media</p>
@@ -629,7 +629,7 @@
                 </button>
             </div>
 
-            <form id="form-verify" method="POST" action="" class="p-6 space-y-4">
+            <form id="form-verify" method="POST" action="" class="p-6 pt-1 space-y-4">
                 @csrf @method('PATCH')
                 <input type="hidden" name="action" :value="action">
 
@@ -870,6 +870,7 @@
         function syncSupervisorState(staffSelect, pmSelectId, hintId) {
             if (!staffSelect) return;
             const pmSelect = document.getElementById(pmSelectId);
+            const assistantSelect = document.getElementById('assign-assistant-sel');
             const hint = document.getElementById(hintId);
             if (!pmSelect) return;
 
@@ -880,12 +881,27 @@
                 pmSelect.value = '';
                 pmSelect.disabled = true;
                 pmSelect.classList.add('bg-gray-100', 'text-gray-400', 'cursor-not-allowed');
+                
+                // Also disable assistant selection
+                if (assistantSelect) {
+                    assistantSelect.value = '';
+                    assistantSelect.disabled = true;
+                    assistantSelect.classList.add('bg-gray-100', 'text-gray-400', 'cursor-not-allowed');
+                }
+                
                 if (hint) {
-                    hint.innerHTML = '<span class="text-indigo-600 font-semibold">🔒 PM Mandiri:</span> Akun dikelola langsung oleh PM. Hasil pengerjaan otomatis lolos Level 1 dan langsung diverifikasi HR Staff (supervisor otomatis dinonaktifkan).';
+                    hint.innerHTML = '<span class="text-indigo-600 font-semibold">🔒 PM Mandiri:</span> Akun dikelola langsung oleh PM. Hasil pengerjaan otomatis lolos Level 1 dan langsung diverifikasi HR Staff (supervisor dan asisten otomatis dinonaktifkan).';
                 }
             } else {
                 pmSelect.disabled = false;
                 pmSelect.classList.remove('bg-gray-100', 'text-gray-400', 'cursor-not-allowed');
+                
+                // Enable assistant selection
+                if (assistantSelect) {
+                    assistantSelect.disabled = false;
+                    assistantSelect.classList.remove('bg-gray-100', 'text-gray-400', 'cursor-not-allowed');
+                }
+                
                 if (hint) {
                     hint.innerHTML = 'PM yang berwenang meninjau & approve tugas. Jika PM mengelola akun mandiri, bagian ini otomatis dinonaktifkan.';
                 }

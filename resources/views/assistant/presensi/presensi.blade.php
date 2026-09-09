@@ -578,21 +578,21 @@
     {{-- ── MODAL CATAT PRESENSI ──────────────────────────────── --}}
     <div id="modal-create" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4">
         <div
-            class="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden animate-in fade-in zoom-in-95 duration-150">
-            <div class="flex items-center justify-between px-5 py-3.5 border-b border-gray-200 bg-gray-50/50">
+            class="bg-white rounded-2xl shadow-xl w-full max-w-md max-h-[90vh] flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+            <div class="flex items-center justify-between px-5 py-3.5 border-b border-gray-200 bg-gray-50/50 flex-shrink-0">
                 <div>
                     <h3 class="text-sm sm:text-base font-bold text-gray-800">Catat Presensi Pemagang</h3>
                     <p class="text-[11px] text-gray-500 mt-0.5">Input kehadiran pemagang hari ini</p>
                 </div>
                 <button onclick="document.getElementById('modal-create').classList.add('hidden')"
-                    class="text-gray-400 hover:text-gray-600 p-1 rounded-lg hover:bg-gray-100 transition">
+                    class="text-gray-400 hover:text-gray-600 p-1 rounded-lg hover:bg-gray-100 transition flex-shrink-0">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                     </svg>
                 </button>
             </div>
 
-            <form action="{{ route('assistant.presensi.store') }}" method="POST" class="px-5 pt-3 pb-4 space-y-3">
+            <form action="{{ route('assistant.presensi.store') }}" method="POST" class="px-5 pt-3 pb-4 space-y-3 overflow-y-auto flex-1">
                 @csrf
 
                 {{-- Tanggal Presensi (Otomatis Hari Ini & Terkunci) --}}
@@ -629,7 +629,8 @@
                         @endif
                     </div>
                     <select name="kantor" id="create-kantor" required
-                        class="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-xs sm:text-sm font-semibold text-gray-800 focus:ring-2 focus:ring-primary-500 focus:bg-white transition">
+                        {{ $assignedKantor ? 'disabled' : '' }}
+                        class="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-xs sm:text-sm font-semibold text-gray-800 focus:ring-2 focus:ring-primary-500 focus:bg-white transition {{ $assignedKantor ? 'bg-gray-100 text-gray-400 cursor-not-allowed border-gray-200' : '' }}">
                         @if(!$assignedKantor && !$selectedKantor)
                             <option value="" disabled selected>-- Pilih Lokasi Kantor Tugas --</option>
                         @endif
@@ -647,6 +648,14 @@
                             </svg>
                             Belum ada penempatan dari Staff/Admin. Memilih kantor ini akan otomatis mencatat tugas Anda hari
                             ini.
+                        </p>
+                    @else
+                        <p class="text-[11px] text-blue-600 mt-1 flex items-center gap-1">
+                            <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                            </svg>
+                            Hanya Admin atau Staff yang dapat mengubah lokasi kantor.
                         </p>
                     @endif
                 </div>
@@ -804,7 +813,7 @@
                         class="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:bg-white transition hover:bg-white hover:border-primary-500"></textarea>
                 </div>
 
-                <div class="flex justify-end gap-2.5 pt-2.5 border-t border-gray-100">
+                <div class="flex justify-end gap-2.5 pt-2.5 border-t border-gray-100 flex-shrink-0">
                     <button type="button" onclick="document.getElementById('modal-create').classList.add('hidden')"
                         class="px-3.5 py-2 text-xs sm:text-sm text-gray-600 font-medium border border-gray-300 rounded-lg hover:bg-gray-50 transition">
                         Batal
@@ -822,21 +831,21 @@
     {{-- ── MODAL EDIT PRESENSI ────────────────────────────────── --}}
     <div id="modal-edit" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4">
         <div
-            class="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden animate-in fade-in zoom-in-95 duration-150">
-            <div class="flex items-center justify-between px-5 py-3.5 border-b border-gray-200 bg-gray-50/50">
+            class="bg-white rounded-2xl shadow-xl w-full max-w-md max-h-[90vh] flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+            <div class="flex items-center justify-between px-5 py-3.5 border-b border-gray-200 bg-gray-50/50 flex-shrink-0">
                 <div>
                     <h3 class="text-sm sm:text-base font-bold text-gray-800">Edit Data Presensi</h3>
                     <p id="edit-pemagang-name" class="text-xs text-primary-600 font-medium mt-0.5"></p>
                 </div>
                 <button onclick="document.getElementById('modal-edit').classList.add('hidden')"
-                    class="text-gray-400 hover:text-gray-600 p-1 rounded-lg hover:bg-gray-100 transition">
+                    class="text-gray-400 hover:text-gray-600 p-1 rounded-lg hover:bg-gray-100 transition flex-shrink-0">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                     </svg>
                 </button>
             </div>
 
-            <form id="form-edit" action="" method="POST" class="px-5 pt-3 pb-4 space-y-3">
+            <form id="form-edit" action="" method="POST" class="px-5 pt-3 pb-4 space-y-3 overflow-y-auto flex-1">
                 @csrf
                 @method('PATCH')
 
@@ -955,7 +964,7 @@
                         class="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:bg-white transition hover:bg-white hover:border-primary-500"></textarea>
                 </div>
 
-                <div class="flex justify-end gap-2.5 pt-2.5 border-t border-gray-100">
+                <div class="flex justify-end gap-2.5 pt-2.5 border-t border-gray-100 flex-shrink-0">
                     <button type="button" onclick="document.getElementById('modal-edit').classList.add('hidden')"
                         class="px-3.5 py-2 text-xs sm:text-sm text-gray-600 font-medium border border-gray-300 rounded-lg hover:bg-gray-50 transition">
                         Batal
