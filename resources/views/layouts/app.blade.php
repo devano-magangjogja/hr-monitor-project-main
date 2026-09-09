@@ -108,6 +108,16 @@
     {{-- ── MAIN AREA ─────────────────────────────────────── --}}
     <div class="flex-1 flex flex-col overflow-hidden min-w-0">
 
+        {{-- Print Header (Logo & Company Name - Visible Only When Printing) --}}
+        <div class="hidden print:flex items-center justify-center gap-3 bg-white p-4 border-b border-gray-300 print:border-b">
+            <img src="{{ asset('images/logo_square.jpg') }}" alt="{{ $appName }}" 
+                 class="w-10 h-10 object-contain rounded-md">
+            <div>
+                <h2 class="text-lg font-bold text-gray-800">{{ $appName }}</h2>
+                <p class="text-xs text-gray-500">Sistem Monitoring HR & Tugas</p>
+            </div>
+        </div>
+
         {{-- Topbar --}}
         <header class="bg-white border-b border-gray-200 px-3 sm:px-4 md:px-6 py-3 sm:py-4 flex items-center
                        justify-between flex-shrink-0 shadow-sm gap-2 sm:gap-3 print:hidden h-16 sm:h-[72px]">
