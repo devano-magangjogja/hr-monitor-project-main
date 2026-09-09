@@ -870,6 +870,7 @@
         function syncSupervisorState(staffSelect, pmSelectId, hintId) {
             if (!staffSelect) return;
             const pmSelect = document.getElementById(pmSelectId);
+            const assistantSelect = document.getElementById('assign-assistant-sel');
             const hint = document.getElementById(hintId);
             if (!pmSelect) return;
 
@@ -880,12 +881,27 @@
                 pmSelect.value = '';
                 pmSelect.disabled = true;
                 pmSelect.classList.add('bg-gray-100', 'text-gray-400', 'cursor-not-allowed');
+                
+                // Also disable assistant selection
+                if (assistantSelect) {
+                    assistantSelect.value = '';
+                    assistantSelect.disabled = true;
+                    assistantSelect.classList.add('bg-gray-100', 'text-gray-400', 'cursor-not-allowed');
+                }
+                
                 if (hint) {
-                    hint.innerHTML = '<span class="text-indigo-600 font-semibold">🔒 PM Mandiri:</span> Akun dikelola langsung oleh PM. Hasil pengerjaan otomatis lolos Level 1 dan langsung diverifikasi HR Staff (supervisor otomatis dinonaktifkan).';
+                    hint.innerHTML = '<span class="text-indigo-600 font-semibold">🔒 PM Mandiri:</span> Akun dikelola langsung oleh PM. Hasil pengerjaan otomatis lolos Level 1 dan langsung diverifikasi HR Staff (supervisor dan asisten otomatis dinonaktifkan).';
                 }
             } else {
                 pmSelect.disabled = false;
                 pmSelect.classList.remove('bg-gray-100', 'text-gray-400', 'cursor-not-allowed');
+                
+                // Enable assistant selection
+                if (assistantSelect) {
+                    assistantSelect.disabled = false;
+                    assistantSelect.classList.remove('bg-gray-100', 'text-gray-400', 'cursor-not-allowed');
+                }
+                
                 if (hint) {
                     hint.innerHTML = 'PM yang berwenang meninjau & approve tugas. Jika PM mengelola akun mandiri, bagian ini otomatis dinonaktifkan.';
                 }

@@ -629,7 +629,8 @@
                         @endif
                     </div>
                     <select name="kantor" id="create-kantor" required
-                        class="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-xs sm:text-sm font-semibold text-gray-800 focus:ring-2 focus:ring-primary-500 focus:bg-white transition">
+                        {{ $assignedKantor ? 'disabled' : '' }}
+                        class="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-xs sm:text-sm font-semibold text-gray-800 focus:ring-2 focus:ring-primary-500 focus:bg-white transition {{ $assignedKantor ? 'bg-gray-100 text-gray-400 cursor-not-allowed border-gray-200' : '' }}">
                         @if(!$assignedKantor && !$selectedKantor)
                             <option value="" disabled selected>-- Pilih Lokasi Kantor Tugas --</option>
                         @endif
@@ -647,6 +648,14 @@
                             </svg>
                             Belum ada penempatan dari Staff/Admin. Memilih kantor ini akan otomatis mencatat tugas Anda hari
                             ini.
+                        </p>
+                    @else
+                        <p class="text-[11px] text-blue-600 mt-1 flex items-center gap-1">
+                            <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                            </svg>
+                            Kantor tugas sudah ditetapkan. Tidak dapat diubah.
                         </p>
                     @endif
                 </div>
