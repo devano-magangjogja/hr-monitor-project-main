@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Traits\LogsActivity;
 use App\Models\Task;
 use App\Services\TaskService;
 use Illuminate\Http\Request;
@@ -10,6 +11,8 @@ use Illuminate\Validation\ValidationException;
 
 class TaskController extends Controller
 {
+    use LogsActivity;
+
     public function __construct(
         protected TaskService $taskService
     ) {
@@ -35,7 +38,8 @@ class TaskController extends Controller
         ]);
 
         try {
-            $this->taskService->createAssignedTask($validated);
+            $task = $this->taskService->createAssignedTask($validated);
+            $this->logActivity('task.created', 'Tugas', "Membuat tugas '{$validated['title']}' dan dikirim ke penerima", $task);
             return redirect()->route('admin.tasks.index')
                 ->with('success', 'Tugas berhasil dibuat dan dikirim ke penerima.');
         } catch (ValidationException $e) {
@@ -55,6 +59,7 @@ class TaskController extends Controller
 
         try {
             $this->taskService->updateTask($task, $validated);
+            $this->logActivity('task.updated', 'Tugas', "Memperbarui tugas '{$task->title}'", $task);
             return back()->with('success', 'Tugas berhasil diperbarui.');
         } catch (ValidationException $e) {
             return back()->with('error', $e->errors()['task'][0] ?? 'Gagal memperbarui tugas.');
@@ -64,7 +69,9 @@ class TaskController extends Controller
     public function destroy(Task $task)
     {
         try {
+            $title = $task->title;
             $this->taskService->deleteTask($task);
+            $this->logActivity('task.deleted', 'Tugas', "Menghapus tugas '{$title}'");
             return back()->with('success', 'Tugas berhasil dihapus.');
         } catch (ValidationException $e) {
             return back()->with('error', $e->errors()['task'][0] ?? 'Gagal menghapus tugas.');
@@ -154,7 +161,9 @@ class TaskController extends Controller
         $redirect = url()->previous();
 
         try {
+            $title = $task->title;
             $this->taskService->forceDeleteTask($task);
+            $this->logActivity('task.deleted', 'Tugas', "Force-hapus tugas '{$title}'");
             return redirect($redirect)->with('success', 'Tugas berhasil dihapus.');
         } catch (ValidationException $e) {
             return redirect($redirect)->with('error', $e->errors()['task'][0] ?? 'Gagal menghapus tugas.');

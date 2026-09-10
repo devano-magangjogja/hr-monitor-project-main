@@ -3,12 +3,15 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Traits\LogsActivity;
 use App\Models\DefaultTask;
 use App\Services\DefaultTaskService;
 use Illuminate\Http\Request;
 
 class DefaultTaskController extends Controller
 {
+    use LogsActivity;
+
     public function __construct(
         protected DefaultTaskService $defaultTaskService
     ) {}
@@ -29,7 +32,8 @@ class DefaultTaskController extends Controller
             'is_active'   => ['nullable', 'boolean'],
         ]);
 
-        $this->defaultTaskService->create($validated);
+        $task = $this->defaultTaskService->create($validated);
+        $this->logActivity('task.created', 'Tugas', "Menambahkan tugas default '{$validated['title']}' untuk role {$validated['target_role']}", $task);
 
         return redirect()->route('admin.default-tasks.index')
             ->with('success', 'Default task berhasil ditambahkan.');
@@ -45,6 +49,7 @@ class DefaultTaskController extends Controller
         ]);
 
         $this->defaultTaskService->update($defaultTask, $validated);
+        $this->logActivity('task.updated', 'Tugas', "Memperbarui tugas default '{$defaultTask->title}'", $defaultTask);
 
         return redirect()->route('admin.default-tasks.index')
             ->with('success', 'Default task berhasil diperbarui.');
@@ -52,7 +57,9 @@ class DefaultTaskController extends Controller
 
     public function destroy(DefaultTask $defaultTask)
     {
+        $title = $defaultTask->title;
         $this->defaultTaskService->delete($defaultTask);
+        $this->logActivity('task.deleted', 'Tugas', "Menghapus tugas default '{$title}'");
 
         return redirect()->route('admin.default-tasks.index')
             ->with('success', 'Default task berhasil dihapus.');

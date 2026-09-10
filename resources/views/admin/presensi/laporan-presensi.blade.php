@@ -170,11 +170,34 @@
     </form>
 </div>
 
-{{-- ── TABEL 1: Rekapitulasi Per Pemagang ──────────────────── --}}
-<div id="tabel-rekap-pemagang" class="bg-white rounded-xl border border-gray-200 print:border-gray-300 overflow-hidden shadow-sm print:shadow-none mb-8 print:mb-6 scroll-mt-6 print-avoid-break">
-    <div class="px-6 py-4 print:px-4 print:py-2.5 border-b border-gray-200 print:border-gray-300 bg-gray-50/60 print:bg-gray-100 flex items-center justify-between">
+{{-- ── TAB NAVIGATION ─────────────────────────────────── --}}
+<div class="print:hidden bg-white rounded-t-xl border border-b-0 border-gray-200 overflow-hidden mb-0 shadow-sm">
+    <div class="flex border-b border-gray-200 overflow-x-auto scrollbar-none">
+        <a href="{{ route('admin.presensi.laporan') }}"
+           class="flex items-center gap-2 px-5 py-3.5 text-sm font-medium whitespace-nowrap border-b-2 transition
+                  {{ !request('tab') || request('tab') === 'rekapitulasi' ? 'border-primary-600 text-primary-600 bg-primary-50/50' : 'border-transparent text-gray-500 hover:text-gray-700 hover:bg-gray-50' }}">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+            </svg>
+            Rekapitulasi Pemagang
+        </a>
+        <a href="{{ route('admin.presensi.laporan', ['tab' => 'riwayat']) }}"
+           class="flex items-center gap-2 px-5 py-3.5 text-sm font-medium whitespace-nowrap border-b-2 transition
+                  {{ request('tab') === 'riwayat' ? 'border-primary-600 text-primary-600 bg-primary-50/50' : 'border-transparent text-gray-500 hover:text-gray-700 hover:bg-gray-50' }}">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+            </svg>
+            Riwayat Detail Log
+        </a>
+    </div>
+</div>
+
+{{-- ── TAB 1: REKAPITULASI PEMAGANG ──────────────────── --}}
+@if(!request('tab') || request('tab') === 'rekapitulasi')
+<div class="bg-white rounded-b-xl border border-t-0 border-gray-200 print:rounded-xl print:border-gray-300 overflow-hidden shadow-sm print:shadow-none mb-8 print:mb-6 scroll-mt-6 print-avoid-break">
+    <div id="tabel-rekap-pemagang" class="px-6 py-4 print:px-4 print:py-2.5 border-b border-gray-200 print:border-gray-300 bg-gray-50/60 print:bg-gray-100 flex items-center justify-between">
         <div>
-            <h2 class="text-sm sm:text-base print:text-sm font-bold text-gray-800">I. Rekapitulasi Kehadiran per Pemagang</h2>
+            <h2 class="text-sm sm:text-base print:text-sm font-bold text-gray-800">Rekapitulasi Kehadiran per Pemagang</h2>
             <p class="text-xs print:text-[11px] text-gray-500">Ringkasan performa dan tingkat kedisiplinan kehadiran setiap individu</p>
         </div>
         <span class="text-xs font-semibold px-2.5 py-1 bg-primary-50 text-primary-700 rounded-full print:bg-transparent print:text-gray-700 print:border print:border-gray-300">
@@ -204,54 +227,38 @@
                         $barColor = $item->rate >= 80 ? 'bg-green-500' : ($item->rate >= 60 ? 'bg-amber-500' : 'bg-red-500');
                     @endphp
                     <tr class="hover:bg-gray-50/80 transition">
-
-                        {{-- Nama & Info --}}
                         <td class="px-6 py-3.5 print:px-3 print:py-2">
                             <p class="font-semibold text-gray-800 text-sm print:text-xs">{{ $p->nama_lengkap }}</p>
                             <p class="text-xs print:text-[10px] text-gray-400">{{ $p->kampus }}</p>
                         </td>
-
-                        {{-- Divisi --}}
                         <td class="px-6 py-3.5 print:px-3 print:py-2">
                             <span class="inline-flex items-center px-2 py-0.5 rounded text-xs print:text-[10px] font-medium bg-gray-100 text-gray-700 print:border print:border-gray-200">
                                 {{ $p->divisi }}
                             </span>
                         </td>
-
-                        {{-- Lebih Awal --}}
                         <td class="px-4 py-3.5 print:px-2 print:py-2 text-center">
                             <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs print:text-[11px] font-semibold bg-indigo-50 text-indigo-700 print:bg-transparent print:text-indigo-800">
                                 {{ $item->datang_awal }}
                             </span>
                         </td>
-
-                        {{-- Tepat Waktu --}}
                         <td class="px-4 py-3.5 print:px-2 print:py-2 text-center">
                             <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs print:text-[11px] font-semibold bg-green-50 text-green-700 print:bg-transparent print:text-green-800">
                                 {{ $item->tepat_waktu }}
                             </span>
                         </td>
-
-                        {{-- Terlambat --}}
                         <td class="px-4 py-3.5 print:px-2 print:py-2 text-center">
                             <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs print:text-[11px] font-semibold {{ $item->terlambat > 0 ? 'bg-amber-50 text-amber-700 print:text-amber-800' : 'text-gray-400' }}">
                                 {{ $item->terlambat }}
                             </span>
                         </td>
-
-                        {{-- Tidak Hadir --}}
                         <td class="px-4 py-3.5 print:px-2 print:py-2 text-center">
                             <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs print:text-[11px] font-semibold {{ $item->tidak_hadir > 0 ? 'bg-red-50 text-red-700 print:text-red-800' : 'text-gray-400' }}">
                                 {{ $item->tidak_hadir }}
                             </span>
                         </td>
-
-                        {{-- Total --}}
                         <td class="px-4 py-3.5 print:px-2 print:py-2 text-center font-bold text-gray-800 print:text-xs">
                             {{ $item->total }}
                         </td>
-
-                        {{-- Rate --}}
                         <td class="px-6 py-3.5 print:px-3 print:py-2 text-right">
                             <div class="flex items-center justify-end gap-2">
                                 <span class="font-bold text-sm print:text-xs {{ $rateColor }}">{{ $item->rate }}%</span>
@@ -278,17 +285,100 @@
         </div>
     @endif
 </div>
+@endif
 
-{{-- ── TABEL 2: Detail Riwayat Log Presensi ───────────────── --}}
-<div id="tabel-log-presensi" class="bg-white rounded-xl border border-gray-200 print:border-gray-300 overflow-hidden shadow-sm print:shadow-none scroll-mt-6 print-avoid-break">
-    <div class="px-6 py-4 print:px-4 print:py-2.5 border-b border-gray-200 print:border-gray-300 bg-gray-50/60 print:bg-gray-100 flex items-center justify-between">
+{{-- ── TAB 2: RIWAYAT DETAIL LOG PRESENSI ──────────────── --}}
+@if(request('tab') === 'riwayat')
+<div class="bg-white rounded-b-xl border border-t-0 border-gray-200 print:rounded-xl print:border-gray-300 overflow-hidden shadow-sm print:shadow-none scroll-mt-6 print-avoid-break">
+    <div id="tabel-log-presensi" class="px-6 py-4 print:px-4 print:py-2.5 border-b border-gray-200 print:border-gray-300 bg-gray-50/60 print:bg-gray-100 flex items-center justify-between">
         <div>
-            <h2 class="text-sm sm:text-base print:text-sm font-bold text-gray-800">II. Riwayat Detail Log Presensi</h2>
+            <h2 class="text-sm sm:text-base print:text-sm font-bold text-gray-800">Riwayat Detail Log Presensi</h2>
             <p class="text-xs print:text-[11px] text-gray-500">Catatan waktu presensi masuk dan status kehadiran pemagang</p>
         </div>
         <span class="text-xs font-semibold px-2.5 py-1 bg-gray-100 text-gray-700 rounded-full print:bg-transparent print:border print:border-gray-300">
             Total Log: {{ $logs->total() }}
         </span>
+    </div>
+
+    {{-- Filter Bar untuk Riwayat Log (Print Hidden) --}}
+    <div class="print:hidden px-5 sm:px-6 py-4 border-b border-gray-100 bg-white">
+        <div class="flex flex-col lg:flex-row lg:items-end gap-4">
+
+            {{-- Filter Form --}}
+            <form method="GET"
+                  action="{{ route('admin.presensi.laporan') }}"
+                  class="flex flex-col sm:flex-row gap-3 flex-1">
+
+                {{-- Preserve tab=riwayat on every submission & pagination --}}
+                <input type="hidden" name="tab" value="riwayat">
+
+                {{-- Filter Kantor --}}
+                <div class="w-full sm:w-[280px]">
+                    <div class="relative">
+                        <select
+                            name="kantor"
+                            onchange="this.form.submit()"
+                            class="w-full appearance-none px-3.5 py-2.5 pr-10 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:bg-white transition"
+                        >
+                            <option value="">Semua Kantor</option>
+                            @foreach($kantorList as $k)
+                                <option value="{{ $k }}" {{ request('kantor') == $k ? 'selected' : '' }}>
+                                    {{ $k }}
+                                </option>
+                            @endforeach
+                        </select>
+
+                        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
+                            <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+
+                {{-- Filter Tanggal --}}
+                <div class="w-full sm:w-[180px]">
+                    <input
+                        type="date"
+                        name="tanggal"
+                        value="{{ request('tanggal', \Carbon\Carbon::today()->format('Y-m-d')) }}"
+                        onchange="this.form.submit()"
+                        class="w-full px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:bg-white transition"
+                    >
+                </div>
+
+                {{-- Reset Button --}}
+                @if(request()->hasAny(['kantor', 'tanggal', 'search', 'divisi', 'shift', 'keterangan']))
+                    <div class="flex items-end">
+                        <a
+                            href="{{ route('admin.presensi.laporan', ['tab' => 'riwayat']) }}"
+                            class="h-[42px] px-3 inline-flex items-center justify-center text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition"
+                            title="Reset Filter"
+                        >
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                            </svg>
+                        </a>
+                    </div>
+                @endif
+
+            </form>
+
+            {{-- Delete Button --}}
+            <div class="w-full lg:w-auto">
+                <button
+                    type="button"
+                    onclick="openDeleteModal()"
+                    class="w-full lg:w-auto h-[42px] inline-flex items-center justify-center gap-2 px-4 bg-red-50 hover:bg-red-100 text-red-600 text-sm font-semibold rounded-lg transition border border-red-200 whitespace-nowrap"
+                >
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 01-1 1v3M4 7h16" />
+                    </svg>
+                    <span>Hapus Riwayat</span>
+                </button>
+            </div>
+
+        </div>
     </div>
 
     <div class="overflow-x-auto">
@@ -299,6 +389,7 @@
                     <th class="px-6 py-3.5 print:px-3 print:py-2">Divisi</th>
                     <th class="px-6 py-3.5 print:px-3 print:py-2">Lokasi</th>
                     <th class="px-6 py-3.5 print:px-3 print:py-2">Shift</th>
+                    <th class="px-6 py-3.5 print:px-3 print:py-2">Tanggal</th>
                     <th class="px-6 py-3.5 print:px-3 print:py-2">Waktu Masuk</th>
                     <th class="px-6 py-3.5 print:px-3 print:py-2">Status</th>
                     <th class="px-6 py-3.5 print:px-3 print:py-2">Pencatat</th>
@@ -344,8 +435,11 @@
                                 {{ $log->shift }}
                             </span>
                         </td>
+                        <td class="px-6 py-3 print:px-3 print:py-1.5 text-xs text-gray-700 font-medium whitespace-nowrap">
+                            {{ \Carbon\Carbon::parse($log->tanggal)->locale('id')->translatedFormat('d M Y') }}
+                        </td>
                         <td class="px-6 py-3 print:px-3 print:py-1.5 text-xs text-gray-700 font-medium">
-                            {{ substr($log->waktu_masuk, 0, 5) }} WIB
+                            {{ $log->waktu_masuk ? substr($log->waktu_masuk, 0, 5) . ' WIB' : '-' }}
                         </td>
                         <td class="px-6 py-3 print:px-3 print:py-1.5">
                             <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs print:text-[10px] font-medium border {{ $badgeStyle }}">
@@ -376,7 +470,7 @@
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="9" class="px-6 py-6 text-center text-gray-400 text-xs">
+                        <td colspan="10" class="px-6 py-6 text-center text-gray-400 text-xs">
                             Belum ada riwayat log presensi.
                         </td>
                     </tr>
@@ -391,6 +485,7 @@
         </div>
     @endif
 </div>
+@endif
 
 {{-- ── Lembar Tanda Tangan / Pengesahan (Hanya muncul saat cetak) ── --}}
 <div class="hidden print:block mt-8 pt-6 border-t border-gray-300 print-avoid-break">
@@ -410,5 +505,89 @@
         </div>
     </div>
 </div>
+
+{{-- ── DELETE MODAL FOR BULK DELETION ──────────────────── --}}
+<div id="deleteModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+    <div class="bg-white rounded-xl shadow-lg max-w-md w-full mx-4">
+        <div class="px-6 py-4 border-b border-gray-200 bg-red-50">
+            <h3 class="text-lg font-bold text-red-800">Hapus Riwayat Presensi</h3>
+            <p class="text-sm text-red-600 mt-1">Pilih rentang waktu yang ingin dihapus</p>
+        </div>
+
+        <form method="POST" action="{{ route('admin.presensi.bulk-delete') }}" class="p-6 space-y-4">
+            @csrf
+            
+            <input type="hidden" name="kantor" value="{{ request('kantor') }}">
+            <input type="hidden" name="tab" value="riwayat">
+            <input type="hidden" name="delete_date" id="modalTanggal" value="{{ request('tanggal', now()->format('Y-m-d')) }}">
+
+            {{-- Delete Type Selection --}}
+            <div class="space-y-3">
+                <label class="flex items-center gap-3 p-3 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50 transition">
+                    <input type="radio" name="delete_type" value="date" checked class="w-4 h-4 text-red-600">
+                    <div class="flex-1">
+                        <p class="font-medium text-gray-800 text-sm">Hapus Tanggal Spesifik</p>
+                        <p class="text-xs text-gray-500">Hanya tanggal yang dipilih di filter</p>
+                    </div>
+                </label>
+
+                <label class="flex items-center gap-3 p-3 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50 transition">
+                    <input type="radio" name="delete_type" value="weekly" class="w-4 h-4 text-red-600">
+                    <div class="flex-1">
+                        <p class="font-medium text-gray-800 text-sm">Hapus Mingguan (7 Hari)</p>
+                        <p class="text-xs text-gray-500">Dari 7 hari sebelumnya hingga tanggal terpilih</p>
+                    </div>
+                </label>
+
+                <label class="flex items-center gap-3 p-3 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50 transition">
+                    <input type="radio" name="delete_type" value="monthly" class="w-4 h-4 text-red-600">
+                    <div class="flex-1">
+                        <p class="font-medium text-gray-800 text-sm">Hapus Bulanan (1 Bulan)</p>
+                        <p class="text-xs text-gray-500">Seluruh bulan dari tanggal terpilih</p>
+                    </div>
+                </label>
+
+                <label class="flex items-center gap-3 p-3 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50 transition">
+                    <input type="radio" name="delete_type" value="yearly" class="w-4 h-4 text-red-600">
+                    <div class="flex-1">
+                        <p class="font-medium text-gray-800 text-sm">Hapus Tahunan (1 Tahun)</p>
+                        <p class="text-xs text-gray-500">Seluruh tahun dari tanggal terpilih</p>
+                    </div>
+                </label>
+            </div>
+
+            {{-- Buttons --}}
+            <div class="flex gap-3 pt-4 border-t border-gray-200">
+                <button type="button" onclick="closeDeleteModal()"
+                        class="flex-1 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-800 text-sm font-medium rounded-lg transition">
+                    Batal
+                </button>
+                <button type="submit"
+                        class="flex-1 px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-sm font-medium rounded-lg transition">
+                    Hapus Data
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+@push('scripts')
+<script>
+    function openDeleteModal() {
+        document.getElementById('deleteModal').classList.remove('hidden');
+    }
+
+    function closeDeleteModal() {
+        document.getElementById('deleteModal').classList.add('hidden');
+    }
+
+    // Close modal when clicking outside
+    document.getElementById('deleteModal')?.addEventListener('click', function(e) {
+        if (e.target === this) {
+            closeDeleteModal();
+        }
+    });
+</script>
+@endpush
 
 @endsection

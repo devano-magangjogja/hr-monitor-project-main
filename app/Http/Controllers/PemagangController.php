@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Controllers\Controller;
+use App\Http\Traits\LogsActivity;
 use App\Models\Pemagang;
 use App\Models\Presensi;
 use Carbon\Carbon;
@@ -10,6 +12,7 @@ use Illuminate\Validation\Rule;
 
 class PemagangController extends Controller
 {
+    use LogsActivity;
     /**
      * Tampilkan daftar seluruh pemagang dengan filter & pencarian (Admin & Staff)
      */
@@ -93,7 +96,11 @@ class PemagangController extends Controller
             'divisi.required'       => 'Divisi magang wajib dipilih atau diisi.',
         ]);
 
-        Pemagang::create($validated);
+        $pemagang = Pemagang::create($validated);
+        $this->logActivity('pemagang.created', 'Pemagang',
+            "Menambahkan pemagang '{$validated['nama_lengkap']}' dari {$validated['kampus']} divisi {$validated['divisi']}",
+            $pemagang
+        );
 
         return redirect()->back()->with('success', "Pemagang {$validated['nama_lengkap']} berhasil ditambahkan.");
     }
@@ -117,6 +124,10 @@ class PemagangController extends Controller
         ]);
 
         $pemagang->update($validated);
+        $this->logActivity('pemagang.updated', 'Pemagang',
+            "Memperbarui data pemagang '{$pemagang->nama_lengkap}'",
+            $pemagang
+        );
 
         return redirect()->back()->with('success', "Data pemagang {$pemagang->nama_lengkap} berhasil diperbarui.");
     }
@@ -128,6 +139,9 @@ class PemagangController extends Controller
     {
         $nama = $pemagang->nama_lengkap;
         $pemagang->delete();
+        $this->logActivity('pemagang.deleted', 'Pemagang',
+            "Menghapus data pemagang '{$nama}' beserta seluruh riwayat presensi"
+        );
 
         return redirect()->back()->with('success', "Data pemagang {$nama} beserta seluruh riwayat presensinya berhasil dihapus.");
     }

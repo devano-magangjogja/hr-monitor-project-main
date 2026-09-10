@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Traits\LogsActivity;
 use App\Models\WaGroup;
 use App\Services\SettingService;
 use Illuminate\Http\Request;
@@ -11,6 +12,8 @@ use Illuminate\Validation\ValidationException;
 
 class SettingController extends Controller
 {
+    use LogsActivity;
+
     public function __construct(protected SettingService $settingService) {}
 
     public function index()
@@ -44,6 +47,8 @@ class SettingController extends Controller
                 $request->hasFile('logo_banner') ? $request->file('logo_banner') : null
             );
 
+            $this->logActivity('setting.updated', 'Pengaturan', "Memperbarui informasi aplikasi/logo");
+
             return back()->with('success', 'Informasi aplikasi berhasil diperbarui.');
         } catch (ValidationException $e) {
             return back()->withErrors($e->errors())->withInput();
@@ -65,6 +70,7 @@ class SettingController extends Controller
         ]);
 
         $this->settingService->updateWaTemplate($request->input('wa_template_tidak_hadir'));
+        $this->logActivity('setting.updated', 'Pengaturan', "Memperbarui template WhatsApp");
 
         return back()->with('success', 'Template pesan WhatsApp konfirmasi ketidakhadiran berhasil diperbarui.');
     }
@@ -79,6 +85,7 @@ class SettingController extends Controller
         ]);
 
         $this->settingService->createWaGroup($request->only('label', 'url'));
+        $this->logActivity('setting.updated', 'Pengaturan', "Menambahkan link grup WhatsApp '{$request->label}'");
 
         return back()->with('success', 'Link grup berhasil ditambahkan.');
     }
@@ -91,13 +98,16 @@ class SettingController extends Controller
         ]);
 
         $this->settingService->updateWaGroup($waGroup, $request->only('label', 'url'));
+        $this->logActivity('setting.updated', 'Pengaturan', "Memperbarui link grup WhatsApp '{$waGroup->label}'");
 
         return back()->with('success', 'Link grup berhasil diperbarui.');
     }
 
     public function destroyWaGroup(WaGroup $waGroup)
     {
+        $label = $waGroup->label;
         $this->settingService->deleteWaGroup($waGroup);
+        $this->logActivity('setting.updated', 'Pengaturan', "Menghapus link grup WhatsApp '{$label}'");
 
         return back()->with('success', 'Link grup berhasil dihapus.');
     }

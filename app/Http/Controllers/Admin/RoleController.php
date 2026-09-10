@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Traits\LogsActivity;
 use App\Models\Role;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
@@ -10,6 +11,7 @@ use Illuminate\Validation\Rule;
 
 class RoleController extends Controller
 {
+    use LogsActivity;
     public function index()
     {
         $roles = Role::withCount('users')->orderBy('id')->get();
@@ -58,6 +60,12 @@ class RoleController extends Controller
             'is_system'   => false,
         ]);
 
+        $this->logActivity(
+            'role.created',
+            'Role',
+            "Membuat role baru '{$validated['label']}' dengan kode '{$validated['name']}'"
+        );
+
         return redirect()->route('admin.roles.index')
             ->with('success', "Role '{$validated['label']}' berhasil ditambahkan.");
     }
@@ -86,6 +94,13 @@ class RoleController extends Controller
 
         $role->update($updateData);
 
+        $this->logActivity(
+            'role.updated',
+            'Role',
+            "Memperbarui role '{$role->label}'",
+            $role
+        );
+
         return redirect()->route('admin.roles.index')
             ->with('success', "Role '{$role->label}' berhasil diperbarui.");
     }
@@ -103,6 +118,12 @@ class RoleController extends Controller
 
         $roleLabel = $role->label;
         $role->delete();
+
+        $this->logActivity(
+            'role.deleted',
+            'Role',
+            "Menghapus role '{$roleLabel}'"
+        );
 
         return redirect()->route('admin.roles.index')
             ->with('success', "Role '{$roleLabel}' berhasil dihapus.");

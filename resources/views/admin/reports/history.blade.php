@@ -583,7 +583,7 @@
             </button>
         </div>
 
-        <form method="POST" action="{{ route('admin.reports.history.purge') }}" class="overflow-y-auto flex-1 p-4 sm:p-6 space-y-5">
+        <form method="POST" action="{{ route('admin.reports.history.purge') }}" class="overflow-y-auto flex-1 p-4 pt-1 sm:p-6 space-y-5">
             @csrf
 
             {{-- 1. Pilihan Periode --}}

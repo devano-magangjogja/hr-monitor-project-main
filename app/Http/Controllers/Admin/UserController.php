@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Traits\LogsActivity;
 use App\Models\User;
 use App\Services\UserService;
 use Illuminate\Http\Request;
@@ -11,6 +12,8 @@ use Illuminate\Validation\ValidationException;
 
 class UserController extends Controller
 {
+    use LogsActivity;
+
     public function __construct(
         protected UserService $userService
     ) {
@@ -34,7 +37,8 @@ class UserController extends Controller
         ]);
 
         try {
-            $this->userService->createUser($validated);
+            $user = $this->userService->createUser($validated);
+            $this->logActivity('user.created', 'Pengguna', "Menambahkan pengguna '{$validated['name']}' (role: {$validated['role']})", $user);
             return redirect()->route('admin.users.index')
                 ->with('success', 'Pengguna berhasil ditambahkan.');
         } catch (ValidationException $e) {
@@ -59,6 +63,7 @@ class UserController extends Controller
                 $validated,
                 $request->hasFile('image') ? $request->file('image') : null
             );
+            $this->logActivity('user.updated', 'Pengguna', "Memperbarui data pengguna '{$user->name}'", $user);
             return redirect()->route('admin.users.index')
                 ->with('success', 'Data pengguna berhasil diperbarui.');
         } catch (ValidationException $e) {
@@ -80,6 +85,7 @@ class UserController extends Controller
         ]);
 
         $this->userService->updatePassword($user, $request->password);
+        $this->logActivity('user.updated', 'Pengguna', "Mengubah password pengguna '{$user->name}'", $user);
 
         return redirect()->route('admin.users.index')
             ->with('success', 'Password pengguna berhasil diperbarui.');
@@ -88,7 +94,10 @@ class UserController extends Controller
     public function destroy(User $user)
     {
         try {
+            $name = $user->name;
+            $role = $user->role;
             $this->userService->deleteUser($user);
+            $this->logActivity('user.deleted', 'Pengguna', "Menghapus pengguna '{$name}' (role: {$role})");
             return redirect()->route('admin.users.index')
                 ->with('success', 'Pengguna berhasil dihapus.');
         } catch (ValidationException $e) {

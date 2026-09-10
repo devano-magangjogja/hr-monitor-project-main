@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Assistant;
 
 use App\Http\Controllers\Controller;
+use App\Http\Traits\LogsActivity;
 use Illuminate\Http\Request;
 use App\Models\Pemagang;
 use App\Models\Presensi;
@@ -12,6 +13,7 @@ use Illuminate\Support\Facades\Auth;
 
 class PresensiController extends Controller
 {
+    use LogsActivity;
     public function index(Request $request)
     {
         $todayDate = Carbon::today()->format('Y-m-d');
@@ -133,6 +135,7 @@ class PresensiController extends Controller
         ]);
 
         $this->ensureAssistantKantorTask(Auth::id(), $validated['kantor']);
+        $this->logActivity('presensi.assigned', 'Presensi', "Menetapkan lokasi bertugas ke {$validated['kantor']}");
 
         return redirect()->route('assistant.presensi.index', ['kantor' => $validated['kantor']])
             ->with('success', 'Lokasi bertugas berhasil ditetapkan ke ' . $validated['kantor'] . ' dan otomatis tercatat di tugas Anda.');
@@ -176,6 +179,10 @@ class PresensiController extends Controller
         $validated['notes'] = $validated['notes'] ?? ($validated['keterangan'] === 'Tidak Hadir' ? 'Tidak hadir tanpa keterangan' : 'Presensi tercatat');
 
         Presensi::create($validated);
+        $pemagang = \App\Models\Pemagang::find($validated['pemagang_id']);
+        $this->logActivity('presensi.created', 'Presensi',
+            "Mencatat presensi '{$pemagang?->nama_lengkap}' ({$validated['keterangan']}) di {$validated['kantor']}"
+        );
 
         return redirect()->route('assistant.presensi.index', ['tanggal' => $today])
             ->with('success', 'Catatan presensi pemagang hari ini berhasil disimpan.');
@@ -198,6 +205,10 @@ class PresensiController extends Controller
         $validated['notes'] = $validated['notes'] ?? '-';
 
         $presensi->update($validated);
+        $this->logActivity('presensi.updated', 'Presensi',
+            "Memperbarui presensi '{$presensi->pemagang?->nama_lengkap}' tanggal {$presensi->tanggal}",
+            $presensi
+        );
 
         return redirect()->route('assistant.presensi.index', ['tanggal' => $presensi->tanggal])
             ->with('success', 'Data presensi berhasil diperbarui.');
@@ -209,7 +220,11 @@ class PresensiController extends Controller
     public function destroy(Presensi $presensi)
     {
         $tanggal = $presensi->tanggal;
+        $namaPemagang = $presensi->pemagang?->nama_lengkap ?? 'Pemagang';
         $presensi->delete();
+        $this->logActivity('presensi.deleted', 'Presensi',
+            "Menghapus catatan presensi '{$namaPemagang}' tanggal {$tanggal}"
+        );
 
         return redirect()->route('assistant.presensi.index', ['tanggal' => $tanggal])
             ->with('success', 'Catatan presensi berhasil dihapus.');
