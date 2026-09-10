@@ -112,6 +112,8 @@
 {{-- ── Filter Bar Laporan (Sembunyi saat Print) ─────────────── --}}
 <div class="print:hidden bg-white rounded-xl border border-gray-200 p-4 mb-6 shadow-sm">
     <form method="GET" action="{{ route('staff.presensi.laporan') }}" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
+        <input type="hidden" name="tab" value="{{ request('tab', 'rekapitulasi') }}">
+
         {{-- Search input --}}
         <div class="relative">
             <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-gray-400">
@@ -158,7 +160,7 @@
             </select>
 
             @if(request()->hasAny(['search', 'divisi', 'shift', 'keterangan']))
-                <a href="{{ route('staff.presensi.laporan') }}"
+                <a href="{{ route('staff.presensi.laporan', ['tab' => request('tab', 'rekapitulasi')]) }}"
                    class="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition"
                    title="Reset Filter">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -170,11 +172,34 @@
     </form>
 </div>
 
-{{-- ── TABEL 1: Rekapitulasi Per Pemagang ──────────────────── --}}
-<div id="tabel-rekap-pemagang" class="bg-white rounded-xl border border-gray-200 print:border-gray-300 overflow-hidden shadow-sm print:shadow-none mb-8 print:mb-6 scroll-mt-6 print-avoid-break">
-    <div class="px-6 py-4 print:px-4 print:py-2.5 border-b border-gray-200 print:border-gray-300 bg-gray-50/60 print:bg-gray-100 flex items-center justify-between">
+{{-- ── TAB NAVIGATION ─────────────────────────────────── --}}
+<div class="print:hidden bg-white rounded-t-xl border border-b-0 border-gray-200 overflow-hidden mb-0 shadow-sm">
+    <div class="flex border-b border-gray-200 overflow-x-auto scrollbar-none">
+        <a href="{{ route('staff.presensi.laporan') }}"
+           class="flex items-center gap-2 px-5 py-3.5 text-sm font-medium whitespace-nowrap border-b-2 transition
+                  {{ !request('tab') || request('tab') === 'rekapitulasi' ? 'border-primary-600 text-primary-600 bg-primary-50/50' : 'border-transparent text-gray-500 hover:text-gray-700 hover:bg-gray-50' }}">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+            </svg>
+            Rekapitulasi Pemagang
+        </a>
+        <a href="{{ route('staff.presensi.laporan', ['tab' => 'riwayat']) }}"
+           class="flex items-center gap-2 px-5 py-3.5 text-sm font-medium whitespace-nowrap border-b-2 transition
+                  {{ request('tab') === 'riwayat' ? 'border-primary-600 text-primary-600 bg-primary-50/50' : 'border-transparent text-gray-500 hover:text-gray-700 hover:bg-gray-50' }}">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+            </svg>
+            Riwayat Detail Log
+        </a>
+    </div>
+</div>
+
+{{-- ── TAB 1: REKAPITULASI PEMAGANG ──────────────────── --}}
+@if(!request('tab') || request('tab') === 'rekapitulasi')
+<div class="bg-white rounded-b-xl border border-t-0 border-gray-200 print:rounded-xl print:border-gray-300 overflow-hidden shadow-sm print:shadow-none mb-8 print:mb-6 scroll-mt-6 print-avoid-break">
+    <div id="tabel-rekap-pemagang" class="px-6 py-4 print:px-4 print:py-2.5 border-b border-gray-200 print:border-gray-300 bg-gray-50/60 print:bg-gray-100 flex items-center justify-between">
         <div>
-            <h2 class="text-sm sm:text-base print:text-sm font-bold text-gray-800">I. Rekapitulasi Kehadiran per Pemagang</h2>
+            <h2 class="text-sm sm:text-base print:text-sm font-bold text-gray-800">Rekapitulasi Kehadiran per Pemagang</h2>
             <p class="text-xs print:text-[11px] text-gray-500">Ringkasan performa dan tingkat kedisiplinan kehadiran setiap individu</p>
         </div>
         <span class="text-xs font-semibold px-2.5 py-1 bg-primary-50 text-primary-700 rounded-full print:bg-transparent print:text-gray-700 print:border print:border-gray-300">
@@ -278,12 +303,14 @@
         </div>
     @endif
 </div>
+@endif
 
-{{-- ── TABEL 2: Detail Riwayat Log Presensi ───────────────── --}}
-<div id="tabel-log-presensi" class="bg-white rounded-xl border border-gray-200 print:border-gray-300 overflow-hidden shadow-sm print:shadow-none scroll-mt-6 print-avoid-break">
-    <div class="px-6 py-4 print:px-4 print:py-2.5 border-b border-gray-200 print:border-gray-300 bg-gray-50/60 print:bg-gray-100 flex items-center justify-between">
+{{-- ── TAB 2: RIWAYAT DETAIL LOG PRESENSI ──────────────── --}}
+@if(request('tab') === 'riwayat')
+<div class="bg-white rounded-b-xl border border-t-0 border-gray-200 print:rounded-xl print:border-gray-300 overflow-hidden shadow-sm print:shadow-none scroll-mt-6 print-avoid-break">
+    <div id="tabel-log-presensi" class="px-6 py-4 print:px-4 print:py-2.5 border-b border-gray-200 print:border-gray-300 bg-gray-50/60 print:bg-gray-100 flex items-center justify-between">
         <div>
-            <h2 class="text-sm sm:text-base print:text-sm font-bold text-gray-800">II. Riwayat Detail Log Presensi</h2>
+            <h2 class="text-sm sm:text-base print:text-sm font-bold text-gray-800">Riwayat Detail Log Presensi</h2>
             <p class="text-xs print:text-[11px] text-gray-500">Catatan waktu presensi masuk dan status kehadiran pemagang</p>
         </div>
         <span class="text-xs font-semibold px-2.5 py-1 bg-gray-100 text-gray-700 rounded-full print:bg-transparent print:border print:border-gray-300">
@@ -303,7 +330,7 @@
                     <th class="px-6 py-3.5 print:px-3 print:py-2">Status</th>
                     <th class="px-6 py-3.5 print:px-3 print:py-2">Pencatat</th>
                     <th class="px-6 py-3.5 print:px-3 print:py-2">Catatan</th>
-                    <th class="px-6 py-3.5 print:hidden text-right">Aksi</th>
+
                 </tr>
             </thead>
             <tbody class="divide-y divide-gray-100 print:divide-gray-200">
@@ -358,25 +385,10 @@
                         <td class="px-6 py-3 print:px-3 print:py-1.5 text-xs text-gray-500 max-w-[200px] truncate">
                             {{ $log->notes ?: '-' }}
                         </td>
-                        <td class="px-6 py-3 print:hidden text-right">
-                            <form method="POST" action="{{ route('staff.presensi.destroy', $log) }}"
-                                  onsubmit="return confirm('Apakah Anda yakin ingin menghapus catatan presensi ini?')">
-                                @csrf
-                                @method('DELETE')
-                                <button type="submit"
-                                        class="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition"
-                                        title="Hapus Presensi">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                              d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                    </svg>
-                                </button>
-                            </form>
-                        </td>
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="9" class="px-6 py-6 text-center text-gray-400 text-xs">
+                        <td colspan="8" class="px-6 py-6 text-center text-gray-400 text-xs">
                             Belum ada riwayat log presensi.
                         </td>
                     </tr>
@@ -391,6 +403,7 @@
         </div>
     @endif
 </div>
+@endif
 
 {{-- ── Lembar Tanda Tangan / Pengesahan (Hanya muncul saat cetak) ── --}}
 <div class="hidden print:block mt-8 pt-6 border-t border-gray-300 print-avoid-break">

@@ -291,6 +291,9 @@ class PresensiController extends Controller
         if ($request->filled('kantor')) {
             $logQuery->where('kantor', $request->input('kantor'));
         }
+        if ($request->filled('tanggal')) {
+            $logQuery->whereDate('tanggal', $request->input('tanggal'));
+        }
         if ($request->filled('shift')) {
             $logQuery->where('shift', $request->input('shift'));
         }

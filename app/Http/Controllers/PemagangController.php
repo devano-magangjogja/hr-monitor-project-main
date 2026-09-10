@@ -43,7 +43,7 @@ class PemagangController extends Controller
         }
 
         $pemagangs = $query->orderBy('nama_lengkap', 'asc')
-            ->paginate(15)
+            ->paginate(5)
             ->withQueryString();
 
         // Opsi Divisi & Kampus untuk filter
@@ -144,5 +144,29 @@ class PemagangController extends Controller
         );
 
         return redirect()->back()->with('success', "Data pemagang {$nama} beserta seluruh riwayat presensinya berhasil dihapus.");
+    }
+
+    /**
+     * Hapus banyak pemagang sekaligus (Bulk Delete) — Admin & Staff
+     */
+    public function bulkDestroy(Request $request)
+    {
+        $validated = $request->validate([
+            'ids'   => ['required', 'array', 'min:1'],
+            'ids.*' => ['required', 'integer', 'exists:pemagang,id'],
+        ], [
+            'ids.required'  => 'Tidak ada pemagang yang dipilih.',
+            'ids.min'       => 'Pilih setidaknya 1 pemagang untuk dihapus.',
+        ]);
+
+        $ids   = $validated['ids'];
+        $count = Pemagang::whereIn('id', $ids)->count();
+        Pemagang::whereIn('id', $ids)->delete();
+
+        $this->logActivity('pemagang.deleted', 'Pemagang',
+            "Menghapus massal {$count} data pemagang sekaligus (Bulk Delete)"
+        );
+
+        return redirect()->back()->with('success', "Berhasil menghapus {$count} data pemagang beserta seluruh riwayat presensinya.");
     }
 }
