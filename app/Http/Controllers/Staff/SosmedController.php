@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Staff;
 
 use App\Http\Controllers\Controller;
+use App\Http\Traits\LogsActivity;
 use App\Models\PmSosmedOversight;
 use App\Models\SosmedAccount;
 use App\Models\SosmedApprovalLog;
@@ -13,6 +14,7 @@ use Illuminate\Support\Facades\Auth;
 
 class SosmedController extends Controller
 {
+    use LogsActivity;
     public function index(Request $request)
     {
         $tab = $request->query('tab', 'accounts');
@@ -142,6 +144,8 @@ class SosmedController extends Controller
             }
         }
 
+        $this->logActivity('sosmed.assigned', 'Sosmed', "Mengatur penugasan akun '{$account->name}'", $account);
+
         return redirect()->route('staff.sosmed.index', ['tab' => 'accounts'])
             ->with('success', 'Delegasi akun berhasil diperbarui.' . ($newStaffId && $newStaffId !== $oldStaffId ? ' Tugas harian otomatis dibuat.' : ''));
     }
@@ -177,6 +181,13 @@ class SosmedController extends Controller
             PmSosmedOversight::where('sosmed_id', $sosmedId)->delete();
         }
 
+        $sosmedUser = User::find($sosmedId);
+        $pmUser = $pmId ? User::find($pmId) : null;
+        $this->logActivity('sosmed.updated', 'Sosmed', 
+            $pmId ? "Menetapkan PM '{$pmUser?->name}' untuk oversight sosmed '{$sosmedUser?->name}'" 
+                  : "Menghapus oversight PM untuk sosmed '{$sosmedUser?->name}'"
+        );
+
         return redirect()->route('staff.sosmed.index', ['tab' => 'oversight'])
             ->with('success', 'Pengaturan oversight PM berhasil disimpan.');
     }
@@ -207,6 +218,8 @@ class SosmedController extends Controller
                 'notes' => 'Disetujui secara final oleh HR Staff.',
             ]);
 
+            $this->logActivity('sosmed.verified', 'Sosmed', "Menyetujui tugas sosmed '{$task->title}'", $task);
+
             return redirect()->route('staff.sosmed.index', ['tab' => 'approvals'])
                 ->with('success', 'Tugas berhasil disetujui secara final oleh HR Staff.');
         } else {
@@ -225,6 +238,8 @@ class SosmedController extends Controller
                 'action' => 'rejected',
                 'notes' => $validated['rejection_note'] ?? 'Ditolak oleh HR Staff',
             ]);
+
+            $this->logActivity('sosmed.verified', 'Sosmed', "Menolak tugas sosmed '{$task->title}' dengan catatan: {$validated['rejection_note']}", $task);
 
             return redirect()->route('staff.sosmed.index', ['tab' => 'approvals'])
                 ->with('success', 'Tugas ditolak dan dikembalikan untuk perbaikan.');

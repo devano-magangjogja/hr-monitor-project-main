@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Ob;
 
 use App\Http\Controllers\Controller;
+use App\Http\Traits\LogsActivity;
 use App\Models\Task;
 use App\Services\TaskService;
 use Illuminate\Http\Request;
@@ -11,6 +12,8 @@ use Illuminate\Validation\ValidationException;
 
 class TaskController extends Controller
 {
+    use LogsActivity;
+
     public function __construct(protected TaskService $taskService) {}
 
     // ── Tugas Mandiri ────────────────────────────────────
@@ -30,6 +33,7 @@ class TaskController extends Controller
         ]);
         try {
             $this->taskService->createSelfTask($validated);
+            $this->logActivity('task.created', 'Tugas', "Membuat tugas mandiri '{$validated['title']}'");
             return redirect()->route('ob.tasks.index')
                 ->with('success', 'Tugas mandiri berhasil ditambahkan.');
         } catch (ValidationException $e) {
@@ -45,6 +49,7 @@ class TaskController extends Controller
         ]);
         try {
             $this->taskService->updateSelfTask($task, $validated);
+            $this->logActivity('task.updated', 'Tugas', "Memperbarui tugas '{$task->title}'", $task);
             return redirect()->route('ob.tasks.index')
                 ->with('success', 'Tugas mandiri berhasil diperbarui.');
         } catch (ValidationException $e) {
@@ -55,7 +60,9 @@ class TaskController extends Controller
     public function destroy(Task $task)
     {
         try {
+            $title = $task->title;
             $this->taskService->deleteSelfTask($task);
+            $this->logActivity('task.deleted', 'Tugas', "Menghapus tugas '{$title}'");
             return redirect()->route('ob.tasks.index')
                 ->with('success', 'Tugas mandiri berhasil dihapus.');
         } catch (ValidationException $e) {
@@ -68,6 +75,7 @@ class TaskController extends Controller
         $request->validate(['note' => ['nullable', 'string', 'max:500']]);
         try {
             $this->taskService->completeTask($task, $request->note);
+            $this->logActivity('task.completed', 'Tugas', "Menyelesaikan tugas '{$task->title}'", $task);
             return redirect()->route('ob.tasks.index')
                 ->with('task_completed', 'Terima kasih sudah menyelesaikan tugas ini dengan baik. Tetap semangat!');
         } catch (ValidationException $e) {
@@ -89,6 +97,7 @@ class TaskController extends Controller
         $request->validate(['note' => ['nullable', 'string', 'max:500']]);
         try {
             $this->taskService->completeTask($task, $request->note);
+            $this->logActivity('task.completed', 'Tugas', "Menyelesaikan tugas '{$task->title}'", $task);
             return redirect()->route('ob.tasks.daily')
                 ->with('task_completed', 'Terima kasih sudah menyelesaikan tugas ini dengan baik. Tetap semangat!');
         } catch (ValidationException $e) {
@@ -110,6 +119,7 @@ class TaskController extends Controller
         $request->validate(['note' => ['nullable', 'string', 'max:500']]);
         try {
             $this->taskService->completeTask($task, $request->note);
+            $this->logActivity('task.completed', 'Tugas', "Menyelesaikan tugas '{$task->title}'", $task);
             return redirect()->route('ob.tasks.assigned')
                 ->with('task_completed', 'Terima kasih sudah menyelesaikan tugas ini dengan baik. Tetap semangat!');
         } catch (ValidationException $e) {
@@ -131,6 +141,7 @@ class TaskController extends Controller
         $request->validate(['note' => ['nullable', 'string', 'max:500']]);
         try {
             $this->taskService->completeTask($task, $request->note);
+            $this->logActivity('task.completed', 'Tugas', "Menyelesaikan tugas '{$task->title}'", $task);
             return redirect()->route('ob.tasks.all')
                 ->with('task_completed', 'Terima kasih sudah menyelesaikan tugas ini dengan baik. Tetap semangat!');
         } catch (ValidationException $e) {

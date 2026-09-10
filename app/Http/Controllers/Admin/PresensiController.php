@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Traits\LogsActivity;
 use App\Models\Pemagang;
 use App\Models\Presensi;
 use App\Models\Task;
@@ -12,6 +13,7 @@ use Illuminate\Support\Facades\Auth;
 
 class PresensiController extends Controller
 {
+    use LogsActivity;
     /**
      * Tampilkan halaman presensi pemagang hari ini (atau sesuai tanggal filter)
      */
@@ -150,7 +152,12 @@ class PresensiController extends Controller
         $validated['created_by'] = Auth::id();
         $validated['notes'] = $validated['notes'] ?? ($validated['keterangan'] === 'Tidak Hadir' ? 'Tidak hadir tanpa keterangan' : 'Presensi tercatat');
 
-        Presensi::create($validated);
+        $presensi = Presensi::create($validated);
+        $pemagang = \App\Models\Pemagang::find($validated['pemagang_id']);
+        $this->logActivity('presensi.created', 'Presensi',
+            "Mencatat presensi pemagang '{$pemagang?->nama_lengkap}' ({$validated['keterangan']}) di {$validated['kantor']}",
+            $presensi
+        );
 
         return redirect()->route('admin.presensi.index', ['tanggal' => $today])
             ->with('success', 'Catatan presensi pemagang hari ini berhasil disimpan.');
@@ -172,6 +179,10 @@ class PresensiController extends Controller
         $validated['notes'] = $validated['notes'] ?? '-';
 
         $presensi->update($validated);
+        $this->logActivity('presensi.updated', 'Presensi',
+            "Memperbarui presensi pemagang '{$presensi->pemagang?->nama_lengkap}' tanggal {$presensi->tanggal}",
+            $presensi
+        );
 
         return redirect()->route('admin.presensi.index', ['tanggal' => $presensi->tanggal])
             ->with('success', 'Data presensi berhasil diperbarui.');
@@ -183,7 +194,11 @@ class PresensiController extends Controller
     public function destroy(Presensi $presensi)
     {
         $tanggal = $presensi->tanggal;
+        $namaPemagang = $presensi->pemagang?->nama_lengkap ?? 'Pemagang';
         $presensi->delete();
+        $this->logActivity('presensi.deleted', 'Presensi',
+            "Menghapus catatan presensi '{$namaPemagang}' tanggal {$tanggal}"
+        );
 
         return redirect()->route('admin.presensi.index', ['tanggal' => $tanggal])
             ->with('success', 'Catatan presensi berhasil dihapus.');
@@ -271,10 +286,13 @@ class PresensiController extends Controller
             'avg_rate' => $avgDisiplinRate,
         ];
 
-        // Tabel 2: Riwayat detail log presensi (10 per halaman)
+        // Tabel 2: Riwayat detail log presensi (5 per halaman)
         $logQuery = Presensi::with(['pemagang', 'creator']);
         if ($request->filled('kantor')) {
             $logQuery->where('kantor', $request->input('kantor'));
+        }
+        if ($request->filled('tanggal')) {
+            $logQuery->whereDate('tanggal', $request->input('tanggal'));
         }
         if ($request->filled('shift')) {
             $logQuery->where('shift', $request->input('shift'));
@@ -298,7 +316,7 @@ class PresensiController extends Controller
 
         $logs = $logQuery->orderBy('tanggal', 'desc')
             ->orderBy('id', 'desc')
-            ->paginate(10, ['*'], 'page_logs')
+            ->paginate(5, ['*'], 'page_logs')
             ->withQueryString()
             ->fragment('tabel-log-presensi');
 
@@ -306,5 +324,67 @@ class PresensiController extends Controller
         $kantorList = ['Kantor 1', 'Kantor 2', 'Kantor 3', 'Kantor 4', 'Kantor 5', 'Kantor 6', 'Kantor 7', 'Kantor 8', 'Kantor 9', 'Kantor 10'];
 
         return view('admin.presensi.laporan-presensi', compact('rekapPemagang', 'stats', 'logs', 'divisiList', 'kantorList'));
+    }
+
+    /**
+     * Bulk delete attendance records by date range
+     */
+    public function bulkDeleteAttendance(Request $request)
+    {
+        // Only admin can delete multiple records
+        if (Auth::user()->role !== 'admin') {
+            return redirect()->route('admin.presensi.laporan')
+                ->with('error', 'Hanya Admin yang dapat menghapus riwayat presensi.');
+        }
+
+        $request->validate([
+            'delete_type' => 'required|in:date,weekly,monthly,yearly',
+            'delete_date' => 'required|date',
+            'kantor' => 'nullable|string',
+        ]);
+
+        $deleteDate = Carbon::parse($request->input('delete_date'));
+        $kantor = $request->input('kantor');
+        $query = Presensi::query();
+
+        if ($kantor) {
+            $query->where('kantor', $kantor);
+        }
+
+        $deleteType = $request->input('delete_type');
+
+        switch ($deleteType) {
+            case 'date':
+                // Hapus hanya tanggal spesifik
+                $query->whereDate('tanggal', $deleteDate->format('Y-m-d'));
+                $message = 'Riwayat presensi tanggal ' . $deleteDate->locale('id')->translatedFormat('d F Y') . ' berhasil dihapus.';
+                break;
+
+            case 'weekly':
+                // Hapus 1 minggu (7 hari ke belakang dari tanggal yang dipilih)
+                $startOfWeek = $deleteDate->copy()->subDays(6);
+                $endOfWeek = $deleteDate;
+                $query->whereBetween('tanggal', [$startOfWeek->format('Y-m-d'), $endOfWeek->format('Y-m-d')]);
+                $message = 'Riwayat presensi minggu ' . $startOfWeek->locale('id')->translatedFormat('d') . ' - ' . $deleteDate->locale('id')->translatedFormat('d F Y') . ' berhasil dihapus.';
+                break;
+
+            case 'monthly':
+                // Hapus 1 bulan penuh
+                $query->whereYear('tanggal', $deleteDate->year)
+                    ->whereMonth('tanggal', $deleteDate->month);
+                $message = 'Riwayat presensi bulan ' . $deleteDate->locale('id')->translatedFormat('F Y') . ' berhasil dihapus.';
+                break;
+
+            case 'yearly':
+                // Hapus 1 tahun penuh
+                $query->whereYear('tanggal', $deleteDate->year);
+                $message = 'Riwayat presensi tahun ' . $deleteDate->year . ' berhasil dihapus.';
+                break;
+        }
+
+        $deletedCount = $query->delete();
+
+        return redirect()->route('admin.presensi.laporan')
+            ->with('success', $message . ' (' . $deletedCount . ' catatan dihapus)');
     }
 }

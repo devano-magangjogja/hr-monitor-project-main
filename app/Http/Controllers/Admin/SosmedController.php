@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Traits\LogsActivity;
 use App\Models\SosmedAccount;
 use App\Models\SosmedApprovalLog;
 use App\Models\SosmedTask;
@@ -12,6 +13,7 @@ use Illuminate\Support\Facades\Auth;
 
 class SosmedController extends Controller
 {
+    use LogsActivity;
     public function index(Request $request)
     {
         $tab = $request->query('tab', 'accounts');
@@ -144,10 +146,11 @@ class SosmedController extends Controller
             }
         }
 
-        SosmedAccount::create([
+        $account = SosmedAccount::create([
             ...$validated,
             'created_by' => Auth::id(),
         ]);
+        $this->logActivity('sosmed.created', 'Sosmed', "Menambahkan akun sosial media '{$validated['name']}' ({$validated['platform']})", $account);
 
         return redirect()->route('admin.sosmed.index', ['tab' => 'accounts'])
             ->with('success', 'Akun sosial media baru berhasil ditambahkan.');
@@ -173,6 +176,7 @@ class SosmedController extends Controller
         }
 
         $account->update($validated);
+        $this->logActivity('sosmed.updated', 'Sosmed', "Memperbarui akun sosial media '{$account->name}'", $account);
 
         return redirect()->route('admin.sosmed.index', ['tab' => 'accounts'])
             ->with('success', 'Akun sosial media berhasil diperbarui.');
@@ -194,6 +198,7 @@ class SosmedController extends Controller
         }
 
         $account->update($validated);
+        $this->logActivity('sosmed.assigned', 'Sosmed', "Menugaskan penanggung jawab untuk akun '{$account->name}'", $account);
 
         return redirect()->route('admin.sosmed.index', ['tab' => 'accounts'])
             ->with('success', 'Penanggung jawab akun berhasil diperbarui.');
@@ -201,7 +206,9 @@ class SosmedController extends Controller
 
     public function destroyAccount(SosmedAccount $account)
     {
+        $name = $account->name;
         $account->delete();
+        $this->logActivity('sosmed.deleted', 'Sosmed', "Menghapus akun sosial media '{$name}'");
         return redirect()->route('admin.sosmed.index', ['tab' => 'accounts'])
             ->with('success', 'Akun sosial media berhasil dihapus.');
     }
@@ -223,6 +230,7 @@ class SosmedController extends Controller
 
         $count = $query->count();
         $query->delete();
+        $this->logActivity('sosmed.deleted', 'Sosmed', "Menghapus {$count} tugas sosmed lama (filter: {$range})");
 
         return redirect()->route('admin.sosmed.index', ['tab' => 'tasks'])
             ->with('success', "Berhasil menghapus {$count} tugas lama.");
@@ -245,6 +253,7 @@ class SosmedController extends Controller
 
         $count = $query->count();
         $query->delete();
+        $this->logActivity('sosmed.deleted', 'Sosmed', "Menghapus {$count} log persetujuan lama (filter: {$range})");
 
         return redirect()->route('admin.sosmed.index', ['tab' => 'logs'])
             ->with('success', "Berhasil menghapus {$count} log persetujuan lama.");

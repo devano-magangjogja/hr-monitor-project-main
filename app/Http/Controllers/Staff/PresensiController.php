@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Staff;
 
 use App\Http\Controllers\Controller;
+use App\Http\Traits\LogsActivity;
 use App\Models\Pemagang;
 use App\Models\Presensi;
 use App\Models\Task;
@@ -12,6 +13,7 @@ use Illuminate\Support\Facades\Auth;
 
 class PresensiController extends Controller
 {
+    use LogsActivity;
     /**
      * Tampilkan halaman presensi pemagang hari ini (atau sesuai tanggal filter)
      */
@@ -150,7 +152,12 @@ class PresensiController extends Controller
         $validated['created_by'] = Auth::id();
         $validated['notes'] = $validated['notes'] ?? ($validated['keterangan'] === 'Tidak Hadir' ? 'Tidak hadir tanpa keterangan' : 'Presensi tercatat');
 
-        Presensi::create($validated);
+        $presensi = Presensi::create($validated);
+        $pemagang = \App\Models\Pemagang::find($validated['pemagang_id']);
+        $this->logActivity('presensi.created', 'Presensi',
+            "Mencatat presensi '{$pemagang?->nama_lengkap}' ({$validated['keterangan']}) di {$validated['kantor']}",
+            $presensi
+        );
 
         return redirect()->route('staff.presensi.index', ['tanggal' => $today])
             ->with('success', 'Catatan presensi pemagang hari ini berhasil disimpan.');
@@ -172,6 +179,10 @@ class PresensiController extends Controller
         $validated['notes'] = $validated['notes'] ?? '-';
 
         $presensi->update($validated);
+        $this->logActivity('presensi.updated', 'Presensi',
+            "Memperbarui presensi '{$presensi->pemagang?->nama_lengkap}' tanggal {$presensi->tanggal}",
+            $presensi
+        );
 
         return redirect()->route('staff.presensi.index', ['tanggal' => $presensi->tanggal])
             ->with('success', 'Data presensi berhasil diperbarui.');
@@ -183,7 +194,11 @@ class PresensiController extends Controller
     public function destroy(Presensi $presensi)
     {
         $tanggal = $presensi->tanggal;
+        $namaPemagang = $presensi->pemagang?->nama_lengkap ?? 'Pemagang';
         $presensi->delete();
+        $this->logActivity('presensi.deleted', 'Presensi',
+            "Menghapus catatan presensi '{$namaPemagang}' tanggal {$tanggal}"
+        );
 
         return redirect()->route('staff.presensi.index', ['tanggal' => $tanggal])
             ->with('success', 'Catatan presensi berhasil dihapus.');

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Staff;
 
 use App\Http\Controllers\Controller;
+use App\Http\Traits\LogsActivity;
 use App\Models\User;
 use App\Services\UserService;
 use Illuminate\Http\Request;
@@ -11,6 +12,8 @@ use Illuminate\Validation\ValidationException;
 
 class UserController extends Controller
 {
+    use LogsActivity;
+
     public function __construct(
         protected UserService $userService
     ) {}
@@ -37,7 +40,8 @@ class UserController extends Controller
         $validated['is_active'] = 1;
 
         try {
-            $this->userService->createUser($validated);
+            $user = $this->userService->createUser($validated);
+            $this->logActivity('user.created', 'Pengguna', "Menambahkan akun HR Assistant '{$validated['name']}'", $user);
             return redirect()->route('staff.users.index')
                 ->with('success', 'Akun HR Assistant berhasil ditambahkan.');
         } catch (ValidationException $e) {
@@ -67,6 +71,7 @@ class UserController extends Controller
                 $validated,
                 $request->hasFile('image') ? $request->file('image') : null
             );
+            $this->logActivity('user.updated', 'Pengguna', "Memperbarui data HR Assistant '{$user->name}'", $user);
             return redirect()->route('staff.users.index')
                 ->with('success', 'Data HR Assistant berhasil diperbarui.');
         } catch (ValidationException $e) {
@@ -90,6 +95,7 @@ class UserController extends Controller
         ]);
 
         $this->userService->updatePassword($user, $request->password);
+        $this->logActivity('user.updated', 'Pengguna', "Memperbarui password HR Assistant '{$user->name}'", $user);
 
         return redirect()->route('staff.users.index')
             ->with('success', 'Password HR Assistant berhasil diperbarui.');
@@ -100,7 +106,9 @@ class UserController extends Controller
         abort_if($user->role !== 'hr_assistant', 403);
 
         try {
+            $name = $user->name;
             $this->userService->deleteUser($user);
+            $this->logActivity('user.deleted', 'Pengguna', "Menghapus akun HR Assistant '{$name}'");
             return redirect()->route('staff.users.index')
                 ->with('success', 'Akun HR Assistant berhasil dihapus.');
         } catch (ValidationException $e) {

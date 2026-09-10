@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\PM;
 
 use App\Http\Controllers\Controller;
+use App\Http\Traits\LogsActivity;
 use App\Models\PmSosmedOversight;
 use App\Models\SosmedAccount;
 use App\Models\SosmedApprovalLog;
@@ -13,6 +14,7 @@ use Illuminate\Support\Facades\Auth;
 
 class SosmedController extends Controller
 {
+    use LogsActivity;
     public function index(Request $request)
     {
         $tab = $request->query('tab', 'accounts');
@@ -205,6 +207,8 @@ class SosmedController extends Controller
             'notes'          => 'PM submit bukti langsung (' . count($links) . ' link). Langsung menunggu approval final HR Staff.',
         ]);
 
+        $this->logActivity('sosmed.submitted', 'Sosmed', "Submit bukti laporan sosmed untuk akun '{$account->name}'", $task);
+
         return redirect()->route('pm.sosmed.index', ['tab' => 'accounts'])
             ->with('success', 'Bukti konten untuk ' . $account->name . ' berhasil dikirim. Menunggu approval final HR Staff.');
     }
@@ -254,6 +258,8 @@ class SosmedController extends Controller
                 'notes'          => 'Diverifikasi oleh PM. Menunggu persetujuan final HR Staff.',
             ]);
 
+            $this->logActivity('sosmed.verified', 'Sosmed', "Memverifikasi tugas sosmed '{$task->title}' dari tim", $task);
+
             return redirect()->route('pm.sosmed.index', ['tab' => 'oversight'])
                 ->with('success', 'Tugas berhasil diverifikasi dan diteruskan ke HR Staff.');
         } else {
@@ -272,6 +278,8 @@ class SosmedController extends Controller
                 'action'         => 'rejected',
                 'notes'          => $validated['rejection_note'] ?? 'Ditolak oleh PM',
             ]);
+
+            $this->logActivity('sosmed.verified', 'Sosmed', "Menolak tugas sosmed '{$task->title}' dari tim", $task);
 
             return redirect()->route('pm.sosmed.index', ['tab' => 'oversight'])
                 ->with('success', 'Tugas ditolak dan dikembalikan ke staff.');
@@ -312,6 +320,7 @@ class SosmedController extends Controller
 
         $deleted = $query->count();
         $query->delete();
+        $this->logActivity('sosmed.deleted', 'Sosmed', "Menghapus {$deleted} riwayat persetujuan sosmed (filter: {$validated['period']})");
 
         return redirect()->route('pm.sosmed.index', ['tab' => 'approvals'])
             ->with('success', "Berhasil menghapus {$deleted} riwayat approval.");

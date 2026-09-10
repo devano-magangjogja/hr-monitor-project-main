@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Traits\LogsActivity;
 use App\Models\Notification;
 use App\Models\User;
 use App\Notifications\CustomNotification;
@@ -13,6 +14,7 @@ use Illuminate\Support\Str;
 
 class NotificationController extends Controller
 {
+    use LogsActivity;
     public function index()
     {
         $users = User::where('role', '!=', 'admin')
@@ -80,6 +82,7 @@ class NotificationController extends Controller
         }
 
         $count = $users->count();
+        $this->logActivity('notification.created', 'Notifikasi', "Mengirim notifikasi '{$validated['title']}' kepada {$count} pengguna");
 
         return redirect()->route('admin.notifications.index')
             ->with('success', "Notifikasi berhasil dikirim ke {$count} pengguna.");

@@ -11,6 +11,7 @@ use App\Http\Controllers\Admin\ReportController;
 use App\Http\Controllers\Admin\NotificationController as AdminNotificationController;
 use App\Http\Controllers\Admin\SettingController as AdminSettingController;
 use App\Http\Controllers\Admin\PresensiController as AdminPresensiController;
+use App\Http\Controllers\Admin\ActivityLogController;
 use App\Http\Controllers\Staff\DashboardController as StaffDashboard;
 use App\Http\Controllers\Staff\TaskController as StaffTaskController;
 use App\Http\Controllers\Staff\UserController as StaffUserController;
@@ -105,6 +106,12 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin'])->grou
     Route::patch('/presensi/{presensi}', [AdminPresensiController::class, 'update'])->name('presensi.update');
     Route::delete('/presensi/{presensi}', [AdminPresensiController::class, 'destroy'])->name('presensi.destroy');
     Route::get('/presensi/laporan', [AdminPresensiController::class, 'laporan'])->name('presensi.laporan');
+    Route::post('/presensi/laporan/bulk-delete', [AdminPresensiController::class, 'bulkDeleteAttendance'])->name('presensi.bulk-delete');
+
+    // Log Activity (Admin Monitoring)
+    Route::get('/activity-log', [ActivityLogController::class, 'index'])->name('activity-log.index');
+    Route::delete('/activity-log/purge', [ActivityLogController::class, 'purge'])->name('activity-log.purge');
+    Route::delete('/activity-log/{activityLog}', [ActivityLogController::class, 'destroy'])->name('activity-log.destroy');
 
     // Kelola Pemagang
     Route::get('/pemagang', [PemagangController::class, 'index'])->name('pemagang.index');
