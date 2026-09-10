@@ -988,7 +988,7 @@
     <div id="modal-create-pemagang"
         class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 transition-all duration-200">
         <div
-            class="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+            class="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-visible animate-in fade-in zoom-in-95 duration-150">
 
             {{-- Header Modal --}}
             <div class="flex items-center justify-between px-5 py-3 border-b border-gray-100 bg-gray-50/50">
@@ -1032,8 +1032,9 @@
                     <label class="block text-[11px] font-bold text-gray-700 uppercase tracking-wider mb-1">
                         Nomor WhatsApp / HP <span class="text-red-500">*</span>
                     </label>
-                    <input type="text" name="no_hp" required placeholder="Contoh: 081234567890" inputmode="tel"
-                        maxlength="13" minlength="10"
+                    <input type="text" name="no_hp" required placeholder="Contoh: 081234567890" inputmode="numeric"
+                        maxlength="14" minlength="10"
+                        oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 14)"
                         class="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:bg-white transition hover:bg-white hover:border-primary-500">
                 </div>
 

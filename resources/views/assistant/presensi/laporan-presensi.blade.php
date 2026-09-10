@@ -10,7 +10,7 @@
 
 @section('content')
 
-{{-- ── Action Header & Filter (Sembunyi saat Print) ─────────── --}}
+{{-- ── Action Header (Sembunyi saat Print) ─────────────────── --}}
 <div class="print:hidden flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
     <div>
         <p class="text-sm text-gray-500">
@@ -113,11 +113,14 @@
 
 </div>
 
-{{-- ── Filter Bar Laporan (Sembunyi saat Print) ─────────────── --}}
+{{-- ── Filter Bar Global (Sembunyi saat Print) ──────────────── --}}
 <div class="print:hidden bg-white rounded-xl border border-gray-200 p-4 mb-6 shadow-sm">
     <form method="GET" action="{{ route('assistant.presensi.laporan') }}"
         class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
-        
+
+        {{-- Preserve tab aktif --}}
+        <input type="hidden" name="tab" value="{{ request('tab', 'rekapitulasi') }}">
+
         {{-- Tanggal Filter --}}
         <div>
             <input type="date" name="tanggal" value="{{ $tanggal }}" onchange="this.form.submit()"
@@ -130,7 +133,8 @@
                 class="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:bg-white transition text-gray-700 font-medium">
                 @foreach ($kantorList as $k)
                     <option value="{{ $k }}" {{ $selectedKantor == $k ? 'selected' : '' }}>
-                        {{ $k }}</option>
+                        {{ $k }}
+                    </option>
                 @endforeach
             </select>
         </div>
@@ -155,7 +159,8 @@
                 <option value="">Semua Divisi</option>
                 @foreach ($divisiList as $div)
                     <option value="{{ $div }}" {{ request('divisi') == $div ? 'selected' : '' }}>
-                        {{ $div }}</option>
+                        {{ $div }}
+                    </option>
                 @endforeach
             </select>
         </div>
@@ -171,8 +176,8 @@
             </select>
 
             @if (request()->hasAny(['search', 'divisi', 'shift', 'keterangan']))
-                <a href="{{ route('assistant.presensi.laporan', ['tanggal' => $tanggal]) }}"
-                    class="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition"
+                <a href="{{ route('assistant.presensi.laporan', ['tanggal' => $tanggal, 'kantor' => $selectedKantor, 'tab' => request('tab', 'rekapitulasi')]) }}"
+                    class="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition flex-shrink-0"
                     title="Reset Filter">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -184,13 +189,47 @@
     </form>
 </div>
 
-{{-- ── TABEL 1: Rekapitulasi Per Pemagang ──────────────────── --}}
+{{-- ── TAB NAVIGATION ──────────────────────────────────────── --}}
+<div class="print:hidden bg-white rounded-t-xl border border-b-0 border-gray-200 overflow-hidden mb-0 shadow-sm">
+    <div class="flex border-b border-gray-200 overflow-x-auto scrollbar-none">
+        <a href="{{ route('assistant.presensi.laporan', array_merge(request()->except('tab', 'page_rekap', 'page_logs'), ['tab' => 'rekapitulasi', 'tanggal' => $tanggal, 'kantor' => $selectedKantor])) }}"
+           class="flex items-center gap-2 px-5 py-3.5 text-sm font-medium whitespace-nowrap border-b-2 transition
+                  {{ !request('tab') || request('tab') === 'rekapitulasi' ? 'border-primary-600 text-primary-600 bg-primary-50/50' : 'border-transparent text-gray-500 hover:text-gray-700 hover:bg-gray-50' }}">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+            </svg>
+            Rekapitulasi Pemagang
+            <span class="ml-1 px-2 py-0.5 rounded-full text-xs font-bold
+                         {{ !request('tab') || request('tab') === 'rekapitulasi' ? 'bg-primary-100 text-primary-700' : 'bg-gray-100 text-gray-600' }}">
+                {{ $rekapPemagang->total() }}
+            </span>
+        </a>
+        <a href="{{ route('assistant.presensi.laporan', array_merge(request()->except('tab', 'page_rekap', 'page_logs'), ['tab' => 'riwayat', 'tanggal' => $tanggal, 'kantor' => $selectedKantor])) }}"
+           class="flex items-center gap-2 px-5 py-3.5 text-sm font-medium whitespace-nowrap border-b-2 transition
+                  {{ request('tab') === 'riwayat' ? 'border-primary-600 text-primary-600 bg-primary-50/50' : 'border-transparent text-gray-500 hover:text-gray-700 hover:bg-gray-50' }}">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+            </svg>
+            Riwayat Detail Log
+            <span class="ml-1 px-2 py-0.5 rounded-full text-xs font-bold
+                         {{ request('tab') === 'riwayat' ? 'bg-primary-100 text-primary-700' : 'bg-gray-100 text-gray-600' }}">
+                {{ $logs->total() }}
+            </span>
+        </a>
+    </div>
+</div>
+
+{{-- ══════════════════════════════════════════════════════════ --}}
+{{-- ── TAB 1: REKAPITULASI PER PEMAGANG ───────────────────── --}}
+{{-- ══════════════════════════════════════════════════════════ --}}
+@if (!request('tab') || request('tab') === 'rekapitulasi')
 <div id="tabel-rekap-pemagang"
-    class="bg-white rounded-xl border border-gray-200 print:border-gray-300 overflow-hidden shadow-sm print:shadow-none mb-8 print:mb-6 scroll-mt-6 print-avoid-break">
+    class="bg-white rounded-b-xl border border-t-0 border-gray-200 print:rounded-xl print:border-gray-300 overflow-hidden shadow-sm print:shadow-none mb-8 print:mb-6 scroll-mt-6 print-avoid-break">
+
     <div class="px-6 py-4 print:px-4 print:py-2.5 border-b border-gray-200 print:border-gray-300 bg-gray-50/60 print:bg-gray-100 flex items-center justify-between">
         <div>
-            <h2 class="text-sm sm:text-base print:text-sm font-bold text-gray-800">I. Rekapitulasi Kehadiran per Pemagang</h2>
-            <p class="text-xs print:text-[11px] text-gray-500">Ringkasan performa dan tingkat kedisiplinan kehadiran setiap individu di {{ $assignedKantor }}</p>
+            <h2 class="text-sm sm:text-base print:text-sm font-bold text-gray-800">Rekapitulasi Kehadiran per Pemagang</h2>
+            <p class="text-xs print:text-[11px] text-gray-500">Ringkasan performa dan tingkat kedisiplinan kehadiran setiap individu di {{ $selectedKantor }}</p>
         </div>
         <span class="text-xs font-semibold px-2.5 py-1 bg-primary-50 text-primary-700 rounded-full print:bg-transparent print:text-gray-700 print:border print:border-gray-300">
             Total: {{ $rekapPemagang->total() }} Pemagang
@@ -215,68 +254,42 @@
                 @forelse($rekapPemagang as $item)
                     @php
                         $p = $item->pemagang;
-                        $rateColor =
-                            $item->rate >= 80
-                                ? 'text-green-600'
-                                : ($item->rate >= 60
-                                    ? 'text-amber-600'
-                                    : 'text-red-600');
-                        $barColor =
-                            $item->rate >= 80
-                                ? 'bg-green-500'
-                                : ($item->rate >= 60
-                                    ? 'bg-amber-500'
-                                    : 'bg-red-500');
+                        $rateColor = $item->rate >= 80 ? 'text-green-600' : ($item->rate >= 60 ? 'text-amber-600' : 'text-red-600');
+                        $barColor  = $item->rate >= 80 ? 'bg-green-500'  : ($item->rate >= 60 ? 'bg-amber-500'  : 'bg-red-500');
                     @endphp
                     <tr class="hover:bg-gray-50/80 transition">
-
-                        {{-- Nama & Info --}}
                         <td class="px-6 py-3.5 print:px-3 print:py-2">
                             <p class="font-semibold text-gray-800 text-sm print:text-xs">{{ $p->nama_lengkap }}</p>
                             <p class="text-xs print:text-[10px] text-gray-400">{{ $p->kampus }}</p>
                         </td>
-
-                        {{-- Divisi --}}
                         <td class="px-6 py-3.5 print:px-3 print:py-2">
                             <span class="inline-flex items-center px-2 py-0.5 rounded text-xs print:text-[10px] font-medium bg-gray-100 text-gray-700 print:border print:border-gray-200">
                                 {{ $p->divisi }}
                             </span>
                         </td>
-
-                        {{-- Lebih Awal --}}
                         <td class="px-4 py-3.5 print:px-2 print:py-2 text-center">
                             <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs print:text-[11px] font-semibold bg-indigo-50 text-indigo-700 print:bg-transparent print:text-indigo-800">
                                 {{ $item->datang_awal }}
                             </span>
                         </td>
-
-                        {{-- Tepat Waktu --}}
                         <td class="px-4 py-3.5 print:px-2 print:py-2 text-center">
                             <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs print:text-[11px] font-semibold bg-green-50 text-green-700 print:bg-transparent print:text-green-800">
                                 {{ $item->tepat_waktu }}
                             </span>
                         </td>
-
-                        {{-- Terlambat --}}
                         <td class="px-4 py-3.5 print:px-2 print:py-2 text-center">
                             <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs print:text-[11px] font-semibold {{ $item->terlambat > 0 ? 'bg-amber-50 text-amber-700 print:text-amber-800' : 'text-gray-400' }}">
                                 {{ $item->terlambat }}
                             </span>
                         </td>
-
-                        {{-- Tidak Hadir --}}
                         <td class="px-4 py-3.5 print:px-2 print:py-2 text-center">
                             <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs print:text-[11px] font-semibold {{ $item->tidak_hadir > 0 ? 'bg-red-50 text-red-700 print:text-red-800' : 'text-gray-400' }}">
                                 {{ $item->tidak_hadir }}
                             </span>
                         </td>
-
-                        {{-- Total --}}
                         <td class="px-4 py-3.5 print:px-2 print:py-2 text-center font-bold text-gray-800 print:text-xs">
                             {{ $item->total }}
                         </td>
-
-                        {{-- Rate --}}
                         <td class="px-6 py-3.5 print:px-3 print:py-2 text-right">
                             <div class="flex items-center justify-end gap-2">
                                 <span class="font-bold text-sm print:text-xs {{ $rateColor }}">{{ $item->rate }}%</span>
@@ -303,14 +316,19 @@
         </div>
     @endif
 </div>
+@endif
 
-{{-- ── TABEL 2: Detail Riwayat Log Presensi ───────────────── --}}
+{{-- ══════════════════════════════════════════════════════════ --}}
+{{-- ── TAB 2: RIWAYAT DETAIL LOG PRESENSI ─────────────────── --}}
+{{-- ══════════════════════════════════════════════════════════ --}}
+@if (request('tab') === 'riwayat')
 <div id="tabel-log-presensi"
-    class="bg-white rounded-xl border border-gray-200 print:border-gray-300 overflow-hidden shadow-sm print:shadow-none scroll-mt-6 print-avoid-break">
+    class="bg-white rounded-b-xl border border-t-0 border-gray-200 print:rounded-xl print:border-gray-300 overflow-hidden shadow-sm print:shadow-none scroll-mt-6 print-avoid-break">
+
     <div class="px-6 py-4 print:px-4 print:py-2.5 border-b border-gray-200 print:border-gray-300 bg-gray-50/60 print:bg-gray-100 flex items-center justify-between">
         <div>
-            <h2 class="text-sm sm:text-base print:text-sm font-bold text-gray-800">II. Riwayat Detail Log Presensi</h2>
-            <p class="text-xs print:text-[11px] text-gray-500">Catatan waktu presensi masuk dan status kehadiran pemagang di {{ $assignedKantor }}</p>
+            <h2 class="text-sm sm:text-base print:text-sm font-bold text-gray-800">Riwayat Detail Log Presensi</h2>
+            <p class="text-xs print:text-[11px] text-gray-500">Catatan waktu presensi masuk dan status kehadiran pemagang di {{ $selectedKantor }}</p>
         </div>
         <span class="text-xs font-semibold px-2.5 py-1 bg-gray-100 text-gray-700 rounded-full print:bg-transparent print:border print:border-gray-300">
             Total Log: {{ $logs->total() }}
@@ -336,23 +354,24 @@
                     @php
                         $pemagang = $log->pemagang;
                         $badgeStyle = match ($log->keterangan) {
-                            'Lebih Awal' => 'bg-indigo-50 text-indigo-700 border-indigo-200',
+                            'Lebih Awal'  => 'bg-indigo-50 text-indigo-700 border-indigo-200',
                             'Tepat Waktu' => 'bg-green-50 text-green-700 border-green-200',
-                            'Terlambat' => 'bg-amber-50 text-amber-700 border-amber-200',
+                            'Terlambat'   => 'bg-amber-50 text-amber-700 border-amber-200',
                             'Tidak Hadir' => 'bg-red-50 text-red-700 border-red-200',
-                            default => 'bg-gray-100 text-gray-700 border-gray-200',
+                            default       => 'bg-gray-100 text-gray-700 border-gray-200',
                         };
                         $shiftStyle = match ($log->shift) {
-                            'Pagi' => 'bg-sky-50 text-sky-700',
+                            'Pagi'   => 'bg-sky-50 text-sky-700',
                             'Middle' => 'bg-purple-50 text-purple-700',
-                            'Siang' => 'bg-orange-50 text-orange-700',
-                            default => 'bg-gray-100 text-gray-700',
+                            'Siang'  => 'bg-orange-50 text-orange-700',
+                            default  => 'bg-gray-100 text-gray-700',
                         };
                     @endphp
                     <tr class="hover:bg-gray-50/80 transition">
                         <td class="px-6 py-3 print:px-3 print:py-1.5">
                             <p class="font-medium text-gray-800 text-xs sm:text-sm print:text-xs">
-                                {{ $pemagang ? $pemagang->nama_lengkap : 'Pemagang Dihapus' }}</p>
+                                {{ $pemagang ? $pemagang->nama_lengkap : 'Pemagang Dihapus' }}
+                            </p>
                             <p class="text-[11px] print:text-[10px] text-gray-400">{{ $pemagang ? $pemagang->kampus : '-' }}</p>
                         </td>
                         <td class="px-6 py-3 print:px-3 print:py-1.5">
@@ -402,15 +421,16 @@
         </div>
     @endif
 </div>
+@endif
 
-{{-- ── Lembar Tanda Tangan / Pengesahan (Hanya muncul saat cetak) ── --}}
+{{-- ── Lembar Tanda Tangan / Pengesahan (Hanya saat cetak) ──── --}}
 <div class="hidden print:block mt-8 pt-6 border-t border-gray-300 print-avoid-break">
     <div class="flex justify-between items-start text-xs text-gray-700">
         <div class="text-center w-52">
             <p class="text-gray-500 mb-1">Asisten Bertugas Lapangan,</p>
             <div class="h-16"></div>
             <p class="font-bold underline text-gray-900">{{ Auth::user()->name }}</p>
-            <p class="text-[10px] text-gray-500">Asisten Penugasan ({{ $assignedKantor }})</p>
+            <p class="text-[10px] text-gray-500">Asisten Penugasan ({{ $selectedKantor }})</p>
         </div>
         <div class="text-center w-60">
             <p class="text-gray-500 mb-1">Yogyakarta, {{ \Carbon\Carbon::parse($tanggal)->locale('id')->translatedFormat('d F Y') }}</p>

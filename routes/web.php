@@ -118,6 +118,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin'])->grou
     Route::post('/pemagang', [PemagangController::class, 'store'])->name('pemagang.store');
     Route::patch('/pemagang/{pemagang}', [PemagangController::class, 'update'])->name('pemagang.update');
     Route::delete('/pemagang/{pemagang}', [PemagangController::class, 'destroy'])->name('pemagang.destroy');
+    Route::delete('/pemagang', [PemagangController::class, 'bulkDestroy'])->name('pemagang.bulk-destroy');
 
     // Manajemen Akun & Monitoring Sosmed
     Route::get('/sosmed', [AdminSosmedController::class, 'index'])->name('sosmed.index');
@@ -169,6 +170,7 @@ Route::prefix('staff')->name('staff.')->middleware(['auth', 'role:hr_staff'])->g
     Route::post('/pemagang', [PemagangController::class, 'store'])->name('pemagang.store');
     Route::patch('/pemagang/{pemagang}', [PemagangController::class, 'update'])->name('pemagang.update');
     Route::delete('/pemagang/{pemagang}', [PemagangController::class, 'destroy'])->name('pemagang.destroy');
+    Route::delete('/pemagang', [PemagangController::class, 'bulkDestroy'])->name('pemagang.bulk-destroy');
 
     // Manajemen Sosmed & Approval Level 2
     Route::get('/sosmed', [StaffSosmedController::class, 'index'])->name('sosmed.index');
