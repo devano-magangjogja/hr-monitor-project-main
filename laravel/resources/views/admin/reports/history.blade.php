@@ -1,0 +1,836 @@
+@extends('layouts.app')
+
+@section('title', 'Riwayat Tugas')
+@section('page-title', 'Riwayat Tugas')
+@section('page-subtitle', 'Rekap historis tugas seluruh anggota tim')
+
+@section('sidebar')
+    @include('components.sidebar-admin')
+@endsection
+
+@section('content')
+    {{-- Top Action Bar --}}
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
+        <div>
+            <h2 class="text-sm font-bold text-gray-800">Daftar Arsip & Riwayat Aktivitas</h2>
+            <p class="text-xs text-gray-400 mt-0.5">Total {{ $tasks->count() }} catatan riwayat ditampilkan</p>
+        </div>
+        <div>
+            <button type="button" onclick="openPurgeModal()"
+                class="inline-flex items-center gap-2 px-3.5 py-2 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 text-xs font-semibold rounded-lg transition shadow-sm">
+                <svg class="w-4 h-4 text-rose-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                </svg>
+                <span>Bersihkan Riwayat</span>
+            </button>
+        </div>
+    </div>
+
+    {{-- Filter --}}
+    <div class="bg-white rounded-xl border border-gray-200 p-4 sm:p-5 mb-6 shadow-sm">
+        <form method="GET" action="{{ route('admin.reports.history') }}"
+            class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-3 items-end">
+
+            {{-- Cari Tugas --}}
+            <div class="lg:col-span-4">
+                <label class="block text-[11px] font-semibold text-gray-500 uppercase tracking-wider mb-1">Cari
+                    Tugas</label>
+                <div class="relative">
+                    <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-gray-400">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                        </svg>
+                    </span>
+                    <input type="text" name="search" value="{{ $search ?? '' }}" placeholder="Cari judul / deskripsi..."
+                        class="w-full pl-9 pr-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:bg-white transition">
+                </div>
+            </div>
+
+            {{-- Filter Pengguna (Searchable Dropdown) --}}
+            @php
+                $selectedUser = $users->firstWhere('id', $userId);
+            @endphp
+            <div class="lg:col-span-3 relative" id="user-filter-container">
+                <label class="block text-[11px] font-semibold text-gray-500 uppercase tracking-wider mb-1">Pengguna</label>
+                <input type="hidden" name="user_id" id="filter-user-id" value="{{ $userId ?? '' }}">
+
+                <div id="user-filter-trigger" onclick="toggleUserDropdown()"
+                    class="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-xs sm:text-sm text-gray-700 flex items-center justify-between cursor-pointer hover:bg-white hover:border-primary-500 transition">
+                    <span id="user-filter-text"
+                        class="truncate font-medium {{ $selectedUser ? 'text-gray-800' : 'text-gray-500' }}">
+                        {{ $selectedUser ? $selectedUser->name . ' (' . $selectedUser->role_label . ')' : 'Semua Pengguna' }}
+                    </span>
+                    <svg class="w-3.5 h-3.5 text-gray-400 flex-shrink-0 ml-1.5" fill="none" stroke="currentColor"
+                        viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                    </svg>
+                </div>
+
+                {{-- Popover list --}}
+                <div id="user-filter-menu"
+                    class="hidden absolute z-30 left-0 right-0 mt-1 bg-white border border-gray-200 rounded-xl shadow-xl overflow-hidden">
+                    <div class="p-2 border-b border-gray-100 bg-gray-50">
+                        <div class="relative">
+                            <input type="text" id="user-search-input" oninput="filterUserOptions(this.value)"
+                                placeholder="Cari nama atau role..."
+                                class="w-full pl-8 pr-3 py-1.5 bg-white border border-gray-200 rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-primary-500">
+                            <svg class="w-3.5 h-3.5 text-gray-400 absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none"
+                                fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                            </svg>
+                        </div>
+                    </div>
+                    <div id="user-options-list" class="max-h-48 overflow-y-auto divide-y divide-gray-50">
+                        <div onclick="selectUser('', 'Semua Pengguna')" data-search="semua pengguna all"
+                            class="user-filter-option px-3 py-2 hover:bg-primary-50 cursor-pointer text-xs font-semibold text-gray-600 hover:text-primary-700">
+                            Semua Pengguna
+                        </div>
+                        @foreach($users as $user)
+                            <div onclick="selectUser('{{ $user->id }}', '{{ addslashes($user->name) }} ({{ addslashes($user->role_label) }})')"
+                                data-search="{{ strtolower($user->name . ' ' . $user->role_label) }}"
+                                class="user-filter-option px-3 py-2 hover:bg-primary-50 cursor-pointer flex items-center justify-between text-xs text-gray-700 hover:text-primary-700">
+                                <span class="font-medium">{{ $user->name }}</span>
+                                <span
+                                    class="text-[10px] px-1.5 py-0.5 rounded bg-gray-100 text-gray-500 font-normal">{{ $user->role_label }}</span>
+                            </div>
+                        @endforeach
+                        <div id="user-filter-no-result" class="hidden py-3 text-center text-xs text-gray-400">
+                            Tidak ada pengguna yang cocok
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {{-- Filter Tanggal --}}
+            <div class="lg:col-span-3">
+                <label class="block text-[11px] font-semibold text-gray-500 uppercase tracking-wider mb-1">Tanggal</label>
+                <input type="date" name="date" value="{{ $date ?? '' }}"
+                    class="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-xs sm:text-sm font-medium text-gray-800 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:bg-white transition">
+            </div>
+
+            {{-- Tombol Aksi --}}
+            <div class="sm:col-span-2 lg:col-span-2 flex items-center gap-2">
+                <button type="submit"
+                    class="flex-1 flex items-center justify-center gap-1.5 px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white text-xs sm:text-sm font-semibold rounded-lg transition shadow-sm hover:shadow">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                    </svg>
+                    <span>Cari</span>
+                </button>
+
+                @if($date || $userId || $search)
+                    <a href="{{ route('admin.reports.history') }}"
+                        class="px-3.5 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs sm:text-sm font-semibold rounded-lg transition text-center flex-shrink-0"
+                        title="Reset Filter">
+                        Reset
+                    </a>
+                @endif
+            </div>
+        </form>
+    </div>
+
+    {{-- Tabel --}}
+    <div class="bg-white rounded-xl border border-gray-200 overflow-hidden flex flex-col">
+        {{-- Desktop / Mobile Table (dengan fixed height dan scrollbar internal) --}}
+        <div class="overflow-x-auto overflow-y-auto max-h-[600px]" style="scrollbar-gutter: stable;">
+            <table class="w-full min-w-[640px] sm:min-w-[900px] table-fixed text-xs sm:text-sm">
+                <thead>
+                    <tr class="bg-gray-50 border-b border-gray-200">
+                        {{-- Tanggal --}}
+                        <th
+                            class="w-[100px] sm:w-[120px] px-3 sm:px-5 py-3 text-left font-semibold text-gray-600 whitespace-nowrap">
+                            Tanggal
+                        </th>
+
+                        {{-- Judul --}}
+                        <th class="w-[130px] sm:w-[180px] px-3 sm:px-5 py-3 text-left font-semibold text-gray-600">
+                            Judul
+                        </th>
+
+                        {{-- Penerima --}}
+                        <th class="w-[130px] sm:w-[170px] px-3 sm:px-5 py-3 text-left font-semibold text-gray-600">
+                            Penerima
+                        </th>
+
+                        {{-- Sumber --}}
+                        <th class="w-[90px] sm:w-[120px] px-3 sm:px-5 py-3 text-left font-semibold text-gray-600">
+                            Sumber
+                        </th>
+
+                        {{-- Catatan --}}
+                        <th class="w-[120px] sm:w-[170px] px-3 sm:px-5 py-3 text-left font-semibold text-gray-600">
+                            Catatan
+                        </th>
+
+                        {{-- Status --}}
+                        <th
+                            class="w-[120px] sm:w-[140px] px-3 sm:px-5 py-3 text-center font-semibold text-gray-600 whitespace-nowrap">
+                            Status
+                        </th>
+
+                        {{-- Aksi --}}
+                        <th
+                            class="w-[85px] sm:w-[110px] px-3 sm:px-5 py-3 text-center font-semibold text-gray-600 whitespace-nowrap">
+                            Aksi
+                        </th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-100">
+                    @forelse($tasks as $task)
+                        @foreach($task->assignedUsers as $assignee)
+                                    @php
+                                        $assignment = $task->assignments->firstWhere('user_id', $assignee->id);
+                                        $status = $assignment?->is_completed ?? 'pending';
+                                    @endphp
+                                    <tr class="hover:bg-gray-50 transition-colors">
+                                        {{-- Tanggal --}}
+                                        <td class="px-3 sm:px-5 py-3 sm:py-4 text-gray-500 align-middle whitespace-nowrap">
+                                            <span class="text-xs sm:text-sm">
+                                                {{ $task->task_date->translatedFormat('d M Y') }}
+                                            </span>
+                                        </td>
+
+                                        {{-- Judul --}}
+                                        <td class="px-3 sm:px-5 py-3 sm:py-4 align-middle">
+                                            <div class="font-medium text-gray-800 text-xs sm:text-sm truncate" title="{{ $task->title }}">
+                                                {{ $task->title }}
+                                            </div>
+                                        </td>
+
+                                        {{-- Penerima --}}
+                                        <td class="px-3 sm:px-5 py-3 sm:py-4 align-middle">
+                                            <div class="font-medium text-gray-700 text-xs sm:text-sm truncate"
+                                                title="{{ $assignee->name }}">
+                                                {{ $assignee->name }}
+                                            </div>
+                                            <p class="hidden sm:block text-[11px] text-gray-400 mt-0.5 truncate">
+                                                {{ $assignee->role_label }}
+                                            </p>
+                                        </td>
+
+                                        {{-- Sumber --}}
+                                        <td class="px-3 sm:px-5 py-3 sm:py-4 align-middle">
+                                            @if($task->type === 'self')
+                                                <span
+                                                    class="inline-flex items-center justify-center px-2 sm:px-2.5 py-1 rounded-full text-[10px] sm:text-xs font-medium bg-gray-100 text-gray-600 whitespace-nowrap">
+                                                    Mandiri
+                                                </span>
+                                            @elseif($task->type === 'assigned')
+                                                <span
+                                                    class="inline-flex items-center max-w-full px-2 sm:px-2.5 py-1 rounded-full text-[10px] sm:text-xs font-medium bg-blue-50 text-blue-700 truncate"
+                                                    title="{{ $task->creator?->name ?? 'Admin' }}">
+                                                    {{ $task->creator?->name ?? 'Admin' }}
+                                                </span>
+                                            @elseif($task->type === 'default')
+                                                <span
+                                                    class="inline-flex items-center justify-center px-2 sm:px-2.5 py-1 rounded-full text-[10px] sm:text-xs font-medium bg-purple-50 text-purple-700 whitespace-nowrap">
+                                                    Rutin
+                                                </span>
+                                            @endif
+                                        </td>
+
+                                        {{-- Catatan --}}
+                                        <td class="px-3 sm:px-5 py-3 sm:py-4 align-middle">
+                                            <div class="truncate max-w-[120px] sm:max-w-[180px] text-xs text-gray-500"
+                                                title="{{ $assignment?->note ?? '-' }}">
+                                                {{ $assignment?->note ?? '-' }}
+                                            </div>
+                                        </td>
+
+                                        {{-- Status --}}
+                                        <td class="px-3 sm:px-5 py-3 sm:py-4 text-center align-middle">
+                                            <div class="flex justify-center items-center whitespace-nowrap">
+                                                <x-task-status-badge :status="$status" :completedAt="$assignment?->completed_at" />
+                                            </div>
+                                        </td>
+
+                                        {{-- Aksi --}}
+                                        <td class="px-3 sm:px-5 py-3 sm:py-4 align-middle">
+                                            <div class="flex items-center justify-center gap-1">
+                                                {{-- DETAIL --}}
+                                                <button onclick="openDetailModal({
+                                                                                    title: '{{ addslashes($task->title) }}',
+                                                                                    description: '{{ addslashes($task->description ?? '') }}',
+                                                                                    type: '{{ $task->type }}',
+                                                                                    date: '{{ $task->task_date->translatedFormat('d M Y') }}',
+                                                                                    source: '{{ addslashes($task->creator?->name ?? 'Sistem') }}',
+                                                                                    status: '{{ $status }}',
+                                                                                    note: '{{ addslashes($assignment?->note ?? '') }}',
+                                                                                    assignees: {{ json_encode($task->assignedUsers->map(fn($u) => [
+                                'name' => $u->name,
+                                'role' => $u->role_label,
+                                'status' => $task->assignments->firstWhere('user_id', $u->id)?->is_completed ?? 'pending',
+                            ])) }}
+                                                                                })"
+                                                    class="p-1.5 text-gray-400 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition"
+                                                    title="Lihat Detail">
+                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                            d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                            d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                                    </svg>
+                                                </button>
+
+                                                {{-- COMPLETE --}}
+                                                @if($assignment && $status !== 'completed')
+                                                    <button onclick="openCompleteModal(
+                                                                                                {{ $assignment->id }},
+                                                                                                '{{ addslashes($task->title) }}',
+                                                                                                '{{ addslashes($assignee->name) }}'
+                                                                                            )"
+                                                        class="p-1.5 text-gray-400 hover:text-green-600 hover:bg-green-50 rounded-lg transition"
+                                                        title="Tandai Selesai">
+                                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                                d="M5 13l4 4L19 7" />
+                                                        </svg>
+                                                    </button>
+                                                @endif
+
+                                                {{-- DELETE --}}
+                                                @if($assignment)
+                                                    <button onclick="openDeleteModal(
+                                                                                                {{ $assignment->id }},
+                                                                                                '{{ addslashes($task->title) }}',
+                                                                                                '{{ addslashes($assignee->name) }}'
+                                                                                            )"
+                                                        class="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition"
+                                                        title="Hapus Riwayat">
+                                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                                        </svg>
+                                                    </button>
+                                                @endif
+                                            </div>
+                                        </td>
+                                    </tr>
+                        @endforeach
+                    @empty
+                        <tr>
+                            <td colspan="7" class="px-3 sm:px-6 py-12 text-center text-gray-400 text-sm">
+                                {{ $date || $userId || $search ? 'Tidak ada data sesuai filter.' : 'Belum ada riwayat tugas.' }}
+                            </td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
+
+        {{-- Pagination di bawah table --}}
+        <div class="px-4 sm:px-6 py-4 border-t border-gray-100 bg-gray-50/50">
+            <div class="flex flex-col sm:flex-row items-center justify-between gap-3">
+                {{-- Info jumlah data --}}
+                <div class="text-xs sm:text-sm text-gray-600">
+                    Menampilkan <span class="font-semibold">{{ $tasks->count() }}</span> dari <span
+                        class="font-semibold">{{ $tasks->total() }}</span> data
+                </div>
+
+                {{-- Links pagination --}}
+                <div class="flex justify-center">
+                    {{ $tasks->links() }}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {{-- ── MODAL TANDAI SELESAI ─────────────────────────── --}}
+    <div id="modal-complete" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+        <div class="bg-white rounded-2xl shadow-xl w-full max-w-sm mx-4">
+            <div class="px-6 py-5 text-center">
+                <div class="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center mx-auto mb-4">
+                    <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                    </svg>
+                </div>
+                <h3 class="text-base font-semibold text-gray-800 mb-1">Tandai Selesai</h3>
+                <p class="text-sm text-gray-500 mb-1">
+                    Tandai tugas <span id="complete-task-title" class="font-semibold text-gray-700"></span>
+                </p>
+                <p class="text-sm text-gray-500 mb-6">
+                    milik <span id="complete-assignee-name" class="font-semibold text-gray-700"></span> sebagai selesai?
+                </p>
+                <form id="form-complete" action="" method="POST">
+                    @csrf
+                    @method('PATCH')
+                    <div class="flex justify-center gap-3">
+                        <button type="button" onclick="document.getElementById('modal-complete').classList.add('hidden')"
+                            class="px-5 py-2 text-sm text-gray-600 font-medium border border-gray-300 rounded-lg hover:bg-gray-50 transition">
+                            Batal
+                        </button>
+                        <button type="submit" class="px-5 py-2 bg-green-600 hover:bg-green-700 text-white
+                                                       text-sm font-medium rounded-lg transition">
+                            Ya, Selesaikan
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    {{-- ── MODAL HAPUS RIWAYAT ──────────────────────────── --}}
+    <div id="modal-delete" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+        <div class="bg-white rounded-2xl shadow-xl w-full max-w-sm mx-4">
+            <div class="px-6 py-5 text-center">
+                <div class="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center mx-auto mb-4">
+                    <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                    </svg>
+                </div>
+                <h3 class="text-base font-semibold text-gray-800 mb-1">Hapus Riwayat</h3>
+                <p class="text-sm text-gray-500 mb-1">
+                    Hapus riwayat tugas <span id="delete-task-title" class="font-semibold text-gray-700"></span>
+                </p>
+                <p class="text-sm text-gray-500 mb-2">
+                    milik <span id="delete-assignee-name" class="font-semibold text-gray-700"></span>?
+                </p>
+                <p class="text-xs text-red-500 mb-6">Tindakan ini tidak dapat dibatalkan.</p>
+                <form id="form-delete" action="" method="POST">
+                    @csrf
+                    @method('DELETE')
+                    <div class="flex justify-center gap-3">
+                        <button type="button" onclick="document.getElementById('modal-delete').classList.add('hidden')"
+                            class="px-5 py-2 text-sm text-gray-600 font-medium border border-gray-300 rounded-lg hover:bg-gray-50 transition">
+                            Batal
+                        </button>
+                        <button type="submit" class="px-5 py-2 bg-red-600 hover:bg-red-700 text-white
+                                                       text-sm font-medium rounded-lg transition">
+                            Ya, Hapus
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function openCompleteModal(assignmentId, taskTitle, assigneeName) {
+            document.getElementById('complete-task-title').textContent = taskTitle;
+            document.getElementById('complete-assignee-name').textContent = assigneeName;
+            document.getElementById('form-complete').action =
+                `/admin/reports/assignments/${assignmentId}/complete`;
+            document.getElementById('modal-complete').classList.remove('hidden');
+        }
+
+        function openDeleteModal(assignmentId, taskTitle, assigneeName) {
+            document.getElementById('delete-task-title').textContent = taskTitle;
+            document.getElementById('delete-assignee-name').textContent = assigneeName;
+            document.getElementById('form-delete').action =
+                `/admin/reports/assignments/${assignmentId}`;
+            document.getElementById('modal-delete').classList.remove('hidden');
+        }
+
+        function toggleUserDropdown() {
+            const menu = document.getElementById('user-filter-menu');
+            if (!menu) return;
+            const isHidden = menu.classList.contains('hidden');
+            if (isHidden) {
+                menu.classList.remove('hidden');
+                const searchInput = document.getElementById('user-search-input');
+                if (searchInput) {
+                    searchInput.value = '';
+                    filterUserOptions('');
+                    setTimeout(() => searchInput.focus(), 50);
+                }
+            } else {
+                menu.classList.add('hidden');
+            }
+        }
+
+        function selectUser(id, label) {
+            document.getElementById('filter-user-id').value = id;
+            const textEl = document.getElementById('user-filter-text');
+            textEl.textContent = label;
+            if (id) {
+                textEl.classList.remove('text-gray-500');
+                textEl.classList.add('text-gray-800');
+            } else {
+                textEl.classList.remove('text-gray-800');
+                textEl.classList.add('text-gray-500');
+            }
+            document.getElementById('user-filter-menu').classList.add('hidden');
+        }
+
+        function filterUserOptions(keyword) {
+            const query = (keyword || '').toLowerCase().trim();
+            const options = document.querySelectorAll('.user-filter-option');
+            let visibleCount = 0;
+            options.forEach(opt => {
+                const text = opt.getAttribute('data-search') || opt.textContent.toLowerCase();
+                if (!query || text.includes(query)) {
+                    opt.classList.remove('hidden');
+                    visibleCount++;
+                } else {
+                    opt.classList.add('hidden');
+                }
+            });
+            const noResult = document.getElementById('user-filter-no-result');
+            if (noResult) {
+                noResult.classList.toggle('hidden', visibleCount > 0);
+            }
+        }
+
+
+        function openPurgeModal() {
+            document.getElementById('modal-purge-history').classList.remove('hidden');
+        }
+
+        function closePurgeModal() {
+            document.getElementById('modal-purge-history').classList.add('hidden');
+            // Close all open custom dropdowns
+            document.querySelectorAll('[id$="-options"]').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('[id$="-chevron"]').forEach(el => el.classList.remove('rotate-180'));
+        }
+
+        // Generic toggle for small dropdowns (year, month, role)
+        function toggleDropdown(optionsId, chevronId) {
+            const opts = document.getElementById(optionsId);
+            const chev = document.getElementById(chevronId);
+            // Close others first
+            document.querySelectorAll('[id$="-options"]').forEach(el => {
+                if (el.id !== optionsId) { el.classList.add('hidden'); }
+            });
+            document.querySelectorAll('[id$="-chevron"]').forEach(el => {
+                if (el.id !== chevronId) { el.classList.remove('rotate-180'); }
+            });
+            opts.classList.toggle('hidden');
+            chev.classList.toggle('rotate-180');
+        }
+
+        // Generic select for small dropdowns
+        function selectOption(optionsId, hiddenId, labelId, chevronId, value, label) {
+            document.getElementById(hiddenId).value = value;
+            document.getElementById(labelId).textContent = label;
+            document.getElementById(optionsId).classList.add('hidden');
+            document.getElementById(chevronId).classList.remove('rotate-180');
+        }
+
+        // Toggle for the main period dropdown
+        function togglePurgeDropdown() {
+            const opts = document.getElementById('purge-period-options');
+            const chev = document.getElementById('purge-period-chevron');
+            // Close others first
+            document.querySelectorAll('[id$="-options"]').forEach(el => {
+                if (el.id !== 'purge-period-options') { el.classList.add('hidden'); }
+            });
+            document.querySelectorAll('[id$="-chevron"]').forEach(el => {
+                if (el.id !== 'purge-period-chevron') { el.classList.remove('rotate-180'); }
+            });
+            opts.classList.toggle('hidden');
+            chev.classList.toggle('rotate-180');
+        }
+
+        // Select a period option
+        function selectPurgePeriod(val, label, colorClass) {
+            document.getElementById('purge-period-type-value').value = val;
+            const labelEl = document.getElementById('purge-period-label');
+            labelEl.innerHTML = `<span class="w-2 h-2 rounded-full ${colorClass} flex-shrink-0"></span><span class="truncate text-gray-700 font-medium">${label}</span>`;
+            document.getElementById('purge-period-options').classList.add('hidden');
+            document.getElementById('purge-period-chevron').classList.remove('rotate-180');
+            updatePurgePeriodFields(val);
+        }
+
+        function updatePurgePeriodFields(val) {
+            const wrapYear = document.getElementById('purge-wrap-year');
+            const wrapMonth = document.getElementById('purge-wrap-month');
+            const wrapDate = document.getElementById('purge-wrap-date');
+            const wrapConfirm = document.getElementById('purge-wrap-confirm');
+
+            wrapYear.classList.add('hidden');
+            wrapMonth.classList.add('hidden');
+            wrapDate.classList.add('hidden');
+            wrapConfirm.classList.add('hidden');
+
+            if (val === 'by_year') {
+                wrapYear.classList.remove('hidden');
+            } else if (val === 'by_month') {
+                wrapYear.classList.remove('hidden');
+                wrapMonth.classList.remove('hidden');
+            } else if (val === 'before_date') {
+                wrapDate.classList.remove('hidden');
+            } else if (val === 'all') {
+                wrapConfirm.classList.remove('hidden');
+            }
+        }
+
+        // Close dropdowns when clicking outside
+        document.addEventListener('click', function (e) {
+            const dropdownIds = ['purge-period-dropdown', 'purge-year-dropdown', 'purge-month-dropdown', 'purge-role-dropdown'];
+            dropdownIds.forEach(id => {
+                const wrap = document.getElementById(id);
+                if (wrap && !wrap.contains(e.target)) {
+                    const opts = wrap.querySelector('[id$="-options"]');
+                    const chev = wrap.querySelector('[id$="-chevron"]');
+                    if (opts) opts.classList.add('hidden');
+                    if (chev) chev.classList.remove('rotate-180');
+                }
+            });
+        });
+    </script>
+
+    {{-- ── MODAL: BERSIHKAN / HAPUS RIWAYAT MASSAL ──────────────────── --}}
+    <div id="modal-purge-history" class="hidden fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4">
+        <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" onclick="closePurgeModal()"></div>
+        <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-sm sm:max-w-lg z-10 flex flex-col max-h-[90vh]">
+            <div class="flex items-center justify-between px-4 sm:px-6 py-3 sm:py-4 border-b border-rose-100 bg-rose-50/70">
+                <div class="flex items-center gap-2.5">
+                    <div class="w-8 h-8 rounded-lg bg-rose-100 text-rose-600 flex items-center justify-center">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                        </svg>
+                    </div>
+                    <div>
+                        <h3 class="text-sm sm:text-base font-bold text-gray-800">Bersihkan Riwayat</h3>
+                        <p class="text-[11px] text-gray-500 mt-0.5">Hapus data riwayat lama untuk optimasi database</p>
+                    </div>
+                </div>
+                <button type="button" onclick="closePurgeModal()" class="text-gray-400 hover:text-gray-600">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+
+            <form method="POST" action="{{ route('admin.reports.history.purge') }}"
+                class="overflow-y-auto flex-1 p-4 sm:pt-1 p t-1 sm:p-6 space-y-5">
+                @csrf
+
+                {{-- 1. Pilihan Periode --}}
+                <div>
+                    <label class="block text-xs font-semibold text-gray-700 mb-1.5">1. Rentang / Periode Riwayat</label>
+                    {{-- Hidden real select for form submission --}}
+                    <input type="hidden" name="period_type" id="purge-period-type-value" value="older_than_year">
+                    {{-- Custom Dropdown --}}
+                    <div class="relative" id="purge-period-dropdown">
+                        <button type="button" id="purge-period-btn" onclick="togglePurgeDropdown()"
+                            class="w-full flex items-center justify-between gap-2 border border-gray-300 rounded-xl px-3.5 py-2.5 text-xs sm:text-sm bg-white hover:border-rose-400 focus:outline-none focus:ring-2 focus:ring-rose-400 focus:border-rose-400 transition text-left">
+                            <span id="purge-period-label" class="flex items-center gap-2 min-w-0">
+                                <span class="w-2 h-2 rounded-full bg-rose-400 flex-shrink-0"></span>
+                                <span class="truncate text-gray-700 font-medium">Lebih dari 1 Tahun yang Lalu</span>
+                            </span>
+                            <svg id="purge-period-chevron"
+                                class="w-4 h-4 text-gray-400 flex-shrink-0 transition-transform duration-200" fill="none"
+                                stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                            </svg>
+                        </button>
+                        <div id="purge-period-options"
+                            class="hidden absolute left-0 right-0 top-full mt-1.5 bg-white border border-gray-200 rounded-xl shadow-2xl overflow-hidden z-[100]">
+                            @php
+                                $periodOptions = [
+                                    'older_than_year' => ['label' => 'Lebih dari 1 Tahun yang Lalu', 'color' => 'bg-red-400'],
+                                    'older_than_months' => ['label' => 'Lebih dari 6 Bulan yang Lalu', 'color' => 'bg-orange-400'],
+                                    'by_year' => ['label' => 'Tahun Tertentu', 'color' => 'bg-amber-400'],
+                                    'by_month' => ['label' => 'Bulan & Tahun Tertentu', 'color' => 'bg-yellow-400'],
+                                    'before_date' => ['label' => 'Sebelum Tanggal Tertentu', 'color' => 'bg-sky-400'],
+                                    'all' => ['label' => 'Semua Riwayat (Sebelum Hari Ini)', 'color' => 'bg-purple-500'],
+                                ];
+                            @endphp
+                            @foreach($periodOptions as $val => $opt)
+                                <button type="button"
+                                    onclick="selectPurgePeriod('{{ $val }}', '{{ $opt['label'] }}', '{{ $opt['color'] }}')"
+                                    class="w-full flex items-center gap-3 px-4 py-2.5 text-xs sm:text-sm text-left hover:bg-rose-50 transition group border-b border-gray-50 last:border-0">
+                                    <span class="w-2 h-2 rounded-full {{ $opt['color'] }} flex-shrink-0"></span>
+                                    <span class="text-gray-700 group-hover:text-rose-700 font-medium">{{ $opt['label'] }}</span>
+                                </button>
+                            @endforeach
+                        </div>
+                    </div>
+                </div>
+
+                {{-- Dynamic Fields --}}
+                <div class="grid grid-cols-2 gap-3">
+                    {{-- Field Tahun --}}
+                    <div id="purge-wrap-year" class="hidden col-span-1">
+                        <label class="block text-xs font-semibold text-gray-700 mb-1.5">Tahun</label>
+                        <div class="relative" id="purge-year-dropdown">
+                            @php $curYear = (int) date('Y'); @endphp
+                            <input type="hidden" name="year" id="purge-year-value" value="{{ $curYear }}">
+                            <button type="button" id="purge-year-btn"
+                                onclick="toggleDropdown('purge-year-options','purge-year-chevron')"
+                                class="w-full flex items-center justify-between gap-1 border border-gray-300 rounded-xl px-3 py-2.5 text-xs sm:text-sm bg-white hover:border-rose-400 focus:outline-none focus:ring-2 focus:ring-rose-400 transition text-left">
+                                <span id="purge-year-label" class="text-gray-700 font-medium">{{ $curYear }}</span>
+                                <svg id="purge-year-chevron"
+                                    class="w-3.5 h-3.5 text-gray-400 flex-shrink-0 transition-transform duration-200"
+                                    fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M19 9l-7 7-7-7" />
+                                </svg>
+                            </button>
+                            <div id="purge-year-options"
+                                class="hidden absolute left-0 right-0 top-full mt-1.5 bg-white border border-gray-200 rounded-xl shadow-2xl overflow-y-auto max-h-40 z-[100]">
+                                @for($y = $curYear; $y >= $curYear - 5; $y--)
+                                    <button type="button"
+                                        onclick="selectOption('purge-year-options','purge-year-value','purge-year-label','purge-year-chevron', '{{ $y }}', '{{ $y }}')"
+                                        class="w-full px-4 py-2 text-xs sm:text-sm text-left text-gray-700 hover:bg-rose-50 hover:text-rose-700 font-medium transition border-b border-gray-50 last:border-0">
+                                        {{ $y }}
+                                    </button>
+                                @endfor
+                            </div>
+                        </div>
+                    </div>
+
+                    {{-- Field Bulan --}}
+                    <div id="purge-wrap-month" class="hidden col-span-1">
+                        <label class="block text-xs font-semibold text-gray-700 mb-1.5">Bulan</label>
+                        <div class="relative" id="purge-month-dropdown">
+                            @php
+                                $months = [
+                                    1 => 'Januari',
+                                    2 => 'Februari',
+                                    3 => 'Maret',
+                                    4 => 'April',
+                                    5 => 'Mei',
+                                    6 => 'Juni',
+                                    7 => 'Juli',
+                                    8 => 'Agustus',
+                                    9 => 'September',
+                                    10 => 'Oktober',
+                                    11 => 'November',
+                                    12 => 'Desember'
+                                ];
+                            @endphp
+                            <input type="hidden" name="month" id="purge-month-value" value="1">
+                            <button type="button" id="purge-month-btn"
+                                onclick="toggleDropdown('purge-month-options','purge-month-chevron')"
+                                class="w-full flex items-center justify-between gap-1 border border-gray-300 rounded-xl px-3 py-2.5 text-xs sm:text-sm bg-white hover:border-rose-400 focus:outline-none focus:ring-2 focus:ring-rose-400 transition text-left">
+                                <span id="purge-month-label" class="text-gray-700 font-medium truncate">Januari</span>
+                                <svg id="purge-month-chevron"
+                                    class="w-3.5 h-3.5 text-gray-400 flex-shrink-0 transition-transform duration-200"
+                                    fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M19 9l-7 7-7-7" />
+                                </svg>
+                            </button>
+                            <div id="purge-month-options"
+                                class="hidden absolute left-0 right-0 top-full mt-1.5 bg-white border border-gray-200 rounded-xl shadow-2xl overflow-y-auto max-h-40 z-[100]">
+                                @foreach($months as $mNum => $mName)
+                                    <button type="button"
+                                        onclick="selectOption('purge-month-options','purge-month-value','purge-month-label','purge-month-chevron','{{ $mNum }}','{{ $mName }}')"
+                                        class="w-full px-4 py-2 text-xs sm:text-sm text-left text-gray-700 hover:bg-rose-50 hover:text-rose-700 font-medium transition border-b border-gray-50 last:border-0">
+                                        {{ $mName }}
+                                    </button>
+                                @endforeach
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {{-- Field Sebelum Tanggal --}}
+                <div id="purge-wrap-date" class="hidden">
+                    <label class="block text-xs font-semibold text-gray-700 mb-1">Sebelum Tanggal (Data sebelum tgl ini
+                        dihapus)</label>
+                    <input type="date" name="before_date" max="{{ date('Y-m-d', strtotime('-1 day')) }}"
+                        class="w-full border border-gray-300 rounded-lg px-3 py-2 text-xs sm:text-sm focus:ring-2 focus:ring-rose-500 focus:outline-none">
+                </div>
+
+                {{-- Field Konfirmasi Teks untuk 'all' --}}
+                <div id="purge-wrap-confirm" class="hidden bg-rose-50 border border-rose-200 rounded-lg p-3">
+                    <label class="block text-xs font-bold text-rose-800 mb-1">Ketik kata "HAPUS" untuk konfirmasi:</label>
+                    <input type="text" name="confirm_phrase" placeholder="Ketik HAPUS..."
+                        class="w-full border border-rose-300 rounded-lg px-3 py-2 text-xs sm:text-sm focus:ring-2 focus:ring-rose-500 focus:outline-none uppercase font-mono">
+                    <p class="text-[11px] text-rose-600 mt-1">Perhatian: Seluruh riwayat aktivitas sebelum hari ini akan
+                        dihapus permanen.</p>
+                </div>
+
+                {{-- 2. Cakupan Data yang Dihapus --}}
+                <div>
+                    <label class="block text-xs font-semibold text-gray-700 mb-2">2. Cakupan Data yang Dihapus</label>
+                    <div class="space-y-2 bg-gray-50 p-3 rounded-lg border border-gray-200">
+                        <label class="flex items-center gap-2 text-xs font-medium text-gray-700 cursor-pointer">
+                            <input type="checkbox" name="targets[]" value="tasks" checked
+                                class="w-4 h-4 rounded text-rose-600 focus:ring-rose-500 border-gray-300">
+                            <span>Riwayat Tugas & Penugasan Seluruh Role (Tasks)</span>
+                        </label>
+                        <label class="flex items-center gap-2 text-xs font-medium text-gray-700 cursor-pointer">
+                            <input type="checkbox" name="targets[]" value="sosmed" checked
+                                class="w-4 h-4 rounded text-rose-600 focus:ring-rose-500 border-gray-300">
+                            <span>Riwayat Konten & Log Approval Sosmed</span>
+                        </label>
+                        <label class="flex items-center gap-2 text-xs font-medium text-gray-700 cursor-pointer">
+                            <input type="checkbox" name="targets[]" value="presensi"
+                                class="w-4 h-4 rounded text-rose-600 focus:ring-rose-500 border-gray-300">
+                            <span>Riwayat Log Presensi Pemagang (Opsional)</span>
+                        </label>
+                    </div>
+                </div>
+
+                {{-- 3. Filter Role (Opsional) --}}
+                <div>
+                    <label class="block text-xs font-semibold text-gray-700 mb-1.5">3. Filter Role (Khusus Riwayat
+                        Tugas)</label>
+                    <input type="hidden" name="role" id="purge-role-value" value="all">
+                    <div class="relative" id="purge-role-dropdown">
+                        <button type="button" id="purge-role-btn"
+                            onclick="toggleDropdown('purge-role-options','purge-role-chevron')"
+                            class="w-full flex items-center justify-between gap-2 border border-gray-300 rounded-xl px-3.5 py-2.5 text-xs sm:text-sm bg-white hover:border-rose-400 focus:outline-none focus:ring-2 focus:ring-rose-400 transition text-left">
+                            <span id="purge-role-label" class="text-gray-700 font-medium truncate">Semua Role (Seluruh
+                                Pengguna)</span>
+                            <svg id="purge-role-chevron"
+                                class="w-4 h-4 text-gray-400 flex-shrink-0 transition-transform duration-200" fill="none"
+                                stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                            </svg>
+                        </button>
+                        <div id="purge-role-options"
+                            class="hidden absolute left-0 right-0 top-full mt-1.5 bg-white border border-gray-200 rounded-xl shadow-2xl overflow-y-auto max-h-48 z-[100]">
+                            @php
+                                $roleOptions = [
+                                    'all' => 'Semua Role (Seluruh Pengguna)',
+                                    'hr_staff' => 'HR Staff',
+                                    'hr_assistant' => 'HR Assistant',
+                                    'pm' => 'Project Manager',
+                                    'sosmed' => 'Sosmed Specialist',
+                                    'programmer' => 'Programmer',
+                                    'dg' => 'Desain Grafis (DG)',
+                                    'vg' => 'Video Grafis (VG)',
+                                    'cs' => 'Customer Service (CS)',
+                                    'ob' => 'Office Boy (OB)',
+                                ];
+                            @endphp
+                            @foreach($roleOptions as $rVal => $rLabel)
+                                <button type="button"
+                                    onclick="selectOption('purge-role-options','purge-role-value','purge-role-label','purge-role-chevron','{{ $rVal }}','{{ $rLabel }}')"
+                                    class="w-full px-4 py-2.5 text-xs sm:text-sm text-left text-gray-700 hover:bg-rose-50 hover:text-rose-700 font-medium transition border-b border-gray-50 last:border-0">
+                                    {{ $rLabel }}
+                                </button>
+                            @endforeach
+                        </div>
+                    </div>
+                </div>
+
+                {{-- Safety Warning Alert --}}
+                <div
+                    class="flex items-start gap-2.5 p-3 rounded-lg bg-amber-50 border border-amber-200 text-amber-800 text-xs">
+                    <svg class="w-4 h-4 text-amber-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor"
+                        viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                    </svg>
+                    <span><strong>Penting:</strong> Data yang dihapus bersifat permanen. Tugas hari ini dan tugas mendatang
+                        tidak akan pernah terhapus.</span>
+                </div>
+
+                {{-- Buttons --}}
+                <div class="flex gap-3 pt-2">
+                    <button type="button" onclick="closePurgeModal()"class="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-xs sm:text-sm font-semibold text-gray-700 hover:bg-gray-50 transition">
+                            Batal
+                        </button>
+                        <button type="submit"
+                            onclick="return confirm('Apakah Anda yakin ingin menghapus data riwayat ini secara permanen?')"
+                            class="flex-1 px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-lg text-xs sm:text-sm font-semibold shadow-sm transition">
+                            Hapus
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+@endsection

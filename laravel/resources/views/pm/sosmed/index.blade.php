@@ -1,0 +1,989 @@
+@extends('layouts.app')
+@section('title', 'Manajemen Sosmed')
+@section('page-title', 'Manajemen Sosmed')
+@section('page-subtitle', 'Kelola akun tanggung jawab Anda & verifikasi hasil tim sosmed')
+@section('sidebar')
+    @include('components.sidebar-pm')
+@endsection
+
+@section('content')
+    @include('components.notification-popup')
+
+    {{-- ═══ STAT CARDS ══════════════════════════════════════════════════ --}}
+    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 mb-6">
+        <div class="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
+            <p class="text-xs font-medium text-gray-500 mb-1">Akun Tanggung Jawab</p>
+            <p class="text-2xl font-bold text-gray-800">{{ $stats['total_accounts'] }}</p>
+            <p class="text-[11px] text-gray-400 mt-0.5">di-assign HR ke Anda</p>
+        </div>
+        <div class="bg-white rounded-xl border {{ $stats['pending_today'] > 0 ? 'border-amber-300 bg-amber-50/20 ring-2 ring-amber-400/30' : 'border-gray-200' }} p-4 shadow-sm relative">
+            <p class="text-xs font-medium text-gray-500 mb-1">Perlu Diurus Hari Ini</p>
+            <p class="text-2xl font-bold text-amber-600">{{ $stats['pending_today'] }}</p>
+            <p class="text-[11px] text-amber-600 mt-0.5">belum disubmit</p>
+        </div>
+        <div class="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
+            <p class="text-xs font-medium text-gray-500 mb-1">Tim Sosmed Diawasi</p>
+            <p class="text-2xl font-bold text-pink-600">{{ $stats['oversight_count'] }}</p>
+            <p class="text-[11px] text-gray-400 mt-0.5">user sosmed</p>
+        </div>
+        <a href="{{ route('pm.sosmed.index', ['tab' => 'oversight']) }}"
+           class="bg-white rounded-xl border {{ $stats['need_pm_verify'] > 0 ? 'border-blue-300 bg-blue-50/30 ring-2 ring-blue-400/30' : 'border-gray-200' }} p-4 shadow-sm relative block hover:border-blue-400 transition">
+            @if($stats['need_pm_verify'] > 0)
+                <span class="absolute top-3 right-3 flex h-2 w-2">
+                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
+                    <span class="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
+                </span>
+            @endif
+            <p class="text-xs font-medium text-gray-500 mb-1">Perlu Verif PM</p>
+            <p class="text-2xl font-bold text-blue-600">{{ $stats['need_pm_verify'] }}</p>
+            <p class="text-[11px] text-blue-600 mt-0.5">dari tim sosmed</p>
+        </a>
+        <div class="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
+            <p class="text-xs font-medium text-gray-500 mb-1">Menunggu HR Staff</p>
+            <p class="text-2xl font-bold text-purple-600">{{ $stats['waiting_hr'] }}</p>
+            <p class="text-[11px] text-gray-400 mt-0.5">lolos verif PM</p>
+        </div>
+        <div class="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
+            <p class="text-xs font-medium text-gray-500 mb-1">Disetujui Final</p>
+            <p class="text-2xl font-bold text-emerald-600">{{ $stats['approved_final'] }}</p>
+            <p class="text-[11px] text-emerald-600 mt-0.5">selesai 100%</p>
+        </div>
+    </div>
+
+    {{-- ═══ TABS ════════════════════════════════════════════════════════ --}}
+    <div class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+        <div class="flex border-b border-gray-200 overflow-x-auto">
+
+            {{-- Tab 1: Akun Tanggung Jawab --}}
+            <a href="{{ route('pm.sosmed.index', ['tab' => 'accounts']) }}"
+               class="flex items-center gap-2 px-5 py-3.5 text-sm font-medium whitespace-nowrap border-b-2 transition
+                      {{ $tab === 'accounts' ? 'border-primary-600 text-primary-600 bg-primary-50/50' : 'border-transparent text-gray-500 hover:text-gray-700' }}">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
+                </svg>
+                Akun Saya ({{ $accounts->count() }})
+            </a>
+
+            {{-- Tab 2: Tim Sosmed Saya --}}
+            <a href="{{ route('pm.sosmed.index', ['tab' => 'oversight']) }}"
+               class="flex items-center gap-2 px-5 py-3.5 text-sm font-medium whitespace-nowrap border-b-2 transition
+                      {{ $tab === 'oversight' ? 'border-primary-600 text-primary-600 bg-primary-50/50' : 'border-transparent text-gray-500 hover:text-gray-700' }}">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>
+                </svg>
+                Tim Sosmed Saya ({{ $stats['oversight_count'] }})
+                @if($stats['need_pm_verify'] > 0)
+                    <span class="ml-1 px-1.5 py-0.5 text-[10px] font-bold rounded-full bg-blue-600 text-white">
+                        {{ $stats['need_pm_verify'] }}
+                    </span>
+                @endif
+            </a>
+
+            {{-- Tab 3: Riwayat Approval --}}
+            <a href="{{ route('pm.sosmed.index', ['tab' => 'approvals']) }}"
+               class="flex items-center gap-2 px-5 py-3.5 text-sm font-medium whitespace-nowrap border-b-2 transition
+                      {{ $tab === 'approvals' ? 'border-primary-600 text-primary-600 bg-primary-50/50' : 'border-transparent text-gray-500 hover:text-gray-700' }}">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                </svg>
+                Riwayat Approval
+            </a>
+        </div>
+
+        {{-- ──────────────────────────────────────────────────────────────
+        TAB 1: AKUN TANGGUNG JAWAB + SUBMIT BUKTI PM
+        ─────────────────────────────────────────────────────────────── --}}
+        @if($tab === 'accounts')
+            <div class="p-5">
+                {{-- Header Section --}}
+                <div class="mb-4 flex flex-wrap items-start justify-between gap-3">
+                    <div>
+                        <h3 class="text-sm font-semibold text-gray-800">Daftar Akun & Status Pengerjaan Hari Ini</h3>
+                        <p class="mt-0.5 text-xs text-gray-500">
+                            Klik <strong>Submit Bukti</strong> untuk mengirim hasil konten hari ini ke HR Staff untuk approval final.
+                        </p>
+                    </div>
+                    <div class="shrink-0 rounded-lg border border-indigo-200 bg-indigo-50 px-3 py-1.5 text-xs font-medium text-indigo-700">
+                        Hari Ini: <span class="font-bold">{{ now()->translatedFormat('d M Y') }}</span>
+                    </div>
+                </div>
+
+                {{-- ── Desktop Table (md+) ────────────────────────────────────────── --}}
+                <div class="hidden md:block overflow-x-auto rounded-lg border border-gray-100">
+                    <table class="w-full table-fixed text-sm">
+                        <colgroup>
+                            <col class="w-12">     {{-- Ceklis --}}
+                            <col class="w-[30%]">  {{-- Nama Akun --}}
+                            <col class="w-32">     {{-- Platform --}}
+                            <col class="w-32">     {{-- Link Profil --}}
+                            <col class="w-[25%]">  {{-- Bukti Konten --}}
+                            <col class="w-36">     {{-- Status / Aksi --}}
+                        </colgroup>
+                        <thead>
+                            <tr class="bg-gray-50 border-b border-gray-200 text-xs font-semibold uppercase tracking-wide text-gray-500">
+                                <th class="px-3 py-3 text-center">✓</th>
+                                <th class="px-4 py-3 text-left">Nama Akun</th>
+                                <th class="px-4 py-3 text-left">Platform</th>
+                                <th class="px-4 py-3 text-left">Link Profil</th>
+                                <th class="px-4 py-3 text-left">Bukti Konten</th>
+                                <th class="px-4 py-3 text-center">Status / Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-100">
+                            @forelse($accounts as $acc)
+                                @php
+                                    $todayTask   = $todayTasks[$acc->id] ?? null;
+                                    $status      = $todayTask?->status ?? 'pending';
+                                    $isSubmitted = in_array($status, ['done_by_staff', 'verified_by_pm', 'approved_hr']);
+                                    $isRejected  = $status === 'rejected';
+                                @endphp
+                                <tr class="align-middle transition hover:bg-gray-50/60">
+
+                                    {{-- Ceklis Status --}}
+                                    <td class="px-3 py-3.5 text-center">
+                                        @if($isSubmitted)
+                                            <span class="inline-flex h-6 w-6 items-center justify-center rounded-full border border-emerald-300 bg-emerald-100 text-xs text-emerald-600" title="Sudah diurus">✓</span>
+                                        @else
+                                            <button type="button"
+                                                onclick="openSubmitModal({{ $acc->id }}, '{{ addslashes($acc->name) }}', '{{ addslashes($todayTask?->description ?? '') }}')"
+                                                class="inline-flex h-6 w-6 items-center justify-center rounded-md border-2 transition {{ $isRejected ? 'border-rose-400 bg-rose-50 hover:bg-rose-100' : 'border-gray-300 bg-white hover:border-primary-500' }}"
+                                                title="{{ $isRejected ? 'Klik untuk revisi' : 'Klik untuk submit bukti' }}">
+                                            </button>
+                                        @endif
+                                    </td>
+
+                                    {{-- Nama Akun --}}
+                                    <td class="px-4 py-3.5 min-w-0">
+                                        <p class="truncate font-semibold text-gray-800 block" title="{{ $acc->name }}">{{ $acc->name }}</p>
+                                        @if($isRejected && $todayTask?->rejection_note)
+                                            <p class="mt-1 rounded border border-rose-200 bg-rose-50 px-2 py-1 text-xs leading-snug text-rose-600">
+                                                ↩ "{{ $todayTask->rejection_note }}"
+                                            </p>
+                                        @endif
+                                    </td>
+
+                                    {{-- Platform --}}
+                                    <td class="px-4 py-3.5 whitespace-nowrap">
+                                        <span class="inline-flex items-center gap-1 rounded-md border px-2.5 py-1 text-xs font-medium {{ $acc->platform_color }}">
+                                            {{ $acc->platform_icon }} {{ $acc->platform }}
+                                        </span>
+                                    </td>
+
+                                    {{-- Link Profil --}}
+                                    <td class="px-4 py-3.5 whitespace-nowrap">
+                                        @if($acc->link)
+                                            <a href="{{ $acc->link }}" target="_blank"
+                                                class="inline-flex items-center gap-1 text-xs text-primary-600 hover:underline font-medium">
+                                                <svg class="h-3 w-3 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+                                                </svg>
+                                                Buka Profil
+                                            </a>
+                                        @else
+                                            <span class="text-xs text-gray-300">—</span>
+                                        @endif
+                                    </td>
+
+                                    {{-- Bukti Hari Ini --}}
+                                    <td class="px-4 py-3.5 text-xs min-w-0">
+                                        @if($todayTask && $todayTask->hasLinks())
+                                            <button type="button"
+                                                onclick="openLinksPopup({{ json_encode($todayTask->link_upload) }}, '{{ addslashes($acc->name) }}')"
+                                                class="inline-flex items-center gap-1 text-xs font-medium text-primary-600 hover:underline">
+                                                <svg class="h-3 w-3 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/>
+                                                </svg>
+                                                {{ $todayTask->link_count }} link bukti
+                                            </button>
+                                            @if($todayTask->description)
+                                                <p class="text-[10px] text-gray-400 mt-0.5 truncate max-w-full block" title="{{ $todayTask->description }}">
+                                                    {{ $todayTask->description }}
+                                                </p>
+                                            @endif
+                                        @else
+                                            <span class="text-xs text-gray-300">—</span>
+                                        @endif
+                                    </td>
+
+                                    {{-- Status / Aksi --}}
+                                    <td class="px-4 py-3.5 text-center whitespace-nowrap">
+                                        @if($isSubmitted)
+                                            <span class="inline-flex items-center rounded-full px-2.5 py-1 text-xs font-semibold leading-snug {{ $todayTask->status_badge_class }}">
+                                                {{ $todayTask->status_label }}
+                                            </span>
+                                        @else
+                                            <button type="button"
+                                                onclick="openSubmitModal({{ $acc->id }}, '{{ addslashes($acc->name) }}', '{{ addslashes($todayTask?->description ?? '') }}')"
+                                                class="rounded-lg {{ $isRejected ? 'bg-rose-500 hover:bg-rose-600' : 'bg-primary-600 hover:bg-primary-700' }} px-3 py-1 text-xs font-semibold text-white shadow-sm transition">
+                                                {{ $isRejected ? 'Revisi' : 'Submit Bukti' }}
+                                            </button>
+                                        @endif
+                                    </td>
+                                </tr>
+                            @empty
+                                <tr>
+                                    <td colspan="6" class="px-4 py-12 text-center text-sm text-gray-400">
+                                        Belum ada akun sosial media yang di-assign ke Anda oleh HR Staff.
+                                    </td>
+                                </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
+
+                {{-- ── Mobile Cards (< md) ────────────────────────────────────────── --}}
+                <div class="md:hidden space-y-3">
+                    @forelse($accounts as $acc)
+                        @php
+                            $todayTask   = $todayTasks[$acc->id] ?? null;
+                            $status      = $todayTask?->status ?? 'pending';
+                            $isSubmitted = in_array($status, ['done_by_staff', 'verified_by_pm', 'approved_hr']);
+                            $isRejected  = $status === 'rejected';
+                        @endphp
+                        <div class="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
+                            <div class="flex items-start justify-between gap-3 mb-3">
+                                <div class="min-w-0 flex-1">
+                                    <div class="flex items-center gap-2">
+                                        <p class="font-semibold text-gray-800 text-sm truncate">{{ $acc->name }}</p>
+                                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-medium border whitespace-nowrap {{ $acc->platform_color }}">
+                                            {{ $acc->platform_icon }} {{ $acc->platform }}
+                                        </span>
+                                    </div>
+                                    @if($acc->link)
+                                        <a href="{{ $acc->link }}" target="_blank"
+                                            class="inline-flex items-center gap-1 text-xs text-primary-600 hover:underline font-medium mt-1">
+                                            <svg class="w-3 h-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+                                            </svg>
+                                            Buka Profil
+                                        </a>
+                                    @endif
+                                </div>
+                                <div class="flex-shrink-0">
+                                    @if($isSubmitted)
+                                        <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold {{ $todayTask->status_badge_class }}">
+                                            {{ $todayTask->status_label }}
+                                        </span>
+                                    @else
+                                        <button type="button"
+                                            onclick="openSubmitModal({{ $acc->id }}, '{{ addslashes($acc->name) }}', '{{ addslashes($todayTask?->description ?? '') }}')"
+                                            class="px-3 py-1 bg-primary-600 hover:bg-primary-700 text-white text-xs font-semibold rounded-lg transition shadow-sm">
+                                            {{ $isRejected ? 'Revisi' : 'Submit Bukti' }}
+                                        </button>
+                                    @endif
+                                </div>
+                            </div>
+                            @if($isRejected && $todayTask?->rejection_note)
+                                <div class="mb-3 bg-rose-50 p-2 rounded-lg border border-rose-200 text-xs text-rose-700">
+                                    <span class="font-semibold">Catatan Revisi:</span> "{{ $todayTask->rejection_note }}"
+                                </div>
+                            @endif
+                            <div class="flex items-center justify-between gap-2 text-xs border-t border-gray-100 pt-2.5">
+                                <div class="min-w-0">
+                                    <p class="text-gray-400 mb-0.5">Bukti Konten</p>
+                                    @if($todayTask && $todayTask->hasLinks())
+                                        <button type="button"
+                                            onclick="openLinksPopup({{ json_encode($todayTask->link_upload) }}, '{{ addslashes($acc->name) }}')"
+                                            class="inline-flex items-center gap-1 text-xs text-primary-600 hover:underline font-medium">
+                                            <svg class="w-3 h-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/>
+                                            </svg>
+                                            {{ $todayTask->link_count }} link
+                                        </button>
+                                    @else
+                                        <span class="text-gray-300">—</span>
+                                    @endif
+                                </div>
+                            </div>
+                        </div>
+                    @empty
+                        <div class="py-8 text-center text-sm text-gray-400">
+                            Belum ada akun sosial media yang di-assign ke Anda oleh HR Staff.
+                        </div>
+                    @endforelse
+                </div>
+            </div>
+        @endif
+
+        {{-- ──────────────────────────────────────────────────────────────
+             TAB 2: TIM SOSMED SAYA — progress monitoring
+        ─────────────────────────────────────────────────────────────── --}}
+        @if($tab === 'oversight')
+        <div class="p-4 sm:p-5">
+            <div class="mb-4">
+                <h3 class="text-sm font-semibold text-gray-800">Progress Tim Sosmed Saya</h3>
+                <p class="text-xs text-gray-500 mt-0.5">
+                    Pantau progress pengerjaan akun sosmed oleh user Sosmed yang berada di bawah pengawasan Anda.
+                    Ditetapkan oleh HR Staff.
+                </p>
+            </div>
+
+            @if($oversightData->isEmpty())
+                <div class="p-10 text-center bg-gray-50 rounded-xl border border-dashed border-gray-200">
+                    <svg class="w-8 h-8 mx-auto text-gray-300 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                            d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>
+                    </svg>
+                    <p class="text-sm text-gray-500 font-medium">Belum ada tim sosmed yang diawasi.</p>
+                    <p class="text-xs text-gray-400 mt-1">HR Staff perlu menetapkan Anda sebagai PM pengawas untuk user Sosmed tertentu.</p>
+                </div>
+            @else
+                <div class="space-y-6">
+                    @foreach($oversightData as $entry)
+                        @php $sosmedUser = $entry['sosmed_user']; @endphp
+                        <div class="rounded-xl border border-gray-200 overflow-hidden shadow-sm">
+                            {{-- Sosmed user header --}}
+                            <div class="flex items-center justify-between px-5 py-3.5 bg-gray-50 border-b border-gray-200">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-9 h-9 rounded-full bg-pink-100 text-pink-700 font-bold flex items-center justify-center text-sm flex-shrink-0">
+                                        {{ strtoupper(substr($sosmedUser->name, 0, 1)) }}
+                                    </div>
+                                    <div>
+                                        <p class="font-semibold text-gray-800 text-sm">{{ $sosmedUser->name }}</p>
+                                        <p class="text-xs text-gray-400">{{ $sosmedUser->role_label }}</p>
+                                    </div>
+                                </div>
+                                <div class="flex items-center gap-3 text-xs">
+                                    <span class="px-2.5 py-1 rounded-full font-medium
+                                        {{ $entry['pending'] > 0 ? 'bg-amber-50 text-amber-700 border border-amber-200' : 'bg-emerald-50 text-emerald-700 border border-emerald-200' }}">
+                                        {{ $entry['done'] }}/{{ $entry['total'] }} selesai hari ini
+                                    </span>
+                                </div>
+                            </div>
+
+                            {{-- Accounts table --}}
+                            @if($entry['accounts']->isEmpty())
+                                <div class="px-5 py-6 text-center text-sm text-gray-400">
+                                    Belum ada akun sosmed yang dikelola user ini.
+                                </div>
+                            @else
+                                {{-- Desktop (md+) --}}
+                                <div class="hidden md:block overflow-x-auto">
+                                    <table class="w-full text-sm table-fixed">
+                                        <colgroup>
+                                            <col class="w-[28%]"> {{-- nama akun --}}
+                                            <col class="w-28">     {{-- platform --}}
+                                            <col class="w-24">     {{-- link --}}
+                                            <col class="w-32">     {{-- bukti hari ini --}}
+                                            <col class="w-36">     {{-- status --}}
+                                            <col class="w-32">     {{-- aksi verifikasi --}}
+                                        </colgroup>
+                                        <thead>
+                                            <tr class="border-b border-gray-100 text-xs font-semibold text-gray-400 uppercase tracking-wide bg-white">
+                                                <th class="px-4 py-2.5 text-left">Akun</th>
+                                                <th class="px-4 py-2.5 text-left">Platform</th>
+                                                <th class="px-4 py-2.5 text-left">Link</th>
+                                                <th class="px-4 py-2.5 text-left">Bukti Hari Ini</th>
+                                                <th class="px-4 py-2.5 text-left">Status</th>
+                                                <th class="px-4 py-2.5 text-center">Aksi</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody class="divide-y divide-gray-50">
+                                            @foreach($entry['accounts'] as $acc)
+                                                @php
+                                                    $t      = $entry['today_tasks'][$acc->id] ?? null;
+                                                    $tSt    = $t?->status ?? 'pending';
+                                                    $tDone  = in_array($tSt, ['done_by_staff', 'verified_by_pm', 'approved_hr']);
+                                                    $tRej   = $tSt === 'rejected';
+                                                    $canVerify = $t && $t->status === 'done_by_staff';
+                                                @endphp
+                                                <tr class="hover:bg-gray-50/60 transition align-middle">
+                                                    <td class="px-4 py-3">
+                                                        <p class="font-semibold text-gray-800 truncate text-sm">{{ $acc->name }}</p>
+                                                    </td>
+                                                    <td class="px-4 py-3">
+                                                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-xs font-medium border {{ $acc->platform_color }}">
+                                                            {{ $acc->platform_icon }} {{ $acc->platform }}
+                                                        </span>
+                                                    </td>
+                                                    <td class="px-4 py-3">
+                                                        @if($acc->link)
+                                                            <a href="{{ $acc->link }}" target="_blank"
+                                                                class="text-xs text-primary-600 hover:underline inline-flex items-center gap-1 font-medium">
+                                                                <svg class="w-3 h-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+                                                                </svg>
+                                                                Buka
+                                                            </a>
+                                                        @else
+                                                            <span class="text-xs text-gray-300">—</span>
+                                                        @endif
+                                                    </td>
+                                                    <td class="px-4 py-3">
+                                                        @if($t && $t->hasLinks())
+                                                            <button type="button"
+                                                                onclick="openLinksPopup({{ json_encode($t->link_upload) }}, '{{ addslashes($acc->name) }}')"
+                                                                class="inline-flex items-center gap-1 text-xs text-primary-600 font-medium hover:underline">
+                                                                <svg class="w-3 h-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/>
+                                                                </svg>
+                                                                {{ $t->link_count }} link
+                                                            </button>
+                                                        @else
+                                                            <span class="text-xs text-gray-300">—</span>
+                                                        @endif
+                                                    </td>
+                                                    <td class="px-4 py-3">
+                                                        @if($t)
+                                                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium {{ $t->status_badge_class }}">
+                                                                {{ $t->status_label }}
+                                                            </span>
+                                                        @else
+                                                            <span class="text-xs text-gray-400 italic">Belum dikerjakan</span>
+                                                        @endif
+                                                    </td>
+                                                    <td class="px-4 py-3 text-center">
+                                                        @if($canVerify)
+                                                            <button type="button"
+                                                                onclick="openVerifyModal({{ $t->id }}, '{{ addslashes($t->title ?? $acc->name) }}')"
+                                                                class="inline-flex items-center gap-1 px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold rounded-lg shadow-sm transition whitespace-nowrap">
+                                                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                                                </svg>
+                                                                Verifikasi
+                                                            </button>
+                                                        @else
+                                                            <span class="text-xs text-gray-300">—</span>
+                                                        @endif
+                                                    </td>
+                                                </tr>
+                                            @endforeach
+                                        </tbody>
+                                    </table>
+                                </div>
+
+                                {{-- Mobile cards --}}
+                                <div class="md:hidden divide-y divide-gray-100">
+                                    @foreach($entry['accounts'] as $acc)
+                                        @php
+                                            $t     = $entry['today_tasks'][$acc->id] ?? null;
+                                            $tDone = $t && in_array($t->status, ['done_by_staff','verified_by_pm','approved_hr']);
+                                            $canVerify = $t && $t->status === 'done_by_staff';
+                                        @endphp
+                                        <div class="px-4 py-3 flex items-center justify-between gap-3">
+                                            <div class="min-w-0">
+                                                <p class="font-semibold text-gray-800 text-sm truncate">{{ $acc->name }}</p>
+                                                <span class="inline-flex items-center gap-1 mt-0.5 px-2 py-0.5 rounded-md text-xs font-medium border {{ $acc->platform_color }}">
+                                                    {{ $acc->platform_icon }} {{ $acc->platform }}
+                                                </span>
+                                            </div>
+                                            <div class="flex items-center gap-2 flex-shrink-0">
+                                                @if($t && $t->hasLinks())
+                                                    <button type="button"
+                                                        onclick="openLinksPopup({{ json_encode($t->link_upload) }}, '{{ addslashes($acc->name) }}')"
+                                                        class="text-xs text-primary-600 font-medium hover:underline">
+                                                        {{ $t->link_count }} link
+                                                    </button>
+                                                @endif
+                                                @if($t)
+                                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium {{ $t->status_badge_class }}">
+                                                        {{ $t->status_label }}
+                                                    </span>
+                                                @else
+                                                    <span class="text-xs text-gray-400 italic">Belum</span>
+                                                @endif
+                                                @if($canVerify)
+                                                    <button type="button"
+                                                        onclick="openVerifyModal({{ $t->id }}, '{{ addslashes($t->title ?? $acc->name) }}')"
+                                                        class="inline-flex items-center gap-1 px-2.5 py-1 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold rounded-lg shadow-sm transition whitespace-nowrap">
+                                                        Verif
+                                                    </button>
+                                                @endif
+                                            </div>
+                                        </div>
+                                    @endforeach
+                                </div>
+                            @endif
+                        </div>
+                    @endforeach
+                </div>
+            @endif
+        </div>
+        @endif
+
+        {{-- ──────────────────────────────────────────────────────────────
+        TAB 3: RIWAYAT APPROVAL
+        ─────────────────────────────────────────────────────────────── --}}
+        @if($tab === 'approvals')
+        <div class="p-4 sm:p-5">
+            <div class="mb-4 flex flex-wrap items-start justify-between gap-3">
+                <div>
+                    <h3 class="text-sm font-semibold text-gray-800">Riwayat Approval Tim Sosmed</h3>
+                    <p class="mt-0.5 text-xs text-gray-500">Menampilkan 10 data terbaru. Gunakan filter tanggal untuk menyaring riwayat.</p>
+                </div>
+                <form method="POST" action="{{ route('pm.sosmed.approvals.purge') }}" onsubmit="return confirm('Hapus riwayat approval sesuai periode yang dipilih?');" class="flex items-center gap-2">
+                    @csrf
+                    <select name="period" class="text-xs border border-gray-300 rounded-lg px-2.5 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500">
+                        <option value="week">Hapus >1 Minggu</option>
+                        <option value="month">Hapus >1 Bulan</option>
+                        <option value="year">Hapus >1 Tahun</option>
+                    </select>
+                    <button type="submit" class="px-3 py-2 bg-rose-600 hover:bg-rose-700 text-white text-xs font-semibold rounded-lg transition shadow-sm">Hapus Riwayat</button>
+                </form>
+            </div>
+
+            <form method="GET" action="{{ route('pm.sosmed.index', ['tab' => 'approvals']) }}" class="mb-4 flex flex-wrap items-end gap-2">
+                <div>
+                    <label class="block text-[11px] font-semibold text-gray-500 uppercase tracking-wider mb-1">Dari Tanggal</label>
+                    <input type="date" name="approval_date_from" value="{{ $approvalDateFrom ?? '' }}"
+                           class="px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-xs sm:text-sm font-medium text-gray-800 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:bg-white transition">
+                </div>
+                <div>
+                    <label class="block text-[11px] font-semibold text-gray-500 uppercase tracking-wider mb-1">Sampai Tanggal</label>
+                    <input type="date" name="approval_date_to" value="{{ $approvalDateTo ?? '' }}"
+                           class="px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-xs sm:text-sm font-medium text-gray-800 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:bg-white transition">
+                </div>
+                <div class="flex items-end gap-2">
+                    <button type="submit" class="px-3 py-2 bg-primary-600 hover:bg-primary-700 text-white text-xs font-semibold rounded-lg transition shadow-sm">Terapkan</button>
+                    <a href="{{ route('pm.sosmed.index', ['tab' => 'approvals']) }}" class="px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-semibold rounded-lg transition">Reset</a>
+                </div>
+            </form>
+
+            <div class="bg-white rounded-xl border border-gray-200 overflow-hidden">
+                <div class="overflow-x-auto overflow-y-auto max-h-[600px]" style="scrollbar-gutter: stable;">
+                    <table class="w-full text-xs sm:text-sm min-w-full">
+                        <thead>
+                            <tr class="bg-gray-50 border-b border-gray-200">
+                                <th class="text-left px-3 sm:px-6 py-2.5 sm:py-3.5 font-semibold text-gray-600">Tugas</th>
+                                <th class="text-left px-3 sm:px-6 py-2.5 sm:py-3.5 font-semibold text-gray-600">Dikerjakan</th>
+                                <th class="text-left px-3 sm:px-6 py-2.5 sm:py-3.5 font-semibold text-gray-600 hidden sm:table-cell">Bukti</th>
+                                <th class="text-left px-3 sm:px-6 py-2.5 sm:py-3.5 font-semibold text-gray-600">Tanggal</th>
+                                <th class="text-left px-3 sm:px-6 py-2.5 sm:py-3.5 font-semibold text-gray-600">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-100">
+                            @forelse($approvalHistoryPaginated as $t)
+                                <tr class="hover:bg-gray-50 transition">
+                                    <td class="px-3 sm:px-6 py-3 sm:py-4">
+                                        <p class="font-medium text-gray-800 truncate" title="{{ $t->title }}">{{ $t->title }}</p>
+                                        <p class="text-xs text-gray-400">{{ $t->account?->name }} ({{ $t->account?->platform }})</p>
+                                        @if($t->rejection_note)
+                                            <p class="text-xs text-rose-600 mt-0.5 truncate">↩ {{ $t->rejection_note }}</p>
+                                        @endif
+                                    </td>
+                                    <td class="px-3 sm:px-6 py-3 sm:py-4 text-xs text-gray-700">{{ $t->assignedUser?->name ?? '—' }}</td>
+                                    <td class="px-3 sm:px-6 py-3 sm:py-4 hidden sm:table-cell">
+                                        @if($t->hasLinks())
+                                            <button type="button" onclick="openLinksPopup({{ json_encode($t->link_upload) }}, '{{ addslashes($t->title) }}')" class="inline-flex items-center gap-1 text-xs text-primary-600 hover:underline font-medium">
+                                                <svg class="w-3 h-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/>
+                                                </svg>
+                                                {{ $t->link_count }} link
+                                            </button>
+                                        @else
+                                            <span class="text-xs text-gray-300">—</span>
+                                        @endif
+                                    </td>
+                                    <td class="px-3 sm:px-6 py-3 sm:py-4 text-xs text-gray-500 whitespace-nowrap">{{ $t->task_date->translatedFormat('d M Y') }}</td>
+                                    <td class="px-3 sm:px-6 py-3 sm:py-4">
+                                        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium {{ $t->status_badge_class }}">
+                                            {{ $t->status_label }}
+                                        </span>
+                                    </td>
+                                </tr>
+                            @empty
+                                <tr>
+                                    <td colspan="5" class="px-3 sm:px-6 py-12 text-center text-sm text-gray-400">Belum ada riwayat approval.</td>
+                                </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="px-4 sm:px-6 py-4 border-t border-gray-100 bg-gray-50/50">
+                    <div class="flex flex-col sm:flex-row items-center justify-between gap-3">
+                        <div class="text-xs sm:text-sm text-gray-600">
+                            Menampilkan <span class="font-semibold">{{ $approvalHistoryPaginated->count() }}</span> dari <span class="font-semibold">{{ $approvalHistoryPaginated->total() }}</span> data
+                        </div>
+                        <div class="flex justify-center">
+                            {{ $approvalHistoryPaginated->appends(request()->query())->links() }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        @endif
+    </div>
+
+    {{-- ═══ MODAL: SUBMIT BUKTI (PM) ════════════════════════════════════ --}}
+    <div id="modal-submit" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" onclick="closeSubmitModal()"></div>
+        <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-lg z-10">
+            <div class="flex items-center justify-between px-6 py-4 border-b border-gray-200">
+                <h3 class="text-base font-bold text-gray-800">Submit Bukti Konten</h3>
+                <button onclick="closeSubmitModal()" class="text-gray-400 hover:text-gray-600">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+            </div>
+            <form id="form-submit" method="POST" action="" onsubmit="handleFormSubmit(event)" class="p-6 pt-1 space-y-4">
+                @csrf
+                <div>
+                    <p class="text-xs text-gray-500 mb-0.5">Akun Sosmed</p>
+                    <p id="submit-account-name" class="text-sm font-semibold text-gray-800"></p>
+                </div>
+
+                {{-- Link Bukti (multi) --}}
+                <div>
+                    <label class="block text-xs font-semibold text-gray-600 mb-1.5">
+                        Link Bukti Konten <span class="text-red-500">*</span>
+                        <span class="font-normal text-gray-400 ml-1">(bisa lebih dari satu)</span>
+                    </label>
+                    <div id="links-container" class="space-y-2 max-h-[220px] overflow-y-auto pr-1">
+                        <div class="flex gap-2 link-row">
+                            <input type="url" name="links[]" required placeholder="https://instagram.com/p/xxx"
+                                class="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 focus:outline-none">
+                            <button type="button" onclick="removeLinkRow(this)" class="text-gray-300 hover:text-rose-500 px-1 transition hidden remove-btn">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                            </button>
+                        </div>
+                    </div>
+                    <button type="button" onclick="addLinkRow()"
+                        class="mt-2 inline-flex items-center gap-1 text-xs text-primary-600 hover:text-primary-700 font-medium">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                        Tambah Link Lain
+                    </button>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-gray-600 mb-1.5">Catatan (Opsional)</label>
+                    <textarea id="submit-description" name="description" rows="2" placeholder="Brief konten / keterangan tambahan..."
+                        class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 focus:outline-none"></textarea>
+                </div>
+
+                <div class="flex gap-3 pt-1">
+                    <button type="button" onclick="cancelSubmitModal()"
+                        class="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-sm text-gray-700">Batal</button>
+                    <button type="submit"
+                        class="flex-1 px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-lg text-sm font-semibold">
+                        Kirim Bukti
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    {{-- ═══ MODAL: KONFIRMASI SUBMIT BUKTI (PM) ═══════════════════════════ --}}
+    <div id="modal-confirm-submit" class="hidden fixed inset-0 z-[60] flex items-center justify-center p-4">
+        <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" onclick="closeConfirmSubmitModal()"></div>
+        <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-sm z-10 p-6 text-center transform transition-all">
+            <div class="w-12 h-12 rounded-full bg-primary-50 text-primary-600 flex items-center justify-center mx-auto mb-3.5">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+            </div>
+            <h3 class="text-base font-bold text-gray-800 mb-1">Submit Bukti?</h3>
+            <p class="text-xs text-gray-500 mb-5 leading-relaxed">
+                Apakah Anda yakin ingin mengirim bukti konten ini? Pastikan link yang diisi sudah benar.
+            </p>
+            <div class="flex gap-3">
+                <button type="button" onclick="closeConfirmSubmitModal()"
+                    class="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition">
+                    Tidak
+                </button>
+                <button type="button" id="btn-confirm-submit" onclick="submitConfirmed()"
+                    class="flex-1 px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-lg text-sm font-semibold shadow-sm transition">
+                    Ya
+                </button>
+            </div>
+        </div>
+    </div>
+
+    {{-- ═══ MODAL: ASSIGN STAFF ══════════════════════════════════════════ --}}
+    {{-- ═══ MODAL: VERIFIKASI PM (APPROVE / REJECT) ══════════════════════ --}}
+    <div id="modal-verify" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4"
+         x-data="{ action: 'verify' }"
+         @open-verify.window="action = 'verify'">
+        <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" onclick="closeVerifyModal()"></div>
+        <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-md z-10 overflow-hidden">
+
+            {{-- Modal Header with Dynamic Color --}}
+            <div class="px-6 py-4 flex items-center justify-between transition-colors"
+                 :class="action === 'verify' ? 'bg-blue-50 border-b border-blue-100' : 'bg-rose-50 border-b border-rose-100'">
+                <div class="flex items-center gap-2.5">
+                    <div class="w-8 h-8 rounded-lg flex items-center justify-center transition-colors"
+                         :class="action === 'verify' ? 'bg-blue-100 text-blue-600' : 'bg-rose-100 text-rose-600'">
+                        <template x-if="action === 'verify'">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                            </svg>
+                        </template>
+                        <template x-if="action === 'reject'">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                            </svg>
+                        </template>
+                    </div>
+                    <div>
+                        <h3 class="text-sm font-bold text-gray-800"
+                            x-text="action === 'verify' ? 'Verifikasi & Setujui Tugas (PM)' : 'Tolak & Kembalikan Tugas'"></h3>
+                        <p class="text-[11px] text-gray-400">Verifikasi pengerjaan tim sosmed yang Anda awasi</p>
+                    </div>
+                </div>
+                <button type="button" onclick="closeVerifyModal()" class="text-gray-400 hover:text-gray-600 transition">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+            </div>
+
+            <form id="form-verify" method="POST" action="" class="p-6 space-y-4">
+                @csrf @method('PATCH')
+                <input type="hidden" name="action" :value="action">
+
+                {{-- Task Info Card --}}
+                <div class="bg-gray-50 rounded-xl p-3.5 border border-gray-200/80">
+                    <p class="text-[11px] font-semibold text-gray-400 uppercase tracking-wider mb-1">Tugas yang Ditinjau</p>
+                    <p id="verify-task-title" class="text-sm font-bold text-gray-800 break-words"></p>
+                </div>
+
+                {{-- Action Toggle (Segmented control) --}}
+                <div>
+                    <label class="block text-xs font-semibold text-gray-600 mb-2">Keputusan Verifikasi</label>
+                    <div class="grid grid-cols-2 gap-2 p-1 bg-gray-100 rounded-xl">
+                        <button type="button"
+                            @click="action = 'verify'"
+                            :class="action === 'verify' ? 'bg-white text-blue-700 shadow-sm font-bold' : 'text-gray-500 font-medium hover:text-gray-700'"
+                            class="py-2 text-xs rounded-lg transition-all flex items-center justify-center gap-1.5">
+                            <svg class="w-3.5 h-3.5 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                            </svg>
+                            Setujui
+                        </button>
+                        <button type="button"
+                            @click="action = 'reject'"
+                            :class="action === 'reject' ? 'bg-white text-rose-700 shadow-sm font-bold' : 'text-gray-500 font-medium hover:text-gray-700'"
+                            class="py-2 text-xs rounded-lg transition-all flex items-center justify-center gap-1.5">
+                            <svg class="w-3.5 h-3.5 text-rose-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                            </svg>
+                            Tolak
+                        </button>
+                    </div>
+                </div>
+
+                {{-- Rejection Note (conditionally visible) --}}
+                <div x-show="action === 'reject'" x-cloak class="space-y-1.5">
+                    <label class="block text-xs font-semibold text-gray-700">
+                        Catatan Revisi <span class="text-rose-500">*</span>
+                    </label>
+                    <textarea name="rejection_note" rows="3"
+                        placeholder="Jelaskan bagian yang perlu diperbaiki oleh staff..."
+                        class="w-full border border-gray-200 rounded-xl px-3.5 py-2.5 text-xs text-gray-800 placeholder-gray-400 focus:ring-2 focus:ring-rose-400 focus:border-rose-400 outline-none transition resize-none"></textarea>
+                    <p class="text-[11px] text-gray-400">Catatan ini akan dikirimkan ke staff yang mengerjakan tugas.</p>
+                </div>
+
+                {{-- Approval Note (conditionally visible) --}}
+                <div x-show="action === 'verify'" class="bg-blue-50 border border-blue-100 rounded-xl p-3 text-xs text-blue-800 leading-relaxed">
+                    <div class="flex items-start gap-2">
+                        <svg class="w-4 h-4 text-blue-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                        <p>Tugas akan lolos verifikasi Level-1 dan diteruskan ke <strong>HR Staff</strong> untuk persetujuan final. Log persetujuan PM Anda akan otomatis dicatat.</p>
+                    </div>
+                </div>
+
+                <div class="flex gap-3 pt-1">
+                    <button type="button" onclick="closeVerifyModal()"
+                        class="flex-1 px-4 py-2.5 rounded-xl border border-gray-300 text-sm text-gray-600 font-medium hover:bg-gray-50 transition">
+                        Batal
+                    </button>
+                    <button type="submit"
+                        class="flex-1 px-4 py-2.5 rounded-xl text-sm font-semibold text-white transition shadow-sm"
+                        :class="action === 'verify' ? 'bg-blue-600 hover:bg-blue-700' : 'bg-rose-600 hover:bg-rose-700'">
+                        <span x-show="action === 'verify'">Verifikasi Tugas</span>
+                        <span x-show="action === 'reject'">Tolak Tugas</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    {{-- ═══ MODAL: DETAIL LINKS POPUP ════════════════════════════════════ --}}
+    <div id="modal-links" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" onclick="document.getElementById('modal-links').classList.add('hidden')"></div>
+        <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-md z-10">
+            <div class="flex items-center justify-between px-6 py-4 border-b border-gray-200">
+                <div>
+                    <h3 class="text-base font-bold text-gray-800">Detail Bukti Konten</h3>
+                    <p id="links-popup-title" class="text-xs text-gray-500 mt-0.5"></p>
+                </div>
+                <button onclick="document.getElementById('modal-links').classList.add('hidden')" class="text-gray-400 hover:text-gray-600">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+            </div>
+            <div id="links-popup-body" class="p-6 space-y-2 max-h-80 overflow-y-auto"></div>
+        </div>
+    </div>
+
+@endsection
+
+@push('scripts')
+<script>
+// ── Submit Modal ──────────────────────────────────────────────────────────────
+// Draft state: persists until user clicks Batal
+let _submitDraft = null; // { accId, accName, action, links: [], desc }
+
+function openSubmitModal(accId, accName, existingDesc) {
+    const modal = document.getElementById('modal-submit');
+
+    // If re-opening the SAME account while a draft exists, restore it
+    if (_submitDraft && _submitDraft.accId === accId) {
+        _restoreSubmitDraft();
+    } else {
+        // New account — initialise fresh
+        _submitDraft = { accId, accName, action: `/pm/sosmed/accounts/${accId}/submit`, links: [''], desc: existingDesc || '' };
+        _restoreSubmitDraft();
+    }
+
+    modal.classList.remove('hidden');
+}
+
+function _restoreSubmitDraft() {
+    document.getElementById('submit-account-name').textContent = _submitDraft.accName;
+    document.getElementById('form-submit').action = _submitDraft.action;
+    document.getElementById('submit-description').value = _submitDraft.desc;
+
+    const container = document.getElementById('links-container');
+    container.innerHTML = '';
+    (_submitDraft.links.length ? _submitDraft.links : ['']).forEach((url, i) => {
+        _appendLinkRow(container, url, i === 0);
+    });
+    updateRemoveButtons();
+}
+
+function _appendLinkRow(container, value, isFirst) {
+    const row = document.createElement('div');
+    row.className = 'flex gap-2 link-row';
+    row.innerHTML = `
+        <input type="url" name="links[]" ${isFirst ? 'required' : ''} value="${value}"
+            placeholder="${isFirst ? 'https://instagram.com/p/xxx' : 'https://tiktok.com/@xxx/video/xxx'}"
+            class="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 focus:outline-none">
+        <button type="button" onclick="removeLinkRow(this)" class="text-gray-300 hover:text-rose-500 px-1 transition remove-btn ${isFirst ? 'hidden' : ''}">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>`;
+    container.appendChild(row);
+}
+
+function _saveDraftFromDOM() {
+    if (!_submitDraft) return;
+    _submitDraft.links = Array.from(document.querySelectorAll('#links-container .link-row input')).map(i => i.value);
+    _submitDraft.desc  = document.getElementById('submit-description').value;
+}
+
+// Backdrop / X close — save draft, just hide
+function closeSubmitModal() {
+    _saveDraftFromDOM();
+    document.getElementById('modal-submit').classList.add('hidden');
+    closeConfirmSubmitModal();
+}
+
+// Batal button — discard draft, hide
+function cancelSubmitModal() {
+    _submitDraft = null;
+    document.getElementById('modal-submit').classList.add('hidden');
+    closeConfirmSubmitModal();
+}
+
+// ── Confirmation Modal Handlers ──────────────────────────────────────────
+function handleFormSubmit(e) {
+    e.preventDefault();
+    const form = document.getElementById('form-submit');
+    if (!form.checkValidity()) {
+        form.reportValidity();
+        return;
+    }
+    const links = Array.from(form.querySelectorAll('input[name="links[]"]')).map(i => i.value.trim()).filter(Boolean);
+    if (links.length === 0) {
+        alert('Minimal satu link bukti harus diisi.');
+        return;
+    }
+    openConfirmSubmitModal();
+}
+
+function openConfirmSubmitModal() {
+    document.getElementById('modal-confirm-submit').classList.remove('hidden');
+}
+
+function closeConfirmSubmitModal() {
+    document.getElementById('modal-confirm-submit').classList.add('hidden');
+}
+
+function submitConfirmed() {
+    const btn = document.getElementById('btn-confirm-submit');
+    if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = '<span class="inline-flex items-center gap-1.5"><svg class="animate-spin h-4 w-4 text-white" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Mengirim...</span>';
+    }
+    const form = document.getElementById('form-submit');
+    HTMLFormElement.prototype.submit.call(form);
+}
+
+function addLinkRow() {
+    _saveDraftFromDOM();
+    const container = document.getElementById('links-container');
+    _appendLinkRow(container, '', false);
+    updateRemoveButtons();
+    // Scroll to bottom so new row is visible
+    container.scrollTop = container.scrollHeight;
+}
+
+function removeLinkRow(btn) {
+    btn.closest('.link-row').remove();
+    updateRemoveButtons();
+    _saveDraftFromDOM();
+}
+
+function updateRemoveButtons() {
+    const rows = document.querySelectorAll('#links-container .link-row');
+    rows.forEach(r => {
+        const btn = r.querySelector('.remove-btn');
+        if (btn) btn.classList.toggle('hidden', rows.length === 1);
+    });
+}
+
+// ── Verify Modal ──────────────────────────────────────────────────────────────
+function openVerifyModal(taskId, title) {
+    document.getElementById('verify-task-title').textContent = title;
+    document.getElementById('form-verify').action = `/pm/sosmed/tasks/${taskId}/verify`;
+    const ta = document.querySelector('#form-verify textarea[name="rejection_note"]');
+    if (ta) ta.value = '';
+    window.dispatchEvent(new CustomEvent('open-verify'));
+    document.getElementById('modal-verify').classList.remove('hidden');
+}
+
+function closeVerifyModal() {
+    document.getElementById('modal-verify').classList.add('hidden');
+}
+
+// ── Links Popup ───────────────────────────────────────────────────────────────
+function openLinksPopup(links, title) {
+    document.getElementById('links-popup-title').textContent = title;
+    const body = document.getElementById('links-popup-body');
+    body.innerHTML = '';
+
+    if (!links || links.length === 0) {
+        body.innerHTML = '<p class="text-sm text-gray-400 text-center">Tidak ada link bukti.</p>';
+    } else {
+        links.forEach((url, i) => {
+            const item = document.createElement('a');
+            item.href = url;
+            item.target = '_blank';
+            item.rel = 'noopener noreferrer';
+            item.className = 'flex items-start gap-2.5 p-3 rounded-lg border border-gray-100 hover:border-primary-300 hover:bg-primary-50/50 transition group';
+            item.innerHTML = `
+                <span class="flex-shrink-0 w-5 h-5 rounded-full bg-primary-100 text-primary-700 text-[10px] font-bold flex items-center justify-center mt-0.5">${i + 1}</span>
+                <span class="text-xs text-primary-700 group-hover:underline break-all leading-relaxed">${url}</span>
+                <svg class="w-3.5 h-3.5 flex-shrink-0 text-gray-400 group-hover:text-primary-600 mt-0.5 ml-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+                </svg>`;
+            body.appendChild(item);
+        });
+    }
+
+    document.getElementById('modal-links').classList.remove('hidden');
+}
+</script>
+@endpush
