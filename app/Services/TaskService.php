@@ -574,9 +574,9 @@ class TaskService
         return $this->taskRepository->getAllTasksForAssistant();
     }
 
-    public function getAllTasksForRole(string $role, int $perPage = 8)
+    public function getAllTasksForRole(string $role, int $perPage = 20, ?string $date = null)
     {
-        return $this->taskRepository->getAllTasksForRole($role, $perPage);
+        return $this->taskRepository->getAllTasksForRole($role, $perPage, $date);
     }
 
     public function getDailyStats(): array
@@ -714,9 +714,9 @@ class TaskService
 
     // ── Laporan Produktivitas: rentang tanggal ───────────
 
-    public function getProductivityByRange(string $dateFrom, string $dateTo): \Illuminate\Support\Collection
+    public function getProductivityByRange(string $dateFrom, string $dateTo, ?string $role = null, ?array $allowedRoles = null): \Illuminate\Support\Collection
     {
-        return $this->taskRepository->getProductivityByRange($dateFrom, $dateTo);
+        return $this->taskRepository->getProductivityByRange($dateFrom, $dateTo, $role, $allowedRoles);
     }
 
     public function getProductivityDetailForUser(int $userId, string $dateFrom, string $dateTo): \Illuminate\Database\Eloquent\Collection

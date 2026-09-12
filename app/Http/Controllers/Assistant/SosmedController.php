@@ -36,16 +36,34 @@ class SosmedController extends Controller
             ->take(50)
             ->get();
 
-        // Statistik khusus akun di bawah wewenang asisten ini
+        // Akun Mandiri yang Dikelola oleh HR Assistant (seperti PM)
+        $myAccounts = \App\Models\SosmedAccount::with(['creator'])
+            ->where('staff_id', $currentUserId)
+            ->orderBy('platform')
+            ->get();
+        $myAccountIds = $myAccounts->pluck('id');
+
+        $todayTasks = SosmedTask::with(['verifiedBy', 'hrVerifiedBy'])
+            ->whereIn('sosmed_account_id', $myAccountIds)
+            ->whereDate('task_date', now()->toDateString())
+            ->get()
+            ->keyBy('sosmed_account_id');
+
+        // Statistik
         $stats = [
-            'pending'   => $pendingVerification->count(),
-            'approved'  => SosmedTask::whereIn('sosmed_account_id', $assignedAccountIds)->where('status', 'verified_by_pm')->count(),
-            'final_ok'  => SosmedTask::whereIn('sosmed_account_id', $assignedAccountIds)->where('status', 'approved_hr')->count(),
-            'rejected'  => SosmedTask::whereIn('sosmed_account_id', $assignedAccountIds)->where('status', 'rejected')->count(),
+            'my_accounts'      => $myAccounts->count(),
+            'my_pending_today' => $myAccounts->filter(function ($acc) use ($todayTasks) {
+                if (!isset($todayTasks[$acc->id])) return true;
+                return in_array($todayTasks[$acc->id]->status, ['pending', 'rejected']);
+            })->count(),
+            'pending'          => $pendingVerification->count(),
+            'approved'         => SosmedTask::whereIn('sosmed_account_id', $assignedAccountIds)->where('status', 'verified_by_pm')->count(),
+            'final_ok'         => SosmedTask::whereIn('sosmed_account_id', $assignedAccountIds)->where('status', 'approved_hr')->count(),
+            'rejected'         => SosmedTask::whereIn('sosmed_account_id', $assignedAccountIds)->where('status', 'rejected')->count(),
         ];
 
         return view('assistant.sosmed.index', compact(
-            'tab', 'pendingVerification', 'approvalHistory', 'stats'
+            'tab', 'myAccounts', 'todayTasks', 'pendingVerification', 'approvalHistory', 'stats'
         ));
     }
 
@@ -108,5 +126,57 @@ class SosmedController extends Controller
             return redirect()->route('assistant.sosmed.index', ['tab' => 'pending'])
                 ->with('success', 'Tugas ditolak dan dikembalikan ke staff untuk diperbaiki.');
         }
+    }
+
+    /**
+     * HR Assistant submit bukti pengerjaan konten sosmed mandiri (sama seperti PM).
+     * Status langsung menjadi 'verified_by_pm' agar diverifikasi oleh HR Staff.
+     */
+    public function submitAccountTask(Request $request, \App\Models\SosmedAccount $account)
+    {
+        if ($account->staff_id !== Auth::id()) {
+            abort(403, 'Akses ditolak. Anda bukan eksekutor akun ini.');
+        }
+
+        $validated = $request->validate([
+            'links'       => ['required', 'array', 'min:1'],
+            'links.*'     => ['required', 'url', 'max:500'],
+            'description' => ['nullable', 'string', 'max:1000'],
+        ]);
+
+        $links = array_values(array_filter($validated['links'], fn($l) => !empty(trim($l))));
+        if (empty($links)) {
+            return back()->withErrors(['links' => 'Minimal satu link bukti harus diisi.'])->withInput();
+        }
+
+        $task = SosmedTask::firstOrNew([
+            'sosmed_account_id' => $account->id,
+            'task_date'         => now()->toDateString(),
+        ]);
+
+        $task->fill([
+            'assigned_to' => Auth::id(),
+            'assigned_by' => Auth::id(),
+            'type'        => 'daily',
+            'title'       => 'Laporan Konten - ' . $account->name,
+            'link_upload' => $links,
+            'description' => $validated['description'] ?? null,
+            'status'      => 'verified_by_pm', // Masuk ke antrean verifikasi HR Staff (seperti PM)
+            'verified_by' => Auth::id(),
+            'verified_at' => now(),
+        ]);
+        $task->save();
+
+        SosmedApprovalLog::create([
+            'sosmed_task_id' => $task->id,
+            'user_id'        => Auth::id(),
+            'user_name'      => Auth::user()->name,
+            'role_name'      => 'HR Assistant',
+            'action'         => 'submitted',
+            'notes'          => 'HR Assistant submit bukti laporan sosmed (' . count($links) . ' link). Menunggu verifikasi oleh HR Staff.',
+        ]);
+
+        return redirect()->route('assistant.sosmed.index', ['tab' => 'my_accounts'])
+            ->with('success', 'Bukti konten untuk ' . $account->name . ' berhasil dikirim. Menunggu verifikasi oleh HR Staff.');
     }
 }

@@ -383,9 +383,9 @@ class TaskRepository
      * Ambil semua tugas yang masuk ke role tertentu (cs, ob, programmer, vg, dg, pm, dst.)
      * dengan pola yang sama seperti getAllTasksForAssistant.
      */
-    public function getAllTasksForRole(string $role, int $perPage = 8)
+    public function getAllTasksForRole(string $role, int $perPage = 20, ?string $date = null)
     {
-        $today = Carbon::today()->toDateString();
+        $filterDate = $date ?? Carbon::today()->toDateString();
         /** @var Builder $query */
         $query = $this->model->newQuery();
 
@@ -396,32 +396,32 @@ class TaskRepository
                     $q->where('role', $role);
                 });
             })
-            ->where(function ($q) use ($role, $today) {
-                $q->where(function ($q2) use ($today) {
-                      // default: hanya hari ini
+            ->where(function ($q) use ($role, $filterDate) {
+                $q->where(function ($q2) use ($filterDate) {
+                      // default: pada tanggal yang dipilih
                       $q2->where('type', 'default')
-                         ->whereDate('task_date', $today);
+                         ->whereDate('task_date', $filterDate);
                   })
-                  ->orWhere(function ($q2) use ($today) {
-                      // assigned: hanya hari ini (tidak carry-over)
+                  ->orWhere(function ($q2) use ($filterDate) {
+                      // assigned: pada tanggal yang dipilih
                       $q2->where('type', 'assigned')
-                         ->whereDate('task_date', $today);
+                         ->whereDate('task_date', $filterDate);
                   })
-                  ->orWhere(function ($q2) use ($role, $today) {
-                      // self: hari ini + pending lama + selesai hari ini
+                  ->orWhere(function ($q2) use ($role, $filterDate) {
+                      // self: tanggal dipilih + pending lama + selesai di tanggal tsb
                       $q2->where('type', 'self')
-                         ->whereDate('task_date', '<=', $today)
-                         ->where(function ($q3) use ($role, $today) {
-                             $q3->whereDate('task_date', $today)
-                                ->orWhereHas('assignments', function ($q4) use ($role, $today) {
+                         ->whereDate('task_date', '<=', $filterDate)
+                         ->where(function ($q3) use ($role, $filterDate) {
+                             $q3->whereDate('task_date', $filterDate)
+                                ->orWhereHas('assignments', function ($q4) use ($role, $filterDate) {
                                     $q4->whereHas('user', function ($q5) use ($role) {
                                         $q5->where('role', $role);
                                     })
-                                    ->where(function ($q6) use ($today) {
+                                    ->where(function ($q6) use ($filterDate) {
                                         $q6->where('is_completed', 'pending')
-                                           ->orWhere(function ($q7) use ($today) {
+                                           ->orWhere(function ($q7) use ($filterDate) {
                                                $q7->where('is_completed', 'completed')
-                                                  ->whereDate('completed_at', $today);
+                                                  ->whereDate('completed_at', $filterDate);
                                            });
                                     });
                                 });
@@ -758,12 +758,22 @@ class TaskRepository
      *
      * @return \Illuminate\Support\Collection<int, array{user: \App\Models\User, total: int, completed: int, pending: int, not_done: int, pct: int}>
      */
-    public function getProductivityByRange(string $dateFrom, string $dateTo): \Illuminate\Support\Collection
+    public function getProductivityByRange(string $dateFrom, string $dateTo, ?string $role = null, ?array $allowedRoles = null): \Illuminate\Support\Collection
     {
-        $users = \App\Models\User::query()
-            ->where('role', '!=', 'admin')
-            ->where('is_active', 1)
-            ->orderBy('role')
+        $query = \App\Models\User::query()
+            ->where('is_active', 1);
+
+        if ($allowedRoles !== null) {
+            $query->whereIn('role', $allowedRoles);
+        } else {
+            $query->where('role', '!=', 'admin');
+        }
+
+        if (!empty($role) && $role !== 'all') {
+            $query->where('role', $role);
+        }
+
+        $users = $query->orderBy('role')
             ->orderBy('name')
             ->get();
 

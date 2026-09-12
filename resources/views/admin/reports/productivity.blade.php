@@ -16,7 +16,7 @@
             class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-3 items-end">
 
             {{-- Dari Tanggal --}}
-            <div class="lg:col-span-4">
+            <div class="lg:col-span-3">
                 <label class="block text-[11px] font-semibold text-gray-500 uppercase tracking-wider mb-1">
                     Dari Tanggal
                 </label>
@@ -27,7 +27,7 @@
             </div>
 
             {{-- Sampai Tanggal --}}
-            <div class="lg:col-span-4">
+            <div class="lg:col-span-3">
                 <label class="block text-[11px] font-semibold text-gray-500 uppercase tracking-wider mb-1">
                     Sampai Tanggal
                 </label>
@@ -37,8 +37,26 @@
                 </div>
             </div>
 
+            {{-- Filter Role --}}
+            <div class="lg:col-span-3">
+                <label class="block text-[11px] font-semibold text-gray-500 uppercase tracking-wider mb-1">
+                    Filter Role
+                </label>
+                <div class="relative">
+                    <select name="role"
+                        class="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-xs sm:text-sm font-medium text-gray-800 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:bg-white transition">
+                        <option value="all" {{ ($selectedRole ?? 'all') === 'all' ? 'selected' : '' }}>Semua Role</option>
+                        @foreach($availableRoles as $roleOption)
+                            <option value="{{ $roleOption->name }}" {{ ($selectedRole ?? 'all') === $roleOption->name ? 'selected' : '' }}>
+                                {{ $roleOption->label }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+            </div>
+
             {{-- Tombol Aksi --}}
-            <div class="sm:col-span-2 lg:col-span-4 flex items-center gap-2">
+            <div class="sm:col-span-2 lg:col-span-3 flex items-center gap-2">
                 <button type="submit"
                     class="flex-1 flex items-center justify-center gap-1.5 px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white text-xs sm:text-sm font-semibold rounded-lg transition shadow-sm hover:shadow">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -48,11 +66,11 @@
                     <span>Tampilkan</span>
                 </button>
 
-                @if($dateFrom !== $today || $dateTo !== $today)
+                @if($dateFrom !== $today || $dateTo !== $today || ($selectedRole ?? 'all') !== 'all')
                     <a href="{{ route('admin.reports.productivity') }}"
                         class="px-3.5 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs sm:text-sm font-semibold rounded-lg transition text-center flex-shrink-0"
-                        title="Kembali ke Hari Ini">
-                        Hari Ini
+                        title="Reset Filter">
+                        Reset
                     </a>
                 @endif
             </div>
@@ -71,6 +89,11 @@
                         — {{ \Carbon\Carbon::parse($dateTo)->locale('id')->translatedFormat('d M Y') }}
                     @endif
                 </strong>
+                @if(($selectedRole ?? 'all') !== 'all')
+                    <span class="ml-2 px-2 py-0.5 rounded-full text-[11px] font-medium bg-primary-50 text-primary-700 border border-primary-200">
+                        Role: {{ $availableRoles->firstWhere('name', $selectedRole)?->label ?? $selectedRole }}
+                    </span>
+                @endif
             </span>
         </div>
     </div>
@@ -150,7 +173,7 @@
                             </td>
                             {{-- Aksi --}}
                             <td class="px-3 sm:px-6 py-3 sm:py-3.5 text-right">
-                                <a href="{{ route('admin.reports.productivity.detail', $item['user']->id) }}?date_from={{ $dateFrom }}&date_to={{ $dateTo }}"
+                                <a href="{{ route('admin.reports.productivity.detail', $item['user']->id) }}?date_from={{ $dateFrom }}&date_to={{ $dateTo }}&role={{ $selectedRole }}"
                                     class="p-1.5 inline-flex text-gray-400 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition"
                                     title="Lihat Detail Tugas">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

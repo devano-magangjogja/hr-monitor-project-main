@@ -7,7 +7,11 @@ use App\Http\Traits\LogsActivity;
 use App\Models\Task;
 use App\Services\TaskService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 use Illuminate\Validation\ValidationException;
+use App\Models\SosmedTask;
+use App\Models\SosmedAccount;
+use App\Models\User;
 
 class TaskController extends Controller
 {
@@ -141,17 +145,70 @@ class TaskController extends Controller
     }
 
     // ── Halaman Dinamis: Pantau Role Kustom / Apapun ─────
-    public function roleTasks(\App\Models\Role $role)
+    public function roleTasks(Request $request, \App\Models\Role $role)
     {
-        if ($role->name === 'hr_staff') {
-            $tasks = $this->taskService->getTasksByStaff();
-        } elseif ($role->name === 'hr_assistant') {
-            $tasks = $this->taskService->getAllTasksForAssistant();
-        } else {
-            $tasks = $this->taskService->getAllTasksForRole($role->name);
+        $date = $request->query('date', Carbon::today()->toDateString());
+        $tasks = $this->taskService->getAllTasksForRole($role->name, 20, $date);
+
+        // ── Tugas Sosmed: tampilkan semua status relevan per role ──────────
+        $sosmedQuery = SosmedTask::with(['account', 'assignedUser'])
+            ->whereDate('task_date', $date);
+
+        // Status yang dianggap "selesai" — tidak perlu ditampilkan
+        $doneStatuses = ['approved_hr'];
+
+        $roleUserIds = User::where('role', $role->name)->where('is_active', true)->pluck('id');
+
+        switch ($role->name) {
+            case 'hr_staff':
+                // HR Staff sebagai eksekutor (admin assign langsung), PLUS yang butuh final approval
+                $staffExecutorTasks = (clone $sosmedQuery)
+                    ->whereIn('assigned_to', $roleUserIds)
+                    ->whereNotIn('status', $doneStatuses)
+                    ->get();
+                $pendingFinalApproval = (clone $sosmedQuery)
+                    ->where('status', 'verified_by_pm')
+                    ->get();
+                $sosmedPending = $staffExecutorTasks->merge($pendingFinalApproval)->unique('id')->sortBy('task_date');
+                break;
+
+            case 'hr_assistant':
+                // Asisten: akun sosmed yang diawasi asisten ini, semua status belum selesai
+                $sosmedPending = (clone $sosmedQuery)
+                    ->whereHas('account', fn($q) => $q->whereIn('assistant_id', $roleUserIds))
+                    ->whereNotIn('status', $doneStatuses)
+                    ->get();
+                break;
+
+            case 'pm':
+                // PM sebagai eksekutor mandiri (pending/rejected) + akun yang diawasi PM (butuh verif)
+                $pmExecutorTasks = (clone $sosmedQuery)
+                    ->whereIn('assigned_to', $roleUserIds)
+                    ->whereNotIn('status', $doneStatuses)
+                    ->get();
+                $pmVerifTasks = (clone $sosmedQuery)
+                    ->whereHas('account', fn($q) => $q->whereIn('pm_id', $roleUserIds))
+                    ->where('status', 'done_by_staff')
+                    ->get();
+                $sosmedPending = $pmExecutorTasks->merge($pmVerifTasks)->unique('id')->sortBy('task_date');
+                break;
+
+            case 'sosmed':
+            case 'digital_marketing':
+                // Eksekutor: tampilkan semua status belum selesai
+                $sosmedPending = (clone $sosmedQuery)
+                    ->whereIn('assigned_to', $roleUserIds)
+                    ->whereNotIn('status', $doneStatuses)
+                    ->get();
+                break;
+
+            default:
+                // Role lain (cs, ob, programmer, dg, vg, dll.) tidak memiliki tugas sosmed
+                $sosmedPending = collect();
+                break;
         }
 
-        return view('admin.tasks.role-tasks', compact('tasks', 'role'));
+        return view('admin.tasks.role-tasks', compact('tasks', 'role', 'date', 'sosmedPending'));
     }
 
     // ── Force Destroy (Admin hapus task siapapun) ────────

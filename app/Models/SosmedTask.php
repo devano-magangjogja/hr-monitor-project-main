@@ -107,9 +107,15 @@ class SosmedTask extends Model
 
     public function getStatusLabelAttribute(): string
     {
+        if ($this->status === 'done_by_staff') {
+            if ($this->assignedUser?->isHrStaff()) {
+                return 'Menunggu Verif Admin';
+            }
+            return 'Menunggu Verif PM';
+        }
+
         return match ($this->status) {
             'pending'        => 'Menunggu Pengerjaan',
-            'done_by_staff'  => 'Menunggu Verif PM',
             'verified_by_pm' => 'Menunggu HR Staff',
             'approved_hr'    => 'Disetujui Final',
             'rejected'       => 'Ditolak / Revisi',
@@ -119,6 +125,10 @@ class SosmedTask extends Model
 
     public function getStatusBadgeClassAttribute(): string
     {
+        if ($this->status === 'done_by_staff' && $this->assignedUser?->isHrStaff()) {
+            return 'bg-purple-50 text-purple-700 border border-purple-200';
+        }
+
         return match ($this->status) {
             'pending'        => 'bg-amber-50 text-amber-700 border border-amber-200',
             'done_by_staff'  => 'bg-blue-50 text-blue-700 border border-blue-200',

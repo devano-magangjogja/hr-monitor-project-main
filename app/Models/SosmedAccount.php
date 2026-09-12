@@ -12,13 +12,24 @@ class SosmedAccount extends Model
         'name',
         'platform',
         'link',
+        'email',
+        'password',
         'pm_id',
         'assistant_id',
         'staff_id',
         'assigned_to', // fallback compatibility
         'created_by',
         'notes',
+        'is_in_sosmed',
     ];
+
+    protected function casts(): array
+    {
+        return [
+            'password' => 'encrypted',
+            'is_in_sosmed' => 'boolean',
+        ];
+    }
 
     // ── Relasi ──────────────────────────────────────────
 
@@ -69,6 +80,21 @@ class SosmedAccount extends Model
         return is_null($this->pm_id);
     }
 
+    public function scopeUnassigned($query)
+    {
+        return $query->whereNull('staff_id');
+    }
+
+    public function scopeInSosmed($query)
+    {
+        return $query->where('is_in_sosmed', true);
+    }
+
+    public function scopeNotInSosmed($query)
+    {
+        return $query->where('is_in_sosmed', false);
+    }
+
     public function getPlatformColorAttribute(): string
     {
         return match (strtolower($this->platform ?? '')) {
@@ -76,7 +102,10 @@ class SosmedAccount extends Model
             'tiktok' => 'bg-neutral-900 border-neutral-800',
             'youtube' => 'bg-red-50 text-red-700 border-red-200',
             'facebook' => 'bg-blue-50 text-blue-700 border-blue-200',
-            'twitter', 'x' => 'bg-slate-50 text-slate-800 border-slate-200',
+            'twitter', 'x', 'twitter/x' => 'bg-slate-50 text-slate-800 border-slate-200',
+            'linkedin' => 'bg-sky-50 text-sky-700 border-sky-200',
+            'threads' => 'bg-zinc-100 text-zinc-900 border-zinc-300',
+            'website' => 'bg-emerald-50 text-emerald-700 border-emerald-200',
             default => 'bg-purple-50 text-purple-700 border-purple-200',
         };
     }
