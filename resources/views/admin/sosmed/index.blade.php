@@ -40,7 +40,8 @@
             <p class="text-2xl font-bold text-blue-600">{{ $stats['need_pm_verify'] }}</p>
             <p class="text-[11px] text-gray-400 mt-0.5">tugas menunggu PM</p>
         </div>
-        <div class="bg-white rounded-xl border {{ $stats['need_admin_verify'] > 0 ? 'border-purple-400 bg-purple-50/30 ring-2 ring-purple-400/30' : 'border-gray-200' }} p-4 shadow-sm">
+        <div
+            class="bg-white rounded-xl border {{ $stats['need_admin_verify'] > 0 ? 'border-purple-400 bg-purple-50/30 ring-2 ring-purple-400/30' : 'border-gray-200' }} p-4 shadow-sm">
             <p class="text-xs font-medium text-purple-700 mb-1">Verif Tugas Staff</p>
             <p class="text-2xl font-bold text-purple-600">{{ $stats['need_admin_verify'] }}</p>
             <p class="text-[11px] text-purple-600 mt-0.5">menunggu verif Admin</p>
@@ -66,7 +67,7 @@
         <div class="flex border-b border-gray-200 overflow-x-auto scrollbar-none">
             <a href="{{ route('admin.sosmed.index', ['tab' => 'accounts']) }}"
                 class="flex items-center gap-2 px-5 py-3.5 text-sm font-medium whitespace-nowrap border-b-2 transition
-                                                                                            {{ $tab === 'accounts' ? 'border-primary-600 text-primary-600 bg-primary-50/50' : 'border-transparent text-gray-500 hover:text-gray-700' }}">
+                                                                                                        {{ $tab === 'accounts' ? 'border-primary-600 text-primary-600 bg-primary-50/50' : 'border-transparent text-gray-500 hover:text-gray-700' }}">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                         d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
@@ -75,7 +76,7 @@
             </a>
             <a href="{{ route('admin.sosmed.index', ['tab' => 'staff_approvals']) }}"
                 class="flex items-center gap-2 px-5 py-3.5 text-sm font-medium whitespace-nowrap border-b-2 transition
-                                                                                            {{ $tab === 'staff_approvals' ? 'border-purple-600 text-purple-600 bg-purple-50/50' : 'border-transparent text-gray-500 hover:text-gray-700' }}">
+                                                                                                        {{ $tab === 'staff_approvals' ? 'border-purple-600 text-purple-600 bg-purple-50/50' : 'border-transparent text-gray-500 hover:text-gray-700' }}">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                         d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -89,7 +90,7 @@
             </a>
             <a href="{{ route('admin.sosmed.index', ['tab' => 'tasks']) }}"
                 class="flex items-center gap-2 px-5 py-3.5 text-sm font-medium whitespace-nowrap border-b-2 transition
-                                                                                            {{ $tab === 'tasks' ? 'border-primary-600 text-primary-600 bg-primary-50/50' : 'border-transparent text-gray-500 hover:text-gray-700' }}">
+                                                                                                        {{ $tab === 'tasks' ? 'border-primary-600 text-primary-600 bg-primary-50/50' : 'border-transparent text-gray-500 hover:text-gray-700' }}">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                         d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
@@ -98,7 +99,7 @@
             </a>
             <a href="{{ route('admin.sosmed.index', ['tab' => 'logs']) }}"
                 class="flex items-center gap-2 px-5 py-3.5 text-sm font-medium whitespace-nowrap border-b-2 transition
-                                                                                            {{ $tab === 'logs' ? 'border-primary-600 text-primary-600 bg-primary-50/50' : 'border-transparent text-gray-500 hover:text-gray-700' }}">
+                                                                                                        {{ $tab === 'logs' ? 'border-primary-600 text-primary-600 bg-primary-50/50' : 'border-transparent text-gray-500 hover:text-gray-700' }}">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                         d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
@@ -112,25 +113,34 @@
                 <div class="p-4 sm:p-5">
                     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
                         <div>
-                            <h3 class="text-sm font-semibold text-gray-800">Master Data Akun Sosial Media</h3>
-                            <p class="text-xs text-gray-500 mt-0.5">Admin memiliki kewenangan penuh menambah akun dan menunjuk
-                                penanggung jawab PM & Staff Sosmed</p>
+                            <h3 class="text-sm font-semibold text-gray-800">Distribusi & Penugasan Akun Sosial Media</h3>
+                            <p class="text-xs text-gray-500 mt-0.5">Pemberian tugas pengelolaan akun sosial media kepada eksekutor
+                                (Staff Sosmed / PM)</p>
                         </div>
                         <div class="flex items-center gap-2 flex-wrap">
                             <form action="{{ route('admin.sosmed.index') }}" method="GET" class="flex items-center gap-2">
                                 <input type="hidden" name="tab" value="accounts">
                                 <input type="text" name="account_search" value="{{ $accountSearch ?? '' }}"
-                                    placeholder="Cari nama akun..."
-                                    class="h-9 px-3 text-xs bg-white border border-gray-300 rounded-lg shadow-sm
-                                                                                                                   focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500
-                                                                                                                   text-gray-700 transition w-40 sm:w-auto">
+                                    placeholder="Cari nama akun..." class="h-9 px-3 text-xs bg-white border border-gray-300 rounded-lg shadow-sm
+                                                                               focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500
+                                                                               text-gray-700 transition w-40 sm:w-auto">
                             </form>
-                            <button onclick="openCreateAccountModal()"
+                            <a href="{{ route('admin.accounts.index') }}"
+                                class="inline-flex items-center justify-center gap-1.5 px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs sm:text-sm font-medium rounded-lg transition border border-gray-300">
+                                <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                </svg>
+                                Manajemen Akun
+                            </a>
+                            <button onclick="openAssignTaskModal()"
                                 class="inline-flex items-center justify-center gap-2 px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white text-xs sm:text-sm font-semibold rounded-lg transition shadow-sm">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
                                 </svg>
-                                Tambah Akun Baru
+                                Beri Tugas Pengelolaan Sosmed
                             </button>
                         </div>
                     </div>
@@ -271,12 +281,27 @@
                                                 <button type="button"
                                                     onclick="openEditAccountModal({{ $acc->id }}, '{{ addslashes($acc->name) }}', '{{ addslashes($acc->platform) }}', '{{ addslashes($acc->link ?? '') }}', {{ $acc->pm_id ?? 'null' }}, {{ $acc->staff_id ?? 'null' }}, '{{ addslashes(str_replace(["\r", "\n"], [' ', ' '], $acc->notes ?? '')) }}', {{ $acc->assistant_id ?? 'null' }})"
                                                     class="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition"
-                                                    title="Edit Akun">
+                                                    title="Atur Penugasan">
                                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                             d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                                                     </svg>
                                                 </button>
+                                                @if($acc->staff_id)
+                                                    <form method="POST" action="{{ route('admin.sosmed.accounts.unassign', $acc) }}"
+                                                        onsubmit="return confirm('Lepas penugasan untuk akun {{ addslashes($acc->name) }}? Akun akan kembali tersedia di dropdown penugasan.')"
+                                                        class="inline">
+                                                        @csrf
+                                                        <button type="submit"
+                                                            class="p-1.5 text-gray-400 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition"
+                                                            title="Lepas Penugasan (Kembalikan ke Akun Tersedia)">
+                                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                                    d="M13 7a4 4 0 11-8 0 4 4 0 018 0zM9 14a6 6 0 00-6 6v1h12v-1a6 6 0 00-6-6zM21 12h-6" />
+                                                            </svg>
+                                                        </button>
+                                                    </form>
+                                                @endif
                                                 <form method="POST" action="{{ route('admin.sosmed.accounts.destroy', $acc) }}"
                                                     onsubmit="return confirm('Hapus akun ini?')">
                                                     @csrf @method('DELETE')
@@ -322,14 +347,29 @@
                                     </div>
                                     <div class="flex items-center gap-1">
                                         <button type="button"
-                                            onclick="openEditAccountModal({{ $acc->id }}, '{{ addslashes($acc->name) }}', '{{ addslashes($acc->platform) }}', '{{ addslashes($acc->link ?? '') }}', {{ $acc->pm_id ?? 'null' }}, {{ $acc->staff_id ?? 'null' }}, '{{ addslashes(str_replace(["\r", "\n"], [' ', ' '], $acc->notes ?? '')) }}')"
+                                            onclick="openEditAccountModal({{ $acc->id }}, '{{ addslashes($acc->name) }}', '{{ addslashes($acc->platform) }}', '{{ addslashes($acc->link ?? '') }}', {{ $acc->pm_id ?? 'null' }}, {{ $acc->staff_id ?? 'null' }}, '{{ addslashes(str_replace(["\r", "\n"], [' ', ' '], $acc->notes ?? '')) }}', {{ $acc->assistant_id ?? 'null' }})"
                                             class="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition"
-                                            title="Edit Akun">
+                                            title="Atur Penugasan">
                                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                     d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                                             </svg>
                                         </button>
+                                        @if($acc->staff_id)
+                                            <form method="POST" action="{{ route('admin.sosmed.accounts.unassign', $acc) }}"
+                                                onsubmit="return confirm('Lepas penugasan untuk akun {{ addslashes($acc->name) }}?')"
+                                                class="inline">
+                                                @csrf
+                                                <button type="submit"
+                                                    class="p-1.5 text-gray-400 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition"
+                                                    title="Lepas Penugasan">
+                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                            d="M13 7a4 4 0 11-8 0 4 4 0 018 0zM9 14a6 6 0 00-6 6v1h12v-1a6 6 0 00-6-6zM21 12h-6" />
+                                                    </svg>
+                                                </button>
+                                            </form>
+                                        @endif
                                         <form method="POST" action="{{ route('admin.sosmed.accounts.destroy', $acc) }}"
                                             onsubmit="return confirm('Hapus akun ini?')">
                                             @csrf @method('DELETE')
@@ -377,77 +417,80 @@
             </div>
         @endif
 
-        {{-- ── TAB: VERIFIKASI TUGAS STAFF (ADMIN LANGSUNG) ────────────── --}}
-        @if($tab === 'staff_approvals')
-            <div class="p-4 sm:p-5">
-                <div class="mb-4">
-                    <h3 class="text-sm font-semibold text-gray-800">Verifikasi Tugas Sosmed Staff</h3>
-                    <p class="text-xs text-gray-500 mt-0.5">Tugas sosial media yang dikerjakan oleh HR Staff diverifikasi langsung oleh Administrator.</p>
-                </div>
+    {{-- ── TAB: VERIFIKASI TUGAS STAFF (ADMIN LANGSUNG) ────────────── --}}
+    @if($tab === 'staff_approvals')
+        <div class="p-4 sm:p-5">
+            <div class="mb-4">
+                <h3 class="text-sm font-semibold text-gray-800">Verifikasi Tugas Sosmed Staff</h3>
+                <p class="text-xs text-gray-500 mt-0.5">Tugas sosial media yang dikerjakan oleh HR Staff diverifikasi langsung
+                    oleh Administrator.</p>
+            </div>
 
-                <div class="space-y-3 mb-6">
-                    @forelse($staffPendingTasks as $task)
-                        <div class="p-4 bg-purple-50/50 border border-purple-200 rounded-xl hover:border-purple-300 transition">
-                            <div class="flex items-start justify-between gap-3">
-                                <div class="min-w-0 flex-1">
-                                    <div class="flex items-center gap-2 flex-wrap">
-                                        <span class="font-semibold text-gray-800 text-sm">{{ $task->title }}</span>
-                                        <span class="px-2 py-0.5 rounded-md text-xs font-medium border bg-white text-gray-700">
-                                            {{ $task->account?->name }} ({{ $task->account?->platform }})
-                                        </span>
-                                        <span class="px-2 py-0.5 rounded text-[11px] bg-purple-100 text-purple-700 font-semibold">
-                                            Role: HR Staff
-                                        </span>
-                                    </div>
-                                    <div class="flex flex-wrap items-center gap-x-3 gap-y-1 mt-2 text-xs text-gray-500">
-                                        <span>Dikerjakan oleh: <strong class="text-gray-800">{{ $task->assignedUser?->name ?? '-' }}</strong></span>
-                                        <span class="hidden sm:inline">·</span>
-                                        <span>Tanggal: {{ $task->task_date->translatedFormat('d M Y') }}</span>
-                                        @if($task->hasLinks())
-                                            <button type="button"
-                                                onclick="openLinksPopup({{ json_encode($task->link_upload) }}, '{{ addslashes($task->title) }}')"
-                                                class="text-primary-600 font-medium hover:underline inline-flex items-center gap-1">
-                                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                        d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
-                                                </svg>
-                                                {{ $task->link_count }} Bukti Link
-                                            </button>
-                                        @endif
-                                    </div>
-                                    @if($task->description)
-                                        <p class="text-xs text-gray-600 mt-2 bg-white/80 p-2.5 rounded-lg border border-purple-100">
-                                            {{ $task->description }}
-                                        </p>
+            <div class="space-y-3 mb-6">
+                @forelse($staffPendingTasks as $task)
+                    <div class="p-4 bg-purple-50/50 border border-purple-200 rounded-xl hover:border-purple-300 transition">
+                        <div class="flex items-start justify-between gap-3">
+                            <div class="min-w-0 flex-1">
+                                <div class="flex items-center gap-2 flex-wrap">
+                                    <span class="font-semibold text-gray-800 text-sm">{{ $task->title }}</span>
+                                    <span class="px-2 py-0.5 rounded-md text-xs font-medium border bg-white text-gray-700">
+                                        {{ $task->account?->name }} ({{ $task->account?->platform }})
+                                    </span>
+                                    <span class="px-2 py-0.5 rounded text-[11px] bg-purple-100 text-purple-700 font-semibold">
+                                        Role: HR Staff
+                                    </span>
+                                </div>
+                                <div class="flex flex-wrap items-center gap-x-3 gap-y-1 mt-2 text-xs text-gray-500">
+                                    <span>Dikerjakan oleh: <strong
+                                            class="text-gray-800">{{ $task->assignedUser?->name ?? '-' }}</strong></span>
+                                    <span class="hidden sm:inline">·</span>
+                                    <span>Tanggal: {{ $task->task_date->translatedFormat('d M Y') }}</span>
+                                    @if($task->hasLinks())
+                                        <button type="button"
+                                            onclick="openLinksPopup({{ json_encode($task->link_upload) }}, '{{ addslashes($task->title) }}')"
+                                            class="text-primary-600 font-medium hover:underline inline-flex items-center gap-1">
+                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+                                            </svg>
+                                            {{ $task->link_count }} Bukti Link
+                                        </button>
                                     @endif
                                 </div>
-                                <div class="flex-shrink-0 self-center">
-                                    <button onclick="openVerifyModal({{ $task->id }}, '{{ addslashes($task->title) }}')"
-                                        class="inline-flex items-center gap-1.5 px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white text-xs font-semibold rounded-xl transition shadow-sm whitespace-nowrap">
-                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                        </svg>
-                                        Verifikasi Admin
-                                    </button>
-                                </div>
+                                @if($task->description)
+                                    <p class="text-xs text-gray-600 mt-2 bg-white/80 p-2.5 rounded-lg border border-purple-100">
+                                        {{ $task->description }}
+                                    </p>
+                                @endif
+                            </div>
+                            <div class="flex-shrink-0 self-center">
+                                <button onclick="openVerifyModal({{ $task->id }}, '{{ addslashes($task->title) }}')"
+                                    class="inline-flex items-center gap-1.5 px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white text-xs font-semibold rounded-xl transition shadow-sm whitespace-nowrap">
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                    Verifikasi Admin
+                                </button>
                             </div>
                         </div>
-                    @empty
-                        <div class="flex flex-col items-center justify-center py-16 text-center">
-                            <div class="w-16 h-16 rounded-full bg-green-50 flex items-center justify-center mb-4">
-                                <svg class="w-8 h-8 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
-                                </svg>
-                            </div>
-                            <p class="text-sm font-semibold text-gray-700">Semua Tugas Staff Sudah Diverifikasi</p>
-                            <p class="text-xs text-gray-400 mt-1 max-w-xs">
-                                Tidak ada tugas sosmed Staff yang menunggu verifikasi Admin saat ini.
-                            </p>
+                    </div>
+                @empty
+                    <div class="flex flex-col items-center justify-center py-16 text-center">
+                        <div class="w-16 h-16 rounded-full bg-green-50 flex items-center justify-center mb-4">
+                            <svg class="w-8 h-8 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                            </svg>
                         </div>
-                    @endforelse
-                </div>
+                        <p class="text-sm font-semibold text-gray-700">Semua Tugas Staff Sudah Diverifikasi</p>
+                        <p class="text-xs text-gray-400 mt-1 max-w-xs">
+                            Tidak ada tugas sosmed Staff yang menunggu verifikasi Admin saat ini.
+                        </p>
+                    </div>
+                @endforelse
             </div>
-        @endif
+        </div>
+    @endif
 
     {{-- ── TAB 2: MONITORING SELURUH TUGAS ────────────────────────── --}}
     @if($tab === 'tasks')
@@ -460,8 +503,8 @@
                     <input type="hidden" name="tab" value="tasks">
                     <input type="date" name="task_date" value="{{ $taskDateFilter }}"
                         class="w-full sm:w-auto h-9 px-3 text-xs bg-white border border-gray-300 rounded-lg shadow-sm
-                                                                                                           focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500
-                                                                                                           text-gray-700 transition" onchange="this.form.submit()">
+                                                                                                                                   focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500
+                                                                                                                                   text-gray-700 transition" onchange="this.form.submit()">
                 </form>
 
                 {{-- Action Buttons (Grid di Mobile, Inline di Tablet/Desktop) --}}
@@ -469,7 +512,7 @@
                     {{-- Cetak PDF --}}
                     <button onclick="window.print()"
                         class="w-full sm:w-auto inline-flex items-center justify-center gap-2 h-9 px-3 sm:px-3.5 bg-primary-600 hover:bg-primary-700 active:bg-primary-800
-                                                                                                           text-white text-xs font-medium rounded-lg transition shadow-sm">
+                                                                                                                                   text-white text-xs font-medium rounded-lg transition shadow-sm">
                         <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
@@ -481,8 +524,8 @@
                     <div class="relative w-full sm:w-auto" id="purgeDropdown">
                         <button type="button" onclick="togglePurgeDropdown()"
                             class="w-full sm:w-auto inline-flex items-center justify-center gap-2 h-9 px-3 sm:px-3.5 bg-white border border-red-200 text-red-600
-                                                                                                               hover:bg-red-50 hover:border-red-300 active:bg-red-100
-                                                                                                               text-xs font-medium rounded-lg transition shadow-sm">
+                                                                                                                                       hover:bg-red-50 hover:border-red-300 active:bg-red-100
+                                                                                                                                       text-xs font-medium rounded-lg transition shadow-sm">
                             <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -497,8 +540,8 @@
                         {{-- Dropdown --}}
                         <div id="purgeMenu"
                             class="absolute right-0 mt-2 w-56 bg-white border border-gray-100 rounded-xl shadow-lg
-                                                                                                                                opacity-0 invisible translate-y-1
-                                                                                                                                transition-all duration-150 z-20 overflow-hidden">
+                                                                                                                                                        opacity-0 invisible translate-y-1
+                                                                                                                                                        transition-all duration-150 z-20 overflow-hidden">
                             <div class="px-3.5 py-2.5 bg-gray-50 border-b border-gray-100">
                                 <p class="text-[10px] font-semibold text-gray-400 uppercase tracking-wider">Hapus data tugas</p>
                             </div>
@@ -690,13 +733,13 @@
                     <div class="relative w-full sm:w-auto">
                         <input type="text" name="log_search" value="{{ $logSearch ?? '' }}" placeholder="Cari nama assignee..."
                             class="w-full sm:w-44 h-9 px-3 text-xs bg-white border border-gray-300 rounded-lg shadow-sm
-                                                                                               focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 text-gray-700 transition">
+                                                                                                                       focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 text-gray-700 transition">
                     </div>
 
                     {{-- Filter Aksi --}}
                     <select name="log_action"
                         class="w-full sm:w-auto h-9 pl-3 pr-8 text-xs bg-white border border-gray-300 rounded-lg shadow-sm
-                                                                                                                 focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 text-gray-700 transition"
+                                                                                                                                         focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 text-gray-700 transition"
                         onchange="this.form.submit()">
                         <option value="">Semua Aksi</option>
                         <option value="submitted" {{ request('log_action') === 'submitted' ? 'selected' : '' }}>Selesai Dikerjakan
@@ -712,7 +755,7 @@
                     {{-- Filter Rentang Waktu --}}
                     <select name="log_range"
                         class="w-full sm:w-auto h-9 pl-3 pr-8 text-xs bg-white border border-gray-300 rounded-lg shadow-sm
-                                                                                                                focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 text-gray-700 transition"
+                                                                                                                                        focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 text-gray-700 transition"
                         onchange="this.form.submit()">
                         <option value="">Semua Waktu</option>
                         <option value="weekly" {{ request('log_range') === 'weekly' ? 'selected' : '' }}>Minggu Ini</option>
@@ -723,7 +766,7 @@
                     {{-- Filter Tanggal --}}
                     <input type="date" name="log_date" value="{{ $logDateFilter ?? '' }}"
                         class="w-full sm:w-auto h-9 px-3 text-xs bg-white border border-gray-300 rounded-lg shadow-sm
-                                                                                           focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 text-gray-700 transition"
+                                                                                                                   focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 text-gray-700 transition"
                         onchange="this.form.submit()">
 
                     {{-- Submit & Reset (Grouped di Mobile) --}}
@@ -899,6 +942,181 @@
         </div>
     @endif
 
+    {{-- ── MODAL BERI TUGAS PENGELOLAAN SOSMED (ADMIN) ─────────────── --}}
+    <div id="modal-assign-task" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div class="absolute inset-0 bg-black/50 backdrop-blur-sm"
+            onclick="document.getElementById('modal-assign-task').classList.add('hidden')"></div>
+        <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-lg z-10 max-h-[90vh] flex flex-col overflow-visible"
+            x-data="assignTaskDropdown({{ json_encode($availableAccounts) }})">
+            <div class="flex items-center justify-between px-6 py-4 border-b border-gray-200">
+                <div>
+                    <h3 class="text-base font-bold text-gray-800">Beri Tugas Pengelolaan Sosmed</h3>
+                    <p class="text-xs text-gray-400 mt-0.5">Tugaskan akun yang belum dikelola kepada eksekutor</p>
+                </div>
+                <button type="button" onclick="document.getElementById('modal-assign-task').classList.add('hidden')"
+                    class="text-gray-400 hover:text-gray-600 transition">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+
+            <form method="POST" action="{{ route('admin.sosmed.assign') }}" class="p-6 pt-1 space-y-4 overflow-y-auto">
+                @csrf
+
+                {{-- Dropdown Searchable: Pilih Akun yang Tersedia --}}
+                <div class="relative">
+                    <label class="block text-xs font-semibold text-gray-700 mb-1.5">
+                        Pilih Akun yang Dikelola <span class="text-red-500">*</span>
+                    </label>
+                    <input type="hidden" name="sosmed_account_id" :value="selectedId" required>
+
+                    {{-- Dropdown Trigger --}}
+                    <button type="button" @click="open = !open"
+                        class="w-full flex items-center justify-between border border-gray-300 rounded-lg px-3 py-2.5 text-sm bg-white hover:bg-gray-50 focus:ring-2 focus:ring-primary-500 focus:outline-none transition">
+                        <span x-show="selectedId" class="font-medium text-gray-800" x-text="selectedLabel"></span>
+                        <span x-show="!selectedId" class="text-gray-400">-- Pilih Akun Tersedia --</span>
+                        <svg class="w-4 h-4 text-gray-400 transition-transform duration-150"
+                            :class="open ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                        </svg>
+                    </button>
+
+                    {{-- Dropdown Menu (Searchable) --}}
+                    <div x-show="open" @click.away="open = false" x-cloak
+                        class="absolute z-50 left-0 right-0 mt-1 bg-white border border-gray-200 rounded-xl shadow-xl max-h-60 overflow-hidden flex flex-col">
+                        {{-- Search Input --}}
+                        <div class="p-2 border-b border-gray-100 bg-gray-50/80 sticky top-0">
+                            <div class="relative">
+                                <span
+                                    class="absolute inset-y-0 left-0 flex items-center pl-2.5 pointer-events-none text-gray-400">
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                    </svg>
+                                </span>
+                                <input type="text" x-model="search" placeholder="Cari nama akun atau platform..."
+                                    class="w-full pl-8 pr-3 py-1.5 text-xs bg-white border border-gray-200 rounded-lg focus:ring-1 focus:ring-primary-500 focus:outline-none">
+                            </div>
+                        </div>
+
+                        {{-- Options List --}}
+                        <div class="overflow-y-auto max-h-48 divide-y divide-gray-50">
+                            <template x-for="acc in filteredAccounts" :key="acc.id">
+                                <button type="button" @click="selectAccount(acc)"
+                                    class="w-full text-left px-3 py-2 text-xs hover:bg-primary-50 hover:text-primary-700 transition flex items-center justify-between"
+                                    :class="selectedId == acc.id ? 'bg-primary-50/70 font-semibold text-primary-700' : 'text-gray-700'">
+                                    {{-- Hanya nama akun dan platform --}}
+                                    <span x-text="`${acc.name} (${acc.platform})`"></span>
+                                    <span x-show="selectedId == acc.id" class="text-primary-600">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M5 13l4 4L19 7" />
+                                        </svg>
+                                    </span>
+                                </button>
+                            </template>
+
+                            <div x-show="filteredAccounts.length === 0"
+                                class="p-4 text-center text-xs text-gray-400 italic">
+                                <span x-show="accounts.length === 0">Semua akun sudah ditugaskan atau belum ada akun di
+                                    Manajemen Akun.</span>
+                                <span x-show="accounts.length > 0">Tidak ada akun yang cocok dengan pencarian.</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {{-- Link Akun (Readonly & Auto-filled) --}}
+                <div>
+                    <label class="block text-xs font-semibold text-gray-700 mb-1.5">
+                        Link Akun <span class="text-xs text-gray-400 font-normal">(Otomatis terisi & tidak dapat
+                            diubah)</span>
+                    </label>
+                    <div class="relative">
+                        <input type="text" readonly :value="selectedLink || '-'"
+                            class="w-full bg-gray-100/80 border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-600 cursor-not-allowed select-all focus:outline-none">
+                        <template x-if="selectedLink">
+                            <a :href="selectedLink" target="_blank" rel="noopener noreferrer"
+                                class="absolute right-2.5 top-1/2 -translate-y-1/2 p-1 text-primary-600 hover:text-primary-800"
+                                title="Buka Link di Tab Baru">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                                </svg>
+                            </a>
+                        </template>
+                    </div>
+                </div>
+
+                {{-- Eksekutor Akun --}}
+                <div>
+                    <label class="block text-xs font-semibold text-gray-700 mb-1.5">
+                        Eksekutor Akun (Dikelola Oleh) <span class="text-red-500">*</span>
+                    </label>
+                    <select name="staff_id" required
+                        class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 focus:outline-none">
+                        <option value="">-- Pilih Eksekutor --</option>
+                        @foreach($executors as $ex)
+                            @php
+                                $exRoleLabel = match ($ex->role) {
+                                    'pm' => 'PM Mandiri',
+                                    'sosmed' => 'Staff Sosmed',
+                                    'digital_marketing' => 'Digital Marketing',
+                                    default => $ex->role_label ?? strtoupper($ex->role)
+                                };
+                            @endphp
+                            <option value="{{ $ex->id }}">{{ $ex->name }} ({{ $exRoleLabel }})</option>
+                        @endforeach
+                    </select>
+                </div>
+
+                {{-- Supervisor PM --}}
+                <div>
+                    <label class="block text-xs font-semibold text-gray-700 mb-1.5">
+                        Supervisor PM <span class="text-gray-400 font-normal">(Opsional)</span>
+                    </label>
+                    <select name="pm_id"
+                        class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 focus:outline-none">
+                        <option value="">-- Tanpa Supervisor / Langsung ke Admin --</option>
+                        @foreach($pms as $pm)
+                            <option value="{{ $pm->id }}">{{ $pm->name }} (PM)</option>
+                        @endforeach
+                    </select>
+                </div>
+
+                {{-- Asisten Pengawas --}}
+                <div>
+                    <label class="block text-xs font-semibold text-gray-700 mb-1.5">
+                        Asisten Pengawas <span class="text-gray-400 font-normal">(Opsional)</span>
+                    </label>
+                    <select name="assistant_id"
+                        class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 focus:outline-none">
+                        <option value="">-- Tanpa Asisten --</option>
+                        @foreach($assistants as $ast)
+                            <option value="{{ $ast->id }}">{{ $ast->name }} (Asisten)</option>
+                        @endforeach
+                    </select>
+                </div>
+
+                {{-- Catatan / Arahan --}}
+                <div>
+                    <label class="block text-xs font-semibold text-gray-700 mb-1.5">Catatan / Arahan Penugasan</label>
+                    <textarea name="notes" rows="2" placeholder="Catatan atau instruksi pengelolaan akun..."
+                        class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 focus:outline-none"></textarea>
+                </div>
+
+                <div class="flex gap-3 pt-2">
+                    <button type="button" onclick="document.getElementById('modal-assign-task').classList.add('hidden')"
+                        class="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-sm text-gray-700 hover:bg-gray-50 transition">Batal</button>
+                    <button type="submit"
+                        class="flex-1 px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-lg text-sm font-semibold shadow-sm transition">Tugaskan
+                        Akun</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     {{-- ── MODAL CREATE ACCOUNT (ADMIN ONLY) ───────────────────────── --}}
     <div id="modal-create-account" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4">
         <div class="absolute inset-0 bg-black/50 backdrop-blur-sm"
@@ -1009,8 +1227,8 @@
         <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-lg z-10 max-h-[90vh] overflow-y-auto">
             <div class="flex items-center justify-between px-6 py-4 border-b border-gray-200 sticky top-0 bg-white z-10">
                 <div>
-                    <h3 class="text-base font-bold text-gray-800">Edit Akun Sosial Media</h3>
-                    <p class="text-xs text-gray-400 mt-0.5">Perbarui informasi akun, URL, eksekutor, dan supervisor</p>
+                    <h3 class="text-base font-bold text-gray-800">Atur Pengelola & Penugasan Akun</h3>
+                    <p class="text-xs text-gray-400 mt-0.5">Perbarui eksekutor, supervisor, asisten, dan briefing akun</p>
                 </div>
                 <button onclick="document.getElementById('modal-edit-account').classList.add('hidden')"
                     class="text-gray-400 hover:text-gray-600">
@@ -1040,9 +1258,12 @@
                     </select>
                 </div>
                 <div>
-                    <label class="block text-xs font-semibold text-gray-600 mb-1.5">Link URL Akun</label>
-                    <input type="url" name="link" id="edit-acc-link" placeholder="https://instagram.com/republikweb_net"
-                        class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 focus:outline-none">
+                    <div class="flex items-center justify-between mb-1.5">
+                        <label class="block text-xs font-semibold text-gray-600">Link URL Akun</label>
+                    </div>
+                    <input type="url" name="link" id="edit-acc-link" readonly
+                        class="w-full border border-gray-200 bg-gray-100 text-gray-500 rounded-lg px-3 py-2 text-sm cursor-not-allowed focus:outline-none select-all"
+                        placeholder="Belum ada link URL akun">
                 </div>
                 <div>
                     <label class="block text-xs font-semibold text-gray-700 mb-1">Dikelola Oleh</label>
@@ -1132,35 +1353,36 @@
 
     {{-- ── MODAL VERIFIKASI TUGAS STAFF (ADMIN LANGSUNG) ────────────── --}}
     <div id="modal-verify" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4"
-         x-data="{ action: 'verify' }"
-         @open-verify.window="action = 'verify'">
+        x-data="{ action: 'verify' }" @open-verify.window="action = 'verify'">
         <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" onclick="closeVerifyModal()"></div>
         <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-md z-10 overflow-hidden">
             <div class="px-6 py-4 flex items-center justify-between transition-colors"
-                 :class="action === 'verify' ? 'bg-purple-50 border-b border-purple-100' : 'bg-rose-50 border-b border-rose-100'">
+                :class="action === 'verify' ? 'bg-purple-50 border-b border-purple-100' : 'bg-rose-50 border-b border-rose-100'">
                 <div class="flex items-center gap-2.5">
                     <div class="w-8 h-8 rounded-lg flex items-center justify-center transition-colors"
-                         :class="action === 'verify' ? 'bg-purple-100 text-purple-600' : 'bg-rose-100 text-rose-600'">
+                        :class="action === 'verify' ? 'bg-purple-100 text-purple-600' : 'bg-rose-100 text-rose-600'">
                         <template x-if="action === 'verify'">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                             </svg>
                         </template>
                         <template x-if="action === 'reject'">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M6 18L18 6M6 6l12 12" />
                             </svg>
                         </template>
                     </div>
                     <div>
                         <h3 class="text-sm font-bold text-gray-800"
-                            x-text="action === 'verify' ? 'Verifikasi Tugas Staff (Admin)' : 'Tolak & Kembalikan Tugas Staff'"></h3>
+                            x-text="action === 'verify' ? 'Verifikasi Tugas Staff (Admin)' : 'Tolak & Kembalikan Tugas Staff'">
+                        </h3>
                         <p class="text-[11px] text-gray-400">Verifikasi langsung hasil pengerjaan sosmed oleh HR Staff</p>
                     </div>
                 </div>
                 <button type="button" onclick="closeVerifyModal()" class="text-gray-400 hover:text-gray-600 transition">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                     </svg>
                 </button>
             </div>
@@ -1177,21 +1399,20 @@
                 <div>
                     <label class="block text-xs font-semibold text-gray-600 mb-2">Keputusan Administrator</label>
                     <div class="grid grid-cols-2 gap-2 p-1 bg-gray-100 rounded-xl">
-                        <button type="button"
-                            @click="action = 'verify'"
+                        <button type="button" @click="action = 'verify'"
                             :class="action === 'verify' ? 'bg-white text-purple-700 shadow-sm font-bold' : 'text-gray-500 font-medium hover:text-gray-700'"
                             class="py-2 text-xs rounded-lg transition-all flex items-center justify-center gap-1.5">
                             <svg class="w-3.5 h-3.5 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                             </svg>
                             Setujui
                         </button>
-                        <button type="button"
-                            @click="action = 'reject'"
+                        <button type="button" @click="action = 'reject'"
                             :class="action === 'reject' ? 'bg-white text-rose-700 shadow-sm font-bold' : 'text-gray-500 font-medium hover:text-gray-700'"
                             class="py-2 text-xs rounded-lg transition-all flex items-center justify-center gap-1.5">
                             <svg class="w-3.5 h-3.5 text-rose-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M6 18L18 6M6 6l12 12" />
                             </svg>
                             Tolak (Revisi)
                         </button>
@@ -1202,8 +1423,7 @@
                     <label class="block text-xs font-semibold text-gray-700 mb-1">
                         Catatan Revisi <span class="text-rose-500">*</span>
                     </label>
-                    <textarea name="rejection_note" rows="3"
-                        placeholder="Tuliskan instruksi perbaikan untuk HR Staff..."
+                    <textarea name="rejection_note" rows="3" placeholder="Tuliskan instruksi perbaikan untuk HR Staff..."
                         class="w-full text-xs sm:text-sm border border-rose-200 rounded-xl p-3 focus:outline-none focus:ring-2 focus:ring-rose-400 bg-rose-50/20"></textarea>
                 </div>
 
@@ -1265,11 +1485,11 @@
                 const searchBox = document.createElement('div');
                 searchBox.className = 'p-2 border-b border-gray-100 sticky top-0 bg-white rounded-t-lg';
                 searchBox.innerHTML = `
-                                                                        <div class="relative">
-                                                                            <input type="text" placeholder="Cari..." class="w-full pl-8 pr-2 py-1.5 text-xs border border-gray-200 rounded-md focus:outline-none focus:ring-1 focus:ring-primary-500 bg-gray-50 transition">
-                                                                            <svg class="w-3.5 h-3.5 text-gray-400 absolute left-2.5 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
-                                                                        </div>
-                                                                    `;
+                                                                                    <div class="relative">
+                                                                                        <input type="text" placeholder="Cari..." class="w-full pl-8 pr-2 py-1.5 text-xs border border-gray-200 rounded-md focus:outline-none focus:ring-1 focus:ring-primary-500 bg-gray-50 transition">
+                                                                                        <svg class="w-3.5 h-3.5 text-gray-400 absolute left-2.5 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                                                                                    </div>
+                                                                                `;
                 const searchInput = searchBox.querySelector('input');
 
                 const list = document.createElement('ul');
@@ -1564,11 +1784,11 @@
                     item.rel = 'noopener noreferrer';
                     item.className = 'flex items-start gap-2.5 p-3 rounded-lg border border-gray-100 hover:border-primary-300 hover:bg-primary-50/50 transition group';
                     item.innerHTML = `
-                                                                                    <span class="flex-shrink-0 w-5 h-5 rounded-full bg-primary-100 text-primary-700 text-[10px] font-bold flex items-center justify-center mt-0.5">${i + 1}</span>
-                                                                                    <span class="text-xs text-primary-700 group-hover:underline break-all leading-relaxed">${url}</span>
-                                                                                    <svg class="w-3.5 h-3.5 flex-shrink-0 text-gray-400 group-hover:text-primary-600 mt-0.5 ml-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
-                                                                                    </svg>`;
+                                                                                                <span class="flex-shrink-0 w-5 h-5 rounded-full bg-primary-100 text-primary-700 text-[10px] font-bold flex items-center justify-center mt-0.5">${i + 1}</span>
+                                                                                                <span class="text-xs text-primary-700 group-hover:underline break-all leading-relaxed">${url}</span>
+                                                                                                <svg class="w-3.5 h-3.5 flex-shrink-0 text-gray-400 group-hover:text-primary-600 mt-0.5 ml-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+                                                                                                </svg>`;
                     body.appendChild(item);
                 });
             }
@@ -1586,6 +1806,43 @@
 
         function closeVerifyModal() {
             document.getElementById('modal-verify').classList.add('hidden');
+        }
+
+        function openAssignTaskModal() {
+            document.getElementById('modal-assign-task').classList.remove('hidden');
+        }
+
+        function assignTaskDropdown(accountsList) {
+            return {
+                accounts: accountsList || [],
+                selectedId: '',
+                selectedName: '',
+                selectedPlatform: '',
+                selectedLink: '',
+                search: '',
+                open: false,
+                get selectedLabel() {
+                    if (!this.selectedId) return '';
+                    return `${this.selectedName} (${this.selectedPlatform})`;
+                },
+                get filteredAccounts() {
+                    if (!this.search || !this.search.trim()) {
+                        return this.accounts;
+                    }
+                    const q = this.search.toLowerCase();
+                    return this.accounts.filter(acc => {
+                        const target = (acc.name + ' ' + acc.platform).toLowerCase();
+                        return target.includes(q);
+                    });
+                },
+                selectAccount(acc) {
+                    this.selectedId = acc.id;
+                    this.selectedName = acc.name;
+                    this.selectedPlatform = acc.platform;
+                    this.selectedLink = acc.link || '';
+                    this.open = false;
+                }
+            };
         }
     </script>
 @endpush

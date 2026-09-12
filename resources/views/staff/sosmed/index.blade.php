@@ -105,10 +105,19 @@
         {{-- ── TAB 1: DISTRIBUSI AKUN ─────────────────────────────────── --}}
         @if($tab === 'accounts')
                 <div class="p-4 sm:p-5">
-                    <div class="mb-4">
-                        <h3 class="text-sm font-semibold text-gray-800">Daftar Akun & Delegasi Tanggung Jawab</h3>
-                        <p class="text-xs text-gray-500 mt-0.5">HR Staff membagikan akun sosial media kepada PM agar PM hanya dapat
-                            mengelola akun yang menjadi tanggung jawabnya.</p>
+                    <div class="mb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                        <div>
+                            <h3 class="text-sm font-semibold text-gray-800">Daftar Akun & Delegasi Tanggung Jawab</h3>
+                            <p class="text-xs text-gray-500 mt-0.5">HR Staff membagikan akun sosial media kepada PM agar PM hanya dapat
+                                mengelola akun yang menjadi tanggung jawabnya.</p>
+                        </div>
+                        <button onclick="openAssignTaskModal()"
+                            class="inline-flex items-center justify-center gap-2 px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white text-xs sm:text-sm font-semibold rounded-lg transition shadow-sm shrink-0">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                            </svg>
+                            Beri Tugas Pengelolaan Sosmed
+                        </button>
                     </div>
 
                     {{-- Desktop table (md+) --}}
@@ -245,11 +254,28 @@
                                             @endif
                                         </td>
                                         <td class="px-4 py-3.5 text-center">
-                                            <button
-                                                onclick="openAssignModal({{ $acc->id }}, '{{ addslashes($acc->name) }}', {{ $acc->pm_id ?? 'null' }}, {{ $acc->staff_id ?? 'null' }}, {{ $acc->assistant_id ?? 'null' }}, '{{ $acc->staffUser?->role ?? '' }}')"
-                                                class="px-3 py-1 bg-primary-50 hover:bg-primary-100 text-primary-700 text-xs font-semibold rounded-lg transition whitespace-nowrap">
-                                                Atur PJ
-                                            </button>
+                                            <div class="flex items-center justify-center gap-1.5">
+                                                <button
+                                                    onclick="openAssignModal({{ $acc->id }}, '{{ addslashes($acc->name) }}', {{ $acc->pm_id ?? 'null' }}, {{ $acc->staff_id ?? 'null' }}, {{ $acc->assistant_id ?? 'null' }}, '{{ $acc->staffUser?->role ?? '' }}')"
+                                                    class="px-2.5 py-1 bg-primary-50 hover:bg-primary-100 text-primary-700 text-xs font-semibold rounded-lg transition whitespace-nowrap"
+                                                    title="Atur PJ">
+                                                    Atur PJ
+                                                </button>
+                                                @if($acc->staff_id)
+                                                    <form method="POST" action="{{ route('staff.sosmed.accounts.unassign', $acc) }}"
+                                                        onsubmit="return confirm('Lepas penugasan untuk akun {{ addslashes($acc->name) }}? Akun akan kembali tersedia di dropdown penugasan.')" class="inline">
+                                                        @csrf
+                                                        <button type="submit"
+                                                            class="p-1 text-gray-400 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition"
+                                                            title="Lepas Penugasan (Kembalikan ke Akun Tersedia)">
+                                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                                    d="M13 7a4 4 0 11-8 0 4 4 0 018 0zM9 14a6 6 0 00-6 6v1h12v-1a6 6 0 00-6-6zM21 12h-6" />
+                                                            </svg>
+                                                        </button>
+                                                    </form>
+                                                @endif
+                                            </div>
                                         </td>
                                     </tr>
                                 @empty
@@ -273,11 +299,26 @@
                                             {{ $acc->platform_icon }} {{ $acc->platform }}
                                         </span>
                                     </div>
-                                    <button
-                                        onclick="openAssignModal({{ $acc->id }}, '{{ addslashes($acc->name) }}', {{ $acc->pm_id ?? 'null' }}, {{ $acc->staff_id ?? 'null' }}, {{ $acc->assistant_id ?? 'null' }}, '{{ $acc->staffUser?->role ?? '' }}')"
-                                        class="flex-shrink-0 px-3 py-1.5 bg-primary-50 hover:bg-primary-100 text-primary-700 text-xs font-semibold rounded-lg transition">
-                                        Atur PJ
-                                    </button>
+                                    <div class="flex items-center gap-1 shrink-0">
+                                        <button
+                                            onclick="openAssignModal({{ $acc->id }}, '{{ addslashes($acc->name) }}', {{ $acc->pm_id ?? 'null' }}, {{ $acc->staff_id ?? 'null' }}, {{ $acc->assistant_id ?? 'null' }}, '{{ $acc->staffUser?->role ?? '' }}')"
+                                            class="px-2.5 py-1.5 bg-primary-50 hover:bg-primary-100 text-primary-700 text-xs font-semibold rounded-lg transition"
+                                            title="Atur PJ">
+                                            Atur PJ
+                                        </button>
+                                        @if($acc->staff_id)
+                                            <form method="POST" action="{{ route('staff.sosmed.accounts.unassign', $acc) }}"
+                                                onsubmit="return confirm('Lepas penugasan untuk akun {{ addslashes($acc->name) }}?')" class="inline">
+                                                @csrf
+                                                <button type="submit" class="p-1.5 text-gray-400 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition" title="Lepas Penugasan">
+                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                            d="M13 7a4 4 0 11-8 0 4 4 0 018 0zM9 14a6 6 0 00-6 6v1h12v-1a6 6 0 00-6-6zM21 12h-6" />
+                                                    </svg>
+                                                </button>
+                                            </form>
+                                        @endif
+                                    </div>
                                 </div>
 
                                 <div class="space-y-2 text-xs border-t border-gray-100 pt-2.5">
@@ -698,6 +739,175 @@
             </div>
         </div>
     @endif
+    </div>
+
+    {{-- ── MODAL BERI TUGAS PENGELOLAAN SOSMED (HR STAFF) ─────────── --}}
+    <div id="modal-assign-task" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div class="absolute inset-0 bg-black/50 backdrop-blur-sm"
+            onclick="document.getElementById('modal-assign-task').classList.add('hidden')"></div>
+        <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-lg z-10 max-h-[90vh] flex flex-col overflow-visible"
+            x-data="assignTaskDropdown({{ json_encode($availableAccounts) }})">
+            <div class="flex items-center justify-between px-6 py-4 border-b border-gray-200">
+                <div>
+                    <h3 class="text-base font-bold text-gray-800">Beri Tugas Pengelolaan Sosmed</h3>
+                    <p class="text-xs text-gray-400 mt-0.5">Tugaskan akun yang belum dikelola kepada eksekutor</p>
+                </div>
+                <button type="button" onclick="document.getElementById('modal-assign-task').classList.add('hidden')"
+                    class="text-gray-400 hover:text-gray-600 transition">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+
+            <form method="POST" action="{{ route('staff.sosmed.assign') }}" class="p-6 space-y-4 overflow-y-auto">
+                @csrf
+
+                {{-- Dropdown Searchable: Pilih Akun yang Tersedia --}}
+                <div class="relative">
+                    <label class="block text-xs font-semibold text-gray-700 mb-1.5">
+                        Pilih Akun yang Dikelola <span class="text-red-500">*</span>
+                    </label>
+                    <input type="hidden" name="sosmed_account_id" :value="selectedId" required>
+
+                    {{-- Dropdown Trigger --}}
+                    <button type="button" @click="open = !open"
+                        class="w-full flex items-center justify-between border border-gray-300 rounded-lg px-3 py-2.5 text-sm bg-white hover:bg-gray-50 focus:ring-2 focus:ring-primary-500 focus:outline-none transition">
+                        <span x-show="selectedId" class="font-medium text-gray-800" x-text="selectedLabel"></span>
+                        <span x-show="!selectedId" class="text-gray-400">-- Pilih Akun Tersedia --</span>
+                        <svg class="w-4 h-4 text-gray-400 transition-transform duration-150" :class="open ? 'rotate-180' : ''"
+                            fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                        </svg>
+                    </button>
+
+                    {{-- Dropdown Menu (Searchable) --}}
+                    <div x-show="open" @click.away="open = false" x-cloak
+                        class="absolute z-50 left-0 right-0 mt-1 bg-white border border-gray-200 rounded-xl shadow-xl max-h-60 overflow-hidden flex flex-col">
+                        {{-- Search Input --}}
+                        <div class="p-2 border-b border-gray-100 bg-gray-50/80 sticky top-0">
+                            <div class="relative">
+                                <span class="absolute inset-y-0 left-0 flex items-center pl-2.5 pointer-events-none text-gray-400">
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                    </svg>
+                                </span>
+                                <input type="text" x-model="search" placeholder="Cari nama akun atau platform..."
+                                    class="w-full pl-8 pr-3 py-1.5 text-xs bg-white border border-gray-200 rounded-lg focus:ring-1 focus:ring-primary-500 focus:outline-none">
+                            </div>
+                        </div>
+
+                        {{-- Options List --}}
+                        <div class="overflow-y-auto max-h-48 divide-y divide-gray-50">
+                            <template x-for="acc in filteredAccounts" :key="acc.id">
+                                <button type="button" @click="selectAccount(acc)"
+                                    class="w-full text-left px-3 py-2 text-xs hover:bg-primary-50 hover:text-primary-700 transition flex items-center justify-between"
+                                    :class="selectedId == acc.id ? 'bg-primary-50/70 font-semibold text-primary-700' : 'text-gray-700'">
+                                    {{-- Hanya nama akun dan platform --}}
+                                    <span x-text="`${acc.name} (${acc.platform})`"></span>
+                                    <span x-show="selectedId == acc.id" class="text-primary-600">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                                        </svg>
+                                    </span>
+                                </button>
+                            </template>
+
+                            <div x-show="filteredAccounts.length === 0" class="p-4 text-center text-xs text-gray-400 italic">
+                                <span x-show="accounts.length === 0">Semua akun sudah ditugaskan atau belum ada akun di sistem.</span>
+                                <span x-show="accounts.length > 0">Tidak ada akun yang cocok dengan pencarian.</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {{-- Link Akun (Readonly & Auto-filled) --}}
+                <div>
+                    <label class="block text-xs font-semibold text-gray-700 mb-1.5">
+                        Link Akun <span class="text-xs text-gray-400 font-normal">(Otomatis terisi & tidak dapat diubah)</span>
+                    </label>
+                    <div class="relative">
+                        <input type="text" readonly :value="selectedLink || '-'"
+                            class="w-full bg-gray-100/80 border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-600 cursor-not-allowed select-all focus:outline-none">
+                        <template x-if="selectedLink">
+                            <a :href="selectedLink" target="_blank" rel="noopener noreferrer"
+                                class="absolute right-2.5 top-1/2 -translate-y-1/2 p-1 text-primary-600 hover:text-primary-800"
+                                title="Buka Link di Tab Baru">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                                </svg>
+                            </a>
+                        </template>
+                    </div>
+                </div>
+
+                {{-- Eksekutor Akun --}}
+                <div>
+                    <label class="block text-xs font-semibold text-gray-700 mb-1.5">
+                        Eksekutor Akun (Dikelola Oleh) <span class="text-red-500">*</span>
+                    </label>
+                    <select name="staff_id" required
+                        class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 focus:outline-none">
+                        <option value="">-- Pilih Eksekutor --</option>
+                        @foreach($executors as $ex)
+                            @php
+                                $exRoleLabel = match ($ex->role) {
+                                    'pm' => 'PM Mandiri',
+                                    'sosmed' => 'Staff Sosmed',
+                                    'digital_marketing' => 'Digital Marketing',
+                                    default => $ex->role_label ?? strtoupper($ex->role)
+                                };
+                            @endphp
+                            <option value="{{ $ex->id }}">{{ $ex->name }} ({{ $exRoleLabel }})</option>
+                        @endforeach
+                    </select>
+                </div>
+
+                {{-- Supervisor PM --}}
+                <div>
+                    <label class="block text-xs font-semibold text-gray-700 mb-1.5">
+                        Supervisor PM <span class="text-gray-400 font-normal">(Opsional)</span>
+                    </label>
+                    <select name="pm_id"
+                        class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 focus:outline-none">
+                        <option value="">-- Tanpa Supervisor / Langsung ke HR --</option>
+                        @foreach($pms as $pm)
+                            <option value="{{ $pm->id }}">{{ $pm->name }} (PM)</option>
+                        @endforeach
+                    </select>
+                </div>
+
+                {{-- Asisten Pengawas --}}
+                <div>
+                    <label class="block text-xs font-semibold text-gray-700 mb-1.5">
+                        Asisten Pengawas <span class="text-gray-400 font-normal">(Opsional)</span>
+                    </label>
+                    <select name="assistant_id"
+                        class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 focus:outline-none">
+                        <option value="">-- Tanpa Asisten --</option>
+                        @foreach($assistants as $ast)
+                            <option value="{{ $ast->id }}">{{ $ast->name }} (Asisten)</option>
+                        @endforeach
+                    </select>
+                </div>
+
+                {{-- Catatan / Arahan --}}
+                <div>
+                    <label class="block text-xs font-semibold text-gray-700 mb-1.5">Catatan / Arahan Penugasan</label>
+                    <textarea name="notes" rows="2" placeholder="Catatan atau instruksi pengelolaan akun..."
+                        class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 focus:outline-none"></textarea>
+                </div>
+
+                <div class="flex gap-3 pt-2">
+                    <button type="button" onclick="document.getElementById('modal-assign-task').classList.add('hidden')"
+                        class="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-sm text-gray-700 hover:bg-gray-50 transition">Batal</button>
+                    <button type="submit"
+                        class="flex-1 px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-lg text-sm font-semibold shadow-sm transition">Tugaskan Akun</button>
+                </div>
+            </form>
+        </div>
     </div>
 
     {{-- ── MODAL DELEGASI AKUN (HR STAFF) ─────────────────────────── --}}
@@ -1282,6 +1492,43 @@
 
         function closeMySubmitModal() {
             document.getElementById('modal-my-submit').classList.add('hidden');
+        }
+
+        function openAssignTaskModal() {
+            document.getElementById('modal-assign-task').classList.remove('hidden');
+        }
+
+        function assignTaskDropdown(accountsList) {
+            return {
+                accounts: accountsList || [],
+                selectedId: '',
+                selectedName: '',
+                selectedPlatform: '',
+                selectedLink: '',
+                search: '',
+                open: false,
+                get selectedLabel() {
+                    if (!this.selectedId) return '';
+                    return ${this.selectedName} ();
+                },
+                get filteredAccounts() {
+                    if (!this.search || !this.search.trim()) {
+                        return this.accounts;
+                    }
+                    const q = this.search.toLowerCase();
+                    return this.accounts.filter(acc => {
+                        const target = (acc.name + ' ' + acc.platform).toLowerCase();
+                        return target.includes(q);
+                    });
+                },
+                selectAccount(acc) {
+                    this.selectedId = acc.id;
+                    this.selectedName = acc.name;
+                    this.selectedPlatform = acc.platform;
+                    this.selectedLink = acc.link || '';
+                    this.open = false;
+                }
+            };
         }
 
         function addMyLinkRow() {

@@ -125,11 +125,11 @@
     <p class="px-4 text-[11px] font-semibold text-slate-500 uppercase tracking-widest">Sosial Media</p>
 </div>
 
-{{-- Sosmed Management --}}
-<a href="{{ route('admin.sosmed.index') }}"
+{{-- Manajemen Akun --}}
+<a href="{{ route('admin.accounts.index') }}"
     class="flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-all
-          {{ request()->routeIs('admin.sosmed.*') ? 'bg-white/10 text-white' : 'text-slate-400 hover:bg-white/5 hover:text-white' }}">
-    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-person-add"
+          {{ request()->routeIs('admin.accounts.*') ? 'bg-white/10 text-white' : 'text-slate-400 hover:bg-white/5 hover:text-white' }}">
+    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-person-add shrink-0"
         viewBox="0 0 16 16">
         <path
             d="M12.5 16a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7m.5-5v1h1a.5.5 0 0 1 0 1h-1v1a.5.5 0 0 1-1 0v-1h-1a.5.5 0 0 1 0-1h1v-1a.5.5 0 0 1 1 0m-2-6a3 3 0 1 1-6 0 3 3 0 0 1 6 0M8 7a2 2 0 1 0 0-4 2 2 0 0 0 0 4" />
