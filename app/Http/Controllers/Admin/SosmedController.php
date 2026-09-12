@@ -93,21 +93,29 @@ class SosmedController extends Controller
             ->orderBy('name')
             ->get();
 
-        $executors = User::whereIn('role', ['sosmed', 'pm'])
+        $executors = User::whereIn('role', ['sosmed', 'pm', 'hr_staff', 'hr_assistant', 'digital_marketing'])
             ->where('is_active', true)
             ->orderBy('name')
             ->get();
         $staffs = $executors; // compatibility
 
+        // Tugas Sosmed yang dikerjakan oleh HR Staff dan menunggu verifikasi langsung Admin
+        $staffPendingTasks = SosmedTask::with(['account', 'assignedUser', 'assignedBy'])
+            ->where('status', 'done_by_staff')
+            ->whereHas('assignedUser', fn($u) => $u->where('role', 'hr_staff'))
+            ->orderBy('updated_at', 'desc')
+            ->get();
+
         $stats = [
-            'total_accounts' => $accounts->count(),
-            'unassigned_pm' => $accounts->whereNull('pm_id')->count(),
-            'unassigned_staff' => $accounts->whereNull('staff_id')->count(),
-            'total_tasks' => $tasks->count(),
-            'pending_tasks' => $tasks->where('status', 'pending')->count(),
-            'need_pm_verify' => $tasks->where('status', 'done_by_staff')->count(),
-            'need_hr_verify' => $tasks->where('status', 'verified_by_pm')->count(),
-            'completed' => $tasks->where('status', 'approved_hr')->count(),
+            'total_accounts'    => $accounts->count(),
+            'unassigned_pm'     => $accounts->whereNull('pm_id')->count(),
+            'unassigned_staff'  => $accounts->whereNull('staff_id')->count(),
+            'total_tasks'       => $tasks->count(),
+            'pending_tasks'     => $tasks->where('status', 'pending')->count(),
+            'need_pm_verify'    => $tasks->where('status', 'done_by_staff')->count(),
+            'need_admin_verify' => $staffPendingTasks->count(),
+            'need_hr_verify'    => $tasks->where('status', 'verified_by_pm')->count(),
+            'completed'         => $tasks->where('status', 'approved_hr')->count(),
         ];
 
         return view('admin.sosmed.index', compact(
@@ -115,6 +123,7 @@ class SosmedController extends Controller
             'accounts',
             'accountSearch',
             'tasks',
+            'staffPendingTasks',
             'taskDateFilter',
             'logs',
             'logDateFilter',
@@ -257,5 +266,59 @@ class SosmedController extends Controller
 
         return redirect()->route('admin.sosmed.index', ['tab' => 'logs'])
             ->with('success', "Berhasil menghapus {$count} log persetujuan lama.");
+    }
+
+    /**
+     * Admin verifikasi tugas sosmed yang dikerjakan oleh HR Staff.
+     */
+    public function verifyTask(Request $request, SosmedTask $task)
+    {
+        $validated = $request->validate([
+            'action'         => ['required', 'in:verify,reject'],
+            'rejection_note' => ['nullable', 'string', 'max:500'],
+        ]);
+
+        if ($validated['action'] === 'verify') {
+            $task->update([
+                'status'         => 'approved_hr',
+                'hr_verified_by' => Auth::id(),
+                'hr_verified_at' => now(),
+            ]);
+
+            SosmedApprovalLog::create([
+                'sosmed_task_id' => $task->id,
+                'user_id'        => Auth::id(),
+                'user_name'      => Auth::user()->name,
+                'role_name'      => 'Administrator',
+                'action'         => 'approved_hr',
+                'notes'          => 'Disetujui langsung oleh Administrator.',
+            ]);
+
+            $this->logActivity('sosmed.verified', 'Sosmed', "Administrator menyetujui tugas sosmed '{$task->title}' milik {$task->assignedUser?->name}", $task);
+
+            return redirect()->route('admin.sosmed.index', ['tab' => 'staff_approvals'])
+                ->with('success', 'Tugas sosmed Staff berhasil disetujui.');
+        } else {
+            $task->update([
+                'status'         => 'rejected',
+                'hr_verified_by' => Auth::id(),
+                'hr_verified_at' => now(),
+                'rejection_note' => $validated['rejection_note'],
+            ]);
+
+            SosmedApprovalLog::create([
+                'sosmed_task_id' => $task->id,
+                'user_id'        => Auth::id(),
+                'user_name'      => Auth::user()->name,
+                'role_name'      => 'Administrator',
+                'action'         => 'rejected',
+                'notes'          => $validated['rejection_note'] ?? 'Ditolak oleh Administrator.',
+            ]);
+
+            $this->logActivity('sosmed.verified', 'Sosmed', "Administrator menolak tugas sosmed '{$task->title}' milik {$task->assignedUser?->name}", $task);
+
+            return redirect()->route('admin.sosmed.index', ['tab' => 'staff_approvals'])
+                ->with('success', 'Tugas ditolak dan dikembalikan ke Staff untuk revisi.');
+        }
     }
 }

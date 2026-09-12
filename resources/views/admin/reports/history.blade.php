@@ -138,7 +138,7 @@
         {{-- Desktop / Mobile Table (dengan fixed height dan scrollbar internal) --}}
         <div class="overflow-x-auto overflow-y-auto max-h-[600px]" style="scrollbar-gutter: stable;">
             <table class="w-full min-w-[640px] sm:min-w-[900px] table-fixed text-xs sm:text-sm">
-                <thead>
+                <thead class="sticky top-0 z-10">
                     <tr class="bg-gray-50 border-b border-gray-200">
                         {{-- Tanggal --}}
                         <th

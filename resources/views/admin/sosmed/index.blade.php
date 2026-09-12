@@ -12,7 +12,7 @@
     {{-- ═══════════════════════════════════════════════════════════════ --}}
     {{-- STAT CARDS --}}
     {{-- ═══════════════════════════════════════════════════════════════ --}}
-    <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-3 mb-6">
+    <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
         <div class="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
             <p class="text-xs font-medium text-gray-500 mb-1">Total Akun</p>
             <p class="text-2xl font-bold text-gray-800">{{ $stats['total_accounts'] }}</p>
@@ -40,13 +40,18 @@
             <p class="text-2xl font-bold text-blue-600">{{ $stats['need_pm_verify'] }}</p>
             <p class="text-[11px] text-gray-400 mt-0.5">tugas menunggu PM</p>
         </div>
+        <div class="bg-white rounded-xl border {{ $stats['need_admin_verify'] > 0 ? 'border-purple-400 bg-purple-50/30 ring-2 ring-purple-400/30' : 'border-gray-200' }} p-4 shadow-sm">
+            <p class="text-xs font-medium text-purple-700 mb-1">Verif Tugas Staff</p>
+            <p class="text-2xl font-bold text-purple-600">{{ $stats['need_admin_verify'] }}</p>
+            <p class="text-[11px] text-purple-600 mt-0.5">menunggu verif Admin</p>
+        </div>
         <div class="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
             <p class="text-xs font-medium text-gray-500 mb-1">Verif Level 2 (HR)</p>
             <p class="text-2xl font-bold text-purple-600">{{ $stats['need_hr_verify'] }}</p>
             <p class="text-[11px] text-gray-400 mt-0.5">tugas menunggu HR</p>
         </div>
 
-        <div class="col-span-2 sm:col-span-1 bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
+        <div class="col-span-1 bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
             <p class="text-xs font-medium text-gray-500 mb-1">Selesai Final</p>
             <p class="text-2xl font-bold text-emerald-600">{{ $stats['completed'] }}</p>
             <p class="text-[11px] text-emerald-600 mt-0.5">approved final</p>
@@ -67,6 +72,20 @@
                         d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
                 </svg>
                 Seluruh Akun Sosmed ({{ $accounts->count() }})
+            </a>
+            <a href="{{ route('admin.sosmed.index', ['tab' => 'staff_approvals']) }}"
+                class="flex items-center gap-2 px-5 py-3.5 text-sm font-medium whitespace-nowrap border-b-2 transition
+                                                                                            {{ $tab === 'staff_approvals' ? 'border-purple-600 text-purple-600 bg-purple-50/50' : 'border-transparent text-gray-500 hover:text-gray-700' }}">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                Verifikasi Tugas Staff
+                @if($stats['need_admin_verify'] > 0)
+                    <span class="ml-1 px-1.5 py-0.5 text-[10px] font-bold rounded-full bg-purple-600 text-white">
+                        {{ $stats['need_admin_verify'] }}
+                    </span>
+                @endif
             </a>
             <a href="{{ route('admin.sosmed.index', ['tab' => 'tasks']) }}"
                 class="flex items-center gap-2 px-5 py-3.5 text-sm font-medium whitespace-nowrap border-b-2 transition
@@ -354,6 +373,78 @@
                         @empty
                             <div class="py-8 text-center text-sm text-gray-400">Belum ada akun sosial media.</div>
                         @endforelse
+                </div>
+            </div>
+        @endif
+
+        {{-- ── TAB: VERIFIKASI TUGAS STAFF (ADMIN LANGSUNG) ────────────── --}}
+        @if($tab === 'staff_approvals')
+            <div class="p-4 sm:p-5">
+                <div class="mb-4">
+                    <h3 class="text-sm font-semibold text-gray-800">Verifikasi Tugas Sosmed Staff</h3>
+                    <p class="text-xs text-gray-500 mt-0.5">Tugas sosial media yang dikerjakan oleh HR Staff diverifikasi langsung oleh Administrator.</p>
+                </div>
+
+                <div class="space-y-3 mb-6">
+                    @forelse($staffPendingTasks as $task)
+                        <div class="p-4 bg-purple-50/50 border border-purple-200 rounded-xl hover:border-purple-300 transition">
+                            <div class="flex items-start justify-between gap-3">
+                                <div class="min-w-0 flex-1">
+                                    <div class="flex items-center gap-2 flex-wrap">
+                                        <span class="font-semibold text-gray-800 text-sm">{{ $task->title }}</span>
+                                        <span class="px-2 py-0.5 rounded-md text-xs font-medium border bg-white text-gray-700">
+                                            {{ $task->account?->name }} ({{ $task->account?->platform }})
+                                        </span>
+                                        <span class="px-2 py-0.5 rounded text-[11px] bg-purple-100 text-purple-700 font-semibold">
+                                            Role: HR Staff
+                                        </span>
+                                    </div>
+                                    <div class="flex flex-wrap items-center gap-x-3 gap-y-1 mt-2 text-xs text-gray-500">
+                                        <span>Dikerjakan oleh: <strong class="text-gray-800">{{ $task->assignedUser?->name ?? '-' }}</strong></span>
+                                        <span class="hidden sm:inline">·</span>
+                                        <span>Tanggal: {{ $task->task_date->translatedFormat('d M Y') }}</span>
+                                        @if($task->hasLinks())
+                                            <button type="button"
+                                                onclick="openLinksPopup({{ json_encode($task->link_upload) }}, '{{ addslashes($task->title) }}')"
+                                                class="text-primary-600 font-medium hover:underline inline-flex items-center gap-1">
+                                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                        d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+                                                </svg>
+                                                {{ $task->link_count }} Bukti Link
+                                            </button>
+                                        @endif
+                                    </div>
+                                    @if($task->description)
+                                        <p class="text-xs text-gray-600 mt-2 bg-white/80 p-2.5 rounded-lg border border-purple-100">
+                                            {{ $task->description }}
+                                        </p>
+                                    @endif
+                                </div>
+                                <div class="flex-shrink-0 self-center">
+                                    <button onclick="openVerifyModal({{ $task->id }}, '{{ addslashes($task->title) }}')"
+                                        class="inline-flex items-center gap-1.5 px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white text-xs font-semibold rounded-xl transition shadow-sm whitespace-nowrap">
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                        </svg>
+                                        Verifikasi Admin
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    @empty
+                        <div class="flex flex-col items-center justify-center py-16 text-center">
+                            <div class="w-16 h-16 rounded-full bg-green-50 flex items-center justify-center mb-4">
+                                <svg class="w-8 h-8 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                                </svg>
+                            </div>
+                            <p class="text-sm font-semibold text-gray-700">Semua Tugas Staff Sudah Diverifikasi</p>
+                            <p class="text-xs text-gray-400 mt-1 max-w-xs">
+                                Tidak ada tugas sosmed Staff yang menunggu verifikasi Admin saat ini.
+                            </p>
+                        </div>
+                    @endforelse
                 </div>
             </div>
         @endif
@@ -1039,6 +1130,98 @@
         </div>
     </div>
 
+    {{-- ── MODAL VERIFIKASI TUGAS STAFF (ADMIN LANGSUNG) ────────────── --}}
+    <div id="modal-verify" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4"
+         x-data="{ action: 'verify' }"
+         @open-verify.window="action = 'verify'">
+        <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" onclick="closeVerifyModal()"></div>
+        <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-md z-10 overflow-hidden">
+            <div class="px-6 py-4 flex items-center justify-between transition-colors"
+                 :class="action === 'verify' ? 'bg-purple-50 border-b border-purple-100' : 'bg-rose-50 border-b border-rose-100'">
+                <div class="flex items-center gap-2.5">
+                    <div class="w-8 h-8 rounded-lg flex items-center justify-center transition-colors"
+                         :class="action === 'verify' ? 'bg-purple-100 text-purple-600' : 'bg-rose-100 text-rose-600'">
+                        <template x-if="action === 'verify'">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                            </svg>
+                        </template>
+                        <template x-if="action === 'reject'">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                            </svg>
+                        </template>
+                    </div>
+                    <div>
+                        <h3 class="text-sm font-bold text-gray-800"
+                            x-text="action === 'verify' ? 'Verifikasi Tugas Staff (Admin)' : 'Tolak & Kembalikan Tugas Staff'"></h3>
+                        <p class="text-[11px] text-gray-400">Verifikasi langsung hasil pengerjaan sosmed oleh HR Staff</p>
+                    </div>
+                </div>
+                <button type="button" onclick="closeVerifyModal()" class="text-gray-400 hover:text-gray-600 transition">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+            </div>
+
+            <form id="form-verify" method="POST" action="" class="p-6 pt-3 space-y-4">
+                @csrf @method('PATCH')
+                <input type="hidden" name="action" :value="action">
+
+                <div class="bg-gray-50 rounded-xl p-3.5 border border-gray-200/80">
+                    <p class="text-[11px] font-semibold text-gray-400 uppercase tracking-wider mb-1">Tugas yang Ditinjau</p>
+                    <p id="verify-task-title" class="text-sm font-bold text-gray-800 break-words"></p>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-gray-600 mb-2">Keputusan Administrator</label>
+                    <div class="grid grid-cols-2 gap-2 p-1 bg-gray-100 rounded-xl">
+                        <button type="button"
+                            @click="action = 'verify'"
+                            :class="action === 'verify' ? 'bg-white text-purple-700 shadow-sm font-bold' : 'text-gray-500 font-medium hover:text-gray-700'"
+                            class="py-2 text-xs rounded-lg transition-all flex items-center justify-center gap-1.5">
+                            <svg class="w-3.5 h-3.5 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                            </svg>
+                            Setujui
+                        </button>
+                        <button type="button"
+                            @click="action = 'reject'"
+                            :class="action === 'reject' ? 'bg-white text-rose-700 shadow-sm font-bold' : 'text-gray-500 font-medium hover:text-gray-700'"
+                            class="py-2 text-xs rounded-lg transition-all flex items-center justify-center gap-1.5">
+                            <svg class="w-3.5 h-3.5 text-rose-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                            </svg>
+                            Tolak (Revisi)
+                        </button>
+                    </div>
+                </div>
+
+                <div x-show="action === 'reject'" x-transition>
+                    <label class="block text-xs font-semibold text-gray-700 mb-1">
+                        Catatan Revisi <span class="text-rose-500">*</span>
+                    </label>
+                    <textarea name="rejection_note" rows="3"
+                        placeholder="Tuliskan instruksi perbaikan untuk HR Staff..."
+                        class="w-full text-xs sm:text-sm border border-rose-200 rounded-xl p-3 focus:outline-none focus:ring-2 focus:ring-rose-400 bg-rose-50/20"></textarea>
+                </div>
+
+                <div class="flex items-center gap-2 pt-2">
+                    <button type="button" onclick="closeVerifyModal()"
+                        class="flex-1 py-2 text-xs font-semibold text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-xl transition">
+                        Batal
+                    </button>
+                    <button type="submit"
+                        :class="action === 'verify' ? 'bg-purple-600 hover:bg-purple-700 text-white' : 'bg-rose-600 hover:bg-rose-700 text-white'"
+                        class="flex-1 py-2 text-xs font-semibold rounded-xl transition shadow-sm">
+                        <span x-text="action === 'verify' ? 'Konfirmasi Setujui' : 'Kirim Penolakan'"></span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
 @endsection
 
 @push('scripts')
@@ -1263,7 +1446,37 @@
                 }
 
                 if (hint) {
-                    hint.innerHTML = '<span class="text-red-700 font-semibold"> Akun dikelola langsung oleh PM. Asisten tidak diperlukan.</span>';
+                    hint.innerHTML = '<span class="text-indigo-700 font-semibold">🔒 PM Mandiri:</span> Akun dikelola langsung oleh PM. Hasil pengerjaan diverifikasi oleh HR Staff.';
+                }
+            } else if (role === 'hr_staff') {
+                // Ketika HR Staff langsung, tugas diverifikasi langsung oleh Admin
+                pmSelect.value = '';
+                pmSelect.disabled = true;
+                pmSelect.classList.add('bg-gray-100', 'text-gray-400', 'cursor-not-allowed');
+
+                if (astSelect) {
+                    astSelect.value = '';
+                    astSelect.disabled = true;
+                    astSelect.classList.add('bg-gray-100', 'text-gray-400', 'cursor-not-allowed');
+                }
+
+                if (hint) {
+                    hint.innerHTML = '<span class="text-purple-700 font-semibold">🔒 HR Staff:</span> Akun dikelola langsung oleh HR Staff. Tugas diverifikasi langsung oleh Admin.';
+                }
+            } else if (role === 'hr_assistant') {
+                // Ketika HR Assistant langsung, tugas diverifikasi oleh HR Staff
+                pmSelect.value = '';
+                pmSelect.disabled = true;
+                pmSelect.classList.add('bg-gray-100', 'text-gray-400', 'cursor-not-allowed');
+
+                if (astSelect) {
+                    astSelect.value = '';
+                    astSelect.disabled = true;
+                    astSelect.classList.add('bg-gray-100', 'text-gray-400', 'cursor-not-allowed');
+                }
+
+                if (hint) {
+                    hint.innerHTML = '<span class="text-blue-700 font-semibold">🔒 HR Assistant:</span> Akun dikelola langsung oleh Asisten. Tugas diverifikasi oleh HR Staff.';
                 }
             } else {
                 // Ketika Staff Sosmed, enable PM dan Asisten dropdown
@@ -1360,6 +1573,19 @@
                 });
             }
             document.getElementById('modal-links').classList.remove('hidden');
+        }
+
+        function openVerifyModal(taskId, title) {
+            document.getElementById('verify-task-title').textContent = title;
+            document.getElementById('form-verify').action = `/admin/sosmed/tasks/${taskId}/verify`;
+            const ta = document.querySelector('#form-verify textarea[name="rejection_note"]');
+            if (ta) ta.value = '';
+            window.dispatchEvent(new CustomEvent('open-verify'));
+            document.getElementById('modal-verify').classList.remove('hidden');
+        }
+
+        function closeVerifyModal() {
+            document.getElementById('modal-verify').classList.add('hidden');
         }
     </script>
 @endpush

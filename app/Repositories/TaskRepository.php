@@ -758,12 +758,22 @@ class TaskRepository
      *
      * @return \Illuminate\Support\Collection<int, array{user: \App\Models\User, total: int, completed: int, pending: int, not_done: int, pct: int}>
      */
-    public function getProductivityByRange(string $dateFrom, string $dateTo): \Illuminate\Support\Collection
+    public function getProductivityByRange(string $dateFrom, string $dateTo, ?string $role = null, ?array $allowedRoles = null): \Illuminate\Support\Collection
     {
-        $users = \App\Models\User::query()
-            ->where('role', '!=', 'admin')
-            ->where('is_active', 1)
-            ->orderBy('role')
+        $query = \App\Models\User::query()
+            ->where('is_active', 1);
+
+        if ($allowedRoles !== null) {
+            $query->whereIn('role', $allowedRoles);
+        } else {
+            $query->where('role', '!=', 'admin');
+        }
+
+        if (!empty($role) && $role !== 'all') {
+            $query->where('role', $role);
+        }
+
+        $users = $query->orderBy('role')
             ->orderBy('name')
             ->get();
 

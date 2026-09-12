@@ -75,7 +75,7 @@
             @endphp
             <a href="{{ route('admin.tasks.by-role', $r->name) }}"
                 class="flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-all
-                                                                      {{ $isCurrentRole ? 'text-white bg-white/10 font-medium' : 'text-slate-400 hover:text-white hover:bg-white/5' }}">
+                                                                                      {{ $isCurrentRole ? 'text-white bg-white/10 font-medium' : 'text-slate-400 hover:text-white hover:bg-white/5' }}">
                 @if($r->base_type === 'staff')
                     <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -98,17 +98,6 @@
     </div>
 </div>
 
-{{-- Sosmed Management --}}
-<a href="{{ route('admin.sosmed.index') }}"
-    class="flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-all
-          {{ request()->routeIs('admin.sosmed.*') ? 'bg-white/10 text-white' : 'text-slate-400 hover:bg-white/5 hover:text-white' }}">
-    <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-            d="M8 12H8.01M12 12H12.01M16 12H16.01M21.0039 12C21.0039 16.9706 16.9745 21 12.0039 21C9.9675 21 3.00463 21 3.00463 21C3.00463 21 4.56382 17.2561 3.93982 16.0008C3.34076 14.7956 3.00391 13.4372 3.00391 12C3.00391 7.02944 7.03334 3 12.0039 3C16.9745 3 21.0039 7.02944 21.0039 12Z" />
-    </svg>
-    Sosmed
-</a>
-
 {{-- Default Task --}}
 <a href="{{ route('admin.default-tasks.index') }}"
     class="flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-all
@@ -130,6 +119,37 @@
     </svg>
     Kirim Notifikasi
 </a>
+
+{{-- Divider --}}
+<div class="pt-4 pb-2">
+    <p class="px-4 text-[11px] font-semibold text-slate-500 uppercase tracking-widest">Sosial Media</p>
+</div>
+
+{{-- Sosmed Management --}}
+<a href="{{ route('admin.sosmed.index') }}"
+    class="flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-all
+          {{ request()->routeIs('admin.sosmed.*') ? 'bg-white/10 text-white' : 'text-slate-400 hover:bg-white/5 hover:text-white' }}">
+    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-person-add"
+        viewBox="0 0 16 16">
+        <path
+            d="M12.5 16a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7m.5-5v1h1a.5.5 0 0 1 0 1h-1v1a.5.5 0 0 1-1 0v-1h-1a.5.5 0 0 1 0-1h1v-1a.5.5 0 0 1 1 0m-2-6a3 3 0 1 1-6 0 3 3 0 0 1 6 0M8 7a2 2 0 1 0 0-4 2 2 0 0 0 0 4" />
+        <path
+            d="M8.256 14a4.5 4.5 0 0 1-.229-1.004H3c.001-.246.154-.986.832-1.664C4.484 10.68 5.711 10 8 10q.39 0 .74.025c.226-.341.496-.65.804-.918Q8.844 9.002 8 9c-5 0-6 3-6 4s1 1 1 1z" />
+    </svg>
+    Manajemen Akun
+</a>
+
+{{-- Sosmed Management --}}
+<a href="{{ route('admin.sosmed.index') }}"
+    class="flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-all
+          {{ request()->routeIs('admin.sosmed.*') ? 'bg-white/10 text-white' : 'text-slate-400 hover:bg-white/5 hover:text-white' }}">
+    <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M8 12H8.01M12 12H12.01M16 12H16.01M21.0039 12C21.0039 16.9706 16.9745 21 12.0039 21C9.9675 21 3.00463 21 3.00463 21C3.00463 21 4.56382 17.2561 3.93982 16.0008C3.34076 14.7956 3.00391 13.4372 3.00391 12C3.00391 7.02944 7.03334 3 12.0039 3C16.9745 3 21.0039 7.02944 21.0039 12Z" />
+    </svg>
+    Sosmed
+</a>
+
 
 {{-- Divider --}}
 <div class="pt-4 pb-2">

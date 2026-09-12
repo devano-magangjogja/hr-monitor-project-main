@@ -24,9 +24,10 @@ class SosmedController extends Controller
             ->orderBy('platform')
             ->get();
 
-        // Tasks needing final HR approval
+        // Tasks needing final HR approval (tugas yang diverifikasi HR Staff, bukan tugas staff sendiri)
         $needHrApproval = SosmedTask::with(['account', 'assignedUser', 'assignedBy', 'verifiedBy'])
             ->where('status', 'verified_by_pm')
+            ->where('assigned_to', '!=', Auth::id())
             ->orderBy('verified_at', 'desc')
             ->get();
 
@@ -34,6 +35,19 @@ class SosmedController extends Controller
         $allTasks = SosmedTask::with(['account', 'assignedUser', 'assignedBy', 'verifiedBy', 'hrVerifiedBy'])
             ->orderBy('task_date', 'desc')
             ->get();
+
+        // Akun Mandiri yang Dikelola oleh Staff yang sedang login
+        $myAccounts = SosmedAccount::with(['creator'])
+            ->where('staff_id', Auth::id())
+            ->orderBy('platform')
+            ->get();
+        $myAccountIds = $myAccounts->pluck('id');
+
+        $todayTasks = SosmedTask::with(['verifiedBy', 'hrVerifiedBy'])
+            ->whereIn('sosmed_account_id', $myAccountIds)
+            ->whereDate('task_date', now()->toDateString())
+            ->get()
+            ->keyBy('sosmed_account_id');
 
         // Approval logs
         $approvalLogs = SosmedApprovalLog::with(['task.account', 'user'])
@@ -57,24 +71,32 @@ class SosmedController extends Controller
             ->orderBy('name')
             ->get();
 
-        // Eksekutor Akun: Staff Sosmed, Digital Marketing, atau PM (Mandiri)
-        $executors = User::whereIn('role', ['sosmed', 'pm'])
+        // Eksekutor Akun: Staff Sosmed, Digital Marketing, PM, dan HR Assistant
+        // HR Staff tidak termasuk — Staff tidak bisa mendelegasikan ke sesama Staff
+        $executors = User::whereIn('role', ['sosmed', 'pm', 'hr_assistant', 'digital_marketing'])
             ->where('is_active', true)
             ->orderBy('name')
             ->get();
         $staffs = $executors;
 
         $stats = [
-            'total_accounts' => $accounts->count(),
-            'unassigned_pm' => $accounts->whereNull('pm_id')->count(),
-            'need_hr_verify' => $needHrApproval->count(),
-            'total_tasks' => $allTasks->count(),
-            'completed' => $allTasks->where('status', 'approved_hr')->count(),
+            'total_accounts'   => $accounts->count(),
+            'my_accounts'      => $myAccounts->count(),
+            'unassigned_pm'    => $accounts->whereNull('pm_id')->count(),
+            'need_hr_verify'   => $needHrApproval->count(),
+            'total_tasks'      => $allTasks->count(),
+            'completed'        => $allTasks->where('status', 'approved_hr')->count(),
+            'my_pending_today' => $myAccounts->filter(function ($acc) use ($todayTasks) {
+                if (!isset($todayTasks[$acc->id])) return true;
+                return in_array($todayTasks[$acc->id]->status, ['pending', 'rejected']);
+            })->count(),
         ];
 
         return view('staff.sosmed.index', compact(
             'tab',
             'accounts',
+            'myAccounts',
+            'todayTasks',
             'needHrApproval',
             'allTasks',
             'approvalLogs',
@@ -84,6 +106,60 @@ class SosmedController extends Controller
             'executors',
             'stats'
         ));
+    }
+
+    /**
+     * Staff submit bukti pengerjaan konten sosmed mandiri.
+     * Status menjadi 'done_by_staff', dan diverifikasi langsung oleh Admin.
+     */
+    public function submitAccountTask(Request $request, SosmedAccount $account)
+    {
+        if ($account->staff_id !== Auth::id()) {
+            abort(403, 'Akses ditolak. Anda bukan eksekutor akun ini.');
+        }
+
+        $validated = $request->validate([
+            'links'       => ['required', 'array', 'min:1'],
+            'links.*'     => ['required', 'url', 'max:500'],
+            'description' => ['nullable', 'string', 'max:1000'],
+        ]);
+
+        $links = array_values(array_filter($validated['links'], fn($l) => !empty(trim($l))));
+        if (empty($links)) {
+            return back()->withErrors(['links' => 'Minimal satu link bukti harus diisi.'])->withInput();
+        }
+
+        $task = SosmedTask::firstOrNew([
+            'sosmed_account_id' => $account->id,
+            'task_date'         => now()->toDateString(),
+        ]);
+
+        $task->fill([
+            'assigned_to' => Auth::id(),
+            'assigned_by' => Auth::id(),
+            'type'        => 'daily',
+            'title'       => 'Laporan Konten - ' . $account->name,
+            'link_upload' => $links,
+            'description' => $validated['description'] ?? null,
+            'status'      => 'done_by_staff', // Menunggu verifikasi langsung oleh Admin
+            'verified_by' => null,
+            'verified_at' => null,
+        ]);
+        $task->save();
+
+        SosmedApprovalLog::create([
+            'sosmed_task_id' => $task->id,
+            'user_id'        => Auth::id(),
+            'user_name'      => Auth::user()->name,
+            'role_name'      => 'HR Staff',
+            'action'         => 'submitted',
+            'notes'          => 'HR Staff submit bukti laporan sosmed (' . count($links) . ' link). Menunggu verifikasi langsung oleh Admin.',
+        ]);
+
+        $this->logActivity('sosmed.submitted', 'Sosmed', "Submit bukti laporan sosmed untuk akun '{$account->name}'", $task);
+
+        return redirect()->route('staff.sosmed.index', ['tab' => 'my_accounts'])
+            ->with('success', 'Bukti konten untuk ' . $account->name . ' berhasil dikirim. Menunggu verifikasi langsung oleh Admin.');
     }
 
     /**

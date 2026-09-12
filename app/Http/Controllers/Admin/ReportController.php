@@ -32,23 +32,27 @@ class ReportController extends Controller
 
     public function productivity(Request $request)
     {
-        $today    = Carbon::today()->toDateString();
-        $dateFrom = $request->query('date_from', $today);
-        $dateTo   = $request->query('date_to',   $today);
+        $today        = Carbon::today()->toDateString();
+        $dateFrom     = $request->query('date_from', $today);
+        $dateTo       = $request->query('date_to',   $today);
+        $selectedRole = $request->query('role', 'all');
 
         // Normalise: pastikan dateFrom <= dateTo
         if ($dateFrom > $dateTo) {
             [$dateFrom, $dateTo] = [$dateTo, $dateFrom];
         }
 
-        $report = $this->taskService->getProductivityByRange($dateFrom, $dateTo);
+        $report = $this->taskService->getProductivityByRange($dateFrom, $dateTo, $selectedRole);
 
-        return view('admin.reports.productivity', compact('report', 'dateFrom', 'dateTo', 'today'));
+        // Daftar role selain admin untuk dropdown filter
+        $availableRoles = \App\Models\Role::where('name', '!=', 'admin')->orderBy('label')->get();
+
+        return view('admin.reports.productivity', compact('report', 'dateFrom', 'dateTo', 'today', 'selectedRole', 'availableRoles'));
     }
 
     public function productivityDetail(Request $request, \App\Models\User $user)
     {
-        abort_if(! in_array($user->role, ['hr_staff', 'hr_assistant']), 403);
+        abort_if($user->role === 'admin', 403);
 
         $today    = Carbon::today()->toDateString();
         $dateFrom = $request->query('date_from', $today);

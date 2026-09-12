@@ -1,18 +1,18 @@
 @extends('layouts.app')
 
-@section('title', 'Laporan Produktivitas')
-@section('page-title', 'Laporan Produktivitas')
-@section('page-subtitle', 'Rekap penyelesaian tugas per pengguna berdasarkan periode')
+@section('title', 'Laporan Produktivitas Tim')
+@section('page-title', 'Laporan Produktivitas Tim')
+@section('page-subtitle', 'Rekap penyelesaian tugas per pengguna untuk seluruh role di bawah Staff')
 
 @section('sidebar')
-    @include('components.sidebar-admin')
+    @include('components.sidebar-staff')
 @endsection
 
 @section('content')
 
-    {{-- Filter Rentang Tanggal --}}
+    {{-- Filter Rentang Tanggal & Role --}}
     <div class="bg-white rounded-xl border border-gray-200 p-4 sm:p-5 mb-6 shadow-sm">
-        <form method="GET" action="{{ route('admin.reports.productivity') }}"
+        <form method="GET" action="{{ route('staff.productivity') }}"
             class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-3 items-end">
 
             {{-- Dari Tanggal --}}
@@ -37,7 +37,7 @@
                 </div>
             </div>
 
-            {{-- Filter Role --}}
+            {{-- Filter Role (Role di Bawah Staff) --}}
             <div class="lg:col-span-3">
                 <label class="block text-[11px] font-semibold text-gray-500 uppercase tracking-wider mb-1">
                     Filter Role
@@ -45,8 +45,8 @@
                 <div class="relative">
                     <select name="role"
                         class="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-xs sm:text-sm font-medium text-gray-800 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:bg-white transition">
-                        <option value="all" {{ ($selectedRole ?? 'all') === 'all' ? 'selected' : '' }}>Semua Role</option>
-                        @foreach($availableRoles as $roleOption)
+                        <option value="all" {{ ($selectedRole ?? 'all') === 'all' ? 'selected' : '' }}>Semua Role (Bawahan)</option>
+                        @foreach($belowStaffRoles as $roleOption)
                             <option value="{{ $roleOption->name }}" {{ ($selectedRole ?? 'all') === $roleOption->name ? 'selected' : '' }}>
                                 {{ $roleOption->label }}
                             </option>
@@ -67,7 +67,7 @@
                 </button>
 
                 @if($dateFrom !== $today || $dateTo !== $today || ($selectedRole ?? 'all') !== 'all')
-                    <a href="{{ route('admin.reports.productivity') }}"
+                    <a href="{{ route('staff.productivity') }}"
                         class="px-3.5 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs sm:text-sm font-semibold rounded-lg transition text-center flex-shrink-0"
                         title="Reset Filter">
                         Reset
@@ -91,7 +91,7 @@
                 </strong>
                 @if(($selectedRole ?? 'all') !== 'all')
                     <span class="ml-2 px-2 py-0.5 rounded-full text-[11px] font-medium bg-primary-50 text-primary-700 border border-primary-200">
-                        Role: {{ $availableRoles->firstWhere('name', $selectedRole)?->label ?? $selectedRole }}
+                        Role: {{ $belowStaffRoles->firstWhere('name', $selectedRole)?->label ?? $selectedRole }}
                     </span>
                 @endif
             </span>
@@ -101,7 +101,7 @@
     {{-- Tabel Ringkasan Produktivitas --}}
     <div class="bg-white rounded-xl border border-gray-200 overflow-hidden mb-6">
         <div class="px-4 sm:px-6 py-4 border-b border-gray-200 flex items-center justify-between">
-            <h2 class="text-sm font-semibold text-gray-700">Ringkasan per Pengguna</h2>
+            <h2 class="text-sm font-semibold text-gray-700">Ringkasan per Anggota Tim</h2>
             <span class="text-xs text-gray-400">{{ $report->count() }} pengguna</span>
         </div>
         <div class="overflow-x-auto">
@@ -173,7 +173,7 @@
                             </td>
                             {{-- Aksi --}}
                             <td class="px-3 sm:px-6 py-3 sm:py-3.5 text-right">
-                                <a href="{{ route('admin.reports.productivity.detail', $item['user']->id) }}?date_from={{ $dateFrom }}&date_to={{ $dateTo }}&role={{ $selectedRole }}"
+                                <a href="{{ route('staff.productivity.detail', $item['user']->id) }}?date_from={{ $dateFrom }}&date_to={{ $dateTo }}&role={{ $selectedRole }}"
                                     class="p-1.5 inline-flex text-gray-400 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition"
                                     title="Lihat Detail Tugas">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -189,7 +189,7 @@
                     @empty
                         <tr>
                             <td colspan="8" class="px-3 sm:px-6 py-8 sm:py-12 text-center text-gray-400 text-xs sm:text-sm">
-                                Tidak ada data pengguna aktif.
+                                Tidak ada data pengguna pada role ini.
                             </td>
                         </tr>
                     @endforelse

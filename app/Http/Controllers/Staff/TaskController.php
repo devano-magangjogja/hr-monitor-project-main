@@ -290,4 +290,61 @@ class TaskController extends Controller
             'scoreWeek', 'scoreMonth'
         ));
     }
+
+    public function productivity(Request $request)
+    {
+        $today        = \Carbon\Carbon::today()->toDateString();
+        $dateFrom     = $request->query('date_from', $today);
+        $dateTo       = $request->query('date_to',   $today);
+        $selectedRole = $request->query('role', 'all');
+
+        if ($dateFrom > $dateTo) {
+            [$dateFrom, $dateTo] = [$dateTo, $dateFrom];
+        }
+
+        // Hanya role di bawah staff (tidak bisa melihat admin dan tidak bisa melihat sesama staff)
+        $belowStaffRoles = \App\Models\Role::whereNotIn('name', ['admin', 'hr_staff'])
+            ->orderBy('label')
+            ->get();
+        $allowedRoleNames = $belowStaffRoles->pluck('name')->toArray();
+
+        $report = $this->taskService->getProductivityByRange($dateFrom, $dateTo, $selectedRole, $allowedRoleNames);
+
+        return view('staff.reports.productivity', compact(
+            'report', 'dateFrom', 'dateTo', 'today', 'selectedRole', 'belowStaffRoles'
+        ));
+    }
+
+    public function productivityDetail(Request $request, \App\Models\User $user)
+    {
+        // Hanya dapat melihat detail pengguna dari role di bawah staff
+        abort_if(in_array($user->role, ['admin', 'hr_staff']), 403);
+
+        $today    = \Carbon\Carbon::today()->toDateString();
+        $dateFrom = $request->query('date_from', $today);
+        $dateTo   = $request->query('date_to',   $today);
+
+        if ($dateFrom > $dateTo) {
+            [$dateFrom, $dateTo] = [$dateTo, $dateFrom];
+        }
+
+        $tasks = $this->taskService->getProductivityDetailForUser($user->id, $dateFrom, $dateTo);
+
+        $total = $tasks->count();
+        $completed = $notDone = $pending = 0;
+        foreach ($tasks as $task) {
+            $s = $task->assignments->first()?->is_completed ?? 'pending';
+            if ($s === 'completed')    $completed++;
+            elseif ($s === 'not_done') $notDone++;
+            else                       $pending++;
+        }
+        $pct = $total > 0 ? round(($completed / $total) * 100) : 0;
+
+        $tasksByDate = $tasks->groupBy(fn($t) => $t->task_date->toDateString());
+
+        return view('staff.reports.productivity-detail', compact(
+            'user', 'tasks', 'tasksByDate', 'dateFrom', 'dateTo',
+            'total', 'completed', 'notDone', 'pending', 'pct'
+        ));
+    }
 }

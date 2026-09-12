@@ -86,6 +86,20 @@
                 </svg>
                 Laporan Tugas & Monitoring
             </a>
+            <a href="{{ route('staff.sosmed.index', ['tab' => 'my_accounts']) }}"
+                class="flex items-center gap-2 px-5 py-3.5 text-sm font-medium whitespace-nowrap border-b-2 transition
+                                      {{ $tab === 'my_accounts' ? 'border-primary-600 text-primary-600 bg-primary-50/50' : 'border-transparent text-gray-500 hover:text-gray-700' }}">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                </svg>
+                Tugas Sosmed Saya
+                @if($stats['my_pending_today'] > 0)
+                    <span class="ml-1 px-1.5 py-0.5 text-[10px] font-bold rounded-full bg-amber-500 text-white">
+                        {{ $stats['my_pending_today'] }}
+                    </span>
+                @endif
+            </a>
         </div>
 
         {{-- ── TAB 1: DISTRIBUSI AKUN ─────────────────────────────────── --}}
@@ -232,7 +246,7 @@
                                         </td>
                                         <td class="px-4 py-3.5 text-center">
                                             <button
-                                                onclick="openAssignModal({{ $acc->id }}, '{{ addslashes($acc->name) }}', {{ $acc->pm_id ?? 'null' }}, {{ $acc->staff_id ?? 'null' }}, {{ $acc->assistant_id ?? 'null' }})"
+                                                onclick="openAssignModal({{ $acc->id }}, '{{ addslashes($acc->name) }}', {{ $acc->pm_id ?? 'null' }}, {{ $acc->staff_id ?? 'null' }}, {{ $acc->assistant_id ?? 'null' }}, '{{ $acc->staffUser?->role ?? '' }}')"
                                                 class="px-3 py-1 bg-primary-50 hover:bg-primary-100 text-primary-700 text-xs font-semibold rounded-lg transition whitespace-nowrap">
                                                 Atur PJ
                                             </button>
@@ -260,7 +274,7 @@
                                         </span>
                                     </div>
                                     <button
-                                        onclick="openAssignModal({{ $acc->id }}, '{{ addslashes($acc->name) }}', {{ $acc->pm_id ?? 'null' }}, {{ $acc->staff_id ?? 'null' }})"
+                                        onclick="openAssignModal({{ $acc->id }}, '{{ addslashes($acc->name) }}', {{ $acc->pm_id ?? 'null' }}, {{ $acc->staff_id ?? 'null' }}, {{ $acc->assistant_id ?? 'null' }}, '{{ $acc->staffUser?->role ?? '' }}')"
                                         class="flex-shrink-0 px-3 py-1.5 bg-primary-50 hover:bg-primary-100 text-primary-700 text-xs font-semibold rounded-lg transition">
                                         Atur PJ
                                     </button>
@@ -514,6 +528,176 @@
         </div>
         </div>
     @endif
+
+    {{-- ── TAB 4: TUGAS SOSMED SAYA ─────────────────────────────── --}}
+    @if($tab === 'my_accounts')
+        <div class="p-4 sm:p-5">
+            <div class="mb-4 flex items-center justify-between">
+                <div>
+                    <h3 class="text-sm font-semibold text-gray-800">Akun Sosmed yang Saya Kelola</h3>
+                    <p class="text-xs text-gray-500 mt-0.5">
+                        Upload bukti pengerjaan konten harian untuk akun yang ditetapkan Admin kepada Anda.
+                    </p>
+                </div>
+                <div class="text-xs bg-indigo-50 border border-indigo-200 text-indigo-700 px-3 py-1.5 rounded-lg font-medium shrink-0">
+                    Hari Ini: <span class="font-bold">{{ now()->translatedFormat('d M Y') }}</span>
+                </div>
+            </div>
+
+            {{-- Desktop Table --}}
+            <div class="hidden md:block overflow-x-auto rounded-lg border border-gray-100">
+                <table class="w-full table-fixed text-sm">
+                    <colgroup>
+                        <col class="w-[28%]">
+                        <col class="w-28">
+                        <col class="w-36">
+                        <col class="w-40">
+                        <col class="w-36">
+                    </colgroup>
+                    <thead>
+                        <tr class="bg-gray-50 border-b border-gray-200 text-xs font-semibold text-gray-500 tracking-wide">
+                            <th class="px-4 py-3 text-left">Nama Akun</th>
+                            <th class="px-4 py-3 text-left">Platform</th>
+                            <th class="px-4 py-3 text-left">Bukti Konten</th>
+                            <th class="px-4 py-3 text-left">Status</th>
+                            <th class="px-4 py-3 text-center">Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-100">
+                        @forelse($myAccounts as $acc)
+                            @php
+                                $myTask = $todayTasks[$acc->id] ?? null;
+                                $myStatus = $myTask?->status ?? 'pending';
+                                $isSubmitted = in_array($myStatus, ['done_by_staff', 'verified_by_pm', 'approved_hr']);
+                                $isRejected  = $myStatus === 'rejected';
+                            @endphp
+                            <tr class="hover:bg-gray-50/80 transition align-middle">
+                                <td class="px-4 py-3.5">
+                                    <p class="font-semibold text-gray-800 truncate">{{ $acc->name }}</p>
+                                    @if($acc->link)
+                                        <a href="{{ $acc->link }}" target="_blank"
+                                           class="inline-flex items-center gap-1 text-xs text-primary-600 hover:underline mt-0.5">
+                                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+                                            </svg>
+                                            Buka Profil
+                                        </a>
+                                    @endif
+                                    @if($isRejected && $myTask?->rejection_note)
+                                        <p class="text-xs text-rose-600 mt-1 bg-rose-50 px-2 py-1 rounded border border-rose-200 leading-snug">
+                                            ↩ "{{ $myTask->rejection_note }}"
+                                        </p>
+                                    @endif
+                                </td>
+                                <td class="px-4 py-3.5">
+                                    <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-medium border {{ $acc->platform_color }}">
+                                        {{ $acc->platform_icon }} {{ $acc->platform }}
+                                    </span>
+                                </td>
+                                <td class="px-4 py-3.5 text-xs">
+                                    @if($myTask && $myTask->hasLinks())
+                                        <button type="button"
+                                            onclick="openLinksPopup({{ json_encode($myTask->link_upload) }}, '{{ addslashes($acc->name) }}')"
+                                            class="inline-flex items-center gap-1 text-xs text-primary-600 hover:underline font-medium">
+                                            <svg class="w-3 h-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/>
+                                            </svg>
+                                            {{ $myTask->link_count }} link bukti
+                                        </button>
+                                    @else
+                                        <span class="text-gray-300">—</span>
+                                    @endif
+                                </td>
+                                <td class="px-4 py-3.5">
+                                    @if($myTask)
+                                        <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium {{ $myTask->status_badge_class }}">
+                                            {{ $myTask->status_label }}
+                                        </span>
+                                    @else
+                                        <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-500">Belum Dikerjakan</span>
+                                    @endif
+                                </td>
+                                <td class="px-4 py-3.5 text-center">
+                                    @if(!$isSubmitted)
+                                        <button type="button"
+                                            onclick="openMySubmitModal({{ $acc->id }}, '{{ addslashes($acc->name) }}', '{{ addslashes($myTask?->description ?? '') }}')"
+                                            class="px-3 py-1 bg-primary-600 hover:bg-primary-700 text-white text-xs font-semibold rounded-lg transition shadow-sm">
+                                            {{ $isRejected ? 'Revisi' : 'Submit Bukti' }}
+                                        </button>
+                                    @else
+                                        <span class="text-xs text-gray-400 italic">Terkunci</span>
+                                    @endif
+                                </td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="5" class="px-4 py-10 text-center text-sm text-gray-400">
+                                    Admin belum menetapkan akun sosmed kepada Anda.
+                                </td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+
+            {{-- Mobile Cards --}}
+            <div class="md:hidden space-y-3">
+                @forelse($myAccounts as $acc)
+                    @php
+                        $myTask = $todayTasks[$acc->id] ?? null;
+                        $myStatus = $myTask?->status ?? 'pending';
+                        $isSubmitted = in_array($myStatus, ['done_by_staff', 'verified_by_pm', 'approved_hr']);
+                        $isRejected  = $myStatus === 'rejected';
+                    @endphp
+                    <div class="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
+                        <div class="flex items-start justify-between gap-3 mb-3">
+                            <div class="min-w-0 flex-1">
+                                <p class="font-semibold text-gray-800 text-sm truncate">{{ $acc->name }}</p>
+                                <span class="inline-flex items-center gap-1 mt-1 px-2 py-0.5 rounded-md text-[10px] font-medium border whitespace-nowrap {{ $acc->platform_color }}">
+                                    {{ $acc->platform_icon }} {{ $acc->platform }}
+                                </span>
+                                @if($isRejected && $myTask?->rejection_note)
+                                    <p class="text-xs text-rose-600 mt-1 bg-rose-50 px-2 py-1 rounded border border-rose-200 leading-snug">
+                                        ↩ "{{ $myTask->rejection_note }}"
+                                    </p>
+                                @endif
+                            </div>
+                            <div class="flex-shrink-0">
+                                @if($isSubmitted)
+                                    <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium {{ $myTask->status_badge_class }}">
+                                        {{ $myTask->status_label }}
+                                    </span>
+                                @else
+                                    <button type="button"
+                                        onclick="openMySubmitModal({{ $acc->id }}, '{{ addslashes($acc->name) }}', '{{ addslashes($myTask?->description ?? '') }}')"
+                                        class="px-3 py-1.5 bg-primary-600 hover:bg-primary-700 text-white text-xs font-semibold rounded-lg transition">
+                                        {{ $isRejected ? 'Revisi' : 'Submit Bukti' }}
+                                    </button>
+                                @endif
+                            </div>
+                        </div>
+                        @if($myTask && $myTask->hasLinks())
+                            <div class="border-t border-gray-100 pt-2 mt-1">
+                                <button type="button"
+                                    onclick="openLinksPopup({{ json_encode($myTask->link_upload) }}, '{{ addslashes($acc->name) }}')"
+                                    class="inline-flex items-center gap-1 text-xs text-primary-600 hover:underline font-medium">
+                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/>
+                                    </svg>
+                                    {{ $myTask->link_count }} link bukti
+                                </button>
+                            </div>
+                        @endif
+                    </div>
+                @empty
+                    <div class="py-8 text-center text-sm text-gray-400">Admin belum menetapkan akun sosmed kepada Anda.</div>
+                @endforelse
+            </div>
+        </div>
+    @endif
     </div>
 
     {{-- ── MODAL DELEGASI AKUN (HR STAFF) ─────────────────────────── --}}
@@ -558,7 +742,7 @@
                             </option>
                         @endforeach
                     </select>
-                    <p class="text-[11px] text-gray-400 mt-1">User yang bertugas membuat & mengunggah konten.</p>
+                    <p id="assign-staff-note" class="text-[11px] text-gray-400 mt-1">User yang bertugas membuat & mengunggah konten.</p>
                 </div>
                 <div>
                     <label class="block text-xs font-semibold text-gray-700 mb-1">2. Supervisor (Diawasi Oleh PM)</label>
@@ -580,7 +764,7 @@
                             <option value="{{ $ast->id }}">{{ $ast->name }} (Asisten)</option>
                         @endforeach
                     </select>
-                    <p class="text-[11px] text-gray-400 mt-1">Jika dipilih, asisten ini berwenang melihat tugas dan memverifikasi Level-1 tugas akun ini.</p>
+                    <p id="assign-ast-note" class="text-[11px] text-gray-400 mt-1">Jika dipilih, asisten ini berwenang melihat tugas dan memverifikasi Level-1 tugas akun ini.</p>
                 </div>
                 <div class="flex gap-3 pt-2">
                     <button type="button" onclick="document.getElementById('modal-assign').classList.add('hidden')"
@@ -719,6 +903,71 @@
                 </button>
             </div>
             <div id="links-popup-body" class="p-6 space-y-2 max-h-80 overflow-y-auto"></div>
+        </div>
+    </div>
+
+    {{-- ── MODAL: SUBMIT BUKTI TUGAS SAYA (STAFF) ─────────────────── --}}
+    <div id="modal-my-submit" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" onclick="closeMySubmitModal()"></div>
+        <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-lg z-10">
+            <div class="flex items-center justify-between px-6 py-4 border-b border-gray-200">
+                <h3 class="text-base font-bold text-gray-800">Submit Bukti Konten</h3>
+                <button onclick="closeMySubmitModal()" class="text-gray-400 hover:text-gray-600">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+            <form id="form-my-submit" method="POST" action="" class="p-6 pt-4 space-y-4">
+                @csrf
+                <div class="bg-gray-50 p-3 rounded-lg border border-gray-200">
+                    <p class="text-xs text-gray-500 mb-0.5">Nama Akun Sosmed</p>
+                    <p id="my-submit-account-name" class="text-sm font-semibold text-gray-800"></p>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-gray-600 mb-1.5">
+                        Link / URL Hasil Konten <span class="text-red-500">*</span>
+                        <span class="font-normal text-gray-400 ml-1">(bisa lebih dari satu)</span>
+                    </label>
+                    <div id="my-links-container" class="space-y-2 max-h-[200px] overflow-y-auto pr-1">
+                        <div class="flex gap-2 link-row">
+                            <input type="url" name="links[]" required
+                                placeholder="https://instagram.com/p/xxx"
+                                class="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 focus:outline-none">
+                            <button type="button" onclick="removeMyLinkRow(this)"
+                                class="text-gray-300 hover:text-rose-500 px-1 transition hidden remove-btn">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                    <button type="button" onclick="addMyLinkRow()"
+                        class="mt-2 inline-flex items-center gap-1 text-xs text-primary-600 hover:text-primary-700 font-medium">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                        </svg>
+                        Tambah Link Lain
+                    </button>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-gray-600 mb-1.5">Catatan Tambahan (Opsional)</label>
+                    <textarea name="description" id="my-submit-description" rows="2"
+                        placeholder="Brief konten / keterangan..."
+                        class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 focus:outline-none"></textarea>
+                </div>
+
+                <div class="flex gap-3 pt-1">
+                    <button type="button" onclick="closeMySubmitModal()"
+                        class="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-sm text-gray-700">Batal</button>
+                    <button type="submit"
+                        class="flex-1 px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-lg text-sm font-semibold">
+                        Kirim Bukti
+                    </button>
+                </div>
+            </form>
         </div>
     </div>
 
@@ -908,25 +1157,80 @@
             }
         }
 
-        function openAssignModal(accId, accName, currentPmId, currentStaffId, currentAssistantId) {
+        // Helper: set disabled state on a custom-dropdown-wrapped select AND update its trigger button visually
+        function setCustomSelectDisabled(select, disabled) {
+            select.disabled = disabled;
+            const wrapper = select.closest('.custom-select-wrapper');
+            if (!wrapper) return;
+            const btn = wrapper.querySelector('button[type="button"]');
+            if (!btn) return;
+            if (disabled) {
+                btn.disabled = true;
+                btn.className = 'w-full border border-gray-200 rounded-lg px-3 py-2 text-sm text-left flex justify-between items-center bg-gray-100 text-gray-400 cursor-not-allowed opacity-70 select-none';
+                // Make the chevron also dimmed
+                const svg = btn.querySelector('svg');
+                if (svg) svg.classList.add('opacity-40');
+            } else {
+                btn.disabled = false;
+                btn.className = 'w-full border border-gray-300 rounded-lg px-3 py-2 text-sm text-left flex justify-between items-center transition bg-white text-gray-800 focus:ring-2 focus:ring-primary-500 focus:outline-none';
+                const svg = btn.querySelector('svg');
+                if (svg) svg.classList.remove('opacity-40');
+            }
+        }
+
+        function openAssignModal(accId, accName, currentPmId, currentStaffId, currentAssistantId, currentStaffRole) {
             document.getElementById('assign-acc-name').textContent = accName;
             document.getElementById('form-assign').action = `/staff/sosmed/accounts/${accId}/assign`;
-            
+
             const staffSel = document.getElementById('assign-staff-sel');
+            const pmSel    = document.getElementById('assign-pm-sel');
+            const astSel   = document.getElementById('assign-assistant-sel');
+
             staffSel.value = currentStaffId ?? '';
-            
-            const pmSel = document.getElementById('assign-pm-sel');
-            pmSel.value = currentPmId ?? '';
-            
-            const astSel = document.getElementById('assign-assistant-sel');
-            astSel.value = currentAssistantId ?? '';
-            
-            syncSupervisorState(staffSel, 'assign-pm-sel', 'assign-pm-hint');
-            
+            pmSel.value    = currentPmId    ?? '';
+            astSel.value   = currentAssistantId ?? '';
+
+            const adminAssigned = currentStaffRole === 'hr_staff';
+
+            if (adminAssigned) {
+                // Lock all three — Admin has already set everything
+                setCustomSelectDisabled(staffSel, true);
+                setCustomSelectDisabled(pmSel,    true);
+                setCustomSelectDisabled(astSel,   true);
+            } else {
+                // Re-enable all, then let syncSupervisorState decide PM
+                setCustomSelectDisabled(staffSel, false);
+                setCustomSelectDisabled(astSel,   false);
+                syncSupervisorState(staffSel, 'assign-pm-sel', 'assign-pm-hint');
+            }
+
+            // Update helper notes
+            const staffNote = document.getElementById('assign-staff-note');
+            const pmNote    = document.getElementById('assign-pm-hint');
+            const astNote   = document.getElementById('assign-ast-note');
+
+            if (staffNote) {
+                staffNote.textContent = adminAssigned
+                    ? '🔒 Eksekutor ditetapkan oleh Admin dan tidak dapat diubah.'
+                    : 'User yang bertugas membuat & mengunggah konten.';
+                staffNote.className = adminAssigned ? 'text-[11px] text-amber-600 mt-1' : 'text-[11px] text-gray-400 mt-1';
+            }
+            if (pmNote && adminAssigned) {
+                pmNote.textContent  = '🔒 Supervisor PM sudah ditetapkan oleh Admin, tidak dapat diubah.';
+                pmNote.className    = 'text-[11px] text-amber-600 mt-1';
+            }
+            if (astNote) {
+                astNote.textContent = adminAssigned
+                    ? '🔒 Asisten pengawas sudah ditetapkan oleh Admin, tidak dapat diubah.'
+                    : 'Jika dipilih, asisten ini berwenang melihat tugas dan memverifikasi Level-1 tugas akun ini.';
+                astNote.className = adminAssigned ? 'text-[11px] text-amber-600 mt-1' : 'text-[11px] text-gray-400 mt-1';
+            }
+
+            // Update custom dropdown labels
             staffSel.dispatchEvent(new Event('change', { bubbles: true }));
             pmSel.dispatchEvent(new Event('change', { bubbles: true }));
             astSel.dispatchEvent(new Event('change', { bubbles: true }));
-            
+
             document.getElementById('modal-assign').classList.remove('hidden');
         }
 
@@ -950,6 +1254,64 @@
 
         function closeVerifyModal() {
             document.getElementById('modal-verify').classList.add('hidden');
+        }
+
+        // ── My Submit Modal (Staff own tasks) ──────────────────────────────
+        function openMySubmitModal(accountId, accountName, existingDesc) {
+            document.getElementById('my-submit-account-name').textContent = accountName;
+            document.getElementById('form-my-submit').action = `/staff/sosmed/accounts/${accountId}/submit`;
+            document.getElementById('my-submit-description').value = existingDesc || '';
+
+            // Reset links container to single empty input
+            const container = document.getElementById('my-links-container');
+            container.innerHTML = `
+                <div class="flex gap-2 link-row">
+                    <input type="url" name="links[]" required
+                        placeholder="https://instagram.com/p/xxx"
+                        class="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 focus:outline-none">
+                    <button type="button" onclick="removeMyLinkRow(this)"
+                        class="text-gray-300 hover:text-rose-500 px-1 transition hidden remove-btn">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>`;
+
+            document.getElementById('modal-my-submit').classList.remove('hidden');
+        }
+
+        function closeMySubmitModal() {
+            document.getElementById('modal-my-submit').classList.add('hidden');
+        }
+
+        function addMyLinkRow() {
+            const container = document.getElementById('my-links-container');
+            const newRow = document.createElement('div');
+            newRow.className = 'flex gap-2 link-row';
+            newRow.innerHTML = `
+                <input type="url" name="links[]" required
+                    placeholder="https://instagram.com/p/xxx"
+                    class="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 focus:outline-none">
+                <button type="button" onclick="removeMyLinkRow(this)"
+                    class="text-gray-300 hover:text-rose-500 px-1 transition remove-btn">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>`;
+            container.appendChild(newRow);
+            // Show all remove buttons when more than one row
+            container.querySelectorAll('.remove-btn').forEach(btn => btn.classList.remove('hidden'));
+        }
+
+        function removeMyLinkRow(btn) {
+            const container = document.getElementById('my-links-container');
+            const rows = container.querySelectorAll('.link-row');
+            if (rows.length <= 1) return;
+            btn.closest('.link-row').remove();
+            // Hide remove button on last remaining row
+            if (container.querySelectorAll('.link-row').length === 1) {
+                container.querySelector('.remove-btn')?.classList.add('hidden');
+            }
         }
 
         function openLinksPopup(links, title) {
