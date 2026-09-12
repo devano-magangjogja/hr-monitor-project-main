@@ -188,6 +188,7 @@ Route::prefix('staff')->name('staff.')->middleware(['auth', 'role:hr_staff'])->g
     Route::post('/sosmed/accounts/{account}/submit', [StaffSosmedController::class, 'submitAccountTask'])->name('sosmed.accounts.submit');
     Route::patch('/sosmed/accounts/{account}/assign', [StaffSosmedController::class, 'assignAccount'])->name('sosmed.accounts.assign');
     Route::post('/sosmed/accounts/{account}/unassign', [StaffSosmedController::class, 'unassignAccount'])->name('sosmed.accounts.unassign');
+    Route::delete('/sosmed/accounts/{account}', [StaffSosmedController::class, 'destroyAccount'])->name('sosmed.accounts.destroy');
     Route::patch('/sosmed/tasks/{task}/verify', [StaffSosmedController::class, 'verifyTask'])->name('sosmed.tasks.verify');
 });
 

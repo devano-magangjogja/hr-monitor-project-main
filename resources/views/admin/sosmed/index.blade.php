@@ -67,7 +67,7 @@
         <div class="flex border-b border-gray-200 overflow-x-auto scrollbar-none">
             <a href="{{ route('admin.sosmed.index', ['tab' => 'accounts']) }}"
                 class="flex items-center gap-2 px-5 py-3.5 text-sm font-medium whitespace-nowrap border-b-2 transition
-                                                                                                        {{ $tab === 'accounts' ? 'border-primary-600 text-primary-600 bg-primary-50/50' : 'border-transparent text-gray-500 hover:text-gray-700' }}">
+                                                                                                                            {{ $tab === 'accounts' ? 'border-primary-600 text-primary-600 bg-primary-50/50' : 'border-transparent text-gray-500 hover:text-gray-700' }}">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                         d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
@@ -76,7 +76,7 @@
             </a>
             <a href="{{ route('admin.sosmed.index', ['tab' => 'staff_approvals']) }}"
                 class="flex items-center gap-2 px-5 py-3.5 text-sm font-medium whitespace-nowrap border-b-2 transition
-                                                                                                        {{ $tab === 'staff_approvals' ? 'border-purple-600 text-purple-600 bg-purple-50/50' : 'border-transparent text-gray-500 hover:text-gray-700' }}">
+                                                                                                                            {{ $tab === 'staff_approvals' ? 'border-purple-600 text-purple-600 bg-purple-50/50' : 'border-transparent text-gray-500 hover:text-gray-700' }}">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                         d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -90,7 +90,7 @@
             </a>
             <a href="{{ route('admin.sosmed.index', ['tab' => 'tasks']) }}"
                 class="flex items-center gap-2 px-5 py-3.5 text-sm font-medium whitespace-nowrap border-b-2 transition
-                                                                                                        {{ $tab === 'tasks' ? 'border-primary-600 text-primary-600 bg-primary-50/50' : 'border-transparent text-gray-500 hover:text-gray-700' }}">
+                                                                                                                            {{ $tab === 'tasks' ? 'border-primary-600 text-primary-600 bg-primary-50/50' : 'border-transparent text-gray-500 hover:text-gray-700' }}">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                         d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
@@ -99,7 +99,7 @@
             </a>
             <a href="{{ route('admin.sosmed.index', ['tab' => 'logs']) }}"
                 class="flex items-center gap-2 px-5 py-3.5 text-sm font-medium whitespace-nowrap border-b-2 transition
-                                                                                                        {{ $tab === 'logs' ? 'border-primary-600 text-primary-600 bg-primary-50/50' : 'border-transparent text-gray-500 hover:text-gray-700' }}">
+                                                                                                                            {{ $tab === 'logs' ? 'border-primary-600 text-primary-600 bg-primary-50/50' : 'border-transparent text-gray-500 hover:text-gray-700' }}">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                         d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
@@ -121,9 +121,10 @@
                             <form action="{{ route('admin.sosmed.index') }}" method="GET" class="flex items-center gap-2">
                                 <input type="hidden" name="tab" value="accounts">
                                 <input type="text" name="account_search" value="{{ $accountSearch ?? '' }}"
-                                    placeholder="Cari nama akun..." class="h-9 px-3 text-xs bg-white border border-gray-300 rounded-lg shadow-sm
-                                                                               focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500
-                                                                               text-gray-700 transition w-40 sm:w-auto">
+                                    placeholder="Cari nama akun..."
+                                    class="h-9 px-3 text-xs bg-white border border-gray-300 rounded-lg shadow-sm
+                                                                                                                                           focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500
+                                                                                                                                           text-gray-700 transition w-40 sm:w-auto">
                             </form>
                             <a href="{{ route('admin.accounts.index') }}"
                                 class="inline-flex items-center justify-center gap-1.5 px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs sm:text-sm font-medium rounded-lg transition border border-gray-300">
@@ -140,7 +141,7 @@
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
                                 </svg>
-                                Beri Tugas Pengelolaan Sosmed
+                                Beri Tugas
                             </button>
                         </div>
                     </div>
@@ -289,12 +290,12 @@
                                                 </button>
                                                 @if($acc->staff_id)
                                                     <form method="POST" action="{{ route('admin.sosmed.accounts.unassign', $acc) }}"
-                                                        onsubmit="return confirm('Lepas penugasan untuk akun {{ addslashes($acc->name) }}? Akun akan kembali tersedia di dropdown penugasan.')"
+                                                        onsubmit="return confirm('Lepas penugasan untuk akun {{ addslashes($acc->name) }}? Akun tetap berada di daftar kelola sosmed dengan status belum ditugaskan.')"
                                                         class="inline">
                                                         @csrf
                                                         <button type="submit"
                                                             class="p-1.5 text-gray-400 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition"
-                                                            title="Lepas Penugasan (Kembalikan ke Akun Tersedia)">
+                                                            title="Lepas Penugasan (Jadikan Belum Ditugaskan)">
                                                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                                     d="M13 7a4 4 0 11-8 0 4 4 0 018 0zM9 14a6 6 0 00-6 6v1h12v-1a6 6 0 00-6-6zM21 12h-6" />
@@ -303,11 +304,11 @@
                                                     </form>
                                                 @endif
                                                 <form method="POST" action="{{ route('admin.sosmed.accounts.destroy', $acc) }}"
-                                                    onsubmit="return confirm('Hapus akun ini?')">
+                                                    onsubmit="return confirm('Hapus akun {{ addslashes($acc->name) }} dari daftar kelola sosmed? Data kredensial tetap aman di Manajemen Akun.')">
                                                     @csrf @method('DELETE')
                                                     <button type="submit"
                                                         class="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition"
-                                                        title="Hapus">
+                                                        title="Hapus dari Kelola Sosmed">
                                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                                 d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -357,12 +358,12 @@
                                         </button>
                                         @if($acc->staff_id)
                                             <form method="POST" action="{{ route('admin.sosmed.accounts.unassign', $acc) }}"
-                                                onsubmit="return confirm('Lepas penugasan untuk akun {{ addslashes($acc->name) }}?')"
+                                                onsubmit="return confirm('Lepas penugasan untuk akun {{ addslashes($acc->name) }}? Akun tetap berada di daftar kelola sosmed dengan status belum ditugaskan.')"
                                                 class="inline">
                                                 @csrf
                                                 <button type="submit"
                                                     class="p-1.5 text-gray-400 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition"
-                                                    title="Lepas Penugasan">
+                                                    title="Lepas Penugasan (Jadikan Belum Ditugaskan)">
                                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                             d="M13 7a4 4 0 11-8 0 4 4 0 018 0zM9 14a6 6 0 00-6 6v1h12v-1a6 6 0 00-6-6zM21 12h-6" />
@@ -371,9 +372,11 @@
                                             </form>
                                         @endif
                                         <form method="POST" action="{{ route('admin.sosmed.accounts.destroy', $acc) }}"
-                                            onsubmit="return confirm('Hapus akun ini?')">
+                                            onsubmit="return confirm('Hapus akun {{ addslashes($acc->name) }} dari daftar kelola sosmed? Data kredensial tetap aman di Manajemen Akun.')">
                                             @csrf @method('DELETE')
-                                            <button type="submit" class="p-1.5 text-gray-400 hover:text-red-600 rounded-lg">
+                                            <button type="submit"
+                                                class="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition"
+                                                title="Hapus dari Kelola Sosmed">
                                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                         d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -503,8 +506,9 @@
                     <input type="hidden" name="tab" value="tasks">
                     <input type="date" name="task_date" value="{{ $taskDateFilter }}"
                         class="w-full sm:w-auto h-9 px-3 text-xs bg-white border border-gray-300 rounded-lg shadow-sm
-                                                                                                                                   focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500
-                                                                                                                                   text-gray-700 transition" onchange="this.form.submit()">
+                                                                                                                                                                           focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500
+                                                                                                                                                                           text-gray-700 transition"
+                        onchange="this.form.submit()">
                 </form>
 
                 {{-- Action Buttons (Grid di Mobile, Inline di Tablet/Desktop) --}}
@@ -512,7 +516,7 @@
                     {{-- Cetak PDF --}}
                     <button onclick="window.print()"
                         class="w-full sm:w-auto inline-flex items-center justify-center gap-2 h-9 px-3 sm:px-3.5 bg-primary-600 hover:bg-primary-700 active:bg-primary-800
-                                                                                                                                   text-white text-xs font-medium rounded-lg transition shadow-sm">
+                                                                                                                                                                           text-white text-xs font-medium rounded-lg transition shadow-sm">
                         <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
@@ -524,8 +528,8 @@
                     <div class="relative w-full sm:w-auto" id="purgeDropdown">
                         <button type="button" onclick="togglePurgeDropdown()"
                             class="w-full sm:w-auto inline-flex items-center justify-center gap-2 h-9 px-3 sm:px-3.5 bg-white border border-red-200 text-red-600
-                                                                                                                                       hover:bg-red-50 hover:border-red-300 active:bg-red-100
-                                                                                                                                       text-xs font-medium rounded-lg transition shadow-sm">
+                                                                                                                                                                               hover:bg-red-50 hover:border-red-300 active:bg-red-100
+                                                                                                                                                                               text-xs font-medium rounded-lg transition shadow-sm">
                             <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -540,8 +544,8 @@
                         {{-- Dropdown --}}
                         <div id="purgeMenu"
                             class="absolute right-0 mt-2 w-56 bg-white border border-gray-100 rounded-xl shadow-lg
-                                                                                                                                                        opacity-0 invisible translate-y-1
-                                                                                                                                                        transition-all duration-150 z-20 overflow-hidden">
+                                                                                                                                                                                                opacity-0 invisible translate-y-1
+                                                                                                                                                                                                transition-all duration-150 z-20 overflow-hidden">
                             <div class="px-3.5 py-2.5 bg-gray-50 border-b border-gray-100">
                                 <p class="text-[10px] font-semibold text-gray-400 uppercase tracking-wider">Hapus data tugas</p>
                             </div>
@@ -733,13 +737,13 @@
                     <div class="relative w-full sm:w-auto">
                         <input type="text" name="log_search" value="{{ $logSearch ?? '' }}" placeholder="Cari nama assignee..."
                             class="w-full sm:w-44 h-9 px-3 text-xs bg-white border border-gray-300 rounded-lg shadow-sm
-                                                                                                                       focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 text-gray-700 transition">
+                                                                                                                                                               focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 text-gray-700 transition">
                     </div>
 
                     {{-- Filter Aksi --}}
                     <select name="log_action"
                         class="w-full sm:w-auto h-9 pl-3 pr-8 text-xs bg-white border border-gray-300 rounded-lg shadow-sm
-                                                                                                                                         focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 text-gray-700 transition"
+                                                                                                                                                                                 focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 text-gray-700 transition"
                         onchange="this.form.submit()">
                         <option value="">Semua Aksi</option>
                         <option value="submitted" {{ request('log_action') === 'submitted' ? 'selected' : '' }}>Selesai Dikerjakan
@@ -755,7 +759,7 @@
                     {{-- Filter Rentang Waktu --}}
                     <select name="log_range"
                         class="w-full sm:w-auto h-9 pl-3 pr-8 text-xs bg-white border border-gray-300 rounded-lg shadow-sm
-                                                                                                                                        focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 text-gray-700 transition"
+                                                                                                                                                                                focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 text-gray-700 transition"
                         onchange="this.form.submit()">
                         <option value="">Semua Waktu</option>
                         <option value="weekly" {{ request('log_range') === 'weekly' ? 'selected' : '' }}>Minggu Ini</option>
@@ -766,7 +770,7 @@
                     {{-- Filter Tanggal --}}
                     <input type="date" name="log_date" value="{{ $logDateFilter ?? '' }}"
                         class="w-full sm:w-auto h-9 px-3 text-xs bg-white border border-gray-300 rounded-lg shadow-sm
-                                                                                                                   focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 text-gray-700 transition"
+                                                                                                                                                           focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 text-gray-700 transition"
                         onchange="this.form.submit()">
 
                     {{-- Submit & Reset (Grouped di Mobile) --}}
@@ -1019,7 +1023,8 @@
 
                             <div x-show="filteredAccounts.length === 0"
                                 class="p-4 text-center text-xs text-gray-400 italic">
-                                <span x-show="accounts.length === 0">Semua akun sudah ditugaskan atau belum ada akun di
+                                <span x-show="accounts.length === 0">Semua akun sudah dimasukkan ke daftar kelola sosmed
+                                    atau belum ada akun di
                                     Manajemen Akun.</span>
                                 <span x-show="accounts.length > 0">Tidak ada akun yang cocok dengan pencarian.</span>
                             </div>
@@ -1030,8 +1035,7 @@
                 {{-- Link Akun (Readonly & Auto-filled) --}}
                 <div>
                     <label class="block text-xs font-semibold text-gray-700 mb-1.5">
-                        Link Akun <span class="text-xs text-gray-400 font-normal">(Otomatis terisi & tidak dapat
-                            diubah)</span>
+                        Link Akun <span class="text-xs text-gray-400 font-normal"></span>
                     </label>
                     <div class="relative">
                         <input type="text" readonly :value="selectedLink || '-'"
@@ -1052,11 +1056,12 @@
                 {{-- Eksekutor Akun --}}
                 <div>
                     <label class="block text-xs font-semibold text-gray-700 mb-1.5">
-                        Eksekutor Akun (Dikelola Oleh) <span class="text-red-500">*</span>
+                        Eksekutor Akun (Dikelola Oleh) <span class="text-gray-400 font-normal">(Opsional)</span>
                     </label>
-                    <select name="staff_id" required
+                    <select name="staff_id" id="assign-task-staff"
+                        onchange="syncSupervisorState(this, 'assign-task-pm', 'assign-task-pm-hint', 'assign-task-ast')"
                         class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 focus:outline-none">
-                        <option value="">-- Pilih Eksekutor --</option>
+                        <option value="" data-role="">-- Belum Ditugaskan / Pilih Nanti --</option>
                         @foreach($executors as $ex)
                             @php
                                 $exRoleLabel = match ($ex->role) {
@@ -1066,7 +1071,8 @@
                                     default => $ex->role_label ?? strtoupper($ex->role)
                                 };
                             @endphp
-                            <option value="{{ $ex->id }}">{{ $ex->name }} ({{ $exRoleLabel }})</option>
+                            <option value="{{ $ex->id }}" data-role="{{ $ex->role }}">{{ $ex->name }} ({{ $exRoleLabel }})
+                            </option>
                         @endforeach
                     </select>
                 </div>
@@ -1076,13 +1082,15 @@
                     <label class="block text-xs font-semibold text-gray-700 mb-1.5">
                         Supervisor PM <span class="text-gray-400 font-normal">(Opsional)</span>
                     </label>
-                    <select name="pm_id"
+                    <select name="pm_id" id="assign-task-pm"
                         class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 focus:outline-none">
                         <option value="">-- Tanpa Supervisor / Langsung ke Admin --</option>
                         @foreach($pms as $pm)
                             <option value="{{ $pm->id }}">{{ $pm->name }} (PM)</option>
                         @endforeach
                     </select>
+                    <p id="assign-task-pm-hint" class="text-[11px] text-gray-400 mt-1">PM yang berwenang meninjau & approve
+                        bukti postingan Staff.</p>
                 </div>
 
                 {{-- Asisten Pengawas --}}
@@ -1090,7 +1098,7 @@
                     <label class="block text-xs font-semibold text-gray-700 mb-1.5">
                         Asisten Pengawas <span class="text-gray-400 font-normal">(Opsional)</span>
                     </label>
-                    <select name="assistant_id"
+                    <select name="assistant_id" id="assign-task-ast"
                         class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 focus:outline-none">
                         <option value="">-- Tanpa Asisten --</option>
                         @foreach($assistants as $ast)
@@ -1110,8 +1118,8 @@
                     <button type="button" onclick="document.getElementById('modal-assign-task').classList.add('hidden')"
                         class="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-sm text-gray-700 hover:bg-gray-50 transition">Batal</button>
                     <button type="submit"
-                        class="flex-1 px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-lg text-sm font-semibold shadow-sm transition">Tugaskan
-                        Akun</button>
+                        class="flex-1 px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-lg text-sm font-semibold shadow-sm transition">Tambahkan
+                        ke Sosmed</button>
                 </div>
             </form>
         </div>
@@ -1220,55 +1228,70 @@
         </div>
     </div>
 
-    {{-- ── MODAL EDIT ACCOUNT (ADMIN) ───────────────────────────────── --}}
-    <div id="modal-edit-account" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4">
-        <div class="absolute inset-0 bg-black/50 backdrop-blur-sm"
-            onclick="document.getElementById('modal-edit-account').classList.add('hidden')"></div>
-        <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-lg z-10 max-h-[90vh] overflow-y-auto">
-            <div class="flex items-center justify-between px-6 py-4 border-b border-gray-200 sticky top-0 bg-white z-10">
+    {{-- ── MODAL EDIT DELEGASI AKUN (ADMIN) ─────────────────────────── --}}
+    <div id="modal-edit-account" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4"
+        x-data="editAccountDropdown({{ json_encode($availableAccounts) }})"
+        @open-edit-account.window="initAccount($event.detail)">
+        <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" onclick="closeEditAccountModal()"></div>
+        <div
+            class="relative bg-white rounded-2xl shadow-2xl w-full max-w-lg z-10 max-h-[90vh] flex flex-col overflow-visible">
+            <div class="flex items-center justify-between px-6 py-4 border-b border-gray-200">
                 <div>
                     <h3 class="text-base font-bold text-gray-800">Atur Pengelola & Penugasan Akun</h3>
-                    <p class="text-xs text-gray-400 mt-0.5">Perbarui eksekutor, supervisor, asisten, dan briefing akun</p>
+                    <p class="text-xs text-gray-400 mt-0.5">Perbarui akun yang dikelola, eksekutor, supervisor, dan arahan
+                    </p>
                 </div>
-                <button onclick="document.getElementById('modal-edit-account').classList.add('hidden')"
-                    class="text-gray-400 hover:text-gray-600">
+                <button type="button" onclick="closeEditAccountModal()"
+                    class="text-gray-400 hover:text-gray-600 transition">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                     </svg>
                 </button>
             </div>
-            <form id="form-edit-account" method="POST" action="" class="p-6 pt-2 space-y-4">
+            <form id="form-edit-account" method="POST" action="" class="p-6 pt-1 space-y-4 overflow-y-auto">
                 @csrf
                 @method('PATCH')
+
+                {{-- Akun yang Dikelola (Readonly / Disabled) --}}
                 <div>
-                    <label class="block text-xs font-semibold text-gray-600 mb-1.5">Nama Akun / Username <span
-                            class="text-red-500">*</span></label>
-                    <input type="text" name="name" id="edit-acc-name" required placeholder="Contoh: @republikweb_net"
-                        class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 focus:outline-none">
+                    <label class="block text-xs font-semibold text-gray-700 mb-1.5">
+                        Akun yang Dikelola <span class="text-xs text-gray-400 font-normal">(Tidak dapat diubah)</span>
+                    </label>
+                    <input type="hidden" name="sosmed_account_id" :value="selectedId">
+                    <input type="text" readonly :value="selectedLabel"
+                        class="w-full bg-gray-100/80 border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-600 cursor-not-allowed select-all focus:outline-none">
                 </div>
+
+                {{-- Link Akun (Readonly & Auto-filled) --}}
                 <div>
-                    <label class="block text-xs font-semibold text-gray-600 mb-1.5">Platform <span
-                            class="text-red-500">*</span></label>
-                    <select name="platform" id="edit-acc-platform" required
-                        class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 focus:outline-none">
-                        <option value="">-- Pilih Platform --</option>
-                        @foreach(['Instagram', 'TikTok', 'YouTube', 'Facebook', 'Twitter/X', 'LinkedIn', 'Threads', 'Website'] as $p)
-                            <option value="{{ $p }}">{{ $p }}</option>
-                        @endforeach
-                    </select>
-                </div>
-                <div>
-                    <div class="flex items-center justify-between mb-1.5">
-                        <label class="block text-xs font-semibold text-gray-600">Link URL Akun</label>
+                    <label class="block text-xs font-semibold text-gray-700 mb-1.5">
+                        Link Akun <span class="text-xs text-gray-400 font-normal">(Otomatis terisi & tidak dapat
+                            diubah)</span>
+                    </label>
+                    <div
+                        class="relative flex items-center w-full bg-gray-100/80 border border-gray-300 rounded-lg focus-within:ring-2 focus-within:ring-primary-500">
+                        <input type="text" readonly :value="selectedLink || '-'"
+                            class="w-full bg-transparent border-none px-3 py-2 text-sm text-gray-600 cursor-not-allowed select-all focus:outline-none focus:ring-0">
+                        <template x-if="selectedLink && selectedLink !== '-'">
+                            <a :href="selectedLink" target="_blank" rel="noopener noreferrer"
+                                class="shrink-0 mr-2.5 p-1 text-primary-600 hover:text-primary-800"
+                                title="Buka Link di Tab Baru">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                                </svg>
+                            </a>
+                        </template>
                     </div>
-                    <input type="url" name="link" id="edit-acc-link" readonly
-                        class="w-full border border-gray-200 bg-gray-100 text-gray-500 rounded-lg px-3 py-2 text-sm cursor-not-allowed focus:outline-none select-all"
-                        placeholder="Belum ada link URL akun">
                 </div>
+
+                {{-- Eksekutor Akun --}}
                 <div>
-                    <label class="block text-xs font-semibold text-gray-700 mb-1">Dikelola Oleh</label>
-                    <select name="staff_id" id="edit-acc-staff"
-                        onchange="syncSupervisorState(this, 'edit-acc-pm', 'edit-pm-hint')"
+                    <label class="block text-xs font-semibold text-gray-700 mb-1.5">
+                        Eksekutor Akun (Dikelola Oleh) <span class="text-red-500">*</span>
+                    </label>
+                    <select name="staff_id" id="edit-acc-staff" required
+                        onchange="syncSupervisorState(this, 'edit-acc-pm', 'edit-pm-hint', 'edit-acc-ast')"
                         class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 focus:outline-none">
                         <option value="" data-role="">-- Belum Ditugaskan --</option>
                         @foreach($executors as $ex)
@@ -1285,14 +1308,18 @@
                             </option>
                         @endforeach
                     </select>
-                    <p class="text-[11px] text-gray-400 mt-1">Pelaksana harian akun (Staff Sosmed atau PM mandiri).</p>
+                    <p id="edit-staff-note" class="text-[11px] text-gray-400 mt-1">Pelaksana harian akun (Staff Sosmed atau
+                        PM mandiri).</p>
                 </div>
+
+                {{-- Supervisor PM --}}
                 <div>
-                    <label class="block text-xs font-semibold text-gray-700 mb-1">Diawasi Oleh
-                        PM</label>
+                    <label class="block text-xs font-semibold text-gray-700 mb-1.5">
+                        Supervisor PM <span class="text-gray-400 font-normal">(Opsional)</span>
+                    </label>
                     <select name="pm_id" id="edit-acc-pm"
                         class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 focus:outline-none">
-                        <option value="">-- Tanpa Supervisor / Langsung ke HR --</option>
+                        <option value="">-- Tanpa Supervisor / Langsung ke Admin --</option>
                         @foreach($pms as $pm)
                             <option value="{{ $pm->id }}">{{ $pm->name }} (PM)</option>
                         @endforeach
@@ -1300,8 +1327,12 @@
                     <p id="edit-pm-hint" class="text-[11px] text-gray-400 mt-1">PM yang berwenang meninjau & approve bukti
                         postingan Staff.</p>
                 </div>
+
+                {{-- Asisten Pengawas --}}
                 <div>
-                    <label class="block text-xs font-semibold text-gray-700 mb-1">Wewenang Verifikasi Asisten</label>
+                    <label class="block text-xs font-semibold text-gray-700 mb-1.5">
+                        Asisten Pengawas <span class="text-gray-400 font-normal">(Opsional)</span>
+                    </label>
                     <select name="assistant_id" id="edit-acc-ast"
                         class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 focus:outline-none">
                         <option value="">-- Tanpa Asisten / Belum Diberi Wewenang --</option>
@@ -1309,16 +1340,19 @@
                             <option value="{{ $ast->id }}">{{ $ast->name }} (Asisten)</option>
                         @endforeach
                     </select>
-                    <p class="text-[11px] text-gray-400 mt-1">Asisten HR yang berwenang meninjau & approve tugas akun ini
-                        sebagai backup PM.</p>
+                    <p id="edit-ast-note" class="text-[11px] text-gray-400 mt-1">Asisten HR yang berwenang meninjau &
+                        approve tugas akun ini sebagai backup PM.</p>
                 </div>
+
+                {{-- Catatan / Arahan Penugasan --}}
                 <div>
-                    <label class="block text-xs font-semibold text-gray-600 mb-1.5">Catatan / Briefing</label>
-                    <textarea name="notes" id="edit-acc-notes" rows="3" placeholder="Catatan seputar akun..."
+                    <label class="block text-xs font-semibold text-gray-700 mb-1.5">Catatan / Arahan Penugasan</label>
+                    <textarea name="notes" id="edit-acc-notes" rows="2" placeholder="Catatan seputar akun..."
                         class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 focus:outline-none"></textarea>
                 </div>
+
                 <div class="flex gap-3 pt-2">
-                    <button type="button" onclick="document.getElementById('modal-edit-account').classList.add('hidden')"
+                    <button type="button" onclick="closeEditAccountModal()"
                         class="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-sm text-gray-700 hover:bg-gray-50 transition">Batal</button>
                     <button type="submit"
                         class="flex-1 px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-lg text-sm font-semibold shadow-sm transition">Simpan
@@ -1387,7 +1421,7 @@
                 </button>
             </div>
 
-            <form id="form-verify" method="POST" action="" class="p-6 pt-3 space-y-4">
+            <form id="form-verify" method="POST" action="" class="p-6 pt-1 space-y-4">
                 @csrf @method('PATCH')
                 <input type="hidden" name="action" :value="action">
 
@@ -1450,7 +1484,8 @@
             // Auto-upgrade select elements to have an integrated search dropdown
             const selectsToUpgrade = document.querySelectorAll(
                 'select[id="create-acc-staff"], select[id="create-acc-pm"], select[id="create-acc-ast"], ' +
-                'select[id="edit-acc-staff"], select[id="edit-acc-pm"], select[id="edit-acc-ast"]'
+                'select[id="edit-acc-staff"], select[id="edit-acc-pm"], select[id="edit-acc-ast"], ' +
+                'select[id="assign-task-staff"], select[id="assign-task-pm"], select[id="assign-task-ast"]'
             );
 
             selectsToUpgrade.forEach(select => {
@@ -1485,11 +1520,11 @@
                 const searchBox = document.createElement('div');
                 searchBox.className = 'p-2 border-b border-gray-100 sticky top-0 bg-white rounded-t-lg';
                 searchBox.innerHTML = `
-                                                                                    <div class="relative">
-                                                                                        <input type="text" placeholder="Cari..." class="w-full pl-8 pr-2 py-1.5 text-xs border border-gray-200 rounded-md focus:outline-none focus:ring-1 focus:ring-primary-500 bg-gray-50 transition">
-                                                                                        <svg class="w-3.5 h-3.5 text-gray-400 absolute left-2.5 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
-                                                                                    </div>
-                                                                                `;
+                                                                                                        <div class="relative">
+                                                                                                            <input type="text" placeholder="Cari..." class="w-full pl-8 pr-2 py-1.5 text-xs border border-gray-200 rounded-md focus:outline-none focus:ring-1 focus:ring-primary-500 bg-gray-50 transition">
+                                                                                                            <svg class="w-3.5 h-3.5 text-gray-400 absolute left-2.5 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                                                                                                        </div>
+                                                                                                    `;
                 const searchInput = searchBox.querySelector('input');
 
                 const list = document.createElement('ul');
@@ -1643,10 +1678,10 @@
         function filterSelectOptions(query, selectId) { }
         function resetSearchFilter(inputId, selectId) { }
 
-        function syncSupervisorState(staffSelect, pmSelectId, hintId) {
+        function syncSupervisorState(staffSelect, pmSelectId, hintId, astSelectId) {
             if (!staffSelect) return;
             const pmSelect = document.getElementById(pmSelectId);
-            const astSelect = document.getElementById(staffSelect.id.replace('staff', 'ast'));
+            const astSelect = astSelectId ? document.getElementById(astSelectId) : document.getElementById(staffSelect.id.replace('staff', 'ast'));
             const hint = document.getElementById(hintId);
             if (!pmSelect) return;
 
@@ -1718,7 +1753,7 @@
             const staffSel = document.getElementById('create-acc-staff');
             if (staffSel) {
                 staffSel.value = '';
-                syncSupervisorState(staffSel, 'create-acc-pm', 'create-pm-hint');
+                syncSupervisorState(staffSel, 'create-acc-pm', 'create-pm-hint', 'create-acc-ast');
                 staffSel.dispatchEvent(new Event('change', { bubbles: true }));
             }
             const pmSel = document.getElementById('create-acc-pm');
@@ -1735,30 +1770,50 @@
         }
 
         function openEditAccountModal(accId, accName, platform, link, currentPmId, currentStaffId, notes, currentAssistantId) {
-            document.getElementById('form-edit-account').action = `/admin/sosmed/accounts/${accId}`;
-            document.getElementById('edit-acc-name').value = accName;
-            document.getElementById('edit-acc-platform').value = platform;
-            document.getElementById('edit-acc-link').value = link || '';
+            let accData = {};
+            if (typeof accId === 'object' && accId !== null) {
+                accData = accId;
+            } else {
+                accData = {
+                    id: accId,
+                    name: accName,
+                    platform: platform,
+                    link: link,
+                    pm_id: currentPmId,
+                    staff_id: currentStaffId,
+                    notes: notes,
+                    assistant_id: currentAssistantId
+                };
+            }
+
+            document.getElementById('form-edit-account').action = `/admin/sosmed/accounts/${accData.id}/assign`;
+
+            window.dispatchEvent(new CustomEvent('open-edit-account', { detail: accData }));
 
             const staffSel = document.getElementById('edit-acc-staff');
-            staffSel.value = currentStaffId ?? '';
+            if (staffSel) staffSel.value = accData.staff_id ?? '';
 
             const pmSel = document.getElementById('edit-acc-pm');
-            pmSel.value = currentPmId ?? '';
+            if (pmSel) pmSel.value = accData.pm_id ?? '';
 
             const astSel = document.getElementById('edit-acc-ast');
-            astSel.value = currentAssistantId ?? '';
+            if (astSel) astSel.value = accData.assistant_id ?? '';
 
-            document.getElementById('edit-acc-notes').value = notes || '';
+            const notesEl = document.getElementById('edit-acc-notes');
+            if (notesEl) notesEl.value = accData.notes ?? '';
 
-            syncSupervisorState(staffSel, 'edit-acc-pm', 'edit-pm-hint');
+            syncSupervisorState(staffSel, 'edit-acc-pm', 'edit-pm-hint', 'edit-acc-ast');
 
             // Dispatch change event to update custom dropdown labels
-            staffSel.dispatchEvent(new Event('change', { bubbles: true }));
-            pmSel.dispatchEvent(new Event('change', { bubbles: true }));
-            astSel.dispatchEvent(new Event('change', { bubbles: true }));
+            if (staffSel) staffSel.dispatchEvent(new Event('change', { bubbles: true }));
+            if (pmSel) pmSel.dispatchEvent(new Event('change', { bubbles: true }));
+            if (astSel) astSel.dispatchEvent(new Event('change', { bubbles: true }));
 
             document.getElementById('modal-edit-account').classList.remove('hidden');
+        }
+
+        function closeEditAccountModal() {
+            document.getElementById('modal-edit-account').classList.add('hidden');
         }
 
         // Enable any disabled select before submitting forms so payload isn't dropped
@@ -1784,11 +1839,11 @@
                     item.rel = 'noopener noreferrer';
                     item.className = 'flex items-start gap-2.5 p-3 rounded-lg border border-gray-100 hover:border-primary-300 hover:bg-primary-50/50 transition group';
                     item.innerHTML = `
-                                                                                                <span class="flex-shrink-0 w-5 h-5 rounded-full bg-primary-100 text-primary-700 text-[10px] font-bold flex items-center justify-center mt-0.5">${i + 1}</span>
-                                                                                                <span class="text-xs text-primary-700 group-hover:underline break-all leading-relaxed">${url}</span>
-                                                                                                <svg class="w-3.5 h-3.5 flex-shrink-0 text-gray-400 group-hover:text-primary-600 mt-0.5 ml-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
-                                                                                                </svg>`;
+                                                                                                                    <span class="flex-shrink-0 w-5 h-5 rounded-full bg-primary-100 text-primary-700 text-[10px] font-bold flex items-center justify-center mt-0.5">${i + 1}</span>
+                                                                                                                    <span class="text-xs text-primary-700 group-hover:underline break-all leading-relaxed">${url}</span>
+                                                                                                                    <svg class="w-3.5 h-3.5 flex-shrink-0 text-gray-400 group-hover:text-primary-600 mt-0.5 ml-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+                                                                                                                    </svg>`;
                     body.appendChild(item);
                 });
             }
@@ -1823,7 +1878,7 @@
                 open: false,
                 get selectedLabel() {
                     if (!this.selectedId) return '';
-                    return `${this.selectedName} (${this.selectedPlatform})`;
+                    return this.selectedName + ' (' + this.selectedPlatform + ')';
                 },
                 get filteredAccounts() {
                     if (!this.search || !this.search.trim()) {
@@ -1841,6 +1896,61 @@
                     this.selectedPlatform = acc.platform;
                     this.selectedLink = acc.link || '';
                     this.open = false;
+                }
+            };
+        }
+
+        function editAccountDropdown(availableList) {
+            return {
+                availableAccounts: availableList || [],
+                accountsList: [],
+                selectedId: '',
+                selectedName: '',
+                selectedPlatform: '',
+                selectedLink: '',
+                search: '',
+                open: false,
+                get selectedLabel() {
+                    if (!this.selectedId) return '';
+                    return this.selectedName + ' (' + this.selectedPlatform + ')';
+                },
+                get filteredAccounts() {
+                    if (!this.search || !this.search.trim()) {
+                        return this.accountsList;
+                    }
+                    const q = this.search.toLowerCase();
+                    return this.accountsList.filter(acc => {
+                        const target = (acc.name + ' ' + acc.platform).toLowerCase();
+                        return target.includes(q);
+                    });
+                },
+                selectAccount(acc) {
+                    this.selectedId = acc.id;
+                    this.selectedName = acc.name;
+                    this.selectedPlatform = acc.platform;
+                    this.selectedLink = acc.link || '';
+                    this.open = false;
+                },
+                initAccount(accData) {
+                    this.selectedId = accData.id;
+                    this.selectedName = accData.name;
+                    this.selectedPlatform = accData.platform;
+                    this.selectedLink = accData.link || '';
+                    this.search = '';
+                    this.open = false;
+
+                    const list = [{
+                        id: accData.id,
+                        name: accData.name,
+                        platform: accData.platform,
+                        link: accData.link || ''
+                    }];
+                    this.availableAccounts.forEach(a => {
+                        if (String(a.id) !== String(accData.id)) {
+                            list.push(a);
+                        }
+                    });
+                    this.accountsList = list;
                 }
             };
         }

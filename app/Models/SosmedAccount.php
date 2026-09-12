@@ -20,12 +20,14 @@ class SosmedAccount extends Model
         'assigned_to', // fallback compatibility
         'created_by',
         'notes',
+        'is_in_sosmed',
     ];
 
     protected function casts(): array
     {
         return [
             'password' => 'encrypted',
+            'is_in_sosmed' => 'boolean',
         ];
     }
 
@@ -81,6 +83,16 @@ class SosmedAccount extends Model
     public function scopeUnassigned($query)
     {
         return $query->whereNull('staff_id');
+    }
+
+    public function scopeInSosmed($query)
+    {
+        return $query->where('is_in_sosmed', true);
+    }
+
+    public function scopeNotInSosmed($query)
+    {
+        return $query->where('is_in_sosmed', false);
     }
 
     public function getPlatformColorAttribute(): string

@@ -57,9 +57,11 @@
 
     {{-- ── FILTER & ACTION BAR ──────────────────────────────────────── --}}
     <div class="bg-white rounded-xl border border-gray-200 p-4 shadow-sm mb-6">
-        <div class="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
-            <form action="{{ route('admin.accounts.index') }}" method="GET" class="flex items-center gap-2 flex-wrap flex-1">
-                <div class="relative flex-1 min-w-[200px]">
+        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+            <form action="{{ route('admin.accounts.index') }}" method="GET"
+                class="flex flex-col sm:flex-row sm:items-center gap-3 flex-1">
+                {{-- Search --}}
+                <div class="relative flex-1 min-w-[220px]">
                     <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-gray-400">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -68,36 +70,40 @@
                     </span>
                     <input type="text" name="search" value="{{ $search ?? '' }}"
                         placeholder="Cari nama akun, platform, atau email..."
-                        class="w-full pl-9 pr-3 py-2 text-xs sm:text-sm bg-gray-50 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:bg-white focus:outline-none transition">
+                        class="w-full h-10 pl-9 pr-3 text-sm bg-gray-50 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:bg-white focus:outline-none transition">
                 </div>
 
-                <select name="platform" onchange="this.form.submit()"
-                    class="py-2 px-3 text-xs sm:text-sm bg-gray-50 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:bg-white focus:outline-none transition">
-                    <option value="">-- Semua Platform --</option>
-                    @foreach($platformList as $p)
-                        <option value="{{ $p }}" {{ ($platform ?? '') === $p ? 'selected' : '' }}>{{ $p }}</option>
-                    @endforeach
-                </select>
+                {{-- Filter group --}}
+                <div class="flex items-center gap-2 shrink-0">
+                    <select name="platform" onchange="this.form.submit()"
+                        class="h-10 w-full sm:w-40 px-3 text-sm bg-gray-50 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:bg-white focus:outline-none transition">
+                        <option value="">Semua Platform</option>
+                        @foreach($platformList as $p)
+                            <option value="{{ $p }}" {{ ($platform ?? '') === $p ? 'selected' : '' }}>{{ $p }}</option>
+                        @endforeach
+                    </select>
 
-                <select name="status" onchange="this.form.submit()"
-                    class="py-2 px-3 text-xs sm:text-sm bg-gray-50 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:bg-white focus:outline-none transition">
-                    <option value="">-- Semua Status --</option>
-                    <option value="unassigned" {{ ($status ?? '') === 'unassigned' ? 'selected' : '' }}>Belum Ditugaskan</option>
-                    <option value="assigned" {{ ($status ?? '') === 'assigned' ? 'selected' : '' }}>Sudah Ditugaskan</option>
-                </select>
+                    <select name="status" onchange="this.form.submit()"
+                        class="h-10 w-full sm:w-44 px-3 text-sm bg-gray-50 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:bg-white focus:outline-none transition">
+                        <option value="">Semua Status</option>
+                        <option value="unassigned" {{ ($status ?? '') === 'unassigned' ? 'selected' : '' }}>Belum Ditugaskan</option>
+                        <option value="assigned" {{ ($status ?? '') === 'assigned' ? 'selected' : '' }}>Sudah Ditugaskan</option>
+                    </select>
 
-                @if($search || $platform || $status)
-                    <a href="{{ route('admin.accounts.index') }}"
-                        class="p-2 text-xs text-gray-500 hover:text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition" title="Reset Filter">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                        </svg>
-                    </a>
-                @endif
+                    @if($search || $platform || $status)
+                        <a href="{{ route('admin.accounts.index') }}"
+                            class="flex items-center justify-center h-10 w-10 text-gray-500 hover:text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition shrink-0"
+                            title="Reset Filter">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </a>
+                    @endif
+                </div>
             </form>
 
             <button onclick="openCreateAccountModal()"
-                class="inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-primary-600 hover:bg-primary-700 text-white text-xs sm:text-sm font-semibold rounded-lg shadow-sm transition shrink-0">
+                class="inline-flex items-center justify-center gap-2 h-10 px-4 bg-primary-600 hover:bg-primary-700 text-white text-sm font-semibold rounded-lg shadow-sm transition shrink-0 w-full lg:w-auto">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
                 </svg>
@@ -229,15 +235,22 @@
 
                             {{-- Status Penugasan --}}
                             <td class="px-5 py-4 whitespace-nowrap">
-                                @if($acc->staffUser)
-                                    <div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-blue-50 text-blue-700 border border-blue-200">
-                                        <span class="w-1.5 h-1.5 rounded-full bg-blue-500"></span>
-                                        Dikelola: <span class="font-semibold">{{ $acc->staffUser->name }}</span>
-                                    </div>
+                                @if($acc->is_in_sosmed)
+                                    @if($acc->staffUser)
+                                        <div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-blue-50 text-blue-700 border border-blue-200">
+                                            <span class="w-1.5 h-1.5 rounded-full bg-blue-500"></span>
+                                            Dikelola: <span class="font-semibold">{{ $acc->staffUser->name }}</span>
+                                        </div>
+                                    @else
+                                        <div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-amber-50 text-amber-700 border border-amber-200">
+                                            <span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
+                                            Di Sosmed (Belum Ada Pengelola)
+                                        </div>
+                                    @endif
                                 @else
                                     <div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-emerald-50 text-emerald-700 border border-emerald-200">
                                         <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-                                        Belum Ditugaskan
+                                        Belum Ditambahkan ke Sosmed
                                     </div>
                                 @endif
                             </td>
@@ -311,7 +324,7 @@
                 </button>
             </div>
 
-            <form method="POST" action="{{ route('admin.accounts.store') }}" class="p-6 space-y-4 overflow-y-auto">
+            <form method="POST" action="{{ route('admin.accounts.store') }}" class="p-6 pt-1 space-y-4 overflow-y-auto">
                 @csrf
 
                 <div>

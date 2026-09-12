@@ -462,7 +462,7 @@
                 @else
                     {{-- Info jumlah data tanpa pagination --}}
                     <div class="text-xs text-gray-600 text-center">
-                        Menampilkan 
+                        Menampilkan
                         <span class="font-semibold text-gray-800">{{ $pemagangs->total() }}</span>
                         data pemagang
                     </div>
@@ -526,13 +526,16 @@
     @endif
 
     {{-- ── 4. MODAL TAMBAH PEMAGANG ───────────────────────────────── --}}
-    <div id="modal-add-pemagang" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 transition-all duration-200">
-        <div class="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-visible animate-in fade-in zoom-in-95 duration-150">
+    <div id="modal-add-pemagang"
+        class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 transition-all duration-200">
+        <div
+            class="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-visible animate-in fade-in zoom-in-95 duration-150">
 
             {{-- Header --}}
-            <div class="flex items-center justify-between px-5 py-3 border-b border-gray-100 bg-gray-50/50">
+            <div class="flex items-center justify-between px-5 py-3 border-b border-gray-100 bg-gray-50/50 rounded-t-2xl">
                 <div class="flex items-center gap-2.5">
-                    <div class="w-8 h-8 rounded-xl bg-primary-100 text-primary-600 flex items-center justify-center flex-shrink-0">
+                    <div
+                        class="w-8 h-8 rounded-xl bg-primary-100 text-primary-600 flex items-center justify-center flex-shrink-0">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
@@ -552,7 +555,8 @@
             </div>
 
             {{-- Form --}}
-            <form method="POST" action="{{ route($routePrefix . '.pemagang.store') }}" class="px-5 py-4 space-y-3">
+            <form method="POST" action="{{ route($routePrefix . '.pemagang.store') }}"
+                class="px-5 py-4 pt-1 space-y-3 rounded-b-2xl">
                 @csrf
 
                 {{-- Nama Lengkap --}}
@@ -569,8 +573,7 @@
                     <label class="block text-[11px] font-bold text-gray-700 uppercase tracking-wider mb-1">
                         Nomor WhatsApp / HP <span class="text-red-500">*</span>
                     </label>
-                    <input type="text" name="no_hp" id="add-no-hp" required
-                        placeholder="Contoh: 081234567890"
+                    <input type="text" name="no_hp" id="add-no-hp" required placeholder="Contoh: 081234567890"
                         inputmode="numeric" maxlength="14" minlength="10"
                         oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 14)"
                         class="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-xs sm:text-sm font-mono focus:outline-none focus:ring-2 focus:ring-primary-500 focus:bg-white transition hover:bg-white hover:border-primary-500">
@@ -606,7 +609,8 @@
                         class="hidden absolute z-50 left-0 right-0 mt-1 bg-white border border-gray-200 rounded-xl shadow-xl overflow-hidden animate-in fade-in duration-100">
                         <div class="p-2 border-b border-gray-100 bg-gray-50/90 sticky top-0 z-10">
                             <div class="relative">
-                                <span class="absolute inset-y-0 left-0 flex items-center pl-2.5 pointer-events-none text-gray-400">
+                                <span
+                                    class="absolute inset-y-0 left-0 flex items-center pl-2.5 pointer-events-none text-gray-400">
                                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                             d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -619,8 +623,7 @@
                         </div>
                         <div id="add-divisi-options-list" class="max-h-48 overflow-y-auto divide-y divide-gray-50">
                             @foreach($divisiList as $div)
-                                <div onclick="selectAddDivisi('{{ addslashes($div) }}')"
-                                    data-search="{{ strtolower($div) }}"
+                                <div onclick="selectAddDivisi('{{ addslashes($div) }}')" data-search="{{ strtolower($div) }}"
                                     class="add-divisi-option px-3 py-2 hover:bg-primary-50 cursor-pointer transition flex items-center justify-between text-xs font-medium text-gray-700 hover:text-primary-700">
                                     <span>{{ $div }}</span>
                                 </div>
@@ -660,7 +663,7 @@
                 </button>
             </div>
 
-            <form id="form-edit-pemagang" method="POST" action="" class="px-5 py-4 space-y-3">
+            <form id="form-edit-pemagang" method="POST" action="" class="px-5 py-4 pt-1 space-y-3">
                 @csrf
                 @method('PATCH')
 
@@ -678,9 +681,8 @@
                     <label class="block text-[11px] font-bold text-gray-700 uppercase tracking-wider mb-1">
                         Nomor WhatsApp / HP <span class="text-red-500">*</span>
                     </label>
-                    <input type="text" name="no_hp" id="edit-nohp" required
-                        inputmode="numeric" maxlength="14" minlength="10"
-                        oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 14)"
+                    <input type="text" name="no_hp" id="edit-nohp" required inputmode="numeric" maxlength="14"
+                        minlength="10" oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 14)"
                         class="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-xs sm:text-sm font-mono focus:outline-none focus:ring-2 focus:ring-primary-500 focus:bg-white transition hover:bg-white hover:border-primary-500">
                     <p class="text-[10px] text-gray-400 mt-1">Hanya angka, maksimal 14 digit</p>
                 </div>
@@ -714,21 +716,22 @@
                         class="hidden absolute z-50 left-0 right-0 mt-1 bg-white border border-gray-200 rounded-xl shadow-xl overflow-hidden animate-in fade-in duration-100">
                         <div class="p-2 border-b border-gray-100 bg-gray-50/90 sticky top-0 z-10">
                             <div class="relative">
-                                <span class="absolute inset-y-0 left-0 flex items-center pl-2.5 pointer-events-none text-gray-400">
+                                <span
+                                    class="absolute inset-y-0 left-0 flex items-center pl-2.5 pointer-events-none text-gray-400">
                                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                             d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                                     </svg>
                                 </span>
-                                <input type="text" id="edit-divisi-search-input" oninput="filterEditDivisiOptions(this.value)"
+                                <input type="text" id="edit-divisi-search-input"
+                                    oninput="filterEditDivisiOptions(this.value)"
                                     placeholder="Ketik untuk mencari divisi..."
                                     class="w-full pl-8 pr-3 py-1.5 bg-white border border-gray-200 rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
                             </div>
                         </div>
                         <div id="edit-divisi-options-list" class="max-h-48 overflow-y-auto divide-y divide-gray-50">
                             @foreach($divisiList as $div)
-                                <div onclick="selectEditDivisi('{{ addslashes($div) }}')"
-                                    data-search="{{ strtolower($div) }}"
+                                <div onclick="selectEditDivisi('{{ addslashes($div) }}')" data-search="{{ strtolower($div) }}"
                                     class="edit-divisi-option px-3 py-2 hover:bg-primary-50 cursor-pointer transition flex items-center justify-between text-xs font-medium text-gray-700 hover:text-primary-700">
                                     <span>{{ $div }}</span>
                                 </div>
@@ -782,19 +785,19 @@
             document.getElementById('edit-nama').value = nama;
             document.getElementById('edit-nohp').value = noHp;
             document.getElementById('edit-kampus').value = kampus;
-            
+
             // Set divisi searchable dropdown
             document.getElementById('edit-pemagang-divisi').value = divisi;
             document.getElementById('edit-selected-divisi-text').textContent = divisi;
             document.getElementById('edit-selected-divisi-text').classList.remove('text-gray-400');
             document.getElementById('edit-selected-divisi-text').classList.add('text-gray-800', 'font-medium');
-            
+
             // Reset search and close dropdown
             const searchInput = document.getElementById('edit-divisi-search-input');
             if (searchInput) { searchInput.value = ''; filterEditDivisiOptions(''); }
             const dropdown = document.getElementById('edit-divisi-dropdown-menu');
             if (dropdown) dropdown.classList.add('hidden');
-            
+
             document.getElementById('modal-edit-pemagang').classList.remove('hidden');
         }
         function closeEditPemagangModal() {
@@ -1017,13 +1020,13 @@
         }
 
         // Tutup dropdown saat klik di luar
-        document.addEventListener('click', function(e) {
+        document.addEventListener('click', function (e) {
             const container = document.getElementById('add-searchable-divisi-container');
             if (container && !container.contains(e.target)) {
                 const dropdown = document.getElementById('add-divisi-dropdown-menu');
                 if (dropdown) dropdown.classList.add('hidden');
             }
-            
+
             const editContainer = document.getElementById('edit-searchable-divisi-container');
             if (editContainer && !editContainer.contains(e.target)) {
                 const editDropdown = document.getElementById('edit-divisi-dropdown-menu');

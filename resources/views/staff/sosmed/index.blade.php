@@ -9,6 +9,15 @@
 @section('content')
     @include('components.notification-popup')
 
+    @if($errors->any())
+        <script>
+            document.addEventListener('DOMContentLoaded', () => {
+                const m = document.getElementById('modal-my-submit');
+                if (m) m.classList.remove('hidden');
+            });
+        </script>
+    @endif
+
     {{-- ═══════════════════════════════════════════════════════════════ --}}
     {{-- STAT CARDS --}}
     {{-- ═══════════════════════════════════════════════════════════════ --}}
@@ -56,7 +65,7 @@
         <div class="flex border-b border-gray-200 overflow-x-auto">
             <a href="{{ route('staff.sosmed.index', ['tab' => 'accounts']) }}"
                 class="flex items-center gap-2 px-5 py-3.5 text-sm font-medium whitespace-nowrap border-b-2 transition
-                                      {{ $tab === 'accounts' ? 'border-primary-600 text-primary-600 bg-primary-50/50' : 'border-transparent text-gray-500 hover:text-gray-700' }}">
+                                                                      {{ $tab === 'accounts' ? 'border-primary-600 text-primary-600 bg-primary-50/50' : 'border-transparent text-gray-500 hover:text-gray-700' }}">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                         d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
@@ -65,7 +74,7 @@
             </a>
             <a href="{{ route('staff.sosmed.index', ['tab' => 'approvals']) }}"
                 class="flex items-center gap-2 px-5 py-3.5 text-sm font-medium whitespace-nowrap border-b-2 transition
-                                      {{ $tab === 'approvals' ? 'border-primary-600 text-primary-600 bg-primary-50/50' : 'border-transparent text-gray-500 hover:text-gray-700' }}">
+                                                                      {{ $tab === 'approvals' ? 'border-primary-600 text-primary-600 bg-primary-50/50' : 'border-transparent text-gray-500 hover:text-gray-700' }}">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                         d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -79,7 +88,7 @@
             </a>
             <a href="{{ route('staff.sosmed.index', ['tab' => 'tasks']) }}"
                 class="flex items-center gap-2 px-5 py-3.5 text-sm font-medium whitespace-nowrap border-b-2 transition
-                                      {{ $tab === 'tasks' ? 'border-primary-600 text-primary-600 bg-primary-50/50' : 'border-transparent text-gray-500 hover:text-gray-700' }}">
+                                                                      {{ $tab === 'tasks' ? 'border-primary-600 text-primary-600 bg-primary-50/50' : 'border-transparent text-gray-500 hover:text-gray-700' }}">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                         d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
@@ -88,7 +97,7 @@
             </a>
             <a href="{{ route('staff.sosmed.index', ['tab' => 'my_accounts']) }}"
                 class="flex items-center gap-2 px-5 py-3.5 text-sm font-medium whitespace-nowrap border-b-2 transition
-                                      {{ $tab === 'my_accounts' ? 'border-primary-600 text-primary-600 bg-primary-50/50' : 'border-transparent text-gray-500 hover:text-gray-700' }}">
+                                                                      {{ $tab === 'my_accounts' ? 'border-primary-600 text-primary-600 bg-primary-50/50' : 'border-transparent text-gray-500 hover:text-gray-700' }}">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                         d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
@@ -108,7 +117,8 @@
                     <div class="mb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                         <div>
                             <h3 class="text-sm font-semibold text-gray-800">Daftar Akun & Delegasi Tanggung Jawab</h3>
-                            <p class="text-xs text-gray-500 mt-0.5">HR Staff membagikan akun sosial media kepada PM agar PM hanya dapat
+                            <p class="text-xs text-gray-500 mt-0.5">HR Staff membagikan akun sosial media kepada PM agar PM hanya
+                                dapat
                                 mengelola akun yang menjadi tanggung jawabnya.</p>
                         </div>
                         <button onclick="openAssignTaskModal()"
@@ -116,7 +126,7 @@
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
                             </svg>
-                            Beri Tugas Pengelolaan Sosmed
+                            Beri Tugas
                         </button>
                     </div>
 
@@ -133,8 +143,7 @@
                                 <col class="w-28"> {{-- Aksi --}}
                             </colgroup>
                             <thead>
-                                <tr
-                                    class="bg-gray-50 border-b border-gray-200 text-xs font-semibold text-gray-500 tracking-wide">
+                                <tr class="bg-gray-50 border-b border-gray-200 text-xs font-semibold text-gray-500 tracking-wide">
                                     <th class="px-4 py-3 text-left">Nama Akun</th>
                                     <th class="px-4 py-3 text-left">Platform</th>
                                     <th class="px-4 py-3 text-left">URL</th>
@@ -176,7 +185,7 @@
                                         <td class="px-4 py-3 text-xs min-w-0">
                                             @if($acc->staffUser)
                                                 @php
-                                                    $stRoleTag = match($acc->staffUser->role) {
+                                                    $stRoleTag = match ($acc->staffUser->role) {
                                                         'pm' => 'PM Mandiri',
                                                         'sosmed' => 'Staff Sosmed',
                                                         'digital_marketing' => 'Digital Marketing',
@@ -193,13 +202,15 @@
                                                             title="{{ $acc->staffUser->name }}">
                                                             {{ $acc->staffUser->name }}
                                                         </span>
-                                                        <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold mt-0.5 {{ $acc->staffUser->role === 'pm' ? 'bg-indigo-50 text-indigo-700 border border-indigo-200' : 'bg-pink-50 text-pink-700 border border-pink-200' }}">
+                                                        <span
+                                                            class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold mt-0.5 {{ $acc->staffUser->role === 'pm' ? 'bg-indigo-50 text-indigo-700 border border-indigo-200' : 'bg-pink-50 text-pink-700 border border-pink-200' }}">
                                                             {{ $stRoleTag }}
                                                         </span>
                                                     </div>
                                                 </div>
                                             @else
-                                                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-amber-50 text-amber-700 border border-amber-200 whitespace-nowrap">
+                                                <span
+                                                    class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium borde bg-gray-100 text-gray-600 whitespace-nowrap">
                                                     Belum Ditugaskan
                                                 </span>
                                             @endif
@@ -220,13 +231,15 @@
                                                             title="{{ $acc->pmUser->name }}">
                                                             {{ $acc->pmUser->name }}
                                                         </span>
-                                                        <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold mt-0.5 bg-purple-50 text-purple-700 border border-purple-200">
+                                                        <span
+                                                            class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold mt-0.5 bg-purple-50 text-purple-700 border border-purple-200">
                                                             Supervisor PM
                                                         </span>
                                                     </div>
                                                 </div>
                                             @else
-                                                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600 whitespace-nowrap">
+                                                <span
+                                                    class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600 whitespace-nowrap">
                                                     Belum Ada PM
                                                 </span>
                                             @endif
@@ -235,46 +248,79 @@
                                         <td class="px-4 py-3 text-xs min-w-0">
                                             @if($acc->assistantUser)
                                                 <div class="flex items-start gap-2 min-w-0">
-                                                    <div class="w-6 h-6 rounded-full bg-teal-100 text-teal-700 font-bold flex items-center justify-center text-[10px] flex-shrink-0 mt-0.5">
+                                                    <div
+                                                        class="w-6 h-6 rounded-full bg-teal-100 text-teal-700 font-bold flex items-center justify-center text-[10px] flex-shrink-0 mt-0.5">
                                                         {{ strtoupper(substr($acc->assistantUser->name, 0, 1)) }}
                                                     </div>
                                                     <div class="min-w-0 flex-1">
-                                                        <span class="font-semibold text-gray-800 block truncate" title="{{ $acc->assistantUser->name }}">
+                                                        <span class="font-semibold text-gray-800 block truncate"
+                                                            title="{{ $acc->assistantUser->name }}">
                                                             {{ $acc->assistantUser->name }}
                                                         </span>
-                                                        <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold mt-0.5 bg-teal-50 text-teal-700 border border-teal-200">
+                                                        <span
+                                                            class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold mt-0.5 bg-teal-50 text-teal-700 border border-teal-200">
                                                             Asisten HR
                                                         </span>
                                                     </div>
                                                 </div>
                                             @else
-                                                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-400 whitespace-nowrap">
+                                                <span
+                                                    class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600  whitespace-nowrap">
                                                     Tanpa Asisten
                                                 </span>
                                             @endif
                                         </td>
+                                        @php $adminLocked = $acc->staffUser && $acc->staffUser->role === 'hr_staff'; @endphp
                                         <td class="px-4 py-3.5 text-center">
-                                            <div class="flex items-center justify-center gap-1.5">
-                                                <button
-                                                    onclick="openAssignModal({{ $acc->id }}, '{{ addslashes($acc->name) }}', {{ $acc->pm_id ?? 'null' }}, {{ $acc->staff_id ?? 'null' }}, {{ $acc->assistant_id ?? 'null' }}, '{{ $acc->staffUser?->role ?? '' }}')"
-                                                    class="px-2.5 py-1 bg-primary-50 hover:bg-primary-100 text-primary-700 text-xs font-semibold rounded-lg transition whitespace-nowrap"
-                                                    title="Atur PJ">
-                                                    Atur PJ
-                                                </button>
-                                                @if($acc->staff_id)
-                                                    <form method="POST" action="{{ route('staff.sosmed.accounts.unassign', $acc) }}"
-                                                        onsubmit="return confirm('Lepas penugasan untuk akun {{ addslashes($acc->name) }}? Akun akan kembali tersedia di dropdown penugasan.')" class="inline">
-                                                        @csrf
-                                                        <button type="submit"
-                                                            class="p-1 text-gray-400 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition"
-                                                            title="Lepas Penugasan (Kembalikan ke Akun Tersedia)">
-                                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                                    d="M13 7a4 4 0 11-8 0 4 4 0 018 0zM9 14a6 6 0 00-6 6v1h12v-1a6 6 0 00-6-6zM21 12h-6" />
-                                                            </svg>
-                                                        </button>
-                                                    </form>
+                                            <div class="flex items-center justify-center gap-1">
+                                                @if($adminLocked)
+                                                    {{-- Akun dikunci Admin: tombol atur tampil disabled --}}
+                                                    <button type="button" disabled
+                                                        class="p-1.5 text-gray-300 bg-gray-50 rounded-lg cursor-not-allowed"
+                                                        title="Pengelolaan ditetapkan oleh Admin, tidak dapat diubah">
+                                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                                d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                                                        </svg>
+                                                    </button>
+                                                @else
+                                                    <button type="button"
+                                                        onclick="openAssignModal({{ $acc->id }}, '{{ addslashes($acc->name) }}', {{ $acc->pm_id ?? 'null' }}, {{ $acc->staff_id ?? 'null' }}, {{ $acc->assistant_id ?? 'null' }}, '{{ $acc->staffUser?->role ?? '' }}', '{{ addslashes($acc->platform) }}', '{{ addslashes($acc->link ?? '') }}', '{{ addslashes(str_replace(["\r", "\n"], [' ', ' '], $acc->notes ?? '')) }}')"
+                                                        class="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition"
+                                                        title="Atur Penugasan">
+                                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                                d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                                        </svg>
+                                                    </button>
+                                                    @if($acc->staff_id)
+                                                        <form method="POST" action="{{ route('staff.sosmed.accounts.unassign', $acc) }}"
+                                                            onsubmit="return confirm('Lepas penugasan untuk akun {{ addslashes($acc->name) }}? Akun tetap berada di daftar kelola sosmed dengan status belum ditugaskan.')"
+                                                            class="inline">
+                                                            @csrf
+                                                            <button type="submit"
+                                                                class="p-1.5 text-gray-400 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition"
+                                                                title="Lepas Penugasan (Jadikan Belum Ditugaskan)">
+                                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                                        d="M13 7a4 4 0 11-8 0 4 4 0 018 0zM9 14a6 6 0 00-6 6v1h12v-1a6 6 0 00-6-6zM21 12h-6" />
+                                                                </svg>
+                                                            </button>
+                                                        </form>
+                                                    @endif
                                                 @endif
+                                                <form method="POST" action="{{ route('staff.sosmed.accounts.destroy', $acc) }}"
+                                                    onsubmit="return confirm('Hapus akun {{ addslashes($acc->name) }} dari daftar kelola sosmed?')">
+                                                    @csrf @method('DELETE')
+                                                    <button type="submit"
+                                                        class="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition"
+                                                        title="Hapus dari Kelola Sosmed">
+                                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                                        </svg>
+                                                    </button>
+                                                </form>
                                             </div>
                                         </td>
                                     </tr>
@@ -299,25 +345,55 @@
                                             {{ $acc->platform_icon }} {{ $acc->platform }}
                                         </span>
                                     </div>
+                                    @php $adminLocked = $acc->staffUser && $acc->staffUser->role === 'hr_staff'; @endphp
                                     <div class="flex items-center gap-1 shrink-0">
-                                        <button
-                                            onclick="openAssignModal({{ $acc->id }}, '{{ addslashes($acc->name) }}', {{ $acc->pm_id ?? 'null' }}, {{ $acc->staff_id ?? 'null' }}, {{ $acc->assistant_id ?? 'null' }}, '{{ $acc->staffUser?->role ?? '' }}')"
-                                            class="px-2.5 py-1.5 bg-primary-50 hover:bg-primary-100 text-primary-700 text-xs font-semibold rounded-lg transition"
-                                            title="Atur PJ">
-                                            Atur PJ
-                                        </button>
-                                        @if($acc->staff_id)
-                                            <form method="POST" action="{{ route('staff.sosmed.accounts.unassign', $acc) }}"
-                                                onsubmit="return confirm('Lepas penugasan untuk akun {{ addslashes($acc->name) }}?')" class="inline">
-                                                @csrf
-                                                <button type="submit" class="p-1.5 text-gray-400 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition" title="Lepas Penugasan">
-                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                            d="M13 7a4 4 0 11-8 0 4 4 0 018 0zM9 14a6 6 0 00-6 6v1h12v-1a6 6 0 00-6-6zM21 12h-6" />
-                                                    </svg>
-                                                </button>
-                                            </form>
+                                        @if($adminLocked)
+                                            <button type="button" disabled
+                                                class="p-1.5 text-gray-300 bg-gray-50 rounded-lg cursor-not-allowed"
+                                                title="Pengelolaan ditetapkan oleh Admin, tidak dapat diubah">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                        d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                                                </svg>
+                                            </button>
+                                        @else
+                                            <button type="button"
+                                                onclick="openAssignModal({{ $acc->id }}, '{{ addslashes($acc->name) }}', {{ $acc->pm_id ?? 'null' }}, {{ $acc->staff_id ?? 'null' }}, {{ $acc->assistant_id ?? 'null' }}, '{{ $acc->staffUser?->role ?? '' }}', '{{ addslashes($acc->platform) }}', '{{ addslashes($acc->link ?? '') }}', '{{ addslashes(str_replace(["\r", "\n"], [' ', ' '], $acc->notes ?? '')) }}')"
+                                                class="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition"
+                                                title="Atur Penugasan">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                        d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                                </svg>
+                                            </button>
+                                            @if($acc->staff_id)
+                                                <form method="POST" action="{{ route('staff.sosmed.accounts.unassign', $acc) }}"
+                                                    onsubmit="return confirm('Lepas penugasan untuk akun {{ addslashes($acc->name) }}? Akun tetap berada di daftar kelola sosmed dengan status belum ditugaskan.')"
+                                                    class="inline">
+                                                    @csrf
+                                                    <button type="submit"
+                                                        class="p-1.5 text-gray-400 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition"
+                                                        title="Lepas Penugasan (Jadikan Belum Ditugaskan)">
+                                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                                d="M13 7a4 4 0 11-8 0 4 4 0 018 0zM9 14a6 6 0 00-6 6v1h12v-1a6 6 0 00-6-6zM21 12h-6" />
+                                                        </svg>
+                                                    </button>
+                                                </form>
+                                            @endif
                                         @endif
+                                        <form method="POST" action="{{ route('staff.sosmed.accounts.destroy', $acc) }}"
+                                            onsubmit="return confirm('Hapus akun {{ addslashes($acc->name) }} dari daftar kelola sosmed?')">
+                                            @csrf @method('DELETE')
+                                            <button type="submit"
+                                                class="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition"
+                                                title="Hapus dari Kelola Sosmed">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                                </svg>
+                                            </button>
+                                        </form>
                                     </div>
                                 </div>
 
@@ -339,7 +415,7 @@
                                             <p class="text-gray-400 mb-0.5">Eksekutor</p>
                                             @if($acc->staffUser)
                                                 @php
-                                                    $mStRoleTag = match($acc->staffUser->role) {
+                                                    $mStRoleTag = match ($acc->staffUser->role) {
                                                         'pm' => 'PM Mandiri',
                                                         'sosmed' => 'Staff Sosmed',
                                                         'digital_marketing' => 'Digital Marketing',
@@ -347,7 +423,8 @@
                                                     };
                                                 @endphp
                                                 <span class="font-medium text-gray-800 truncate block">
-                                                    {{ $acc->staffUser->name }} <span class="text-[10px] text-gray-500 font-normal">({{ $mStRoleTag }})</span>
+                                                    {{ $acc->staffUser->name }} <span
+                                                        class="text-[10px] text-gray-500 font-normal">({{ $mStRoleTag }})</span>
                                                 </span>
                                             @else
                                                 <span class="text-amber-600 font-medium">Belum Ditugaskan</span>
@@ -423,7 +500,8 @@
                                 <button onclick="openVerifyModal({{ $task->id }}, '{{ addslashes($task->title) }}')"
                                     class="inline-flex items-center gap-1.5 px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white text-xs font-semibold rounded-xl transition shadow-sm whitespace-nowrap">
                                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                                     </svg>
                                     Final Approve
                                 </button>
@@ -434,7 +512,7 @@
                     <div class="flex flex-col items-center justify-center py-16 text-center">
                         <div class="w-16 h-16 rounded-full bg-green-50 flex items-center justify-center mb-4">
                             <svg class="w-8 h-8 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                             </svg>
                         </div>
                         <p class="text-sm font-semibold text-gray-700">Semua Tugas Sudah Selesai Diverifikasi</p>
@@ -580,7 +658,8 @@
                         Upload bukti pengerjaan konten harian untuk akun yang ditetapkan Admin kepada Anda.
                     </p>
                 </div>
-                <div class="text-xs bg-indigo-50 border border-indigo-200 text-indigo-700 px-3 py-1.5 rounded-lg font-medium shrink-0">
+                <div
+                    class="text-xs bg-indigo-50 border border-indigo-200 text-indigo-700 px-3 py-1.5 rounded-lg font-medium shrink-0">
                     Hari Ini: <span class="font-bold">{{ now()->translatedFormat('d M Y') }}</span>
                 </div>
             </div>
@@ -610,29 +689,31 @@
                                 $myTask = $todayTasks[$acc->id] ?? null;
                                 $myStatus = $myTask?->status ?? 'pending';
                                 $isSubmitted = in_array($myStatus, ['done_by_staff', 'verified_by_pm', 'approved_hr']);
-                                $isRejected  = $myStatus === 'rejected';
+                                $isRejected = $myStatus === 'rejected';
                             @endphp
                             <tr class="hover:bg-gray-50/80 transition align-middle">
                                 <td class="px-4 py-3.5">
                                     <p class="font-semibold text-gray-800 truncate">{{ $acc->name }}</p>
                                     @if($acc->link)
                                         <a href="{{ $acc->link }}" target="_blank"
-                                           class="inline-flex items-center gap-1 text-xs text-primary-600 hover:underline mt-0.5">
+                                            class="inline-flex items-center gap-1 text-xs text-primary-600 hover:underline mt-0.5">
                                             <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                    d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+                                                    d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
                                             </svg>
                                             Buka Profil
                                         </a>
                                     @endif
                                     @if($isRejected && $myTask?->rejection_note)
-                                        <p class="text-xs text-rose-600 mt-1 bg-rose-50 px-2 py-1 rounded border border-rose-200 leading-snug">
+                                        <p
+                                            class="text-xs text-rose-600 mt-1 bg-rose-50 px-2 py-1 rounded border border-rose-200 leading-snug">
                                             ↩ "{{ $myTask->rejection_note }}"
                                         </p>
                                     @endif
                                 </td>
                                 <td class="px-4 py-3.5">
-                                    <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-medium border {{ $acc->platform_color }}">
+                                    <span
+                                        class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-medium border {{ $acc->platform_color }}">
                                         {{ $acc->platform_icon }} {{ $acc->platform }}
                                     </span>
                                 </td>
@@ -643,7 +724,7 @@
                                             class="inline-flex items-center gap-1 text-xs text-primary-600 hover:underline font-medium">
                                             <svg class="w-3 h-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                    d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/>
+                                                    d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
                                             </svg>
                                             {{ $myTask->link_count }} link bukti
                                         </button>
@@ -653,11 +734,14 @@
                                 </td>
                                 <td class="px-4 py-3.5">
                                     @if($myTask)
-                                        <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium {{ $myTask->status_badge_class }}">
+                                        <span
+                                            class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium {{ $myTask->status_badge_class }}">
                                             {{ $myTask->status_label }}
                                         </span>
                                     @else
-                                        <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-500">Belum Dikerjakan</span>
+                                        <span
+                                            class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-500">Belum
+                                            Dikerjakan</span>
                                     @endif
                                 </td>
                                 <td class="px-4 py-3.5 text-center">
@@ -668,7 +752,7 @@
                                             {{ $isRejected ? 'Revisi' : 'Submit Bukti' }}
                                         </button>
                                     @else
-                                        <span class="text-xs text-gray-400 italic">Terkunci</span>
+                                        <span class="text-xs text-gray-400 italic">-</span>
                                     @endif
                                 </td>
                             </tr>
@@ -690,24 +774,27 @@
                         $myTask = $todayTasks[$acc->id] ?? null;
                         $myStatus = $myTask?->status ?? 'pending';
                         $isSubmitted = in_array($myStatus, ['done_by_staff', 'verified_by_pm', 'approved_hr']);
-                        $isRejected  = $myStatus === 'rejected';
+                        $isRejected = $myStatus === 'rejected';
                     @endphp
                     <div class="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
                         <div class="flex items-start justify-between gap-3 mb-3">
                             <div class="min-w-0 flex-1">
                                 <p class="font-semibold text-gray-800 text-sm truncate">{{ $acc->name }}</p>
-                                <span class="inline-flex items-center gap-1 mt-1 px-2 py-0.5 rounded-md text-[10px] font-medium border whitespace-nowrap {{ $acc->platform_color }}">
+                                <span
+                                    class="inline-flex items-center gap-1 mt-1 px-2 py-0.5 rounded-md text-[10px] font-medium border whitespace-nowrap {{ $acc->platform_color }}">
                                     {{ $acc->platform_icon }} {{ $acc->platform }}
                                 </span>
                                 @if($isRejected && $myTask?->rejection_note)
-                                    <p class="text-xs text-rose-600 mt-1 bg-rose-50 px-2 py-1 rounded border border-rose-200 leading-snug">
+                                    <p
+                                        class="text-xs text-rose-600 mt-1 bg-rose-50 px-2 py-1 rounded border border-rose-200 leading-snug">
                                         ↩ "{{ $myTask->rejection_note }}"
                                     </p>
                                 @endif
                             </div>
                             <div class="flex-shrink-0">
                                 @if($isSubmitted)
-                                    <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium {{ $myTask->status_badge_class }}">
+                                    <span
+                                        class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium {{ $myTask->status_badge_class }}">
                                         {{ $myTask->status_label }}
                                     </span>
                                 @else
@@ -726,7 +813,7 @@
                                     class="inline-flex items-center gap-1 text-xs text-primary-600 hover:underline font-medium">
                                     <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/>
+                                            d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
                                     </svg>
                                     {{ $myTask->link_count }} link bukti
                                 </button>
@@ -760,7 +847,7 @@
                 </button>
             </div>
 
-            <form method="POST" action="{{ route('staff.sosmed.assign') }}" class="p-6 space-y-4 overflow-y-auto">
+            <form method="POST" action="{{ route('staff.sosmed.assign') }}" class="p-6 pt-1 space-y-4 overflow-y-auto">
                 @csrf
 
                 {{-- Dropdown Searchable: Pilih Akun yang Tersedia --}}
@@ -775,8 +862,8 @@
                         class="w-full flex items-center justify-between border border-gray-300 rounded-lg px-3 py-2.5 text-sm bg-white hover:bg-gray-50 focus:ring-2 focus:ring-primary-500 focus:outline-none transition">
                         <span x-show="selectedId" class="font-medium text-gray-800" x-text="selectedLabel"></span>
                         <span x-show="!selectedId" class="text-gray-400">-- Pilih Akun Tersedia --</span>
-                        <svg class="w-4 h-4 text-gray-400 transition-transform duration-150" :class="open ? 'rotate-180' : ''"
-                            fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg class="w-4 h-4 text-gray-400 transition-transform duration-150"
+                            :class="open ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                         </svg>
                     </button>
@@ -787,7 +874,8 @@
                         {{-- Search Input --}}
                         <div class="p-2 border-b border-gray-100 bg-gray-50/80 sticky top-0">
                             <div class="relative">
-                                <span class="absolute inset-y-0 left-0 flex items-center pl-2.5 pointer-events-none text-gray-400">
+                                <span
+                                    class="absolute inset-y-0 left-0 flex items-center pl-2.5 pointer-events-none text-gray-400">
                                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                             d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -808,14 +896,18 @@
                                     <span x-text="`${acc.name} (${acc.platform})`"></span>
                                     <span x-show="selectedId == acc.id" class="text-primary-600">
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M5 13l4 4L19 7" />
                                         </svg>
                                     </span>
                                 </button>
                             </template>
 
-                            <div x-show="filteredAccounts.length === 0" class="p-4 text-center text-xs text-gray-400 italic">
-                                <span x-show="accounts.length === 0">Semua akun sudah ditugaskan atau belum ada akun di sistem.</span>
+                            <div x-show="filteredAccounts.length === 0"
+                                class="p-4 text-center text-xs text-gray-400 italic">
+                                <span x-show="accounts.length === 0">Semua akun sudah dimasukkan ke daftar kelola sosmed
+                                    atau belum ada akun di
+                                    sistem.</span>
                                 <span x-show="accounts.length > 0">Tidak ada akun yang cocok dengan pencarian.</span>
                             </div>
                         </div>
@@ -825,14 +917,16 @@
                 {{-- Link Akun (Readonly & Auto-filled) --}}
                 <div>
                     <label class="block text-xs font-semibold text-gray-700 mb-1.5">
-                        Link Akun <span class="text-xs text-gray-400 font-normal">(Otomatis terisi & tidak dapat diubah)</span>
+                        Link Akun <span class="text-xs text-gray-400 font-normal">(Otomatis terisi & tidak dapat
+                            diubah)</span>
                     </label>
-                    <div class="relative">
+                    <div
+                        class="relative flex items-center w-full bg-gray-100/80 border border-gray-300 rounded-lg focus-within:ring-2 focus-within:ring-primary-500">
                         <input type="text" readonly :value="selectedLink || '-'"
-                            class="w-full bg-gray-100/80 border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-600 cursor-not-allowed select-all focus:outline-none">
-                        <template x-if="selectedLink">
+                            class="w-full bg-transparent border-none px-3 py-2 text-sm text-gray-600 cursor-not-allowed select-all focus:outline-none focus:ring-0">
+                        <template x-if="selectedLink && selectedLink !== '-'">
                             <a :href="selectedLink" target="_blank" rel="noopener noreferrer"
-                                class="absolute right-2.5 top-1/2 -translate-y-1/2 p-1 text-primary-600 hover:text-primary-800"
+                                class="shrink-0 mr-2.5 p-1 text-primary-600 hover:text-primary-800"
                                 title="Buka Link di Tab Baru">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -846,11 +940,12 @@
                 {{-- Eksekutor Akun --}}
                 <div>
                     <label class="block text-xs font-semibold text-gray-700 mb-1.5">
-                        Eksekutor Akun (Dikelola Oleh) <span class="text-red-500">*</span>
+                        Eksekutor Akun (Dikelola Oleh) <span class="text-gray-400 font-normal">(Opsional)</span>
                     </label>
-                    <select name="staff_id" required
+                    <select name="staff_id" id="assign-task-staff"
+                        onchange="syncSupervisorState(this, 'assign-task-pm', 'assign-task-pm-hint', 'assign-task-ast')"
                         class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 focus:outline-none">
-                        <option value="">-- Pilih Eksekutor --</option>
+                        <option value="" data-role="">-- Belum Ditugaskan / Pilih Nanti --</option>
                         @foreach($executors as $ex)
                             @php
                                 $exRoleLabel = match ($ex->role) {
@@ -860,7 +955,8 @@
                                     default => $ex->role_label ?? strtoupper($ex->role)
                                 };
                             @endphp
-                            <option value="{{ $ex->id }}">{{ $ex->name }} ({{ $exRoleLabel }})</option>
+                            <option value="{{ $ex->id }}" data-role="{{ $ex->role }}">{{ $ex->name }} ({{ $exRoleLabel }})
+                            </option>
                         @endforeach
                     </select>
                 </div>
@@ -870,13 +966,15 @@
                     <label class="block text-xs font-semibold text-gray-700 mb-1.5">
                         Supervisor PM <span class="text-gray-400 font-normal">(Opsional)</span>
                     </label>
-                    <select name="pm_id"
+                    <select name="pm_id" id="assign-task-pm"
                         class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 focus:outline-none">
                         <option value="">-- Tanpa Supervisor / Langsung ke HR --</option>
                         @foreach($pms as $pm)
                             <option value="{{ $pm->id }}">{{ $pm->name }} (PM)</option>
                         @endforeach
                     </select>
+                    <p id="assign-task-pm-hint" class="text-[11px] text-gray-400 mt-1">PM yang berwenang meninjau & approve
+                        tugas.</p>
                 </div>
 
                 {{-- Asisten Pengawas --}}
@@ -884,7 +982,7 @@
                     <label class="block text-xs font-semibold text-gray-700 mb-1.5">
                         Asisten Pengawas <span class="text-gray-400 font-normal">(Opsional)</span>
                     </label>
-                    <select name="assistant_id"
+                    <select name="assistant_id" id="assign-task-ast"
                         class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 focus:outline-none">
                         <option value="">-- Tanpa Asisten --</option>
                         @foreach($assistants as $ast)
@@ -904,43 +1002,80 @@
                     <button type="button" onclick="document.getElementById('modal-assign-task').classList.add('hidden')"
                         class="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-sm text-gray-700 hover:bg-gray-50 transition">Batal</button>
                     <button type="submit"
-                        class="flex-1 px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-lg text-sm font-semibold shadow-sm transition">Tugaskan Akun</button>
+                        class="flex-1 px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-lg text-sm font-semibold shadow-sm transition">Tambahkan
+                        ke Sosmed</button>
                 </div>
             </form>
         </div>
     </div>
 
     {{-- ── MODAL DELEGASI AKUN (HR STAFF) ─────────────────────────── --}}
-    <div id="modal-assign" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4">
-        <div class="absolute inset-0 bg-black/50 backdrop-blur-sm"
-            onclick="document.getElementById('modal-assign').classList.add('hidden')"></div>
-        <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-md z-10 overflow-visible">
+    <div id="modal-assign" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4"
+        x-data="editAccountDropdown({{ json_encode($availableAccounts) }})"
+        @open-edit-account.window="initAccount($event.detail)">
+        <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" onclick="closeAssignModal()"></div>
+        <div
+            class="relative bg-white rounded-2xl shadow-2xl w-full max-w-lg z-10 max-h-[90vh] flex flex-col overflow-visible">
             <div class="flex items-center justify-between px-6 py-4 border-b border-gray-200">
                 <div>
                     <h3 class="text-base font-bold text-gray-800">Atur Penugasan Akun Sosmed</h3>
-                    <p class="text-xs text-gray-400 mt-0.5">Tentukan eksekutor harian dan supervisor pengawas</p>
+                    <p class="text-xs text-gray-400 mt-0.5">Perbarui akun yang dikelola, eksekutor, supervisor, dan arahan
+                    </p>
                 </div>
-                <button onclick="document.getElementById('modal-assign').classList.add('hidden')"
-                    class="text-gray-400 hover:text-gray-600">
+                <button type="button" onclick="closeAssignModal()" class="text-gray-400 hover:text-gray-600 transition">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                     </svg>
                 </button>
             </div>
-            <form id="form-assign" method="POST" action="" class="p-6 pt-1 space-y-4">
-                @csrf @method('PATCH')
-                <div class="bg-gray-50 p-3 rounded-lg border border-gray-200">
-                    <p class="text-xs text-gray-500 mb-0.5">Nama Akun Sosial Media</p>
-                    <p id="assign-acc-name" class="text-sm font-bold text-gray-800"></p>
-                </div>
+            <form id="form-assign" method="POST" action="" class="p-6 pt-1 space-y-4 overflow-y-auto">
+                @csrf
+                @method('PATCH')
+
+                {{-- Akun yang Dikelola (Readonly / Disabled) --}}
                 <div>
-                    <label class="block text-xs font-semibold text-gray-700 mb-1">1. Eksekutor Akun (Dikelola Oleh)</label>
-                    <select name="staff_id" id="assign-staff-sel" onchange="syncSupervisorState(this, 'assign-pm-sel', 'assign-pm-hint')"
+                    <label class="block text-xs font-semibold text-gray-700 mb-1.5">
+                        Akun yang Dikelola <span class="text-xs text-gray-400 font-normal">(Tidak dapat diubah)</span>
+                    </label>
+                    <input type="hidden" name="sosmed_account_id" :value="selectedId">
+                    <input type="text" readonly :value="selectedLabel"
+                        class="w-full bg-gray-100/80 border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-600 cursor-not-allowed select-all focus:outline-none">
+                </div>
+
+                {{-- Link Akun (Readonly & Auto-filled) --}}
+                <div>
+                    <label class="block text-xs font-semibold text-gray-700 mb-1.5">
+                        Link Akun <span class="text-xs text-gray-400 font-normal">(Otomatis terisi & tidak dapat
+                            diubah)</span>
+                    </label>
+                    <div class="relative">
+                        <input type="text" readonly :value="selectedLink || '-'"
+                            class="w-full bg-gray-100/80 border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-600 cursor-not-allowed select-all focus:outline-none">
+                        <template x-if="selectedLink && selectedLink !== '-'">
+                            <a :href="selectedLink" target="_blank" rel="noopener noreferrer"
+                                class="absolute right-2.5 top-1/2 -translate-y-1/2 p-1 text-primary-600 hover:text-primary-800"
+                                title="Buka Link di Tab Baru">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                                </svg>
+                            </a>
+                        </template>
+                    </div>
+                </div>
+
+                {{-- Eksekutor Akun --}}
+                <div>
+                    <label class="block text-xs font-semibold text-gray-700 mb-1.5">
+                        Eksekutor Akun (Dikelola Oleh) <span class="text-red-500">*</span>
+                    </label>
+                    <select name="staff_id" id="assign-staff-sel" required
+                        onchange="syncSupervisorState(this, 'assign-pm-sel', 'assign-pm-hint', 'assign-assistant-sel')"
                         class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 focus:outline-none">
                         <option value="" data-role="">-- Belum Ditugaskan --</option>
                         @foreach($executors as $ex)
                             @php
-                                $exRoleLabel = match($ex->role) {
+                                $exRoleLabel = match ($ex->role) {
                                     'pm' => 'PM Mandiri',
                                     'sosmed' => 'Staff Sosmed',
                                     'digital_marketing' => 'Digital Marketing',
@@ -952,10 +1087,15 @@
                             </option>
                         @endforeach
                     </select>
-                    <p id="assign-staff-note" class="text-[11px] text-gray-400 mt-1">User yang bertugas membuat & mengunggah konten.</p>
+                    <p id="assign-staff-note" class="text-[11px] text-gray-400 mt-1">User yang bertugas membuat & mengunggah
+                        konten.</p>
                 </div>
+
+                {{-- Supervisor PM --}}
                 <div>
-                    <label class="block text-xs font-semibold text-gray-700 mb-1">2. Supervisor (Diawasi Oleh PM)</label>
+                    <label class="block text-xs font-semibold text-gray-700 mb-1.5">
+                        Supervisor PM <span class="text-gray-400 font-normal">(Opsional)</span>
+                    </label>
                     <select name="pm_id" id="assign-pm-sel"
                         class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 focus:outline-none">
                         <option value="">-- Tanpa Supervisor / Langsung ke HR --</option>
@@ -963,10 +1103,15 @@
                             <option value="{{ $pm->id }}">{{ $pm->name }} (PM)</option>
                         @endforeach
                     </select>
-                    <p id="assign-pm-hint" class="text-[11px] text-gray-400 mt-1">PM yang berwenang meninjau & approve tugas. Jika PM mengelola akun mandiri, bagian ini otomatis dinonaktifkan.</p>
+                    <p id="assign-pm-hint" class="text-[11px] text-gray-400 mt-1">PM yang berwenang meninjau & approve
+                        tugas.</p>
                 </div>
+
+                {{-- Asisten Pengawas --}}
                 <div>
-                    <label class="block text-xs font-semibold text-gray-700 mb-1">3. Asisten Pengawas (Wewenang Verifikasi Asisten)</label>
+                    <label class="block text-xs font-semibold text-gray-700 mb-1.5">
+                        Asisten Pengawas <span class="text-gray-400 font-normal">(Opsional)</span>
+                    </label>
                     <select name="assistant_id" id="assign-assistant-sel"
                         class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 focus:outline-none">
                         <option value="">-- Tanpa Asisten / Belum Diberi Wewenang --</option>
@@ -974,13 +1119,24 @@
                             <option value="{{ $ast->id }}">{{ $ast->name }} (Asisten)</option>
                         @endforeach
                     </select>
-                    <p id="assign-ast-note" class="text-[11px] text-gray-400 mt-1">Jika dipilih, asisten ini berwenang melihat tugas dan memverifikasi Level-1 tugas akun ini.</p>
+                    <p id="assign-ast-note" class="text-[11px] text-gray-400 mt-1">Asisten HR yang berwenang meninjau &
+                        approve tugas akun ini sebagai backup PM.</p>
                 </div>
+
+                {{-- Catatan / Arahan Penugasan --}}
+                <div>
+                    <label class="block text-xs font-semibold text-gray-700 mb-1.5">Catatan / Arahan Penugasan</label>
+                    <textarea name="notes" id="assign-notes-input" rows="2"
+                        placeholder="Catatan atau instruksi pengelolaan akun..."
+                        class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 focus:outline-none"></textarea>
+                </div>
+
                 <div class="flex gap-3 pt-2">
-                    <button type="button" onclick="document.getElementById('modal-assign').classList.add('hidden')"
+                    <button type="button" onclick="closeAssignModal()"
                         class="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-sm text-gray-700 hover:bg-gray-50 transition">Batal</button>
                     <button type="submit"
-                        class="flex-1 px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-lg text-sm font-semibold shadow-sm transition">Simpan Penugasan</button>
+                        class="flex-1 px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-lg text-sm font-semibold shadow-sm transition">Simpan
+                        Penugasan</button>
                 </div>
             </form>
         </div>
@@ -988,37 +1144,38 @@
 
     {{-- ── MODAL VERIFIKASI FINAL (HR STAFF - APPROVE / REJECT) ─────── --}}
     <div id="modal-verify" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4"
-         x-data="{ action: 'verify' }"
-         @open-verify.window="action = 'verify'">
+        x-data="{ action: 'verify' }" @open-verify.window="action = 'verify'">
         <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" onclick="closeVerifyModal()"></div>
         <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-md z-10 overflow-hidden">
 
             {{-- Modal Header with Dynamic Color --}}
             <div class="px-6 py-4 flex items-center justify-between transition-colors"
-                 :class="action === 'verify' ? 'bg-purple-50 border-b border-purple-100' : 'bg-rose-50 border-b border-rose-100'">
+                :class="action === 'verify' ? 'bg-purple-50 border-b border-purple-100' : 'bg-rose-50 border-b border-rose-100'">
                 <div class="flex items-center gap-2.5">
                     <div class="w-8 h-8 rounded-lg flex items-center justify-center transition-colors"
-                         :class="action === 'verify' ? 'bg-purple-100 text-purple-600' : 'bg-rose-100 text-rose-600'">
+                        :class="action === 'verify' ? 'bg-purple-100 text-purple-600' : 'bg-rose-100 text-rose-600'">
                         <template x-if="action === 'verify'">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                             </svg>
                         </template>
                         <template x-if="action === 'reject'">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M6 18L18 6M6 6l12 12" />
                             </svg>
                         </template>
                     </div>
                     <div>
                         <h3 class="text-sm font-bold text-gray-800"
-                            x-text="action === 'verify' ? 'Final Approval Tugas (HR Staff)' : 'Tolak & Kembalikan Tugas'"></h3>
+                            x-text="action === 'verify' ? 'Final Approval Tugas (HR Staff)' : 'Tolak & Kembalikan Tugas'">
+                        </h3>
                         <p class="text-[11px] text-gray-400">Persetujuan akhir tingkat 2 untuk hasil konten tim sosmed</p>
                     </div>
                 </div>
                 <button type="button" onclick="closeVerifyModal()" class="text-gray-400 hover:text-gray-600 transition">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                     </svg>
                 </button>
             </div>
@@ -1037,21 +1194,20 @@
                 <div>
                     <label class="block text-xs font-semibold text-gray-600 mb-2">Keputusan Final HR</label>
                     <div class="grid grid-cols-2 gap-2 p-1 bg-gray-100 rounded-xl">
-                        <button type="button"
-                            @click="action = 'verify'"
+                        <button type="button" @click="action = 'verify'"
                             :class="action === 'verify' ? 'bg-white text-purple-700 shadow-sm font-bold' : 'text-gray-500 font-medium hover:text-gray-700'"
                             class="py-2 text-xs rounded-lg transition-all flex items-center justify-center gap-1.5">
                             <svg class="w-3.5 h-3.5 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                             </svg>
                             Approve Final
                         </button>
-                        <button type="button"
-                            @click="action = 'reject'"
+                        <button type="button" @click="action = 'reject'"
                             :class="action === 'reject' ? 'bg-white text-rose-700 shadow-sm font-bold' : 'text-gray-500 font-medium hover:text-gray-700'"
                             class="py-2 text-xs rounded-lg transition-all flex items-center justify-center gap-1.5">
                             <svg class="w-3.5 h-3.5 text-rose-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M6 18L18 6M6 6l12 12" />
                             </svg>
                             Tolak
                         </button>
@@ -1070,12 +1226,16 @@
                 </div>
 
                 {{-- Approval Note (conditionally visible) --}}
-                <div x-show="action === 'verify'" class="bg-purple-50 border border-purple-100 rounded-xl p-3 text-xs text-purple-800 leading-relaxed">
+                <div x-show="action === 'verify'"
+                    class="bg-purple-50 border border-purple-100 rounded-xl p-3 text-xs text-purple-800 leading-relaxed">
                     <div class="flex items-start gap-2">
-                        <svg class="w-4 h-4 text-purple-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        <svg class="w-4 h-4 text-purple-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor"
+                            viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
-                        <p>Tugas akan <strong>disetujui secara final</strong> (Level 2). Status pengerjaan akan selesai 100% dan dicatat dalam riwayat kinerja divisi.</p>
+                        <p>Tugas akan <strong>disetujui secara final</strong> (Level 2). Status pengerjaan akan selesai 100%
+                            dan dicatat dalam riwayat kinerja divisi.</p>
                     </div>
                 </div>
 
@@ -1128,12 +1288,23 @@
                     </svg>
                 </button>
             </div>
-            <form id="form-my-submit" method="POST" action="" class="p-6 pt-4 space-y-4">
+            <form id="form-my-submit" method="POST" action="" onsubmit="handleMyFormSubmit(event)" class="p-6 pt-1 space-y-4">
                 @csrf
                 <div class="bg-gray-50 p-3 rounded-lg border border-gray-200">
                     <p class="text-xs text-gray-500 mb-0.5">Nama Akun Sosmed</p>
                     <p id="my-submit-account-name" class="text-sm font-semibold text-gray-800"></p>
                 </div>
+
+                {{-- Error flash (tampil jika ada error dari server) --}}
+                @if($errors->any())
+                    <div class="bg-rose-50 border border-rose-200 rounded-lg px-4 py-3">
+                        <ul class="text-xs text-rose-600 space-y-1 list-disc list-inside">
+                            @foreach($errors->all() as $error)
+                                <li>{{ $error }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
+                @endif
 
                 <div>
                     <label class="block text-xs font-semibold text-gray-600 mb-1.5">
@@ -1142,19 +1313,20 @@
                     </label>
                     <div id="my-links-container" class="space-y-2 max-h-[200px] overflow-y-auto pr-1">
                         <div class="flex gap-2 link-row">
-                            <input type="url" name="links[]" required
-                                placeholder="https://instagram.com/p/xxx"
+                            <input type="text" name="links[]" required placeholder="https://instagram.com/p/xxx"
                                 class="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 focus:outline-none">
                             <button type="button" onclick="removeMyLinkRow(this)"
                                 class="text-gray-300 hover:text-rose-500 px-1 transition hidden remove-btn">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M6 18L18 6M6 6l12 12" />
                                 </svg>
                             </button>
                         </div>
                     </div>
+                    <p class="text-[11px] text-gray-400 mt-1">Pastikan link diawali dengan https:// atau http://</p>
                     <button type="button" onclick="addMyLinkRow()"
-                        class="mt-2 inline-flex items-center gap-1 text-xs text-primary-600 hover:text-primary-700 font-medium">
+                        class="mt-1.5 inline-flex items-center gap-1 text-xs text-primary-600 hover:text-primary-700 font-medium">
                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
                         </svg>
@@ -1174,10 +1346,37 @@
                         class="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-sm text-gray-700">Batal</button>
                     <button type="submit"
                         class="flex-1 px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-lg text-sm font-semibold">
-                        Kirim Bukti
+                        Lanjut
                     </button>
                 </div>
             </form>
+        </div>
+    </div>
+
+    {{-- ── MODAL: KONFIRMASI SUBMIT (STAFF) ────────────────────────── --}}
+    <div id="modal-my-confirm" class="hidden fixed inset-0 z-[60] flex items-center justify-center p-4">
+        <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" onclick="closeMyConfirm()"></div>
+        <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-sm z-10 p-6 text-center">
+            <div class="w-12 h-12 rounded-full bg-primary-50 text-primary-600 flex items-center justify-center mx-auto mb-3.5">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+            </div>
+            <h3 class="text-base font-bold text-gray-800 mb-1">Kirim Bukti Konten?</h3>
+            <p class="text-xs text-gray-500 mb-5 leading-relaxed">
+                Pastikan semua link bukti sudah benar sebelum dikirim. Bukti yang sudah dikirim akan masuk ke antrian verifikasi Admin.
+            </p>
+            <div class="flex gap-3">
+                <button type="button" onclick="closeMyConfirm()"
+                    class="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition">
+                    Periksa Lagi
+                </button>
+                <button type="button" onclick="submitMyConfirmed()"
+                    class="flex-1 px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-lg text-sm font-semibold shadow-sm transition">
+                    Ya, Kirim
+                </button>
+            </div>
         </div>
     </div>
 
@@ -1188,9 +1387,10 @@
         document.addEventListener('DOMContentLoaded', () => {
             // Auto-upgrade select elements to have an integrated search dropdown
             const selectsToUpgrade = document.querySelectorAll(
-                'select[id="assign-staff-sel"], select[id="assign-pm-sel"], select[id="assign-assistant-sel"]'
+                'select[id="assign-staff-sel"], select[id="assign-pm-sel"], select[id="assign-assistant-sel"], ' +
+                'select[id="assign-task-staff"], select[id="assign-task-pm"], select[id="assign-task-ast"]'
             );
-            
+
             selectsToUpgrade.forEach(select => {
                 if (select.dataset.customDropdownInit) return;
                 select.dataset.customDropdownInit = "true";
@@ -1204,35 +1404,35 @@
                 const wrapper = document.createElement('div');
                 wrapper.className = 'relative custom-select-wrapper';
                 wrapper.style.zIndex = '10';
-                
+
                 const button = document.createElement('button');
                 button.type = 'button';
-                button.className = 'w-full border border-gray-300 rounded-lg px-3 py-2 text-sm text-left flex justify-between items-center transition ' + 
-                                   (select.disabled ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 'bg-white text-gray-800 focus:ring-2 focus:ring-primary-500 focus:outline-none');
-                
+                button.className = 'w-full border border-gray-300 rounded-lg px-3 py-2 text-sm text-left flex justify-between items-center transition ' +
+                    (select.disabled ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 'bg-white text-gray-800 focus:ring-2 focus:ring-primary-500 focus:outline-none');
+
                 const label = document.createElement('span');
                 label.className = 'truncate block';
                 label.textContent = select.options[select.selectedIndex]?.text || '';
-                
+
                 button.innerHTML = `<svg class="w-4 h-4 text-gray-500 shrink-0 ml-2 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>`;
                 button.prepend(label);
-                
+
                 const dropdown = document.createElement('div');
                 dropdown.className = 'absolute mt-1 z-50 w-full bg-white border border-gray-200 rounded-lg shadow-xl flex flex-col hidden';
-                
+
                 const searchBox = document.createElement('div');
                 searchBox.className = 'p-2 border-b border-gray-100 sticky top-0 bg-white rounded-t-lg';
                 searchBox.innerHTML = `
-                    <div class="relative">
-                        <input type="text" placeholder="Cari..." class="w-full pl-8 pr-2 py-1.5 text-xs border border-gray-200 rounded-md focus:outline-none focus:ring-1 focus:ring-primary-500 bg-gray-50 transition">
-                        <svg class="w-3.5 h-3.5 text-gray-400 absolute left-2.5 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
-                    </div>
-                `;
+                                                    <div class="relative">
+                                                        <input type="text" placeholder="Cari..." class="w-full pl-8 pr-2 py-1.5 text-xs border border-gray-200 rounded-md focus:outline-none focus:ring-1 focus:ring-primary-500 bg-gray-50 transition">
+                                                        <svg class="w-3.5 h-3.5 text-gray-400 absolute left-2.5 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                                                    </div>
+                                                `;
                 const searchInput = searchBox.querySelector('input');
-                
+
                 const list = document.createElement('ul');
                 list.className = 'max-h-48 overflow-y-auto p-1';
-                
+
                 const renderOptions = (filter = '') => {
                     list.innerHTML = '';
                     let hasMatch = false;
@@ -1240,10 +1440,10 @@
                         const text = opt.text;
                         if (filter && !text.toLowerCase().includes(filter.toLowerCase())) return;
                         hasMatch = true;
-                        
+
                         const li = document.createElement('li');
-                        li.className = 'px-3 py-1.5 text-sm cursor-pointer rounded-md mb-0.5 transition-colors ' + 
-                                       (select.value === opt.value ? 'bg-primary-50 text-primary-700 font-medium' : 'hover:bg-gray-100 text-gray-700');
+                        li.className = 'px-3 py-1.5 text-sm cursor-pointer rounded-md mb-0.5 transition-colors ' +
+                            (select.value === opt.value ? 'bg-primary-50 text-primary-700 font-medium' : 'hover:bg-gray-100 text-gray-700');
                         li.textContent = text;
                         li.addEventListener('click', (e) => {
                             e.stopPropagation();
@@ -1258,23 +1458,23 @@
                         list.innerHTML = '<li class="px-3 py-2 text-xs text-gray-400 text-center pointer-events-none">Tidak ditemukan</li>';
                     }
                 };
-                
+
                 searchInput.addEventListener('input', (e) => renderOptions(e.target.value));
-                
+
                 dropdown.appendChild(searchBox);
                 dropdown.appendChild(list);
-                
+
                 wrapper.appendChild(button);
                 wrapper.appendChild(dropdown);
-                
+
                 select.parentNode.insertBefore(wrapper, select);
                 wrapper.appendChild(select);
                 select.style.display = 'none';
-                
+
                 button.addEventListener('click', (e) => {
                     e.stopPropagation();
                     if (select.disabled) return;
-                    
+
                     const isHidden = dropdown.classList.contains('hidden');
                     document.querySelectorAll('.custom-select-wrapper .absolute').forEach(d => d.classList.add('hidden'));
                     document.querySelectorAll('.custom-select-wrapper').forEach(w => {
@@ -1282,7 +1482,7 @@
                         if (w.parentElement) w.parentElement.style.zIndex = '';
                         if (w.parentElement) w.parentElement.style.position = '';
                     });
-                    
+
                     if (isHidden) {
                         wrapper.style.zIndex = '9999';
                         if (wrapper.parentElement) {
@@ -1295,7 +1495,7 @@
                         setTimeout(() => searchInput.focus(), 50);
                     }
                 });
-                
+
                 document.addEventListener('click', (e) => {
                     if (!wrapper.contains(e.target)) {
                         dropdown.classList.add('hidden');
@@ -1306,11 +1506,11 @@
                         }
                     }
                 });
-                
+
                 select.addEventListener('change', () => {
                     label.textContent = select.options[select.selectedIndex]?.text || '';
                 });
-                
+
                 const observer = new MutationObserver(() => {
                     if (select.disabled) {
                         button.className = 'w-full border border-gray-300 rounded-lg px-3 py-2 text-sm text-left flex justify-between items-center transition bg-gray-100 text-gray-400 cursor-not-allowed';
@@ -1323,13 +1523,13 @@
         });
 
         // Deprecated functions kept for compatibility
-        function filterSelectOptions(query, selectId) {}
-        function resetSearchFilter(inputId, selectId) {}
+        function filterSelectOptions(query, selectId) { }
+        function resetSearchFilter(inputId, selectId) { }
 
-        function syncSupervisorState(staffSelect, pmSelectId, hintId) {
+        function syncSupervisorState(staffSelect, pmSelectId, hintId, astSelectId) {
             if (!staffSelect) return;
             const pmSelect = document.getElementById(pmSelectId);
-            const assistantSelect = document.getElementById('assign-assistant-sel');
+            const assistantSelect = astSelectId ? document.getElementById(astSelectId) : document.getElementById('assign-assistant-sel');
             const hint = document.getElementById(hintId);
             if (!pmSelect) return;
 
@@ -1340,27 +1540,27 @@
                 pmSelect.value = '';
                 pmSelect.disabled = true;
                 pmSelect.classList.add('bg-gray-100', 'text-gray-400', 'cursor-not-allowed');
-                
+
                 // Also disable assistant selection
                 if (assistantSelect) {
                     assistantSelect.value = '';
                     assistantSelect.disabled = true;
                     assistantSelect.classList.add('bg-gray-100', 'text-gray-400', 'cursor-not-allowed');
                 }
-                
+
                 if (hint) {
                     hint.innerHTML = '<span class="text-indigo-600 font-semibold">🔒 PM Mandiri:</span> Akun dikelola langsung oleh PM. Hasil pengerjaan otomatis lolos Level 1 dan langsung diverifikasi HR Staff (supervisor dan asisten otomatis dinonaktifkan).';
                 }
             } else {
                 pmSelect.disabled = false;
                 pmSelect.classList.remove('bg-gray-100', 'text-gray-400', 'cursor-not-allowed');
-                
+
                 // Enable assistant selection
                 if (assistantSelect) {
                     assistantSelect.disabled = false;
                     assistantSelect.classList.remove('bg-gray-100', 'text-gray-400', 'cursor-not-allowed');
                 }
-                
+
                 if (hint) {
                     hint.innerHTML = 'PM yang berwenang meninjau & approve tugas. Jika PM mengelola akun mandiri, bagian ini otomatis dinonaktifkan.';
                 }
@@ -1388,36 +1588,56 @@
             }
         }
 
-        function openAssignModal(accId, accName, currentPmId, currentStaffId, currentAssistantId, currentStaffRole) {
-            document.getElementById('assign-acc-name').textContent = accName;
-            document.getElementById('form-assign').action = `/staff/sosmed/accounts/${accId}/assign`;
+        function openAssignModal(accId, accName, currentPmId, currentStaffId, currentAssistantId, currentStaffRole, platform, link, notes) {
+            let accData = {};
+            if (typeof accId === 'object' && accId !== null) {
+                accData = accId;
+            } else {
+                accData = {
+                    id: accId,
+                    name: accName,
+                    platform: platform,
+                    link: link,
+                    pm_id: currentPmId,
+                    staff_id: currentStaffId,
+                    notes: notes,
+                    assistant_id: currentAssistantId,
+                    staff_role: currentStaffRole
+                };
+            }
+
+            document.getElementById('form-assign').action = `/staff/sosmed/accounts/${accData.id}/assign`;
+
+            window.dispatchEvent(new CustomEvent('open-edit-account', { detail: accData }));
 
             const staffSel = document.getElementById('assign-staff-sel');
-            const pmSel    = document.getElementById('assign-pm-sel');
-            const astSel   = document.getElementById('assign-assistant-sel');
+            const pmSel = document.getElementById('assign-pm-sel');
+            const astSel = document.getElementById('assign-assistant-sel');
+            const notesEl = document.getElementById('assign-notes-input');
 
-            staffSel.value = currentStaffId ?? '';
-            pmSel.value    = currentPmId    ?? '';
-            astSel.value   = currentAssistantId ?? '';
+            if (staffSel) staffSel.value = accData.staff_id ?? '';
+            if (pmSel) pmSel.value = accData.pm_id ?? '';
+            if (astSel) astSel.value = accData.assistant_id ?? '';
+            if (notesEl) notesEl.value = accData.notes ?? '';
 
-            const adminAssigned = currentStaffRole === 'hr_staff';
+            const adminAssigned = accData.staff_role === 'hr_staff';
 
             if (adminAssigned) {
                 // Lock all three — Admin has already set everything
                 setCustomSelectDisabled(staffSel, true);
-                setCustomSelectDisabled(pmSel,    true);
-                setCustomSelectDisabled(astSel,   true);
+                setCustomSelectDisabled(pmSel, true);
+                setCustomSelectDisabled(astSel, true);
             } else {
                 // Re-enable all, then let syncSupervisorState decide PM
                 setCustomSelectDisabled(staffSel, false);
-                setCustomSelectDisabled(astSel,   false);
-                syncSupervisorState(staffSel, 'assign-pm-sel', 'assign-pm-hint');
+                setCustomSelectDisabled(astSel, false);
+                syncSupervisorState(staffSel, 'assign-pm-sel', 'assign-pm-hint', 'assign-assistant-sel');
             }
 
             // Update helper notes
             const staffNote = document.getElementById('assign-staff-note');
-            const pmNote    = document.getElementById('assign-pm-hint');
-            const astNote   = document.getElementById('assign-ast-note');
+            const pmNote = document.getElementById('assign-pm-hint');
+            const astNote = document.getElementById('assign-ast-note');
 
             if (staffNote) {
                 staffNote.textContent = adminAssigned
@@ -1426,8 +1646,8 @@
                 staffNote.className = adminAssigned ? 'text-[11px] text-amber-600 mt-1' : 'text-[11px] text-gray-400 mt-1';
             }
             if (pmNote && adminAssigned) {
-                pmNote.textContent  = '🔒 Supervisor PM sudah ditetapkan oleh Admin, tidak dapat diubah.';
-                pmNote.className    = 'text-[11px] text-amber-600 mt-1';
+                pmNote.textContent = '🔒 Supervisor PM sudah ditetapkan oleh Admin, tidak dapat diubah.';
+                pmNote.className = 'text-[11px] text-amber-600 mt-1';
             }
             if (astNote) {
                 astNote.textContent = adminAssigned
@@ -1437,16 +1657,20 @@
             }
 
             // Update custom dropdown labels
-            staffSel.dispatchEvent(new Event('change', { bubbles: true }));
-            pmSel.dispatchEvent(new Event('change', { bubbles: true }));
-            astSel.dispatchEvent(new Event('change', { bubbles: true }));
+            if (staffSel) staffSel.dispatchEvent(new Event('change', { bubbles: true }));
+            if (pmSel) pmSel.dispatchEvent(new Event('change', { bubbles: true }));
+            if (astSel) astSel.dispatchEvent(new Event('change', { bubbles: true }));
 
             document.getElementById('modal-assign').classList.remove('hidden');
         }
 
+        function closeAssignModal() {
+            document.getElementById('modal-assign').classList.add('hidden');
+        }
+
         // Enable any disabled select before submitting forms so payload isn't dropped
         document.querySelectorAll('form').forEach(form => {
-            form.addEventListener('submit', function() {
+            form.addEventListener('submit', function () {
                 this.querySelectorAll('select:disabled').forEach(sel => {
                     sel.disabled = false;
                 });
@@ -1466,7 +1690,7 @@
             document.getElementById('modal-verify').classList.add('hidden');
         }
 
-        // ── My Submit Modal (Staff own tasks) ──────────────────────────────
+        // ── My Submit Modal (Staff own tasks) ──────────────────────────────────
         function openMySubmitModal(accountId, accountName, existingDesc) {
             document.getElementById('my-submit-account-name').textContent = accountName;
             document.getElementById('form-my-submit').action = `/staff/sosmed/accounts/${accountId}/submit`;
@@ -1476,7 +1700,7 @@
             const container = document.getElementById('my-links-container');
             container.innerHTML = `
                 <div class="flex gap-2 link-row">
-                    <input type="url" name="links[]" required
+                    <input type="text" name="links[]" required
                         placeholder="https://instagram.com/p/xxx"
                         class="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 focus:outline-none">
                     <button type="button" onclick="removeMyLinkRow(this)"
@@ -1494,7 +1718,55 @@
             document.getElementById('modal-my-submit').classList.add('hidden');
         }
 
+        function handleMyFormSubmit(event) {
+            event.preventDefault();
+
+            // Validate: at least one non-empty link
+            const links = document.querySelectorAll('#my-links-container input[name="links[]"]');
+            let hasLink = false;
+            links.forEach(input => { if (input.value.trim()) hasLink = true; });
+            if (!hasLink) {
+                alert('Harap isi minimal satu link bukti.');
+                return;
+            }
+
+            // Show confirmation modal
+            document.getElementById('modal-my-confirm').classList.remove('hidden');
+        }
+
+        function closeMyConfirm() {
+            document.getElementById('modal-my-confirm').classList.add('hidden');
+        }
+
+        function submitMyConfirmed() {
+            closeMyConfirm();
+            // Add https:// prefix if missing, to prevent URL validation errors
+            document.querySelectorAll('#my-links-container input[name="links[]"]').forEach(input => {
+                const val = input.value.trim();
+                if (val && !val.startsWith('http://') && !val.startsWith('https://')) {
+                    input.value = 'https://' + val;
+                }
+            });
+            document.getElementById('form-my-submit').submit();
+        }
+
         function openAssignTaskModal() {
+            const staffSel = document.getElementById('assign-task-staff');
+            if (staffSel) {
+                staffSel.value = '';
+                syncSupervisorState(staffSel, 'assign-task-pm', 'assign-task-pm-hint', 'assign-task-ast');
+                staffSel.dispatchEvent(new Event('change', { bubbles: true }));
+            }
+            const pmSel = document.getElementById('assign-task-pm');
+            if (pmSel) {
+                pmSel.value = '';
+                pmSel.dispatchEvent(new Event('change', { bubbles: true }));
+            }
+            const astSel = document.getElementById('assign-task-ast');
+            if (astSel) {
+                astSel.value = '';
+                astSel.dispatchEvent(new Event('change', { bubbles: true }));
+            }
             document.getElementById('modal-assign-task').classList.remove('hidden');
         }
 
@@ -1509,7 +1781,7 @@
                 open: false,
                 get selectedLabel() {
                     if (!this.selectedId) return '';
-                    return ${this.selectedName} ();
+                    return this.selectedName + ' (' + this.selectedPlatform + ')';
                 },
                 get filteredAccounts() {
                     if (!this.search || !this.search.trim()) {
@@ -1531,20 +1803,75 @@
             };
         }
 
+        function editAccountDropdown(availableList) {
+            return {
+                availableAccounts: availableList || [],
+                accountsList: [],
+                selectedId: '',
+                selectedName: '',
+                selectedPlatform: '',
+                selectedLink: '',
+                search: '',
+                open: false,
+                get selectedLabel() {
+                    if (!this.selectedId) return '';
+                    return this.selectedName + ' (' + this.selectedPlatform + ')';
+                },
+                get filteredAccounts() {
+                    if (!this.search || !this.search.trim()) {
+                        return this.accountsList;
+                    }
+                    const q = this.search.toLowerCase();
+                    return this.accountsList.filter(acc => {
+                        const target = (acc.name + ' ' + acc.platform).toLowerCase();
+                        return target.includes(q);
+                    });
+                },
+                selectAccount(acc) {
+                    this.selectedId = acc.id;
+                    this.selectedName = acc.name;
+                    this.selectedPlatform = acc.platform;
+                    this.selectedLink = acc.link || '';
+                    this.open = false;
+                },
+                initAccount(accData) {
+                    this.selectedId = accData.id;
+                    this.selectedName = accData.name;
+                    this.selectedPlatform = accData.platform;
+                    this.selectedLink = accData.link || '';
+                    this.search = '';
+                    this.open = false;
+
+                    const list = [{
+                        id: accData.id,
+                        name: accData.name,
+                        platform: accData.platform,
+                        link: accData.link || ''
+                    }];
+                    this.availableAccounts.forEach(a => {
+                        if (String(a.id) !== String(accData.id)) {
+                            list.push(a);
+                        }
+                    });
+                    this.accountsList = list;
+                }
+            };
+        }
+
         function addMyLinkRow() {
             const container = document.getElementById('my-links-container');
             const newRow = document.createElement('div');
             newRow.className = 'flex gap-2 link-row';
             newRow.innerHTML = `
-                <input type="url" name="links[]" required
-                    placeholder="https://instagram.com/p/xxx"
-                    class="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 focus:outline-none">
-                <button type="button" onclick="removeMyLinkRow(this)"
-                    class="text-gray-300 hover:text-rose-500 px-1 transition remove-btn">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                </button>`;
+                                                <input type="url" name="links[]" required
+                                                    placeholder="https://instagram.com/p/xxx"
+                                                    class="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 focus:outline-none">
+                                                <button type="button" onclick="removeMyLinkRow(this)"
+                                                    class="text-gray-300 hover:text-rose-500 px-1 transition remove-btn">
+                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                                    </svg>
+                                                </button>`;
             container.appendChild(newRow);
             // Show all remove buttons when more than one row
             container.querySelectorAll('.remove-btn').forEach(btn => btn.classList.remove('hidden'));
@@ -1575,11 +1902,11 @@
                     item.rel = 'noopener noreferrer';
                     item.className = 'flex items-start gap-2.5 p-3 rounded-lg border border-gray-100 hover:border-primary-300 hover:bg-primary-50/50 transition group';
                     item.innerHTML = `
-                                    <span class="flex-shrink-0 w-5 h-5 rounded-full bg-primary-100 text-primary-700 text-[10px] font-bold flex items-center justify-center mt-0.5">${i + 1}</span>
-                                    <span class="text-xs text-primary-700 group-hover:underline break-all leading-relaxed">${url}</span>
-                                    <svg class="w-3.5 h-3.5 flex-shrink-0 text-gray-400 group-hover:text-primary-600 mt-0.5 ml-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
-                                    </svg>`;
+                                                                    <span class="flex-shrink-0 w-5 h-5 rounded-full bg-primary-100 text-primary-700 text-[10px] font-bold flex items-center justify-center mt-0.5">${i + 1}</span>
+                                                                    <span class="text-xs text-primary-700 group-hover:underline break-all leading-relaxed">${url}</span>
+                                                                    <svg class="w-3.5 h-3.5 flex-shrink-0 text-gray-400 group-hover:text-primary-600 mt-0.5 ml-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+                                                                    </svg>`;
                     body.appendChild(item);
                 });
             }

@@ -73,13 +73,14 @@ class AccountController extends Controller
         ]);
 
         $data = [
-            'name'       => $validated['name'],
-            'platform'   => $validated['platform'],
-            'link'       => $validated['link'] ?? null,
-            'email'      => $validated['email'] ?? null,
-            'password'   => !empty($validated['password']) ? $validated['password'] : null,
-            'notes'      => $validated['notes'] ?? null,
-            'created_by' => Auth::id(),
+            'name'         => $validated['name'],
+            'platform'     => $validated['platform'],
+            'link'         => $validated['link'] ?? null,
+            'email'        => $validated['email'] ?? null,
+            'password'     => !empty($validated['password']) ? $validated['password'] : null,
+            'notes'        => $validated['notes'] ?? null,
+            'is_in_sosmed' => false,
+            'created_by'   => Auth::id(),
         ];
 
         $account = SosmedAccount::create($data);

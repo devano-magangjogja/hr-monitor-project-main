@@ -574,9 +574,9 @@ class TaskService
         return $this->taskRepository->getAllTasksForAssistant();
     }
 
-    public function getAllTasksForRole(string $role, int $perPage = 8)
+    public function getAllTasksForRole(string $role, int $perPage = 20, ?string $date = null)
     {
-        return $this->taskRepository->getAllTasksForRole($role, $perPage);
+        return $this->taskRepository->getAllTasksForRole($role, $perPage, $date);
     }
 
     public function getDailyStats(): array
