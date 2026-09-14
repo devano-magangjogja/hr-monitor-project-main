@@ -65,16 +65,16 @@
         <div class="flex border-b border-gray-200 overflow-x-auto">
             <a href="{{ route('staff.sosmed.index', ['tab' => 'accounts']) }}"
                 class="flex items-center gap-2 px-5 py-3.5 text-sm font-medium whitespace-nowrap border-b-2 transition
-                                                                      {{ $tab === 'accounts' ? 'border-primary-600 text-primary-600 bg-primary-50/50' : 'border-transparent text-gray-500 hover:text-gray-700' }}">
+                                                                                      {{ $tab === 'accounts' ? 'border-primary-600 text-primary-600 bg-primary-50/50' : 'border-transparent text-gray-500 hover:text-gray-700' }}">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                         d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
                 </svg>
-                Distribusi Akun ke PM / Sosmed ({{ $accounts->count() }})
+                Distribusi Akun ke PM / Sosmed ({{ $accounts->total() }})
             </a>
             <a href="{{ route('staff.sosmed.index', ['tab' => 'approvals']) }}"
                 class="flex items-center gap-2 px-5 py-3.5 text-sm font-medium whitespace-nowrap border-b-2 transition
-                                                                      {{ $tab === 'approvals' ? 'border-primary-600 text-primary-600 bg-primary-50/50' : 'border-transparent text-gray-500 hover:text-gray-700' }}">
+                                                                                      {{ $tab === 'approvals' ? 'border-primary-600 text-primary-600 bg-primary-50/50' : 'border-transparent text-gray-500 hover:text-gray-700' }}">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                         d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -88,7 +88,7 @@
             </a>
             <a href="{{ route('staff.sosmed.index', ['tab' => 'tasks']) }}"
                 class="flex items-center gap-2 px-5 py-3.5 text-sm font-medium whitespace-nowrap border-b-2 transition
-                                                                      {{ $tab === 'tasks' ? 'border-primary-600 text-primary-600 bg-primary-50/50' : 'border-transparent text-gray-500 hover:text-gray-700' }}">
+                                                                                      {{ $tab === 'tasks' ? 'border-primary-600 text-primary-600 bg-primary-50/50' : 'border-transparent text-gray-500 hover:text-gray-700' }}">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                         d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
@@ -97,7 +97,7 @@
             </a>
             <a href="{{ route('staff.sosmed.index', ['tab' => 'my_accounts']) }}"
                 class="flex items-center gap-2 px-5 py-3.5 text-sm font-medium whitespace-nowrap border-b-2 transition
-                                                                      {{ $tab === 'my_accounts' ? 'border-primary-600 text-primary-600 bg-primary-50/50' : 'border-transparent text-gray-500 hover:text-gray-700' }}">
+                                                                                      {{ $tab === 'my_accounts' ? 'border-primary-600 text-primary-600 bg-primary-50/50' : 'border-transparent text-gray-500 hover:text-gray-700' }}">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                         d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
@@ -218,8 +218,8 @@
 
                                         {{-- Supervisor PM --}}
                                         <td class="px-4 py-3 text-xs min-w-0">
-                                            @if($acc->staffUser && $acc->staffUser->role === 'pm')
-                                                <span class="text-gray-400 italic text-[11px] block">— (Langsung ke HR)</span>
+                                            @if($acc->staffUser && in_array($acc->staffUser->role, ['pm', 'hr_assistant', 'hr_staff']))
+                                                <span class="text-gray-400 text-[11px] block">Langsung ke HR</span>
                                             @elseif($acc->pmUser)
                                                 <div class="flex items-start gap-2 min-w-0">
                                                     <div
@@ -246,7 +246,9 @@
                                         </td>
                                         {{-- Asisten Pengawas --}}
                                         <td class="px-4 py-3 text-xs min-w-0">
-                                            @if($acc->assistantUser)
+                                            @if($acc->staffUser && in_array($acc->staffUser->role, ['pm', 'hr_assistant', 'hr_staff']))
+                                                <span class="text-gray-400 text-[11px] block">Langsung ke HR</span>
+                                            @elseif($acc->assistantUser)
                                                 <div class="flex items-start gap-2 min-w-0">
                                                     <div
                                                         class="w-6 h-6 rounded-full bg-teal-100 text-teal-700 font-bold flex items-center justify-center text-[10px] flex-shrink-0 mt-0.5">
@@ -332,6 +334,11 @@
                                 @endforelse
                             </tbody>
                         </table>
+
+                        {{-- Pagination Links --}}
+                        <div class="mt-4 px-4 py-3 border-t border-gray-200">
+                            {{ $accounts->links() }}
+                        </div>
                     </div>
 
                     {{-- Mobile cards (< md) --}} <div class="md:hidden space-y-3">
@@ -402,8 +409,14 @@
                                     <div class="min-w-0">
                                         <p class="text-gray-400 mb-0.5">Link Akun</p>
                                         @if($acc->link)
-                                            <a href="{{ $acc->link }}" target="_blank"
-                                                class="text-primary-600 hover:underline truncate block">{{ parse_url($acc->link, PHP_URL_HOST) ?? $acc->link }}</a>
+                                            <a href="{{ $acc->link }}" target="_blank" rel="noopener noreferrer"
+                                                class="inline-flex items-center gap-1 text-xs text-primary-600 hover:text-primary-800 hover:underline truncate">
+                                                <svg class="w-3 h-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                        d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                                                </svg>
+                                                <span class="truncate">Buka Link</span>
+                                            </a>
                                         @else
                                             <span class="text-gray-300">—</span>
                                         @endif
@@ -432,16 +445,16 @@
                                         </div>
                                         <div class="min-w-0 text-right">
                                             <p class="text-gray-400 mb-0.5">Supervisor PM</p>
-                                            <span class="font-medium text-gray-800 truncate block">
-                                                {{ ($acc->staffUser && $acc->staffUser->role === 'pm') ? 'Langsung ke HR' : ($acc->pmUser?->name ?? 'Belum Ada PM') }}
+                                            <span class="font-medium text-gray-800 truncate block text-xs">
+                                                {{ ($acc->staffUser && in_array($acc->staffUser->role, ['pm', 'hr_assistant', 'hr_staff'])) ? 'Langsung ke HR' : ($acc->pmUser?->name ?? 'Belum Ada PM') }}
                                             </span>
                                         </div>
                                     </div>
                                     {{-- Row Asisten Pengawas Mobile --}}
                                     <div class="pt-1 border-t border-gray-50 flex items-center justify-between text-xs">
                                         <span class="text-gray-400">Asisten Pengawas:</span>
-                                        <span class="font-medium text-gray-800 truncate">
-                                            {{ $acc->assistantUser?->name ?? 'Tanpa Asisten' }}
+                                        <span class="font-medium text-gray-800 truncate text-xs">
+                                            {{ ($acc->staffUser && in_array($acc->staffUser->role, ['pm', 'hr_assistant', 'hr_staff'])) ? 'Langsung ke HR' : ($acc->assistantUser?->name ?? 'Tanpa Asisten') }}
                                         </span>
                                     </div>
                                 </div>
@@ -449,6 +462,11 @@
                         @empty
                             <div class="py-8 text-center text-sm text-gray-400">Belum ada akun sosial media.</div>
                         @endforelse
+
+                        {{-- Pagination Links (Mobile) --}}
+                        <div class="mt-4">
+                            {{ $accounts->links() }}
+                        </div>
                 </div>
             </div>
         @endif
@@ -521,6 +539,13 @@
                         </p>
                     </div>
                 @endforelse
+
+                {{-- Pagination Links --}}
+                @if($needHrApproval->count() > 0)
+                    <div class="mt-6 flex justify-center">
+                        {{ $needHrApproval->links() }}
+                    </div>
+                @endif
             </div>
         </div>
     @endif
@@ -599,6 +624,11 @@
                         @endforelse
                     </tbody>
                 </table>
+
+                {{-- Pagination Links --}}
+                <div class="mt-4 px-4 py-3 border-t border-gray-200">
+                    {{ $allTasks->links() }}
+                </div>
             </div>
 
             {{-- Mobile cards (< md) --}} <div class="md:hidden space-y-3">
@@ -823,6 +853,11 @@
                 @empty
                     <div class="py-8 text-center text-sm text-gray-400">Admin belum menetapkan akun sosmed kepada Anda.</div>
                 @endforelse
+
+                {{-- Pagination Links --}}
+                <div class="mt-4">
+                    {{ $myAccounts->links() }}
+                </div>
             </div>
         </div>
     @endif
@@ -1288,7 +1323,8 @@
                     </svg>
                 </button>
             </div>
-            <form id="form-my-submit" method="POST" action="" onsubmit="handleMyFormSubmit(event)" class="p-6 pt-1 space-y-4">
+            <form id="form-my-submit" method="POST" action="" onsubmit="handleMyFormSubmit(event)"
+                class="p-6 pt-1 space-y-4">
                 @csrf
                 <div class="bg-gray-50 p-3 rounded-lg border border-gray-200">
                     <p class="text-xs text-gray-500 mb-0.5">Nama Akun Sosmed</p>
@@ -1357,7 +1393,8 @@
     <div id="modal-my-confirm" class="hidden fixed inset-0 z-[60] flex items-center justify-center p-4">
         <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" onclick="closeMyConfirm()"></div>
         <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-sm z-10 p-6 text-center">
-            <div class="w-12 h-12 rounded-full bg-primary-50 text-primary-600 flex items-center justify-center mx-auto mb-3.5">
+            <div
+                class="w-12 h-12 rounded-full bg-primary-50 text-primary-600 flex items-center justify-center mx-auto mb-3.5">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                         d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -1365,7 +1402,8 @@
             </div>
             <h3 class="text-base font-bold text-gray-800 mb-1">Kirim Bukti Konten?</h3>
             <p class="text-xs text-gray-500 mb-5 leading-relaxed">
-                Pastikan semua link bukti sudah benar sebelum dikirim. Bukti yang sudah dikirim akan masuk ke antrian verifikasi Admin.
+                Pastikan semua link bukti sudah benar sebelum dikirim. Bukti yang sudah dikirim akan masuk ke antrian
+                verifikasi Admin.
             </p>
             <div class="flex gap-3">
                 <button type="button" onclick="closeMyConfirm()"
@@ -1423,11 +1461,11 @@
                 const searchBox = document.createElement('div');
                 searchBox.className = 'p-2 border-b border-gray-100 sticky top-0 bg-white rounded-t-lg';
                 searchBox.innerHTML = `
-                                                    <div class="relative">
-                                                        <input type="text" placeholder="Cari..." class="w-full pl-8 pr-2 py-1.5 text-xs border border-gray-200 rounded-md focus:outline-none focus:ring-1 focus:ring-primary-500 bg-gray-50 transition">
-                                                        <svg class="w-3.5 h-3.5 text-gray-400 absolute left-2.5 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
-                                                    </div>
-                                                `;
+                                                                    <div class="relative">
+                                                                        <input type="text" placeholder="Cari..." class="w-full pl-8 pr-2 py-1.5 text-xs border border-gray-200 rounded-md focus:outline-none focus:ring-1 focus:ring-primary-500 bg-gray-50 transition">
+                                                                        <svg class="w-3.5 h-3.5 text-gray-400 absolute left-2.5 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                                                                    </div>
+                                                                `;
                 const searchInput = searchBox.querySelector('input');
 
                 const list = document.createElement('ul');
@@ -1699,17 +1737,17 @@
             // Reset links container to single empty input
             const container = document.getElementById('my-links-container');
             container.innerHTML = `
-                <div class="flex gap-2 link-row">
-                    <input type="text" name="links[]" required
-                        placeholder="https://instagram.com/p/xxx"
-                        class="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 focus:outline-none">
-                    <button type="button" onclick="removeMyLinkRow(this)"
-                        class="text-gray-300 hover:text-rose-500 px-1 transition hidden remove-btn">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                        </svg>
-                    </button>
-                </div>`;
+                                <div class="flex gap-2 link-row">
+                                    <input type="text" name="links[]" required
+                                        placeholder="https://instagram.com/p/xxx"
+                                        class="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 focus:outline-none">
+                                    <button type="button" onclick="removeMyLinkRow(this)"
+                                        class="text-gray-300 hover:text-rose-500 px-1 transition hidden remove-btn">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                        </svg>
+                                    </button>
+                                </div>`;
 
             document.getElementById('modal-my-submit').classList.remove('hidden');
         }
@@ -1863,15 +1901,15 @@
             const newRow = document.createElement('div');
             newRow.className = 'flex gap-2 link-row';
             newRow.innerHTML = `
-                                                <input type="url" name="links[]" required
-                                                    placeholder="https://instagram.com/p/xxx"
-                                                    class="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 focus:outline-none">
-                                                <button type="button" onclick="removeMyLinkRow(this)"
-                                                    class="text-gray-300 hover:text-rose-500 px-1 transition remove-btn">
-                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                                                    </svg>
-                                                </button>`;
+                                                                <input type="url" name="links[]" required
+                                                                    placeholder="https://instagram.com/p/xxx"
+                                                                    class="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 focus:outline-none">
+                                                                <button type="button" onclick="removeMyLinkRow(this)"
+                                                                    class="text-gray-300 hover:text-rose-500 px-1 transition remove-btn">
+                                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                                                    </svg>
+                                                                </button>`;
             container.appendChild(newRow);
             // Show all remove buttons when more than one row
             container.querySelectorAll('.remove-btn').forEach(btn => btn.classList.remove('hidden'));
@@ -1902,11 +1940,11 @@
                     item.rel = 'noopener noreferrer';
                     item.className = 'flex items-start gap-2.5 p-3 rounded-lg border border-gray-100 hover:border-primary-300 hover:bg-primary-50/50 transition group';
                     item.innerHTML = `
-                                                                    <span class="flex-shrink-0 w-5 h-5 rounded-full bg-primary-100 text-primary-700 text-[10px] font-bold flex items-center justify-center mt-0.5">${i + 1}</span>
-                                                                    <span class="text-xs text-primary-700 group-hover:underline break-all leading-relaxed">${url}</span>
-                                                                    <svg class="w-3.5 h-3.5 flex-shrink-0 text-gray-400 group-hover:text-primary-600 mt-0.5 ml-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
-                                                                    </svg>`;
+                                                                                    <span class="flex-shrink-0 w-5 h-5 rounded-full bg-primary-100 text-primary-700 text-[10px] font-bold flex items-center justify-center mt-0.5">${i + 1}</span>
+                                                                                    <span class="text-xs text-primary-700 group-hover:underline break-all leading-relaxed">${url}</span>
+                                                                                    <svg class="w-3.5 h-3.5 flex-shrink-0 text-gray-400 group-hover:text-primary-600 mt-0.5 ml-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+                                                                                    </svg>`;
                     body.appendChild(item);
                 });
             }

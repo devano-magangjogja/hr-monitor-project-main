@@ -56,6 +56,20 @@
         </div>
     </div>
 
+    {{-- ── Banner Info: Belum Ada Penugasan Kantor (hanya melihat catatan sendiri) --}}
+    @if(!$hasKantor && $isToday)
+        <div class="mb-6 flex items-start gap-3 bg-amber-50 border border-amber-200 rounded-xl px-5 py-3.5 shadow-sm">
+            <svg class="w-4 h-4 text-amber-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <p class="text-xs text-amber-800">
+                Anda belum memiliki penugasan kantor resmi hari ini. Daftar presensi yang ditampilkan
+                <strong>hanya catatan yang Anda buat sendiri</strong>. Setelah set kantor, Anda bisa melihat semua presensi di kantor tersebut.
+            </p>
+        </div>
+    @endif
+
     {{-- ── Stat Cards Ringkasan Tanggal Ini ────────────────────── --}}
     <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4 mb-8">
 
@@ -159,7 +173,8 @@
                         <option value="" {{ !$selectedKantor ? 'selected' : '' }}>Semua Kantor</option>
                         @foreach($kantorList as $k)
                             <option value="{{ $k }}" {{ $selectedKantor == $k ? 'selected' : '' }}>{{ $k }}
-                                {{ $assignedKantor == $k ? '(Tugas)' : '' }}</option>
+                                {{ $assignedKantor == $k ? '(Tugas)' : '' }}
+                            </option>
                         @endforeach
                     </select>
                 </div>
@@ -334,41 +349,46 @@
                             {{-- Aksi --}}
                             <td class="px-6 py-4 text-right">
                                 <div class="flex items-center justify-end gap-1.5">
-                                    {{-- Edit --}}
-                                    <button type="button"
-                                        onclick="openEditModal(
-                                                                                                                                                                                                    {{ $presensi->id }},
-                                                                                                                                                                                                    {{ $presensi->pemagang_id }},
-                                                                                                                                                                                                    '{{ addslashes($pemagang ? $pemagang->nama_lengkap : '') }}',
-                                                                                                                                                                                                    '{{ $presensi->tanggal }}',
-                                                                                                                                                                                                    '{{ $presensi->shift }}',
-                                                                                                                                                                                                    '{{ substr($presensi->waktu_masuk, 0, 5) }}',
-                                                                                                                                                                                                    '{{ $presensi->keterangan }}',
-                                                                                                                                                                                                    '{{ addslashes($presensi->notes ?: '') }}'
-                                                                                                                                                                                                )"
-                                        class="p-1.5 text-gray-400 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition"
-                                        title="Edit Presensi">
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                                        </svg>
-                                    </button>
+                                    @if($presensi->created_by == $authId)
+                                        {{-- Edit (hanya milik sendiri) --}}
+                                        <button type="button"
+                                            onclick="openEditModal(
+                                                {{ $presensi->id }},
+                                                {{ $presensi->pemagang_id }},
+                                                '{{ addslashes($pemagang ? $pemagang->nama_lengkap : '') }}',
+                                                '{{ $presensi->tanggal }}',
+                                                '{{ $presensi->shift }}',
+                                                '{{ substr($presensi->waktu_masuk, 0, 5) }}',
+                                                '{{ $presensi->keterangan }}',
+                                                '{{ addslashes($presensi->notes ?: '') }}'
+                                            )"
+                                            class="p-1.5 text-gray-400 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition"
+                                            title="Edit Presensi">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                            </svg>
+                                        </button>
 
-                                    {{-- Hapus --}}
-                                    <button type="button"
-                                        onclick="openDeleteModal(
-                                                                                                                                                                                                    {{ $presensi->id }},
-                                                                                                                                                                                                    '{{ addslashes($pemagang ? $pemagang->nama_lengkap : 'Pemagang') }}',
-                                                                                                                                                                                                    '{{ $presensi->shift }}',
-                                                                                                                                                                                                    '{{ substr($presensi->waktu_masuk, 0, 5) }}'
-                                                                                                                                                                                                )"
-                                        class="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition"
-                                        title="Hapus Presensi">
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                        </svg>
-                                    </button>
+                                        {{-- Hapus (hanya milik sendiri) --}}
+                                        <button type="button"
+                                            onclick="openDeleteModal(
+                                                {{ $presensi->id }},
+                                                '{{ addslashes($pemagang ? $pemagang->nama_lengkap : 'Pemagang') }}',
+                                                '{{ $presensi->shift }}',
+                                                '{{ substr($presensi->waktu_masuk, 0, 5) }}'
+                                            )"
+                                            class="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition"
+                                            title="Hapus Presensi">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                            </svg>
+                                        </button>
+                                    @else
+                                        {{-- Catatan dari asisten lain, tidak bisa diedit --}}
+                                        <span class="text-[10px] text-gray-400 italic px-1">Dicatat asisten lain</span>
+                                    @endif
                                 </div>
                             </td>
 
@@ -511,41 +531,46 @@
                             {{-- Aksi --}}
                             <td class="px-6 py-4 text-right">
                                 <div class="flex items-center justify-end gap-1.5">
-                                    {{-- Edit --}}
-                                    <button type="button"
-                                        onclick="openEditModal(
-                                                                                                                                                                                                    {{ $presensi->id }},
-                                                                                                                                                                                                    {{ $presensi->pemagang_id }},
-                                                                                                                                                                                                    '{{ addslashes($pemagang ? $pemagang->nama_lengkap : '') }}',
-                                                                                                                                                                                                    '{{ $presensi->tanggal }}',
-                                                                                                                                                                                                    '{{ $presensi->shift }}',
-                                                                                                                                                                                                    '{{ substr($presensi->waktu_masuk, 0, 5) }}',
-                                                                                                                                                                                                    '{{ $presensi->keterangan }}',
-                                                                                                                                                                                                    '{{ addslashes($presensi->notes ?: '') }}'
-                                                                                                                                                                                                )"
-                                        class="p-1.5 text-gray-400 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition"
-                                        title="Ubah Status Presensi">
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                                        </svg>
-                                    </button>
+                                    @if($presensi->created_by == $authId)
+                                        {{-- Edit (hanya milik sendiri) --}}
+                                        <button type="button"
+                                            onclick="openEditModal(
+                                                {{ $presensi->id }},
+                                                {{ $presensi->pemagang_id }},
+                                                '{{ addslashes($pemagang ? $pemagang->nama_lengkap : '') }}',
+                                                '{{ $presensi->tanggal }}',
+                                                '{{ $presensi->shift }}',
+                                                '{{ substr($presensi->waktu_masuk, 0, 5) }}',
+                                                '{{ $presensi->keterangan }}',
+                                                '{{ addslashes($presensi->notes ?: '') }}'
+                                            )"
+                                            class="p-1.5 text-gray-400 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition"
+                                            title="Ubah Status Presensi">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                            </svg>
+                                        </button>
 
-                                    {{-- Hapus --}}
-                                    <button type="button"
-                                        onclick="openDeleteModal(
-                                                                                                                                                                                                    {{ $presensi->id }},
-                                                                                                                                                                                                    '{{ addslashes($pemagang ? $pemagang->nama_lengkap : 'Pemagang') }}',
-                                                                                                                                                                                                    '{{ $presensi->shift }}',
-                                                                                                                                                                                                    '{{ substr($presensi->waktu_masuk, 0, 5) }}'
-                                                                                                                                                                                                )"
-                                        class="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition"
-                                        title="Hapus Data">
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                        </svg>
-                                    </button>
+                                        {{-- Hapus (hanya milik sendiri) --}}
+                                        <button type="button"
+                                            onclick="openDeleteModal(
+                                                {{ $presensi->id }},
+                                                '{{ addslashes($pemagang ? $pemagang->nama_lengkap : 'Pemagang') }}',
+                                                '{{ $presensi->shift }}',
+                                                '{{ substr($presensi->waktu_masuk, 0, 5) }}'
+                                            )"
+                                            class="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition"
+                                            title="Hapus Data">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                            </svg>
+                                        </button>
+                                    @else
+                                        {{-- Catatan dari asisten lain, tidak bisa diedit --}}
+                                        <span class="text-[10px] text-gray-400 italic px-1">Dicatat asisten lain</span>
+                                    @endif
                                 </div>
                             </td>
 
@@ -592,7 +617,8 @@
                 </button>
             </div>
 
-            <form action="{{ route('assistant.presensi.store') }}" method="POST" class="px-5 pt-3 pb-4 space-y-3 overflow-y-auto flex-1">
+            <form action="{{ route('assistant.presensi.store') }}" method="POST"
+                class="px-5 pt-3 pb-4 space-y-3 overflow-y-auto flex-1">
                 @csrf
 
                 {{-- Tanggal Presensi (Otomatis Hari Ini & Terkunci) --}}
@@ -628,8 +654,7 @@
                                 Kantor</span>
                         @endif
                     </div>
-                    <select name="kantor" id="create-kantor" required
-                        {{ $assignedKantor ? 'disabled' : '' }}
+                    <select name="kantor" id="create-kantor" required {{ $assignedKantor ? 'disabled' : '' }}
                         class="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-xs sm:text-sm font-semibold text-gray-800 focus:ring-2 focus:ring-primary-500 focus:bg-white transition {{ $assignedKantor ? 'bg-gray-100 text-gray-400 cursor-not-allowed border-gray-200' : '' }}">
                         @if(!$assignedKantor && !$selectedKantor)
                             <option value="" disabled selected>-- Pilih Lokasi Kantor Tugas --</option>
@@ -640,6 +665,9 @@
                             </option>
                         @endforeach
                     </select>
+                    @if($assignedKantor)
+                        <input type="hidden" name="kantor" value="{{ $assignedKantor }}">
+                    @endif
                     @if(!$assignedKantor)
                         <p class="text-[11px] text-amber-600 mt-1 flex items-center gap-1">
                             <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -729,9 +757,9 @@
                     <div class="relative">
                         <select name="shift" required
                             class="w-full px-3 py-2 pr-8 bg-gray-50 border border-gray-300 rounded-lg text-xs sm:text-sm appearance-none cursor-pointer focus:outline-none focus:ring-2 focus:ring-primary-500 focus:bg-white transition hover:bg-white hover:border-primary-500">
-                            <option value="Pagi">Shift Pagi (08:00 - 16:00)</option>
-                            <option value="Middle">Shift Middle (10:00 - 18:00)</option>
-                            <option value="Siang">Shift Siang (13:00 - 21:00)</option>
+                            <option value="Pagi">Shift Pagi</option>
+                            <option value="Middle">Shift Middle</option>
+                            <option value="Siang">Shift Siang</option>
                         </select>
                         <div class="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400">
                             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

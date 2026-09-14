@@ -40,13 +40,12 @@ class AccountController extends Controller
             $accountsQuery->whereNull('staff_id');
         }
 
-        $accounts = $accountsQuery->get();
+        $accounts = $accountsQuery->paginate(5)->appends($request->query());
 
-        $allAccounts = SosmedAccount::all();
         $stats = [
-            'total'      => $allAccounts->count(),
-            'assigned'   => $allAccounts->whereNotNull('staff_id')->count(),
-            'unassigned' => $allAccounts->whereNull('staff_id')->count(),
+            'total'      => SosmedAccount::count(),
+            'assigned'   => SosmedAccount::whereNotNull('staff_id')->count(),
+            'unassigned' => SosmedAccount::whereNull('staff_id')->count(),
         ];
 
         $platformList = ['Instagram', 'TikTok', 'YouTube', 'Facebook', 'Twitter/X', 'LinkedIn', 'Threads', 'Website'];

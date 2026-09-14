@@ -19,7 +19,7 @@ class SosmedController extends Controller
         $accounts = SosmedAccount::with(['pmUser', 'creator'])
             ->where('staff_id', $currentUserId)
             ->orderBy('platform')
-            ->get();
+            ->paginate(5);
 
         $accountIds = $accounts->pluck('id');
 

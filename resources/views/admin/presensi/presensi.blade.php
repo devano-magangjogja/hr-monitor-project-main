@@ -689,9 +689,9 @@
                         </label>
                         <select name="shift" required
                             class="w-full border border-gray-300 rounded-lg text-xs sm:text-sm focus:ring-2 focus:ring-primary-500 focus:outline-none">
-                            <option value="Pagi">Shift Pagi (08:00 - 16:00)</option>
-                            <option value="Middle">Shift Middle (10:00 - 18:00)</option>
-                            <option value="Siang">Shift Siang (13:00 - 21:00)</option>
+                            <option value="Pagi">Shift Pagi</option>
+                            <option value="Middle">Shift Middle</option>
+                            <option value="Siang">Shift Siang</option>
                         </select>
                     </div>
 

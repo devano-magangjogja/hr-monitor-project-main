@@ -243,41 +243,46 @@
                 </tr>
             </thead>
             <tbody class="divide-y divide-gray-100">
-                @forelse(isset($sosmedPending) ? $sosmedPending : collect() as $st)
-                    <tr class="hover:bg-amber-50/40 transition align-middle">
+                @forelse(isset($sosmedPending) ? $sosmedPending : collect() as $row)
+                    @php
+                        $isDone = $row->status === 'approved_hr';
+                    @endphp
+                    <tr class="{{ $isDone ? 'opacity-50' : 'hover:bg-amber-50/40' }} transition align-middle">
                         <td class="px-4 py-3">
-                            <p class="font-semibold text-gray-800 truncate">{{ $st->account?->name ?? '—' }}</p>
-                            @if($st->title && $st->title !== 'Laporan Konten Harian - ' . ($st->account?->name ?? ''))
-                                <p class="text-xs text-gray-400 truncate">{{ $st->title }}</p>
+                            <p class="font-semibold text-gray-800 truncate">{{ $row->account?->name ?? '—' }}</p>
+                            @if(!empty($row->is_verif_row))
+                                <p class="text-[10px] text-blue-500 mt-0.5">butuh verifikasi</p>
                             @endif
                         </td>
                         <td class="px-4 py-3">
-                            @if($st->account)
-                                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-medium border {{ $st->account->platform_color ?? 'bg-gray-100 text-gray-600 border-gray-200' }}">
-                                    {{ $st->account->platform_icon ?? '' }} {{ $st->account->platform }}
+                            @if($row->account)
+                                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-medium border {{ $row->account->platform_color ?? 'bg-gray-100 text-gray-600 border-gray-200' }}">
+                                    {{ $row->account->platform_icon ?? '' }} {{ $row->account->platform }}
                                 </span>
                             @else
                                 <span class="text-gray-300">—</span>
                             @endif
                         </td>
                         <td class="px-4 py-3 text-xs">
-                            @if($st->assignedUser)
-                                <p class="font-medium text-gray-800">{{ $st->assignedUser->name }}</p>
-                                <p class="text-gray-400 text-[11px]">{{ $st->assignedUser->role_label }}</p>
+                            @if($row->executor_name && $row->executor_name !== '—')
+                                <p class="font-medium text-gray-800">{{ $row->executor_name }}</p>
+                                @if($row->executor_role)
+                                    <p class="text-gray-400 text-[11px]">{{ $row->executor_role }}</p>
+                                @endif
                             @else
                                 <span class="text-gray-300">—</span>
                             @endif
                         </td>
                         <td class="px-4 py-3 text-xs text-gray-500 whitespace-nowrap">
-                            {{ $st->task_date?->translatedFormat('d M Y') ?? '—' }}
+                            {{ \Carbon\Carbon::parse($row->task_date)->translatedFormat('d M Y') }}
                         </td>
                         <td class="px-4 py-3">
-                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium {{ $st->status_badge_class }}">
-                                {{ $st->status_label }}
+                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium {{ $row->status_class }}">
+                                {{ $row->status_label }}
                             </span>
                         </td>
                         <td class="px-4 py-3 text-xs text-rose-600 hidden sm:table-cell">
-                            {{ $st->rejection_note ?? '—' }}
+                            {{ $row->rejection_note ?? '—' }}
                         </td>
                     </tr>
                 @empty

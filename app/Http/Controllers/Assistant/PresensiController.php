@@ -34,11 +34,21 @@ class PresensiController extends Controller
         // Kantor yang sedang dilihat / difilter pada halaman
         $selectedKantor = $request->input('kantor') ?: $assignedKantor;
 
+        // Flag: apakah asisten sudah memiliki penugasan kantor pada tanggal ini
+        $hasKantor = !is_null($assignedKantor);
+
         $baseQuery = Presensi::with(['pemagang', 'creator'])
             ->where('tanggal', $tanggal);
 
         if ($selectedKantor) {
             $baseQuery->where('kantor', $selectedKantor);
+        }
+
+        // Jika asisten BELUM punya penugasan kantor resmi:
+        // hanya tampilkan presensi yang DIA SENDIRI catat.
+        // Asisten yang sudah punya penugasan → bisa lihat semua presensi di kantornya.
+        if (!$hasKantor) {
+            $baseQuery->where('created_by', Auth::id());
         }
 
         if ($request->filled('search')) {
@@ -80,9 +90,12 @@ class PresensiController extends Controller
             ->fragment('tabel-tidak-hadir');
 
         // Statistik Ringkasan untuk TANGGAL YANG DIPILIH
+        // Jika belum ada penugasan kantor, semua stats = 0
         $statsQuery = Presensi::where('tanggal', $tanggal);
-        if ($selectedKantor) {
+        if ($hasKantor) {
             $statsQuery->where('kantor', $selectedKantor);
+        } else {
+            $statsQuery->whereRaw('1 = 0');
         }
 
         $stats = [
@@ -95,20 +108,19 @@ class PresensiController extends Controller
             'total_hadir' => (clone $statsQuery)->whereIn('keterangan', ['Lebih Awal', 'Tepat Waktu', 'Terlambat'])->count(),
         ];
 
-        // List pemagang untuk dropdown modal
+        // List pemagang untuk dropdown modal — hanya yang BELUM tercatat presensinya hari ini (di kantor mana pun)
         $pemagangQuery = Pemagang::query();
-        if ($selectedKantor) {
-            $pemagangQuery->whereDoesntHave('presensis', function ($q) use ($tanggal, $selectedKantor) {
-                $q->where('tanggal', $tanggal)
-                    ->where('kantor', '!=', $selectedKantor);
-            });
-        }
+        $pemagangQuery->whereDoesntHave('presensis', function ($q) use ($tanggal) {
+            $q->where('tanggal', $tanggal);
+        });
         $pemagangs = $pemagangQuery->orderBy('nama_lengkap', 'asc')->get();
 
         // List opsi divisi lengkap
         $divisiList = Pemagang::getAllDivisi();
 
         $kantorList = ['Kantor 1', 'Kantor 2', 'Kantor 3', 'Kantor 4', 'Kantor 5', 'Kantor 6', 'Kantor 7', 'Kantor 8', 'Kantor 9', 'Kantor 10'];
+
+        $authId = Auth::id();
 
         return view('assistant.presensi.presensi', compact(
             'presensiHadir',
@@ -121,7 +133,9 @@ class PresensiController extends Controller
             'formattedDate',
             'assignedKantor',
             'selectedKantor',
-            'kantorList'
+            'kantorList',
+            'authId',
+            'hasKantor'
         ));
     }
 
@@ -192,9 +206,15 @@ class PresensiController extends Controller
      * Perbarui data presensi
      * Asisten hanya dapat mengubah shift, waktu masuk, keterangan, dan notes
      * Hanya admin/staff dapat mengubah kantor
+     * Asisten hanya boleh mengubah catatan yang dia sendiri buat
      */
     public function update(Request $request, Presensi $presensi)
     {
+        // Asisten hanya boleh mengubah catatan yang dia sendiri buat
+        if ($presensi->created_by !== Auth::id()) {
+            return back()->with('error', 'Anda tidak memiliki izin untuk mengubah catatan presensi ini.');
+        }
+
         $validated = $request->validate([
             'shift' => ['required', 'in:Pagi,Middle,Siang'],
             'waktu_masuk' => ['required'],
@@ -216,9 +236,15 @@ class PresensiController extends Controller
 
     /**
      * Hapus catatan presensi
+     * Asisten hanya boleh menghapus catatan yang dia sendiri buat
      */
     public function destroy(Presensi $presensi)
     {
+        // Asisten hanya boleh menghapus catatan yang dia sendiri buat
+        if ($presensi->created_by !== Auth::id()) {
+            return back()->with('error', 'Anda tidak memiliki izin untuk menghapus catatan presensi ini.');
+        }
+
         $tanggal = $presensi->tanggal;
         $namaPemagang = $presensi->pemagang?->nama_lengkap ?? 'Pemagang';
         $presensi->delete();

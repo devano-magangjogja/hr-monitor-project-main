@@ -91,8 +91,10 @@ class PresensiController extends Controller
             'total_hadir' => (clone $statsQuery)->whereIn('keterangan', ['Lebih Awal', 'Tepat Waktu', 'Terlambat'])->count(),
         ];
 
-        // List semua pemagang untuk dropdown modal
-        $pemagangs = Pemagang::orderBy('nama_lengkap', 'asc')->get();
+        // List pemagang untuk dropdown modal — hanya yang BELUM tercatat presensinya pada tanggal ini
+        $pemagangs = Pemagang::whereDoesntHave('presensis', function ($q) use ($tanggal) {
+            $q->where('tanggal', $tanggal);
+        })->orderBy('nama_lengkap', 'asc')->get();
 
         // List opsi divisi lengkap
         $divisiList = Pemagang::getAllDivisi();
