@@ -27,7 +27,7 @@ class SosmedController extends Controller
             ->whereIn('sosmed_account_id', $assignedAccountIds)
             ->where('status', 'done_by_staff')
             ->orderBy('updated_at', 'desc')
-            ->get();
+            ->paginate(5);
 
         // Riwayat yang pernah di-approve oleh asisten ini
         $approvalHistory = SosmedApprovalLog::with(['task.account', 'user'])
@@ -36,8 +36,8 @@ class SosmedController extends Controller
             ->take(50)
             ->get();
 
-        // Akun Mandiri yang Dikelola oleh HR Assistant (seperti PM)
-        $myAccounts = \App\Models\SosmedAccount::with(['creator'])
+        // Akun yang Dikelola oleh HR Assistant sebagai eksekutor (staff_id = asisten ini)
+        $myAccounts = \App\Models\SosmedAccount::with(['creator', 'pmUser'])
             ->where('staff_id', $currentUserId)
             ->orderBy('platform')
             ->get();
@@ -140,7 +140,7 @@ class SosmedController extends Controller
 
         $validated = $request->validate([
             'links'       => ['required', 'array', 'min:1'],
-            'links.*'     => ['required', 'url', 'max:500'],
+            'links.*'     => ['required', 'string', 'max:500'],
             'description' => ['nullable', 'string', 'max:1000'],
         ]);
 

@@ -27,7 +27,7 @@ class SosmedController extends Controller
         $myAccounts = SosmedAccount::with(['creator'])
             ->where('staff_id', $currentUserId)
             ->orderBy('platform')
-            ->get();
+            ->paginate(5);
 
         $myAccountIds = $myAccounts->pluck('id');
 
@@ -67,7 +67,7 @@ class SosmedController extends Controller
                 });
             })
             ->orderBy('platform')
-            ->get();
+            ->paginate(5);
 
         $supervisedAccountIds = $allSupervisedAccounts->pluck('id')->unique();
 
@@ -123,7 +123,7 @@ class SosmedController extends Controller
         $allSupervisedTasks = SosmedTask::whereIn('sosmed_account_id', $supervisedAccountIds)->get();
 
         $stats = [
-            'total_accounts'    => $accounts->count(), // Akun mandiri yang dipegang sendiri
+            'total_accounts'    => $accounts->total(), // Akun mandiri yang dipegang sendiri
             'need_pm_verify'    => $pendingVerification->count(),
             'waiting_hr'        => $allSupervisedTasks->where('status', 'verified_by_pm')->count(),
             'approved_final'    => $allSupervisedTasks->where('status', 'approved_hr')->count(),

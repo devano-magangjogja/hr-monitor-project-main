@@ -28,25 +28,25 @@ class SosmedController extends Controller
                   ->orWhereHas('staffUser', fn($u) => $u->where('role', '!=', 'hr_staff'));
             })
             ->orderBy('platform')
-            ->get();
+            ->paginate(5);
 
         // Tasks needing final HR approval (tugas yang diverifikasi HR Staff, bukan tugas staff sendiri)
         $needHrApproval = SosmedTask::with(['account', 'assignedUser', 'assignedBy', 'verifiedBy'])
             ->where('status', 'verified_by_pm')
             ->where('assigned_to', '!=', Auth::id())
             ->orderBy('verified_at', 'desc')
-            ->get();
+            ->paginate(5);
 
         // All tasks for monitoring
         $allTasks = SosmedTask::with(['account', 'assignedUser', 'assignedBy', 'verifiedBy', 'hrVerifiedBy'])
             ->orderBy('task_date', 'desc')
-            ->get();
+            ->paginate(5);
 
         // Akun Mandiri yang Dikelola oleh Staff yang sedang login
         $myAccounts = SosmedAccount::with(['creator'])
             ->where('staff_id', Auth::id())
             ->orderBy('platform')
-            ->get();
+            ->paginate(5);
         $myAccountIds = $myAccounts->pluck('id');
 
         $todayTasks = SosmedTask::with(['verifiedBy', 'hrVerifiedBy'])
@@ -87,10 +87,10 @@ class SosmedController extends Controller
 
         $stats = [
             'total_accounts'   => $accounts->count(),
-            'my_accounts'      => $myAccounts->count(),
+            'my_accounts'      => $myAccounts->total(),
             'unassigned_pm'    => $accounts->whereNull('pm_id')->count(),
-            'need_hr_verify'   => $needHrApproval->count(),
-            'total_tasks'      => $allTasks->count(),
+            'need_hr_verify'   => $needHrApproval->total(),
+            'total_tasks'      => $allTasks->total(),
             'completed'        => $allTasks->where('status', 'approved_hr')->count(),
             'my_pending_today' => $myAccounts->filter(function ($acc) use ($todayTasks) {
                 if (!isset($todayTasks[$acc->id])) return true;

@@ -689,9 +689,9 @@
                         <div class="relative">
                             <select name="shift" required
                                 class="w-full px-3 py-2 pr-8 bg-gray-50 border border-gray-300 rounded-lg text-xs sm:text-sm appearance-none cursor-pointer focus:outline-none focus:ring-2 focus:ring-primary-500 focus:bg-white transition hover:bg-white hover:border-primary-500">
-                                <option value="Pagi">Shift Pagi (08:00 - 16:00)</option>
-                                <option value="Middle">Shift Middle (10:00 - 18:00)</option>
-                                <option value="Siang">Shift Siang (13:00 - 21:00)</option>
+                                <option value="Pagi">Shift Pagi</option>
+                                <option value="Middle">Shift Middle</option>
+                                <option value="Siang">Shift Siang</option>
                             </select>
                             <div class="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400">
                                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

@@ -28,7 +28,15 @@ class SosmedController extends Controller
             $accountsQuery->where('name', 'like', '%' . $accountSearch . '%');
         }
 
-        $accounts = $accountsQuery->get();
+        // Get counts before pagination
+        $totalAccountsCount = $accountsQuery->count();
+        $accountsStats = [
+            'total' => $totalAccountsCount,
+            'unassigned_pm' => (clone $accountsQuery)->whereNull('pm_id')->count(),
+            'unassigned_staff' => (clone $accountsQuery)->whereNull('staff_id')->count(),
+        ];
+
+        $accounts = $accountsQuery->paginate(5)->appends($request->all());
 
         // Filter date for tasks
         $taskDateFilter = $request->query('task_date');
@@ -37,12 +45,23 @@ class SosmedController extends Controller
         }
 
         // Seluruh Tugas Sosmed
-        $tasks = SosmedTask::with(['account', 'assignedUser', 'assignedBy', 'verifiedBy', 'hrVerifiedBy'])
+        $tasksQuery = SosmedTask::with(['account', 'assignedUser', 'assignedBy', 'verifiedBy', 'hrVerifiedBy'])
             ->when($taskDateFilter, function ($q) use ($taskDateFilter) {
                 $q->whereDate('task_date', $taskDateFilter);
             })
-            ->orderBy('task_date', 'desc')
-            ->get();
+            ->orderBy('task_date', 'desc');
+
+        // Get counts before pagination
+        $totalTasksCount = $tasksQuery->count();
+        $tasksStats = [
+            'total' => $totalTasksCount,
+            'pending' => (clone $tasksQuery)->where('status', 'pending')->count(),
+            'done_by_staff' => (clone $tasksQuery)->where('status', 'done_by_staff')->count(),
+            'verified_by_pm' => (clone $tasksQuery)->where('status', 'verified_by_pm')->count(),
+            'approved_hr' => (clone $tasksQuery)->where('status', 'approved_hr')->count(),
+        ];
+
+        $tasks = $tasksQuery->paginate(5)->appends($request->all());
 
         // Date filter and time ranges for audit logs
         $logDateFilter = $request->query('log_date');
@@ -108,15 +127,15 @@ class SosmedController extends Controller
             ->get();
 
         $stats = [
-            'total_accounts'    => $accounts->count(),
-            'unassigned_pm'     => $accounts->whereNull('pm_id')->count(),
-            'unassigned_staff'  => $accounts->whereNull('staff_id')->count(),
-            'total_tasks'       => $tasks->count(),
-            'pending_tasks'     => $tasks->where('status', 'pending')->count(),
-            'need_pm_verify'    => $tasks->where('status', 'done_by_staff')->count(),
+            'total_accounts'    => $accountsStats['total'],
+            'unassigned_pm'     => $accountsStats['unassigned_pm'],
+            'unassigned_staff'  => $accountsStats['unassigned_staff'],
+            'total_tasks'       => $tasksStats['total'],
+            'pending_tasks'     => $tasksStats['pending'],
+            'need_pm_verify'    => $tasksStats['done_by_staff'],
             'need_admin_verify' => $staffPendingTasks->count(),
-            'need_hr_verify'    => $tasks->where('status', 'verified_by_pm')->count(),
-            'completed'         => $tasks->where('status', 'approved_hr')->count(),
+            'need_hr_verify'    => $tasksStats['verified_by_pm'],
+            'completed'         => $tasksStats['approved_hr'],
         ];
 
         // Akun dari Manajemen Akun yang belum dimasukkan ke daftar kelola sosmed

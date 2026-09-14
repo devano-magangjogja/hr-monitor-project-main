@@ -192,6 +192,11 @@
                         @endforelse
                     </tbody>
                 </table>
+
+                {{-- Pagination Links --}}
+                <div class="mt-4 px-4 py-3 border-t border-gray-200">
+                    {{ $accounts->links() }}
+                </div>
             </div>
 
             {{-- ── Mobile Cards (< md) ────────────────────────────────────────── --}} <div class="md:hidden space-y-3">
@@ -278,6 +283,11 @@
                         Belum ada akun sosial media yang di-assign kepada Anda oleh PM / HR Staff.
                     </div>
                 @endforelse
+
+                {{-- Pagination Links --}}
+                <div class="mt-4">
+                    {{ $accounts->links() }}
+                </div>
         </div>
     </div>
     </div>

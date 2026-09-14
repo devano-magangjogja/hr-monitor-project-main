@@ -304,6 +304,13 @@
                 </tbody>
             </table>
         </div>
+
+        {{-- Pagination --}}
+        @if($accounts->hasPages())
+            <div class="px-5 py-4 border-t border-gray-100 bg-gray-50/50">
+                {{ $accounts->links() }}
+            </div>
+        @endif
     </div>
 
     {{-- ── MODAL CREATE ACCOUNT ─────────────────────────────────────── --}}

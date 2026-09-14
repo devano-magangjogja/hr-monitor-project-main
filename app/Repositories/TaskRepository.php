@@ -129,20 +129,22 @@ class TaskRepository
             }])
             ->where('created_by', $userId)
             ->where('type', 'self')
+            ->whereDate('task_date', '<=', Carbon::today())
             ->where(function ($q) use ($userId, $today) {
+                // Tugas hari ini selalu tampil
                 $q->whereDate('task_date', $today)
+                  // Tugas lama yang assignment-nya masih pending tetap tampil
+                  ->orWhereHas('assignments', function ($q2) use ($userId) {
+                      $q2->where('user_id', $userId)
+                         ->where('is_completed', 'pending');
+                  })
+                  // Tugas lama yang diselesaikan hari ini tetap tampil
                   ->orWhereHas('assignments', function ($q2) use ($userId, $today) {
                       $q2->where('user_id', $userId)
-                         ->where(function ($q3) use ($today) {
-                             $q3->where('is_completed', 'pending')
-                                ->orWhere(function ($q4) use ($today) {
-                                    $q4->where('is_completed', 'completed')
-                                       ->whereDate('completed_at', $today);
-                                });
-                         });
+                         ->where('is_completed', 'completed')
+                         ->whereDate('completed_at', $today);
                   });
             })
-            ->whereDate('task_date', '<=', Carbon::today())
             ->orderByDesc('task_date')
             ->orderByDesc('created_at')
             ->get();
@@ -221,10 +223,8 @@ class TaskRepository
 
     public function getHistoryForUser(int $userId, ?string $date = null, ?string $search = null): LengthAwarePaginator
     {
-        /** @var Builder $query */
-        $query = $this->model->newQuery();
-
-        return $query
+        // Ambil tugas regular dari tabel tasks
+        $regularTasksQuery = $this->model->newQuery()
             ->with(['assignments' => function ($q) use ($userId) {
                 $q->where('user_id', $userId);
             }, 'creator:id,name'])
@@ -241,8 +241,82 @@ class TaskRepository
                 });
             })
             ->orderByDesc('task_date')
-            ->orderByDesc('created_at')
-            ->paginate(8);
+            ->orderByDesc('created_at');
+
+        // Ambil tugas sosmed dari tabel sosmed_tasks
+        $sosmedTasksQuery = \App\Models\SosmedTask::query()
+            ->with(['account', 'assignedUser', 'verifiedBy', 'hrVerifiedBy'])
+            ->where('assigned_to', $userId)
+            ->when($date, function ($q) use ($date) {
+                $q->whereDate('task_date', $date);
+            })
+            ->when($search, function ($q) use ($search) {
+                $q->where(function ($q2) use ($search) {
+                    $q2->where('title', 'like', '%' . $search . '%')
+                       ->orWhere('description', 'like', '%' . $search . '%')
+                       ->orWhereHas('account', fn($qa) => $qa->where('name', 'like', '%' . $search . '%'));
+                });
+            });
+
+        // Gabungkan hasil dan urutkan
+        $regularTasks = $regularTasksQuery->get();
+        $sosmedTasks = $sosmedTasksQuery->get();
+
+        // Merge dan transform sosmed tasks menjadi format yang sesuai dengan view
+        $allTasks = $regularTasks->merge($sosmedTasks->map(function ($sosmedTask) use ($userId) {
+            // Transform sosmed task menjadi format task biasa
+            $task = new \App\Models\Task();
+            $task->id = 'sosmed_' . $sosmedTask->id; // Prefix untuk membedakan
+            $task->title = $sosmedTask->title;
+            $task->description = $sosmedTask->description;
+            $task->task_date = $sosmedTask->task_date;
+            $task->created_at = $sosmedTask->created_at;
+            $task->updated_at = $sosmedTask->updated_at;
+            $task->creator = $sosmedTask->assignedBy;
+
+            // Buat assignment palsu untuk compatibility dengan view
+            // is_completed menggunakan string status sosmed agar task-status-badge bisa mendeteksi dengan benar
+            $assignment = new \stdClass();
+            $assignment->is_completed = $sosmedTask->status; // 'approved_hr', 'verified_by_pm', 'done_by_staff', 'rejected', 'pending'
+            $assignment->completed_at = $sosmedTask->status === 'approved_hr' ?
+                                       ($sosmedTask->hr_verified_at ?? $sosmedTask->updated_at) : null;
+
+            // Note berisi info status proses
+            $noteMap = [
+                'approved_hr'    => 'Disetujui Final oleh HR Staff',
+                'verified_by_pm' => 'Menunggu Persetujuan Final HR',
+                'done_by_staff'  => 'Menunggu Verifikasi PM',
+                'rejected'       => 'Ditolak - Perlu Revisi',
+                'pending'        => 'Belum Disubmit',
+            ];
+            $noteText = $noteMap[$sosmedTask->status] ?? $sosmedTask->status;
+            if ($sosmedTask->hasLinks()) {
+                $noteText .= ' | Bukti: ' . count($sosmedTask->link_upload) . ' link';
+            }
+            $assignment->note = $noteText;
+            
+            $task->setRelation('assignments', collect([$assignment]));
+            
+            return $task;
+        }));
+
+        // Urutkan berdasarkan task_date desc
+        $allTasks = $allTasks->sortByDesc('task_date')->values();
+
+        // Manual pagination
+        $perPage = 8;
+        $currentPage = request()->get('page', 1);
+        $offset = ($currentPage - 1) * $perPage;
+        
+        $paginatedItems = $allTasks->slice($offset, $perPage)->values();
+        
+        return new \Illuminate\Pagination\LengthAwarePaginator(
+            $paginatedItems,
+            $allTasks->count(),
+            $perPage,
+            $currentPage,
+            ['path' => request()->url(), 'query' => request()->query()]
+        );
     }
     public function getHistoryForAdmin(?int $userId = null, ?string $date = null, ?string $search = null, int $perPage = 10)
     {
