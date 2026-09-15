@@ -25,8 +25,8 @@ class AccountController extends Controller
         if ($search) {
             $accountsQuery->where(function ($q) use ($search) {
                 $q->where('name', 'like', '%' . $search . '%')
-                  ->orWhere('platform', 'like', '%' . $search . '%')
-                  ->orWhere('email', 'like', '%' . $search . '%');
+                    ->orWhere('platform', 'like', '%' . $search . '%')
+                    ->orWhere('email', 'like', '%' . $search . '%');
             });
         }
 
@@ -40,11 +40,11 @@ class AccountController extends Controller
             $accountsQuery->whereNull('staff_id');
         }
 
-        $accounts = $accountsQuery->paginate(5)->appends($request->query());
+        $accounts = $accountsQuery->paginate(15)->appends($request->query());
 
         $stats = [
-            'total'      => SosmedAccount::count(),
-            'assigned'   => SosmedAccount::whereNotNull('staff_id')->count(),
+            'total' => SosmedAccount::count(),
+            'assigned' => SosmedAccount::whereNotNull('staff_id')->count(),
             'unassigned' => SosmedAccount::whereNull('staff_id')->count(),
         ];
 
@@ -63,23 +63,23 @@ class AccountController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'name'     => ['required', 'string', 'max:200'],
+            'name' => ['required', 'string', 'max:200'],
             'platform' => ['required', 'string', 'max:50'],
-            'link'     => ['nullable', 'url', 'max:500'],
-            'email'    => ['nullable', 'string', 'email', 'max:255'],
+            'link' => ['nullable', 'string', 'max:500'],
+            'email' => ['nullable', 'string', 'email', 'max:255'],
             'password' => ['nullable', 'string', 'max:255'],
-            'notes'    => ['nullable', 'string', 'max:1000'],
+            'notes' => ['nullable', 'string', 'max:1000'],
         ]);
 
         $data = [
-            'name'         => $validated['name'],
-            'platform'     => $validated['platform'],
-            'link'         => $validated['link'] ?? null,
-            'email'        => $validated['email'] ?? null,
-            'password'     => !empty($validated['password']) ? $validated['password'] : null,
-            'notes'        => $validated['notes'] ?? null,
+            'name' => $validated['name'],
+            'platform' => $validated['platform'],
+            'link' => $validated['link'] ?? null,
+            'email' => $validated['email'] ?? null,
+            'password' => !empty($validated['password']) ? $validated['password'] : null,
+            'notes' => $validated['notes'] ?? null,
             'is_in_sosmed' => false,
-            'created_by'   => Auth::id(),
+            'created_by' => Auth::id(),
         ];
 
         $account = SosmedAccount::create($data);
@@ -98,20 +98,20 @@ class AccountController extends Controller
     public function update(Request $request, SosmedAccount $account)
     {
         $validated = $request->validate([
-            'name'     => ['required', 'string', 'max:200'],
+            'name' => ['required', 'string', 'max:200'],
             'platform' => ['required', 'string', 'max:50'],
-            'link'     => ['nullable', 'url', 'max:500'],
-            'email'    => ['nullable', 'string', 'email', 'max:255'],
+            'link' => ['nullable', 'string', 'max:500'],
+            'email' => ['nullable', 'string', 'email', 'max:255'],
             'password' => ['nullable', 'string', 'max:255'],
-            'notes'    => ['nullable', 'string', 'max:1000'],
+            'notes' => ['nullable', 'string', 'max:1000'],
         ]);
 
         $data = [
-            'name'     => $validated['name'],
+            'name' => $validated['name'],
             'platform' => $validated['platform'],
-            'link'     => $validated['link'] ?? null,
-            'email'    => $validated['email'] ?? null,
-            'notes'    => $validated['notes'] ?? null,
+            'link' => $validated['link'] ?? null,
+            'email' => $validated['email'] ?? null,
+            'notes' => $validated['notes'] ?? null,
         ];
 
         // Only update password if a new one is provided

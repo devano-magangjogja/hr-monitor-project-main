@@ -73,9 +73,14 @@ class PresensiController extends Controller
             });
         }
 
-        // 1. Tabel Hadir (Lebih Awal, Tepat Waktu, Terlambat) - 5 data per halaman
+        // 1. Tabel Hadir (Lebih Awal, Tepat Waktu, Terlambat)
+        $allowedHadir   = ['Lebih Awal', 'Tepat Waktu', 'Terlambat'];
+        $filterKet      = in_array($request->input('keterangan'), $allowedHadir)
+                            ? $request->input('keterangan') : null;
+
         $presensiHadir = (clone $baseQuery)
-            ->whereIn('keterangan', ['Lebih Awal', 'Tepat Waktu', 'Terlambat'])
+            ->whereIn('keterangan', $allowedHadir)
+            ->when($filterKet, fn($q) => $q->where('keterangan', $filterKet))
             ->orderBy('waktu_masuk', 'asc')
             ->paginate(15, ['*'], 'page_hadir')
             ->withQueryString()

@@ -71,6 +71,9 @@
     @endif
 
     {{-- ── Stat Cards Ringkasan Tanggal Ini ────────────────────── --}}
+    @php
+        $activeKet = request('keterangan');
+    @endphp
     <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4 mb-8">
 
         {{-- Total Pemagang (Melebar penuh 2 kolom di mobile) --}}
@@ -89,7 +92,12 @@
         </div>
 
         {{-- Datang Lebih Awal --}}
-        <div class="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
+        <div onclick="filterKet('Lebih Awal')"
+             title="Klik untuk filter tabel Lebih Awal"
+             class="rounded-xl border p-4 shadow-sm cursor-pointer transition-all select-none
+                    {{ $activeKet === 'Lebih Awal'
+                        ? 'bg-indigo-50 border-indigo-400 ring-2 ring-indigo-200 shadow-indigo-100'
+                        : 'bg-white border-gray-200 hover:border-indigo-300 hover:shadow-md' }}">
             <div class="flex items-center justify-between mb-2">
                 <p class="text-xs font-medium text-gray-500">Lebih Awal</p>
                 <div class="w-8 h-8 rounded-lg bg-indigo-50 flex items-center justify-center flex-shrink-0">
@@ -100,11 +108,18 @@
                 </div>
             </div>
             <p class="text-2xl font-bold text-indigo-600">{{ $stats['datang_awal'] }}</p>
-            <p class="text-[11px] text-gray-400 mt-0.5">hadir lebih awal</p>
+            <p class="text-[11px] mt-0.5 {{ $activeKet === 'Lebih Awal' ? 'text-indigo-500 font-semibold' : 'text-gray-400' }}">
+                {{ $activeKet === 'Lebih Awal' ? '▼ filter aktif' : 'hadir lebih awal' }}
+            </p>
         </div>
 
         {{-- Tepat Waktu --}}
-        <div class="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
+        <div onclick="filterKet('Tepat Waktu')"
+             title="Klik untuk filter tabel Tepat Waktu"
+             class="rounded-xl border p-4 shadow-sm cursor-pointer transition-all select-none
+                    {{ $activeKet === 'Tepat Waktu'
+                        ? 'bg-green-50 border-green-400 ring-2 ring-green-200 shadow-green-100'
+                        : 'bg-white border-gray-200 hover:border-green-300 hover:shadow-md' }}">
             <div class="flex items-center justify-between mb-2">
                 <p class="text-xs font-medium text-gray-500">Tepat Waktu</p>
                 <div class="w-8 h-8 rounded-lg bg-green-50 flex items-center justify-center flex-shrink-0">
@@ -114,11 +129,18 @@
                 </div>
             </div>
             <p class="text-2xl font-bold text-green-600">{{ $stats['tepat_waktu'] }}</p>
-            <p class="text-[11px] text-gray-400 mt-0.5">hadir tepat waktu</p>
+            <p class="text-[11px] mt-0.5 {{ $activeKet === 'Tepat Waktu' ? 'text-green-500 font-semibold' : 'text-gray-400' }}">
+                {{ $activeKet === 'Tepat Waktu' ? '▼ filter aktif' : 'hadir tepat waktu' }}
+            </p>
         </div>
 
         {{-- Terlambat --}}
-        <div class="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
+        <div onclick="filterKet('Terlambat')"
+             title="Klik untuk filter tabel Terlambat"
+             class="rounded-xl border p-4 shadow-sm cursor-pointer transition-all select-none
+                    {{ $activeKet === 'Terlambat'
+                        ? 'bg-amber-50 border-amber-400 ring-2 ring-amber-200 shadow-amber-100'
+                        : 'bg-white border-gray-200 hover:border-amber-300 hover:shadow-md' }}">
             <div class="flex items-center justify-between mb-2">
                 <p class="text-xs font-medium text-gray-500">Terlambat</p>
                 <div class="w-8 h-8 rounded-lg bg-amber-50 flex items-center justify-center flex-shrink-0">
@@ -129,11 +151,15 @@
                 </div>
             </div>
             <p class="text-2xl font-bold text-amber-600">{{ $stats['terlambat'] }}</p>
-            <p class="text-[11px] text-gray-400 mt-0.5">terlambat masuk</p>
+            <p class="text-[11px] mt-0.5 {{ $activeKet === 'Terlambat' ? 'text-amber-500 font-semibold' : 'text-gray-400' }}">
+                {{ $activeKet === 'Terlambat' ? '▼ filter aktif' : 'terlambat masuk' }}
+            </p>
         </div>
 
         {{-- Tidak Hadir --}}
-        <div class="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
+        <div onclick="scrollToTidakHadir()"
+             title="Klik untuk langsung ke daftar tidak hadir"
+             class="bg-white rounded-xl border border-gray-200 p-4 shadow-sm cursor-pointer transition-all select-none hover:border-red-300 hover:shadow-md hover:bg-red-50/30">
             <div class="flex items-center justify-between mb-2">
                 <p class="text-xs font-medium text-gray-500">Tidak Hadir</p>
                 <div class="w-8 h-8 rounded-lg bg-red-50 flex items-center justify-center flex-shrink-0">
@@ -143,7 +169,7 @@
                 </div>
             </div>
             <p class="text-2xl font-bold text-red-600">{{ $stats['tidak_hadir'] }}</p>
-            <p class="text-[11px] text-gray-400 mt-0.5">perlu dikonfirmasi</p>
+            <p class="text-[11px] text-gray-400 mt-0.5">↓ lihat daftar</p>
         </div>
 
     </div>
@@ -249,10 +275,22 @@
                     </p>
                 </div>
             </div>
-            <span
-                class="text-xs font-semibold px-3 py-1 bg-emerald-50 text-emerald-700 rounded-full border border-emerald-200">
-                {{ $presensiHadir->total() }} Hadir
-            </span>
+            <div class="flex items-center gap-2">
+                @if($activeKet)
+                    <a href="{{ request()->fullUrlWithoutQuery(['keterangan', 'page_hadir']) }}"
+                       class="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-semibold
+                              bg-gray-100 hover:bg-gray-200 text-gray-600 rounded-full border border-gray-300 transition"
+                       title="Hapus filter">
+                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                        </svg>
+                        Reset filter
+                    </a>
+                @endif
+                <span class="text-xs font-semibold px-3 py-1 bg-emerald-50 text-emerald-700 rounded-full border border-emerald-200">
+                    {{ $presensiHadir->total() }} Hadir
+                </span>
+            </div>
         </div>
 
         <div class="overflow-x-auto">
@@ -1236,6 +1274,28 @@
             document.getElementById('delete-info').textContent = `${shift} - ${waktu}`;
             document.getElementById('form-delete').action = `/assistant/presensi/${id}`;
             document.getElementById('modal-delete').classList.remove('hidden');
+        }
+
+        // ── Stat Card Filter Helpers ──────────────────────────────────
+        function filterKet(keterangan) {
+            const url = new URL(window.location.href);
+            if (url.searchParams.get('keterangan') === keterangan) {
+                url.searchParams.delete('keterangan'); // toggle off
+            } else {
+                url.searchParams.set('keterangan', keterangan);
+            }
+            url.searchParams.delete('page_hadir'); // reset halaman
+            window.location.href = url.toString();
+        }
+
+        function scrollToTidakHadir() {
+            const el = document.getElementById('tabel-tidak-hadir');
+            if (el) {
+                el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                // Highlight singkat
+                el.classList.add('ring-2', 'ring-red-300');
+                setTimeout(() => el.classList.remove('ring-2', 'ring-red-300'), 1500);
+            }
         }
     </script>
 @endpush

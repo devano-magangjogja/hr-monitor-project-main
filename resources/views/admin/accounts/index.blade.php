@@ -353,7 +353,7 @@
 
                 <div>
                     <label class="block text-xs font-semibold text-gray-700 mb-1.5">Link Akun (URL Profil)</label>
-                    <input type="url" name="link" placeholder="https://instagram.com/republikweb_net"
+                    <input type="text" name="link" placeholder="https://instagram.com/republikweb_net"
                         class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 focus:outline-none">
                     <p class="text-[11px] text-gray-400 mt-1">Link ini dapat langsung diklik pada tabel untuk membuka profil akun.</p>
                 </div>
@@ -431,7 +431,7 @@
 
                 <div>
                     <label class="block text-xs font-semibold text-gray-700 mb-1.5">Link Akun (URL Profil)</label>
-                    <input type="url" name="link" id="edit-acc-link" placeholder="https://instagram.com/username"
+                    <input type="text" name="link" id="edit-acc-link" placeholder="https://instagram.com/username"
                         class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 focus:outline-none">
                 </div>
 
