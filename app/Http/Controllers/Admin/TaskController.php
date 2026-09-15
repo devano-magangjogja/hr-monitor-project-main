@@ -278,4 +278,29 @@ class TaskController extends Controller
             return redirect($redirect)->with('error', $e->errors()['task'][0] ?? 'Gagal menghapus tugas.');
         }
     }
+
+    // ── Force Update (Admin edit task siapapun) ──────────
+
+    public function forceUpdate(Request $request, Task $task)
+    {
+        $validated = $request->validate([
+            'title'       => ['required', 'string', 'max:200'],
+            'description' => ['nullable', 'string'],
+            'kantor'      => ['nullable', 'string', 'in:Kantor 1,Kantor 2,Kantor 3,Kantor 4,Kantor 5,Kantor 6,Kantor 7,Kantor 8,Kantor 9,Kantor 10'],
+        ]);
+
+        $redirect = url()->previous();
+
+        try {
+            $task->update([
+                'title'       => $validated['title'],
+                'description' => $validated['description'] ?? null,
+                'kantor'      => $validated['kantor'] ?? null,
+            ]);
+            $this->logActivity('task.updated', 'Tugas', "Force-edit tugas '{$task->title}'", $task);
+            return redirect($redirect)->with('success', 'Tugas berhasil diperbarui.');
+        } catch (\Throwable $e) {
+            return redirect($redirect)->with('error', 'Gagal memperbarui tugas.');
+        }
+    }
 }

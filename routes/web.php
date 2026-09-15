@@ -77,6 +77,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin'])->grou
     Route::get('/tasks/vg', [AdminTaskController::class, 'vgTasks'])->name('tasks.vg');
     Route::get('/tasks/role/{role:name}', [AdminTaskController::class, 'roleTasks'])->name('tasks.by-role');
     Route::delete('/tasks/{task}/force', [AdminTaskController::class, 'forceDestroy'])->name('tasks.force-destroy');
+    Route::patch('/tasks/{task}/force-update', [AdminTaskController::class, 'forceUpdate'])->name('tasks.force-update');
 
     Route::prefix('reports')->name('reports.')->group(function () {
         Route::get('/productivity', [ReportController::class, 'productivity'])->name('productivity');
