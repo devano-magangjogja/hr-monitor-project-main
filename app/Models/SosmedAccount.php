@@ -16,6 +16,7 @@ class SosmedAccount extends Model
         'password',
         'pm_id',
         'assistant_id',
+        'supervisor_staff_id',
         'staff_id',
         'assigned_to', // fallback compatibility
         'created_by',
@@ -41,6 +42,16 @@ class SosmedAccount extends Model
     public function assistantUser()
     {
         return $this->belongsTo(User::class, 'assistant_id');
+    }
+
+    public function supervisorStaff()
+    {
+        return $this->belongsTo(User::class, 'supervisor_staff_id');
+    }
+
+    public function supervisorUser()
+    {
+        return $this->supervisorStaff();
     }
 
     public function staffUser()

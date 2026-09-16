@@ -11,10 +11,10 @@ return new class extends Migration {
     public function up(): void
     {
         Schema::table('sosmed_accounts', function (Blueprint $table) {
-            if (!Schema::hasColumn('sosmed_accounts', 'assistant_id')) {
-                $table->foreignId('assistant_id')
+            if (!Schema::hasColumn('sosmed_accounts', 'supervisor_staff_id')) {
+                $table->foreignId('supervisor_staff_id')
                     ->nullable()
-                    ->after('pm_id')
+                    ->after('assistant_id')
                     ->constrained('users')
                     ->nullOnDelete();
             }
@@ -27,9 +27,9 @@ return new class extends Migration {
     public function down(): void
     {
         Schema::table('sosmed_accounts', function (Blueprint $table) {
-            if (Schema::hasColumn('sosmed_accounts', 'assistant_id')) {
-                $table->dropForeign(['assistant_id']);
-                $table->dropColumn('assistant_id');
+            if (Schema::hasColumn('sosmed_accounts', 'supervisor_staff_id')) {
+                $table->dropForeign(['supervisor_staff_id']);
+                $table->dropColumn('supervisor_staff_id');
             }
         });
     }

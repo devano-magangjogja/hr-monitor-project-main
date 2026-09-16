@@ -148,13 +148,13 @@
         const statusMap = {
             'completed':      { label: 'Selesai', cls: 'bg-green-50 text-green-700' },
             'approved_hr':    { label: 'Disetujui HR', cls: 'bg-emerald-50 text-emerald-700' },
-            'done_by_staff':  { label: 'Menunggu Verif PM', cls: 'bg-amber-50 text-amber-700' },
+            'done_by_staff':  { label: data.status_label || 'Menunggu Verif PM', cls: data.status === 'done_by_staff' && data.no_pm_no_ast ? 'bg-orange-50 text-orange-700' : 'bg-amber-50 text-amber-700' },
             'verified_by_pm': { label: 'Menunggu Final HR', cls: 'bg-blue-50 text-blue-700' },
             'rejected':       { label: 'Ditolak (Revisi)', cls: 'bg-rose-50 text-rose-700' },
             'not_done':       { label: 'Tidak Dikerjakan', cls: 'bg-red-50 text-red-700' },
             'pending':        { label: 'Belum Selesai', cls: 'bg-yellow-50 text-yellow-700' },
         };
-        const status = statusMap[data.status] || { label: data.status, cls: 'bg-gray-100 text-gray-600' };
+        const status = statusMap[data.status] || { label: data.status_label || data.status, cls: 'bg-gray-100 text-gray-600' };
         statusEl.innerHTML = `<span class="inline-flex px-2.5 py-1 rounded-full text-xs font-medium ${status.cls}">${status.label}</span>`;
 
         // Penerima

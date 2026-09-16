@@ -150,12 +150,13 @@
                     <div class="hidden md:block overflow-x-auto rounded-lg border border-gray-100">
                         <table class="w-full table-fixed text-sm">
                             <colgroup>
-                                <col class="w-[20%]"> {{-- Nama Akun & Catatan --}}
+                                <col class="w-[18%]"> {{-- Nama Akun & Catatan --}}
                                 <col class="w-28"> {{-- Platform --}}
-                                <col class="w-36"> {{-- Link URL --}}
-                                <col class="w-40"> {{-- Eksekutor --}}
-                                <col class="w-40"> {{-- Supervisor PM --}}
-                                <col class="w-40"> {{-- Asisten Pengawas --}}
+                                <col class="w-32"> {{-- Link URL --}}
+                                <col class="w-36"> {{-- Eksekutor --}}
+                                <col class="w-36"> {{-- Supervisor PM --}}
+                                <col class="w-36"> {{-- Asisten Pengawas --}}
+                                <col class="w-36"> {{-- Staff Pengawas --}}
                                 <col class="w-28"> {{-- Aksi --}}
                             </colgroup>
                             <thead>
@@ -166,6 +167,7 @@
                                     <th class="px-4 py-3 text-left">Dikelola</th>
                                     <th class="px-4 py-3 text-left">PM</th>
                                     <th class="px-4 py-3 text-left">Asisten Pengawas</th>
+                                    <th class="px-4 py-3 text-left">Staff Pengawas</th>
                                     <th class="px-4 py-3 text-center">Aksi</th>
                                 </tr>
                             </thead>
@@ -284,10 +286,37 @@
                                                 </span>
                                             @endif
                                         </td>
+
+                                        {{-- Staff Pengawas --}}
+                                        <td class="px-4 py-3 text-xs min-w-0">
+                                            @if($acc->supervisorStaff)
+                                                <div class="flex items-start gap-2 min-w-0">
+                                                    <div
+                                                        class="w-6 h-6 rounded-full bg-blue-100 text-blue-700 font-bold flex items-center justify-center text-[10px] flex-shrink-0 mt-0.5">
+                                                        {{ strtoupper(substr($acc->supervisorStaff->name, 0, 1)) }}
+                                                    </div>
+                                                    <div class="min-w-0 flex-1">
+                                                        <span class="font-semibold text-gray-800 block truncate"
+                                                            title="{{ $acc->supervisorStaff->name }}">
+                                                            {{ $acc->supervisorStaff->name }}
+                                                        </span>
+                                                        <span
+                                                            class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold mt-0.5 bg-blue-50 text-blue-700 border border-blue-200">
+                                                            Staff Pengawas
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            @else
+                                                <span
+                                                    class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-500 whitespace-nowrap">
+                                                    Tanpa Pengawas
+                                                </span>
+                                            @endif
+                                        </td>
                                         <td class="px-4 py-3.5 text-center">
                                             <div class="flex items-center justify-center gap-1">
                                                 <button type="button"
-                                                    onclick="openEditAccountModal({{ $acc->id }}, '{{ addslashes($acc->name) }}', '{{ addslashes($acc->platform) }}', '{{ addslashes($acc->link ?? '') }}', {{ $acc->pm_id ?? 'null' }}, {{ $acc->staff_id ?? 'null' }}, '{{ addslashes(str_replace(["\r", "\n"], [' ', ' '], $acc->notes ?? '')) }}', {{ $acc->assistant_id ?? 'null' }})"
+                                                    onclick="openEditAccountModal({{ $acc->id }}, '{{ addslashes($acc->name) }}', '{{ addslashes($acc->platform) }}', '{{ addslashes($acc->link ?? '') }}', {{ $acc->pm_id ?? 'null' }}, {{ $acc->staff_id ?? 'null' }}, '{{ addslashes(str_replace(["\r", "\n"], [' ', ' '], $acc->notes ?? '')) }}', {{ $acc->assistant_id ?? 'null' }}, {{ $acc->supervisor_staff_id ?? 'null' }})"
                                                     class="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition"
                                                     title="Atur Penugasan">
                                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -355,7 +384,7 @@
                                     </div>
                                     <div class="flex items-center gap-1">
                                         <button type="button"
-                                            onclick="openEditAccountModal({{ $acc->id }}, '{{ addslashes($acc->name) }}', '{{ addslashes($acc->platform) }}', '{{ addslashes($acc->link ?? '') }}', {{ $acc->pm_id ?? 'null' }}, {{ $acc->staff_id ?? 'null' }}, '{{ addslashes(str_replace(["\r", "\n"], [' ', ' '], $acc->notes ?? '')) }}', {{ $acc->assistant_id ?? 'null' }})"
+                                            onclick="openEditAccountModal({{ $acc->id }}, '{{ addslashes($acc->name) }}', '{{ addslashes($acc->platform) }}', '{{ addslashes($acc->link ?? '') }}', {{ $acc->pm_id ?? 'null' }}, {{ $acc->staff_id ?? 'null' }}, '{{ addslashes(str_replace(["\r", "\n"], [' ', ' '], $acc->notes ?? '')) }}', {{ $acc->assistant_id ?? 'null' }}, {{ $acc->supervisor_staff_id ?? 'null' }})"
                                             class="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition"
                                             title="Atur Penugasan">
                                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -442,6 +471,14 @@
                                     <span class="text-gray-400">Asisten Pengawas:</span>
                                     <span class="font-medium text-gray-800 truncate text-xs">
                                         {{ ($acc->staffUser && $acc->staffUser->role === 'hr_staff') ? 'Langsung ke Admin' : (($acc->staffUser && in_array($acc->staffUser->role, ['pm', 'hr_assistant'])) ? 'Langsung ke HR' : ($acc->assistantUser?->name ?? 'Tanpa Asisten')) }}
+                                    </span>
+                                </div>
+
+                                {{-- Row Staff Pengawas Mobile --}}
+                                <div class="pt-1 border-t border-gray-50 flex items-center justify-between text-xs">
+                                    <span class="text-gray-400">Staff Pengawas:</span>
+                                    <span class="font-medium text-gray-800 truncate text-xs">
+                                        {{ $acc->supervisorStaff?->name ?? 'Tanpa Pengawas' }}
                                     </span>
                                 </div>
                             </div>
@@ -1165,6 +1202,21 @@
                     </select>
                 </div>
 
+                {{-- Staff Pengawas --}}
+                <div>
+                    <label class="block text-xs font-semibold text-gray-700 mb-1.5">
+                        Staff Pengawas <span class="text-gray-400 font-normal">(Opsional)</span>
+                    </label>
+                    <select name="supervisor_staff_id" id="assign-task-sup"
+                        class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 focus:outline-none">
+                        <option value="">-- Tanpa Staff Pengawas --</option>
+                        @foreach($supervisors as $sup)
+                            <option value="{{ $sup->id }}">{{ $sup->name }} (HR Staff)</option>
+                        @endforeach
+                    </select>
+                    <p class="text-[11px] text-gray-400 mt-1">Staff HR yang berwenang memverifikasi tugas jika PM/Asisten tidak ada.</p>
+                </div>
+
                 <div class="flex gap-3 pt-2">
                     <button type="button" onclick="document.getElementById('modal-assign-task').classList.add('hidden')"
                         class="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-sm text-gray-700 hover:bg-gray-50 transition">Batal</button>
@@ -1262,6 +1314,17 @@
                         @endforeach
                     </select>
                     <p class="text-[11px] text-gray-400 mt-1">Asisten HR yang berwenang approve tugas sebagai backup PM.</p>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-gray-700 mb-1">Staff Pengawas <span class="text-gray-400 font-normal">(Opsional)</span></label>
+                    <select name="supervisor_staff_id" id="create-acc-sup"
+                        class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 focus:outline-none">
+                        <option value="">-- Tanpa Staff Pengawas --</option>
+                        @foreach($supervisors as $sup)
+                            <option value="{{ $sup->id }}">{{ $sup->name }} (HR Staff)</option>
+                        @endforeach
+                    </select>
+                    <p class="text-[11px] text-gray-400 mt-1">Staff HR yang berwenang memverifikasi tugas jika PM/Asisten tidak ada.</p>
                 </div>
                 <div>
                     <label class="block text-xs font-semibold text-gray-600 mb-1.5">Catatan / Briefing</label>
@@ -1393,6 +1456,21 @@
                     </select>
                     <p id="edit-ast-note" class="text-[11px] text-gray-400 mt-1">Asisten HR yang berwenang meninjau &
                         approve tugas akun ini sebagai backup PM.</p>
+                </div>
+
+                {{-- Staff Pengawas --}}
+                <div>
+                    <label class="block text-xs font-semibold text-gray-700 mb-1.5">
+                        Staff Pengawas <span class="text-gray-400 font-normal">(Opsional)</span>
+                    </label>
+                    <select name="supervisor_staff_id" id="edit-acc-sup"
+                        class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 focus:outline-none">
+                        <option value="">-- Tanpa Staff Pengawas --</option>
+                        @foreach($supervisors as $sup)
+                            <option value="{{ $sup->id }}">{{ $sup->name }} (HR Staff)</option>
+                        @endforeach
+                    </select>
+                    <p id="edit-sup-note" class="text-[11px] text-gray-400 mt-1">Staff HR yang berwenang memverifikasi tugas jika PM/Asisten tidak ada.</p>
                 </div>
 
                 {{-- Catatan / Arahan Penugasan --}}
@@ -1817,10 +1895,15 @@
                 astSel.value = '';
                 astSel.dispatchEvent(new Event('change', { bubbles: true }));
             }
+            const supSel = document.getElementById('create-acc-sup');
+            if (supSel) {
+                supSel.value = '';
+                supSel.dispatchEvent(new Event('change', { bubbles: true }));
+            }
             document.getElementById('modal-create-account').classList.remove('hidden');
         }
 
-        function openEditAccountModal(accId, accName, platform, link, currentPmId, currentStaffId, notes, currentAssistantId) {
+        function openEditAccountModal(accId, accName, platform, link, currentPmId, currentStaffId, notes, currentAssistantId, currentSupervisorStaffId) {
             let accData = {};
             if (typeof accId === 'object' && accId !== null) {
                 accData = accId;
@@ -1833,7 +1916,8 @@
                     pm_id: currentPmId,
                     staff_id: currentStaffId,
                     notes: notes,
-                    assistant_id: currentAssistantId
+                    assistant_id: currentAssistantId,
+                    supervisor_staff_id: currentSupervisorStaffId
                 };
             }
 
@@ -1850,6 +1934,9 @@
             const astSel = document.getElementById('edit-acc-ast');
             if (astSel) astSel.value = accData.assistant_id ?? '';
 
+            const supSel = document.getElementById('edit-acc-sup');
+            if (supSel) supSel.value = accData.supervisor_staff_id ?? '';
+
             const notesEl = document.getElementById('edit-acc-notes');
             if (notesEl) notesEl.value = accData.notes ?? '';
 
@@ -1859,6 +1946,7 @@
             if (staffSel) staffSel.dispatchEvent(new Event('change', { bubbles: true }));
             if (pmSel) pmSel.dispatchEvent(new Event('change', { bubbles: true }));
             if (astSel) astSel.dispatchEvent(new Event('change', { bubbles: true }));
+            if (supSel) supSel.dispatchEvent(new Event('change', { bubbles: true }));
 
             document.getElementById('modal-edit-account').classList.remove('hidden');
         }
