@@ -43,7 +43,7 @@ class PemagangController extends Controller
         }
 
         $pemagangs = $query->orderBy('nama_lengkap', 'asc')
-            ->paginate(5)
+            ->paginate(15)
             ->withQueryString();
 
         // Opsi Divisi & Kampus untuk filter

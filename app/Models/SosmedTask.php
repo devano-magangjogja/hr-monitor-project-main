@@ -114,9 +114,9 @@ class SosmedTask extends Model
             // Jika akun tidak punya PM maupun Asisten → langsung menunggu verifikasi HR Staff
             $account = $this->relationLoaded('account') ? $this->account : $this->account()->first();
             if ($account && is_null($account->pm_id) && is_null($account->assistant_id)) {
-                return 'Menunggu Verifikasi Staff';
+                return 'Menunggu Verifikasi HR Staff';
             }
-            return 'Menunggu Verif PM';
+            return 'Menunggu Verifikasi PM / Asisten';
         }
 
         return match ($this->status) {
@@ -133,7 +133,7 @@ class SosmedTask extends Model
         if ($this->status === 'done_by_staff' && $this->assignedUser?->isHrStaff()) {
             return 'bg-purple-50 text-purple-700 border border-purple-200';
         }
-        // Akun tanpa PM & Asisten → badge oranye (menunggu Staff langsung)
+        // Akun tanpa PM & Asisten → badge oranye (menunggu HR Staff langsung)
         if ($this->status === 'done_by_staff') {
             $account = $this->relationLoaded('account') ? $this->account : $this->account()->first();
             if ($account && is_null($account->pm_id) && is_null($account->assistant_id)) {

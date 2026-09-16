@@ -638,12 +638,12 @@
                 {{-- Link Bukti (multi) --}}
                 <div>
                     <label class="block text-xs font-semibold text-gray-600 mb-1.5">
-                        Link Bukti Konten <span class="text-red-500">*</span>
+                        Bukti Konten <span class="text-red-500">*</span>
                         <span class="font-normal text-gray-400 ml-1">(bisa lebih dari satu)</span>
                     </label>
                     <div id="links-container" class="space-y-2 max-h-[220px] overflow-y-auto pr-1">
                         <div class="flex gap-2 link-row">
-                            <input type="url" name="links[]" required placeholder="https://instagram.com/p/xxx"
+                            <input type="text" name="links[]" required placeholder="Tulis link atau keterangan bukti..."
                                 class="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 focus:outline-none">
                             <button type="button" onclick="removeLinkRow(this)" class="text-gray-300 hover:text-rose-500 px-1 transition hidden remove-btn">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
@@ -868,8 +868,8 @@ function _appendLinkRow(container, value, isFirst) {
     const row = document.createElement('div');
     row.className = 'flex gap-2 link-row';
     row.innerHTML = `
-        <input type="url" name="links[]" ${isFirst ? 'required' : ''} value="${value}"
-            placeholder="${isFirst ? 'https://instagram.com/p/xxx' : 'https://tiktok.com/@xxx/video/xxx'}"
+        <input type="text" name="links[]" ${isFirst ? 'required' : ''} value="${value}"
+            placeholder="${isFirst ? 'Tulis link atau keterangan bukti...' : 'Tulis bukti lainnya...'}"
             class="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 focus:outline-none">
         <button type="button" onclick="removeLinkRow(this)" class="text-gray-300 hover:text-rose-500 px-1 transition remove-btn ${isFirst ? 'hidden' : ''}">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>

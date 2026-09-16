@@ -285,7 +285,7 @@ class TaskRepository
             $noteMap = [
                 'approved_hr'    => 'Disetujui Final oleh HR Staff',
                 'verified_by_pm' => 'Menunggu Persetujuan Final HR',
-                'done_by_staff'  => 'Menunggu Verifikasi PM',
+                'done_by_staff'  => 'Menunggu Verifikasi PM / Asisten atau HR Staff',
                 'rejected'       => 'Ditolak - Perlu Revisi',
                 'pending'        => 'Belum Disubmit',
             ];

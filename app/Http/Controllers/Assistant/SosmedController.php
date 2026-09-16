@@ -27,7 +27,7 @@ class SosmedController extends Controller
             ->whereIn('sosmed_account_id', $assignedAccountIds)
             ->where('status', 'done_by_staff')
             ->orderBy('updated_at', 'desc')
-            ->paginate(5);
+            ->paginate(15);
 
         // Riwayat yang pernah di-approve oleh asisten ini
         $approvalHistory = SosmedApprovalLog::with(['task.account', 'user'])

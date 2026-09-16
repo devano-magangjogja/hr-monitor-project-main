@@ -171,7 +171,7 @@ class SosmedController extends Controller
 
         $validated = $request->validate([
             'links'       => ['required', 'array', 'min:1'],
-            'links.*'     => ['required', 'url', 'max:500'],
+            'links.*'     => ['required', 'string', 'max:500'],
             'description' => ['nullable', 'string', 'max:1000'],
         ]);
 

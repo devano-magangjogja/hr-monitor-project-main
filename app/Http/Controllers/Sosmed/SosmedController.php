@@ -57,7 +57,7 @@ class SosmedController extends Controller
 
         $validated = $request->validate([
             'links'       => ['required', 'array', 'min:1'],
-            'links.*'     => ['required', 'url', 'max:500'],
+            'links.*'     => ['required', 'string', 'max:500'],
             'description' => ['nullable', 'string', 'max:1000'],
         ]);
 
@@ -90,10 +90,10 @@ class SosmedController extends Controller
             'user_name'      => Auth::user()->name,
             'role_name'      => Auth::user()->role_label,
             'action'         => 'submitted',
-            'notes'          => 'Bukti disubmit (' . count($links) . ' link). Menunggu verifikasi PM.',
+            'notes'          => 'Bukti disubmit (' . count($links) . ' item). Menunggu verifikasi ' . ($account->levelOneVerifier()?->name ?? $account->finalVerifierLabel()) . '.',
         ]);
 
         return redirect()->route('sosmed.sosmed.index')
-            ->with('success', $account->name . ' berhasil ditandai selesai dan diteruskan ke PM untuk verifikasi.');
+            ->with('success', $account->name . ' berhasil ditandai selesai. Menunggu verifikasi ' . ($account->levelOneVerifier()?->name ?? $account->finalVerifierLabel()) . '.');
     }
 }

@@ -36,7 +36,7 @@ class SosmedController extends Controller
             'unassigned_staff' => (clone $accountsQuery)->whereNull('staff_id')->count(),
         ];
 
-        $accounts = $accountsQuery->paginate(5)->appends($request->all());
+        $accounts = $accountsQuery->paginate(15)->appends($request->all());
 
         // Filter date for tasks
         $taskDateFilter = $request->query('task_date');
@@ -61,7 +61,7 @@ class SosmedController extends Controller
             'approved_hr' => (clone $tasksQuery)->where('status', 'approved_hr')->count(),
         ];
 
-        $tasks = $tasksQuery->paginate(5)->appends($request->all());
+        $tasks = $tasksQuery->paginate(15)->appends($request->all());
 
         // Date filter and time ranges for audit logs
         $logDateFilter = $request->query('log_date');
@@ -130,7 +130,10 @@ class SosmedController extends Controller
 
         // Tugas Sosmed yang menunggu verifikasi langsung Admin (tugas yang dikerjakan Staff atau menunggu verifikasi pengawas/admin)
         $staffPendingTasks = SosmedTask::with(['account.supervisorStaff', 'account.pmUser', 'account.assistantUser', 'assignedUser', 'assignedBy'])
-            ->whereIn('status', ['done_by_staff', 'verified_by_pm'])
+            ->where(function ($q) {
+                $q->where('status', 'done_by_staff')
+                    ->whereHas('account', fn($acc) => $acc->whereNull('pm_id')->whereNull('assistant_id')->whereNull('supervisor_staff_id'));
+            })
             ->orderBy('updated_at', 'desc')
             ->get();
 

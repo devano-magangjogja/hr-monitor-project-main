@@ -121,20 +121,37 @@
                                 dapat
                                 mengelola akun yang menjadi tanggung jawabnya.</p>
                         </div>
-                        <button onclick="openAssignTaskModal()"
-                            class="inline-flex items-center justify-center gap-2 px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white text-xs sm:text-sm font-semibold rounded-lg transition shadow-sm shrink-0">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-                            </svg>
-                            Beri Tugas
-                        </button>
+                        <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 shrink-0">
+                            <form action="{{ route('staff.sosmed.index') }}" method="GET" class="flex items-center gap-2">
+                                <input type="hidden" name="tab" value="accounts">
+                                <input type="text" name="account_search" value="{{ $accountSearch ?? '' }}"
+                                    placeholder="Cari nama akun..."
+                                    class="h-9 w-full sm:w-44 px-3 text-xs bg-white border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 text-gray-700 transition">
+                                @if($accountSearch)
+                                    <a href="{{ route('staff.sosmed.index', ['tab' => 'accounts']) }}"
+                                        class="inline-flex items-center justify-center h-9 w-9 text-gray-500 hover:text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition shrink-0"
+                                        title="Reset pencarian">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                        </svg>
+                                    </a>
+                                @endif
+                            </form>
+                            <button onclick="openAssignTaskModal()"
+                                class="inline-flex items-center justify-center gap-2 px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white text-xs sm:text-sm font-semibold rounded-lg transition shadow-sm">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                                </svg>
+                                Beri Tugas
+                            </button>
+                        </div>
                     </div>
 
                     {{-- Desktop table (md+) --}}
                     <div class="hidden md:block overflow-x-auto rounded-lg border border-gray-100">
                         <table class="w-full table-fixed text-sm">
                             <colgroup>
-                                <col class="w-[18%]"> {{-- Nama Akun & Catatan --}}
+                                <col class="w-[24%]"> {{-- Nama Akun & Catatan --}}
                                 <col class="w-28"> {{-- Platform --}}
                                 <col class="w-32"> {{-- Link URL --}}
                                 <col class="w-36"> {{-- Eksekutor --}}
@@ -158,8 +175,8 @@
                             <tbody class="divide-y divide-gray-100">
                                 @forelse($accounts as $acc)
                                     <tr class="hover:bg-gray-50/80 transition align-middle">
-                                        <td class="px-4 py-3.5">
-                                            <span class="font-semibold text-gray-800 truncate block"
+                                        <td class="px-4 py-3.5 min-w-[180px]">
+                                            <span class="font-semibold text-gray-800 block break-words"
                                                 title="{{ $acc->name }}">{{ $acc->name }}</span>
                                         </td>
                                         <td class="px-4 py-3.5">
@@ -194,12 +211,8 @@
                                                         default => $acc->staffUser->role_label ?? strtoupper($acc->staffUser->role)
                                                     };
                                                 @endphp
-                                                <div class="flex items-start gap-2 min-w-0">
-                                                    <div
-                                                        class="w-6 h-6 rounded-full bg-pink-100 text-pink-700 font-bold flex items-center justify-center text-[10px] flex-shrink-0 mt-0.5">
-                                                        {{ strtoupper(substr($acc->staffUser->name, 0, 1)) }}
-                                                    </div>
-                                                    <div class="min-w-0 flex-1">
+                                                <div class="min-w-0">
+                                                    <div class="min-w-0">
                                                         <span class="font-semibold text-gray-800 block truncate"
                                                             title="{{ $acc->staffUser->name }}">
                                                             {{ $acc->staffUser->name }}
@@ -223,12 +236,8 @@
                                             @if($acc->staffUser && in_array($acc->staffUser->role, ['pm', 'hr_assistant', 'hr_staff']))
                                                 <span class="text-gray-400 text-[11px] block">Langsung ke HR</span>
                                             @elseif($acc->pmUser)
-                                                <div class="flex items-start gap-2 min-w-0">
-                                                    <div
-                                                        class="w-6 h-6 rounded-full bg-indigo-100 text-indigo-700 font-bold flex items-center justify-center text-[10px] flex-shrink-0 mt-0.5">
-                                                        {{ strtoupper(substr($acc->pmUser->name, 0, 1)) }}
-                                                    </div>
-                                                    <div class="min-w-0 flex-1">
+                                                <div class="min-w-0">
+                                                    <div class="min-w-0">
                                                         <span class="font-semibold text-gray-800 block truncate"
                                                             title="{{ $acc->pmUser->name }}">
                                                             {{ $acc->pmUser->name }}
@@ -251,12 +260,8 @@
                                             @if($acc->staffUser && in_array($acc->staffUser->role, ['pm', 'hr_assistant', 'hr_staff']))
                                                 <span class="text-gray-400 text-[11px] block">Langsung ke HR</span>
                                             @elseif($acc->assistantUser)
-                                                <div class="flex items-start gap-2 min-w-0">
-                                                    <div
-                                                        class="w-6 h-6 rounded-full bg-teal-100 text-teal-700 font-bold flex items-center justify-center text-[10px] flex-shrink-0 mt-0.5">
-                                                        {{ strtoupper(substr($acc->assistantUser->name, 0, 1)) }}
-                                                    </div>
-                                                    <div class="min-w-0 flex-1">
+                                                <div class="min-w-0">
+                                                    <div class="min-w-0">
                                                         <span class="font-semibold text-gray-800 block truncate"
                                                             title="{{ $acc->assistantUser->name }}">
                                                             {{ $acc->assistantUser->name }}
@@ -277,12 +282,8 @@
                                         {{-- Staff Pengawas --}}
                                         <td class="px-4 py-3 text-xs min-w-0">
                                             @if($acc->supervisorStaff)
-                                                <div class="flex items-start gap-2 min-w-0">
-                                                    <div
-                                                        class="w-6 h-6 rounded-full bg-blue-100 text-blue-700 font-bold flex items-center justify-center text-[10px] flex-shrink-0 mt-0.5">
-                                                        {{ strtoupper(substr($acc->supervisorStaff->name, 0, 1)) }}
-                                                    </div>
-                                                    <div class="min-w-0 flex-1">
+                                                <div class="min-w-0">
+                                                    <div class="min-w-0">
                                                         <span class="font-semibold text-gray-800 block truncate"
                                                             title="{{ $acc->supervisorStaff->name }}">
                                                             {{ $acc->supervisorStaff->name }}
@@ -1417,12 +1418,12 @@
 
                 <div>
                     <label class="block text-xs font-semibold text-gray-600 mb-1.5">
-                        Link / URL Hasil Konten <span class="text-red-500">*</span>
+                        Bukti Konten <span class="text-red-500">*</span>
                         <span class="font-normal text-gray-400 ml-1">(bisa lebih dari satu)</span>
                     </label>
                     <div id="my-links-container" class="space-y-2 max-h-[200px] overflow-y-auto pr-1">
                         <div class="flex gap-2 link-row">
-                            <input type="text" name="links[]" required placeholder="https://instagram.com/p/xxx"
+                            <input type="text" name="links[]" required placeholder="Tulis link atau keterangan bukti..."
                                 class="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 focus:outline-none">
                             <button type="button" onclick="removeMyLinkRow(this)"
                                 class="text-gray-300 hover:text-rose-500 px-1 transition hidden remove-btn">
@@ -1433,7 +1434,7 @@
                             </button>
                         </div>
                     </div>
-                    <p class="text-[11px] text-gray-400 mt-1">Pastikan link diawali dengan https:// atau http://</p>
+                    <p class="text-[11px] text-gray-400 mt-1">Isi link atau keterangan hasil konten yang dikerjakan.</p>
                     <button type="button" onclick="addMyLinkRow()"
                         class="mt-1.5 inline-flex items-center gap-1 text-xs text-primary-600 hover:text-primary-700 font-medium">
                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1987,7 +1988,7 @@
             const newRow = document.createElement('div');
             newRow.className = 'flex gap-2 link-row';
             newRow.innerHTML = `
-                                                                <input type="url" name="links[]" required
+                                                                <input type="text" name="links[]" required
                                                                     placeholder="https://instagram.com/p/xxx"
                                                                     class="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 focus:outline-none">
                                                                 <button type="button" onclick="removeMyLinkRow(this)"

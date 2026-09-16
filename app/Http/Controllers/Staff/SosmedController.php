@@ -18,17 +18,24 @@ class SosmedController extends Controller
     public function index(Request $request)
     {
         $tab = $request->query('tab', 'accounts');
+        $accountSearch = $request->query('account_search');
 
         // Akun yang bisa dikelola Staff: exclude akun yang eksekutornya HR Staff
         // (akun tersebut sudah ditetapkan langsung oleh Admin, tersimpan di tab "Tugas Sosmed Saya")
-        $accounts = SosmedAccount::inSosmed()
+        $accountsQuery = SosmedAccount::inSosmed()
             ->with(['pmUser', 'staffUser', 'assistantUser', 'supervisorStaff', 'creator'])
             ->where(function ($q) {
                 $q->whereNull('staff_id')
                   ->orWhereHas('staffUser', fn($u) => $u->where('role', '!=', 'hr_staff'));
-            })
-            ->orderBy('platform')
-            ->paginate(5);
+            });
+
+        if ($accountSearch) {
+            $accountsQuery->where('name', 'like', '%' . $accountSearch . '%');
+        }
+
+        $accounts = $accountsQuery->orderBy('platform')
+            ->paginate(15)
+            ->appends($request->all());
 
         // Tasks needing HR approval:
         // 1. Tugas level 2: sudah diverifikasi PM / Asisten (verified_by_pm)
@@ -37,11 +44,16 @@ class SosmedController extends Controller
             ->where(function ($q) {
                 $q->where('status', 'verified_by_pm')
                   ->orWhere(function ($sub) {
-                      $sub->where('status', 'done_by_staff')
-                          ->whereHas('account', function ($acc) {
-                              $acc->where('supervisor_staff_id', Auth::id());
-                          });
-                  });
+                    $sub->where('status', 'done_by_staff')
+                        ->whereHas('account', function ($acc) {
+                            $acc->whereNull('pm_id')
+                                ->whereNull('assistant_id')
+                                ->where(function ($verifier) {
+                                    $verifier->whereNull('supervisor_staff_id')
+                                        ->orWhere('supervisor_staff_id', Auth::id());
+                                });
+                        });
+                });
             })
             ->where('assigned_to', '!=', Auth::id())
             ->orderByRaw("CASE WHEN status = 'done_by_staff' THEN 0 ELSE 1 END")
@@ -51,13 +63,13 @@ class SosmedController extends Controller
         // All tasks for monitoring
         $allTasks = SosmedTask::with(['account', 'assignedUser', 'assignedBy', 'verifiedBy', 'hrVerifiedBy'])
             ->orderBy('task_date', 'desc')
-            ->paginate(5);
+            ->paginate(15);
 
         // Akun Mandiri yang Dikelola oleh Staff yang sedang login
         $myAccounts = SosmedAccount::with(['creator'])
             ->where('staff_id', Auth::id())
             ->orderBy('platform')
-            ->paginate(5);
+            ->paginate(15);
         $myAccountIds = $myAccounts->pluck('id');
 
         $todayTasks = SosmedTask::with(['verifiedBy', 'hrVerifiedBy'])
@@ -128,6 +140,7 @@ class SosmedController extends Controller
         return view('staff.sosmed.index', compact(
             'tab',
             'accounts',
+            'accountSearch',
             'availableAccounts',
             'myAccounts',
             'todayTasks',
@@ -188,13 +201,13 @@ class SosmedController extends Controller
             'user_name'      => Auth::user()->name,
             'role_name'      => 'HR Staff',
             'action'         => 'submitted',
-            'notes'          => 'HR Staff submit bukti laporan sosmed (' . count($links) . ' link). Menunggu verifikasi langsung oleh Admin.',
+            'notes'          => 'HR Staff submit bukti laporan sosmed (' . count($links) . ' item). Menunggu verifikasi ' . $account->finalVerifierLabel() . '.',
         ]);
 
         $this->logActivity('sosmed.submitted', 'Sosmed', "Submit bukti laporan sosmed untuk akun '{$account->name}'", $task);
 
         return redirect()->route('staff.sosmed.index', ['tab' => 'my_accounts'])
-            ->with('success', 'Bukti konten untuk ' . $account->name . ' berhasil dikirim. Menunggu verifikasi langsung oleh Admin.');
+            ->with('success', 'Bukti konten untuk ' . $account->name . ' berhasil dikirim. Menunggu verifikasi ' . $account->finalVerifierLabel() . '.');
     }
 
     /**
@@ -217,6 +230,10 @@ class SosmedController extends Controller
         $newPmId = $validated['pm_id'] ?? null;
         $newAssistantId = $validated['assistant_id'] ?? null;
         $newSupervisorStaffId = $validated['supervisor_staff_id'] ?? null;
+
+        if (!$newSupervisorStaffId && ($newPmId || $newAssistantId)) {
+            $newSupervisorStaffId = Auth::id();
+        }
 
         if ($newStaffId) {
             $oversight = PmSosmedOversight::where('sosmed_id', $newStaffId)->first();
@@ -294,6 +311,10 @@ class SosmedController extends Controller
         $newPmId = $validated['pm_id'] ?? null;
         $newAssistantId = $validated['assistant_id'] ?? null;
         $newSupervisorStaffId = $validated['supervisor_staff_id'] ?? null;
+
+        if (!$newSupervisorStaffId && ($newPmId || $newAssistantId)) {
+            $newSupervisorStaffId = Auth::id();
+        }
 
         // Enforce role restriction: Staff cannot assign to HR Staff or Admin
         if ($newStaffId) {
@@ -464,11 +485,8 @@ class SosmedController extends Controller
 
         $isSupervisorDirect = ($task->status === 'done_by_staff');
 
-        if ($isSupervisorDirect) {
-            // Jika akun menunjuk Staff Pengawas tertentu, pastikan yang login adalah Staff Pengawas tersebut (atau akun memang berada di bawah pengawasannya)
-            if ($task->account?->supervisor_staff_id && $task->account->supervisor_staff_id !== Auth::id()) {
-                abort(403, 'Akses ditolak. Anda bukan Staff Pengawas yang ditugaskan untuk akun ini.');
-            }
+        if ($isSupervisorDirect && $task->account?->supervisor_staff_id && $task->account->supervisor_staff_id !== Auth::id()) {
+            abort(403, 'Akses ditolak. Anda bukan Staff Pengawas yang ditugaskan untuk akun ini.');
         }
 
         if ($validated['action'] === 'verify') {

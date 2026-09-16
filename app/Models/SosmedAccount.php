@@ -69,6 +69,32 @@ class SosmedAccount extends Model
         return $this->belongsTo(User::class, 'created_by');
     }
 
+    public function finalVerifier(): ?User
+    {
+        if ($this->supervisorStaff) {
+            return $this->supervisorStaff;
+        }
+
+        $creator = $this->creator;
+        if ($creator && $creator->role === 'hr_staff') {
+            return $creator;
+        }
+
+        return null;
+    }
+
+    public function levelOneVerifier(): ?User
+    {
+        return $this->pmUser ?: $this->assistantUser;
+    }
+
+    public function finalVerifierLabel(): string
+    {
+        $verifier = $this->finalVerifier();
+
+        return $verifier ? 'HR Staff (' . $verifier->name . ')' : 'Admin';
+    }
+
     public function sosmedTasks()
     {
         return $this->hasMany(SosmedTask::class, 'sosmed_account_id');

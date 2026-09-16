@@ -150,7 +150,7 @@
                     <div class="hidden md:block overflow-x-auto rounded-lg border border-gray-100">
                         <table class="w-full table-fixed text-sm">
                             <colgroup>
-                                <col class="w-[18%]"> {{-- Nama Akun & Catatan --}}
+                                <col class="w-[24%]"> {{-- Nama Akun & Catatan --}}
                                 <col class="w-28"> {{-- Platform --}}
                                 <col class="w-32"> {{-- Link URL --}}
                                 <col class="w-36"> {{-- Eksekutor --}}
@@ -174,8 +174,8 @@
                             <tbody class="divide-y divide-gray-100">
                                 @forelse($accounts as $acc)
                                     <tr class="hover:bg-gray-50/80 transition align-middle">
-                                        <td class="px-4 py-3.5 min-w-0">
-                                            <span class="font-semibold text-gray-800 block truncate"
+                                        <td class="px-4 py-3.5 min-w-[180px]">
+                                            <span class="font-semibold text-gray-800 block break-words"
                                                 title="{{ $acc->name }}">{{ $acc->name }}</span>
                                             @if($acc->notes)
                                                 <p class="text-xs text-gray-400 mt-0.5 truncate max-w-full block" title="{{ $acc->notes }}">
@@ -263,12 +263,8 @@
                                             @elseif($acc->staffUser && in_array($acc->staffUser->role, ['pm', 'hr_assistant']))
                                                 <span class="text-gray-400 text-[11px] block">Langsung ke HR</span>
                                             @elseif($acc->assistantUser)
-                                                <div class="flex items-start gap-2 min-w-0">
-                                                    <div
-                                                        class="w-6 h-6 rounded-full bg-teal-100 text-teal-700 font-bold flex items-center justify-center text-[10px] flex-shrink-0 mt-0.5">
-                                                        {{ strtoupper(substr($acc->assistantUser->name, 0, 1)) }}
-                                                    </div>
-                                                    <div class="min-w-0 flex-1">
+                                                <div class="min-w-0">
+                                                    <div class="min-w-0">
                                                         <span class="font-semibold text-gray-800 block truncate"
                                                             title="{{ $acc->assistantUser->name }}">
                                                             {{ $acc->assistantUser->name }}
@@ -290,12 +286,8 @@
                                         {{-- Staff Pengawas --}}
                                         <td class="px-4 py-3 text-xs min-w-0">
                                             @if($acc->supervisorStaff)
-                                                <div class="flex items-start gap-2 min-w-0">
-                                                    <div
-                                                        class="w-6 h-6 rounded-full bg-blue-100 text-blue-700 font-bold flex items-center justify-center text-[10px] flex-shrink-0 mt-0.5">
-                                                        {{ strtoupper(substr($acc->supervisorStaff->name, 0, 1)) }}
-                                                    </div>
-                                                    <div class="min-w-0 flex-1">
+                                                <div class="min-w-0">
+                                                    <div class="min-w-0">
                                                         <span class="font-semibold text-gray-800 block truncate"
                                                             title="{{ $acc->supervisorStaff->name }}">
                                                             {{ $acc->supervisorStaff->name }}
@@ -501,8 +493,7 @@
         <div class="p-4 sm:p-5">
             <div class="mb-4">
                 <h3 class="text-sm font-semibold text-gray-800">Verifikasi Tugas Sosmed Staff</h3>
-                <p class="text-xs text-gray-500 mt-0.5">Tugas sosial media yang dikerjakan oleh HR Staff diverifikasi langsung
-                    oleh Administrator.</p>
+                <p class="text-xs text-gray-500 mt-0.5">Tugas yang memang belum memiliki verifikator HR Staff dan harus ditangani langsung oleh Administrator.</p>
             </div>
 
             <div class="space-y-3 mb-6">
@@ -520,7 +511,7 @@
                                             {{ $task->account?->name }} ({{ $task->account?->platform }})
                                         </span>
                                         <span class="px-2 py-0.5 rounded text-[11px] bg-purple-100 text-purple-700 font-semibold">
-                                            Role: HR Staff
+                                            Menunggu Verifikasi Admin
                                         </span>
                                     </div>
                                 </div>
@@ -562,7 +553,7 @@
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                             d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                                     </svg>
-                                    Verifikasi Admin
+                                    Verifikasi
                                 </button>
                             </div>
                         </div>
