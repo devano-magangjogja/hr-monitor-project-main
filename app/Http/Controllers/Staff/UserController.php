@@ -18,9 +18,21 @@ class UserController extends Controller
         protected UserService $userService
     ) {}
 
+    /** Role yang boleh dikelola oleh Staff */
+    protected array $allowedRoles = ['hr_assistant', 'pm', 'sosmed'];
+
+    protected function roleLabel(string $role): string
+    {
+        return match ($role) {
+            'pm'           => 'PM',
+            'sosmed'       => 'Sosmed',
+            default        => 'HR Assistant',
+        };
+    }
+
     public function index()
     {
-        $users = User::where('role', 'hr_assistant')
+        $users = User::whereIn('role', $this->allowedRoles)
             ->orderBy('name')
             ->get();
 
@@ -33,17 +45,17 @@ class UserController extends Controller
             'name'     => ['required', 'string', 'max:100'],
             'email'    => ['required', 'email', 'max:100'],
             'password' => ['required', 'string', 'min:8', 'confirmed'],
+            'role'     => ['required', 'string', 'in:' . implode(',', $this->allowedRoles)],
         ]);
 
-        // Role dikunci ke hr_assistant, tidak boleh diubah
-        $validated['role']      = 'hr_assistant';
         $validated['is_active'] = 1;
+        $label = $this->roleLabel($validated['role']);
 
         try {
             $user = $this->userService->createUser($validated);
-            $this->logActivity('user.created', 'Pengguna', "Menambahkan akun HR Assistant '{$validated['name']}'", $user);
+            $this->logActivity('user.created', 'Pengguna', "Menambahkan akun {$label} '{$validated['name']}'", $user);
             return redirect()->route('staff.users.index')
-                ->with('success', 'Akun HR Assistant berhasil ditambahkan.');
+                ->with('success', "Akun {$label} berhasil ditambahkan.");
         } catch (ValidationException $e) {
             return back()->withErrors($e->errors())->withInput();
         }
@@ -51,8 +63,8 @@ class UserController extends Controller
 
     public function update(Request $request, User $user)
     {
-        // Pastikan hanya bisa edit hr_assistant
-        abort_if($user->role !== 'hr_assistant', 403);
+        // Pastikan hanya bisa edit role yang diizinkan
+        abort_if(!in_array($user->role, $this->allowedRoles), 403);
 
         $validated = $request->validate([
             'name'         => ['required', 'string', 'max:100'],
@@ -62,8 +74,9 @@ class UserController extends Controller
             'remove_image' => ['nullable', 'in:0,1'],
         ]);
 
-        // Paksa role tetap hr_assistant
-        $validated['role'] = 'hr_assistant';
+        // Pertahankan role yang sudah ada (tidak diubah saat edit)
+        $validated['role'] = $user->role;
+        $label = $this->roleLabel($user->role);
 
         try {
             $this->userService->updateUserWithPhoto(
@@ -71,46 +84,48 @@ class UserController extends Controller
                 $validated,
                 $request->hasFile('image') ? $request->file('image') : null
             );
-            $this->logActivity('user.updated', 'Pengguna', "Memperbarui data HR Assistant '{$user->name}'", $user);
+            $this->logActivity('user.updated', 'Pengguna', "Memperbarui data {$label} '{$user->name}'", $user);
             return redirect()->route('staff.users.index')
-                ->with('success', 'Data HR Assistant berhasil diperbarui.');
+                ->with('success', "Data {$label} berhasil diperbarui.");
         } catch (ValidationException $e) {
             return back()->withErrors($e->errors())->withInput();
         } catch (\Throwable $e) {
-            Log::error('Gagal memperbarui data HR Assistant: ' . $e->getMessage(), [
+            Log::error("Gagal memperbarui data {$label}: " . $e->getMessage(), [
                 'target_user_id' => $user->id,
                 'exception' => $e,
             ]);
 
-            return back()->with('error', 'Terjadi kendala saat memperbarui data HR Assistant. Silakan coba beberapa saat lagi.')->withInput();
+            return back()->with('error', "Terjadi kendala saat memperbarui data {$label}. Silakan coba beberapa saat lagi.")->withInput();
         }
     }
 
     public function updatePassword(Request $request, User $user)
     {
-        abort_if($user->role !== 'hr_assistant', 403);
+        abort_if(!in_array($user->role, $this->allowedRoles), 403);
 
         $request->validate([
             'password' => ['required', 'string', 'min:8', 'confirmed'],
         ]);
 
+        $label = $this->roleLabel($user->role);
         $this->userService->updatePassword($user, $request->password);
-        $this->logActivity('user.updated', 'Pengguna', "Memperbarui password HR Assistant '{$user->name}'", $user);
+        $this->logActivity('user.updated', 'Pengguna', "Memperbarui password {$label} '{$user->name}'", $user);
 
         return redirect()->route('staff.users.index')
-            ->with('success', 'Password HR Assistant berhasil diperbarui.');
+            ->with('success', "Password {$label} berhasil diperbarui.");
     }
 
     public function destroy(User $user)
     {
-        abort_if($user->role !== 'hr_assistant', 403);
+        abort_if(!in_array($user->role, $this->allowedRoles), 403);
 
+        $label = $this->roleLabel($user->role);
         try {
             $name = $user->name;
             $this->userService->deleteUser($user);
-            $this->logActivity('user.deleted', 'Pengguna', "Menghapus akun HR Assistant '{$name}'");
+            $this->logActivity('user.deleted', 'Pengguna', "Menghapus akun {$label} '{$name}'");
             return redirect()->route('staff.users.index')
-                ->with('success', 'Akun HR Assistant berhasil dihapus.');
+                ->with('success', "Akun {$label} berhasil dihapus.");
         } catch (ValidationException $e) {
             return back()->with('error', $e->errors()['user'][0]);
         }

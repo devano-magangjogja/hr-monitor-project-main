@@ -28,6 +28,23 @@
 
 {{-- Divider --}}
 <div class="pt-4 pb-2">
+    <p class="px-4 text-[11px] font-semibold text-slate-500 uppercase tracking-widest">AKUN</p>
+</div>
+
+{{-- Tugas Sosmed Utama --}}
+<a href="{{ route('sosmed.sosmed.index') }}"
+    class="flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-all
+          {{ request()->routeIs('sosmed.sosmed.*') ? 'bg-white/10 text-white' : 'text-slate-400 hover:bg-white/5 hover:text-white' }}">
+    <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" <svg class="w-6 h-6 text-gray-800 dark:text-white"
+        aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M12 7.757v8.486M7.757 12h8.486M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+    </svg>
+    Tambah Akun Sosmed
+</a>
+
+{{-- Divider --}}
+<div class="pt-4 pb-2">
     <p class="px-4 text-[11px] font-semibold text-slate-500 uppercase tracking-widest">TASK</p>
 </div>
 

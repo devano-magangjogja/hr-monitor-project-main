@@ -1,8 +1,8 @@
 @extends('layouts.app')
 
-@section('title', 'Manajemen HR Assistant')
-@section('page-title', 'Manajemen HR Assistant')
-@section('page-subtitle', 'Kelola akun HR Assistant yang ada di bawah pengawasan Anda')
+@section('title', 'Manajemen Pengguna')
+@section('page-title', 'Manajemen Pengguna')
+@section('page-subtitle', 'Kelola akun HR Assistant, PM, dan Sosmed yang ada di bawah pengawasan Anda')
 
 @section('sidebar')
     @include('components.sidebar-staff')
@@ -13,7 +13,7 @@
 {{-- Header + Tombol Tambah --}}
 <div class="flex items-center justify-between mb-6">
     <p class="text-sm text-gray-500">
-        Total <span class="font-semibold text-gray-700">{{ $users->count() }}</span> HR Assistant
+        Total <span class="font-semibold text-gray-700">{{ $users->count() }}</span> Pengguna
     </p>
     <button onclick="document.getElementById('modal-create').classList.remove('hidden')"
             class="flex items-center gap-2 px-4 py-2 bg-primary-600 hover:bg-primary-700
@@ -21,7 +21,7 @@
         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
         </svg>
-        Tambah HR Assistant
+        Tambah Pengguna
     </button>
 </div>
 
@@ -33,6 +33,7 @@
                 <tr class="bg-gray-50 border-b border-gray-200">
                     <th class="text-left px-6 py-3.5 font-semibold text-gray-600">Nama</th>
                     <th class="text-left px-6 py-3.5 font-semibold text-gray-600">Email</th>
+                    <th class="text-left px-6 py-3.5 font-semibold text-gray-600">Role</th>
                     <th class="text-left px-6 py-3.5 font-semibold text-gray-600">Status</th>
                     <th class="text-right px-6 py-3.5 font-semibold text-gray-600">Aksi</th>
                 </tr>
@@ -63,6 +64,20 @@
 
                         {{-- Email --}}
                         <td class="px-6 py-4 text-gray-600">{{ $user->email }}</td>
+
+                        {{-- Role --}}
+                        <td class="px-6 py-4">
+                            @php
+                                $roleConfig = match($user->role) {
+                                    'pm'           => ['label' => 'PM',           'class' => 'bg-blue-50 text-blue-700'],
+                                    'sosmed'       => ['label' => 'Sosmed',       'class' => 'bg-pink-50 text-pink-700'],
+                                    default        => ['label' => 'HR Assistant', 'class' => 'bg-purple-50 text-purple-700'],
+                                };
+                            @endphp
+                            <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium {{ $roleConfig['class'] }}">
+                                {{ $roleConfig['label'] }}
+                            </span>
+                        </td>
 
                         {{-- Status --}}
                         <td class="px-6 py-4">
@@ -120,8 +135,8 @@
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="4" class="px-6 py-12 text-center text-gray-400 text-sm">
-                            Belum ada HR Assistant. Tambahkan akun baru.
+                        <td colspan="5" class="px-6 py-12 text-center text-gray-400 text-sm">
+                            Belum ada pengguna. Tambahkan akun baru.
                         </td>
                     </tr>
                 @endforelse
@@ -135,7 +150,7 @@
      class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4">
     <div class="bg-white rounded-2xl shadow-xl w-full max-w-md">
         <div class="flex items-center justify-between px-6 py-4 border-b border-gray-200">
-            <h3 class="text-base font-semibold text-gray-800">Tambah HR Assistant</h3>
+        <h3 class="text-base font-semibold text-gray-800">Tambah Pengguna</h3>
             <button onclick="document.getElementById('modal-create').classList.add('hidden')"
                     class="text-gray-400 hover:text-gray-600">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -156,6 +171,17 @@
                 <input type="email" name="email" value="{{ old('email') }}" required maxlength="100"
                        class="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm
                               focus:outline-none focus:ring-2 focus:ring-primary-500">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Role</label>
+                <select name="role" required
+                        class="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm
+                               focus:outline-none focus:ring-2 focus:ring-primary-500">
+                    <option value="" disabled selected>-- Pilih Role --</option>
+                    <option value="hr_assistant" {{ old('role') === 'hr_assistant' ? 'selected' : '' }}>HR Assistant</option>
+                    <option value="pm"           {{ old('role') === 'pm'           ? 'selected' : '' }}>PM</option>
+                    <option value="sosmed"       {{ old('role') === 'sosmed'       ? 'selected' : '' }}>Sosmed</option>
+                </select>
             </div>
             <div x-data="{ show: false }">
                 <div class="flex items-center justify-between mb-1">

@@ -88,10 +88,10 @@
 
 {{-- Divider --}}
 <div class="pt-4 pb-2">
-    <p class="px-4 text-[11px] font-semibold text-slate-500 uppercase tracking-widest">Kelola Assistant</p>
+    <p class="px-4 text-[11px] font-semibold text-slate-500 uppercase tracking-widest">Kelola Akun</p>
 </div>
 
-{{-- Manajemen HR Assistant --}}
+{{-- Manajemen Akun --}}
 <a href="{{ route('staff.users.index') }}"
     class="flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-all
           {{ request()->routeIs('staff.users.*') ? 'bg-white/10 text-white' : 'text-slate-400 hover:bg-white/5 hover:text-white' }}">
@@ -99,7 +99,7 @@
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
             d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
     </svg>
-    Manajemen HR Assistant
+    Manajemen Akun
 </a>
 
 {{-- Kirim Notifikasi --}}
@@ -112,6 +112,11 @@
     </svg>
     Kirim Notifikasi
 </a>
+
+{{-- Divider --}}
+<div class="pt-4 pb-2">
+    <p class="px-4 text-[11px] font-semibold text-slate-500 uppercase tracking-widest">Kelola Assistant</p>
+</div>
 
 {{-- Buat Tugas Assistant --}}
 <a href="{{ route('staff.assign.index') }}"
