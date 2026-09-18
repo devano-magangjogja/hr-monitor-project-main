@@ -67,7 +67,7 @@
         <div class="flex border-b border-gray-200 overflow-x-auto scrollbar-none">
             <a href="{{ route('admin.sosmed.index', ['tab' => 'accounts']) }}"
                 class="flex items-center gap-2 px-5 py-3.5 text-sm font-medium whitespace-nowrap border-b-2 transition
-                                                                                                                                                                    {{ $tab === 'accounts' ? 'border-primary-600 text-primary-600 bg-primary-50/50' : 'border-transparent text-gray-500 hover:text-gray-700' }}">
+                                                                                                                                                                            {{ $tab === 'accounts' ? 'border-primary-600 text-primary-600 bg-primary-50/50' : 'border-transparent text-gray-500 hover:text-gray-700' }}">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                         d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
@@ -76,7 +76,7 @@
             </a>
             <a href="{{ route('admin.sosmed.index', ['tab' => 'staff_approvals']) }}"
                 class="flex items-center gap-2 px-5 py-3.5 text-sm font-medium whitespace-nowrap border-b-2 transition
-                                                                                                                                                                    {{ $tab === 'staff_approvals' ? 'border-purple-600 text-purple-600 bg-purple-50/50' : 'border-transparent text-gray-500 hover:text-gray-700' }}">
+                                                                                                                                                                            {{ $tab === 'staff_approvals' ? 'border-purple-600 text-purple-600 bg-purple-50/50' : 'border-transparent text-gray-500 hover:text-gray-700' }}">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                         d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -90,7 +90,7 @@
             </a>
             <a href="{{ route('admin.sosmed.index', ['tab' => 'tasks']) }}"
                 class="flex items-center gap-2 px-5 py-3.5 text-sm font-medium whitespace-nowrap border-b-2 transition
-                                                                                                                                                                    {{ $tab === 'tasks' ? 'border-primary-600 text-primary-600 bg-primary-50/50' : 'border-transparent text-gray-500 hover:text-gray-700' }}">
+                                                                                                                                                                            {{ $tab === 'tasks' ? 'border-primary-600 text-primary-600 bg-primary-50/50' : 'border-transparent text-gray-500 hover:text-gray-700' }}">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                         d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
@@ -99,7 +99,7 @@
             </a>
             <a href="{{ route('admin.sosmed.index', ['tab' => 'logs']) }}"
                 class="flex items-center gap-2 px-5 py-3.5 text-sm font-medium whitespace-nowrap border-b-2 transition
-                                                                                                                                                                    {{ $tab === 'logs' ? 'border-primary-600 text-primary-600 bg-primary-50/50' : 'border-transparent text-gray-500 hover:text-gray-700' }}">
+                                                                                                                                                                            {{ $tab === 'logs' ? 'border-primary-600 text-primary-600 bg-primary-50/50' : 'border-transparent text-gray-500 hover:text-gray-700' }}">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                         d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
@@ -123,8 +123,8 @@
                                 <input type="text" name="account_search" value="{{ $accountSearch ?? '' }}"
                                     placeholder="Cari nama akun..."
                                     class="h-9 px-3 text-xs bg-white border border-gray-300 rounded-lg shadow-sm
-                                                                                                                                                                                                                                                                   focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500
-                                                                                                                                                                                                                                                                   text-gray-700 transition w-40 sm:w-auto">
+                                                                                                                                                                                                                                                                                           focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500
+                                                                                                                                                                                                                                                                                           text-gray-700 transition w-40 sm:w-auto">
                             </form>
                             <a href="{{ route('admin.accounts.index') }}"
                                 class="inline-flex items-center justify-center gap-1.5 px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs sm:text-sm font-medium rounded-lg transition border border-gray-300">
@@ -493,7 +493,8 @@
         <div class="p-4 sm:p-5">
             <div class="mb-4">
                 <h3 class="text-sm font-semibold text-gray-800">Verifikasi Tugas Sosmed Staff</h3>
-                <p class="text-xs text-gray-500 mt-0.5">Tugas yang memang belum memiliki verifikator HR Staff dan harus ditangani langsung oleh Administrator.</p>
+                <p class="text-xs text-gray-500 mt-0.5">Tugas yang memang belum memiliki verifikator HR Staff dan harus
+                    ditangani langsung oleh Administrator.</p>
             </div>
 
             <div class="space-y-3 mb-6">
@@ -587,8 +588,8 @@
                     <input type="hidden" name="tab" value="tasks">
                     <input type="date" name="task_date" value="{{ $taskDateFilter }}"
                         class="w-full sm:w-auto h-9 px-3 text-xs bg-white border border-gray-300 rounded-lg shadow-sm
-                                                                                                                                                                                                                                                           focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500
-                                                                                                                                                                                                                                                           text-gray-700 transition"
+                                                                                                                                                                                                                                                                           focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500
+                                                                                                                                                                                                                                                                           text-gray-700 transition"
                         onchange="this.form.submit()">
                 </form>
 
@@ -597,7 +598,7 @@
                     {{-- Cetak PDF --}}
                     <button onclick="window.print()"
                         class="w-full sm:w-auto inline-flex items-center justify-center gap-2 h-9 px-3 sm:px-3.5 bg-primary-600 hover:bg-primary-700 active:bg-primary-800
-                                                                                                                                                                                                                                                           text-white text-xs font-medium rounded-lg transition shadow-sm">
+                                                                                                                                                                                                                                                                           text-white text-xs font-medium rounded-lg transition shadow-sm">
                         <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
@@ -609,8 +610,8 @@
                     <div class="relative w-full sm:w-auto" id="purgeDropdown">
                         <button type="button" onclick="togglePurgeDropdown()"
                             class="w-full sm:w-auto inline-flex items-center justify-center gap-2 h-9 px-3 sm:px-3.5 bg-white border border-red-200 text-red-600
-                                                                                                                                                                                                                                                               hover:bg-red-50 hover:border-red-300 active:bg-red-100
-                                                                                                                                                                                                                                                               text-xs font-medium rounded-lg transition shadow-sm">
+                                                                                                                                                                                                                                                                               hover:bg-red-50 hover:border-red-300 active:bg-red-100
+                                                                                                                                                                                                                                                                               text-xs font-medium rounded-lg transition shadow-sm">
                             <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -625,8 +626,8 @@
                         {{-- Dropdown --}}
                         <div id="purgeMenu"
                             class="absolute right-0 mt-2 w-56 bg-white border border-gray-100 rounded-xl shadow-lg
-                                                                                                                                                                                                                                                                                opacity-0 invisible translate-y-1
-                                                                                                                                                                                                                                                                                transition-all duration-150 z-20 overflow-hidden">
+                                                                                                                                                                                                                                                                                                opacity-0 invisible translate-y-1
+                                                                                                                                                                                                                                                                                                transition-all duration-150 z-20 overflow-hidden">
                             <div class="px-3.5 py-2.5 bg-gray-50 border-b border-gray-100">
                                 <p class="text-[10px] font-semibold text-gray-400 uppercase tracking-wider">Hapus data tugas</p>
                             </div>
@@ -825,13 +826,13 @@
                     <div class="relative w-full sm:w-auto">
                         <input type="text" name="log_search" value="{{ $logSearch ?? '' }}" placeholder="Cari nama assignee..."
                             class="w-full sm:w-44 h-9 px-3 text-xs bg-white border border-gray-300 rounded-lg shadow-sm
-                                                                                                                                                                                                                                               focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 text-gray-700 transition">
+                                                                                                                                                                                                                                                               focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 text-gray-700 transition">
                     </div>
 
                     {{-- Filter Aksi --}}
                     <select name="log_action"
                         class="w-full sm:w-auto h-9 pl-3 pr-8 text-xs bg-white border border-gray-300 rounded-lg shadow-sm
-                                                                                                                                                                                                                                                                 focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 text-gray-700 transition"
+                                                                                                                                                                                                                                                                                 focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 text-gray-700 transition"
                         onchange="this.form.submit()">
                         <option value="">Semua Aksi</option>
                         <option value="submitted" {{ request('log_action') === 'submitted' ? 'selected' : '' }}>Selesai Dikerjakan
@@ -847,7 +848,7 @@
                     {{-- Filter Rentang Waktu --}}
                     <select name="log_range"
                         class="w-full sm:w-auto h-9 pl-3 pr-8 text-xs bg-white border border-gray-300 rounded-lg shadow-sm
-                                                                                                                                                                                                                                                                focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 text-gray-700 transition"
+                                                                                                                                                                                                                                                                                focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 text-gray-700 transition"
                         onchange="this.form.submit()">
                         <option value="">Semua Waktu</option>
                         <option value="weekly" {{ request('log_range') === 'weekly' ? 'selected' : '' }}>Minggu Ini</option>
@@ -858,7 +859,7 @@
                     {{-- Filter Tanggal --}}
                     <input type="date" name="log_date" value="{{ $logDateFilter ?? '' }}"
                         class="w-full sm:w-auto h-9 px-3 text-xs bg-white border border-gray-300 rounded-lg shadow-sm
-                                                                                                                                                                                                                                           focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 text-gray-700 transition"
+                                                                                                                                                                                                                                                           focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 text-gray-700 transition"
                         onchange="this.form.submit()">
 
                     {{-- Submit & Reset (Grouped di Mobile) --}}
@@ -1065,10 +1066,11 @@
 
                     {{-- Dropdown Trigger --}}
                     <button type="button" @click="open = !open"
-                        class="w-full flex items-center justify-between border border-gray-300 rounded-lg px-3 py-2.5 text-sm bg-white hover:bg-gray-50 focus:ring-2 focus:ring-primary-500 focus:outline-none transition">
-                        <span x-show="selectedId" class="font-medium text-gray-800" x-text="selectedLabel"></span>
+                        class="w-full flex items-center justify-between gap-2 border border-gray-300 rounded-lg px-3 py-2.5 text-sm bg-white hover:bg-gray-50 focus:ring-2 focus:ring-primary-500 focus:outline-none transition min-w-0">
+                        <span x-show="selectedId" class="font-medium text-gray-800 truncate min-w-0 text-left"
+                            :title="selectedLabel" x-text="selectedLabel"></span>
                         <span x-show="!selectedId" class="text-gray-400">-- Pilih Akun Tersedia --</span>
-                        <svg class="w-4 h-4 text-gray-400 transition-transform duration-150"
+                        <svg class="w-4 h-4 text-gray-400 shrink-0 transition-transform duration-150"
                             :class="open ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                         </svg>
@@ -1096,11 +1098,11 @@
                         <div class="overflow-y-auto max-h-48 divide-y divide-gray-50">
                             <template x-for="acc in filteredAccounts" :key="acc.id">
                                 <button type="button" @click="selectAccount(acc)"
-                                    class="w-full text-left px-3 py-2 text-xs hover:bg-primary-50 hover:text-primary-700 transition flex items-center justify-between"
-                                    :class="selectedId == acc.id ? 'bg-primary-50/70 font-semibold text-primary-700' : 'text-gray-700'">
-                                    {{-- Hanya nama akun dan platform --}}
-                                    <span x-text="`${acc.name} (${acc.platform})`"></span>
-                                    <span x-show="selectedId == acc.id" class="text-primary-600">
+                                    class="w-full text-left px-3 py-2 text-xs hover:bg-primary-50 hover:text-primary-700 transition flex items-center justify-between gap-2 min-w-0"
+                                    :class="selectedId == acc.id ? 'bg-primary-50/70 font-semibold text-primary-700' : 'text-gray-700'"
+                                    :title="`${acc.name} (${acc.platform})`">
+                                    <span class="truncate min-w-0" x-text="`${acc.name} (${acc.platform})`"></span>
+                                    <span x-show="selectedId == acc.id" class="text-primary-600 shrink-0">
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                 d="M5 13l4 4L19 7" />
@@ -1205,7 +1207,8 @@
                             <option value="{{ $sup->id }}">{{ $sup->name }} (HR Staff)</option>
                         @endforeach
                     </select>
-                    <p class="text-[11px] text-gray-400 mt-1">Staff HR yang berwenang memverifikasi tugas jika PM/Asisten tidak ada.</p>
+                    <p class="text-[11px] text-gray-400 mt-1">Staff HR yang berwenang memverifikasi tugas jika PM/Asisten
+                        tidak ada.</p>
                 </div>
 
                 <div class="flex gap-3 pt-2">
@@ -1307,7 +1310,8 @@
                     <p class="text-[11px] text-gray-400 mt-1">Asisten HR yang berwenang approve tugas sebagai backup PM.</p>
                 </div>
                 <div>
-                    <label class="block text-xs font-semibold text-gray-700 mb-1">Staff Pengawas <span class="text-gray-400 font-normal">(Opsional)</span></label>
+                    <label class="block text-xs font-semibold text-gray-700 mb-1">Staff Pengawas <span
+                            class="text-gray-400 font-normal">(Opsional)</span></label>
                     <select name="supervisor_staff_id" id="create-acc-sup"
                         class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 focus:outline-none">
                         <option value="">-- Tanpa Staff Pengawas --</option>
@@ -1315,7 +1319,8 @@
                             <option value="{{ $sup->id }}">{{ $sup->name }} (HR Staff)</option>
                         @endforeach
                     </select>
-                    <p class="text-[11px] text-gray-400 mt-1">Staff HR yang berwenang memverifikasi tugas jika PM/Asisten tidak ada.</p>
+                    <p class="text-[11px] text-gray-400 mt-1">Staff HR yang berwenang memverifikasi tugas jika PM/Asisten
+                        tidak ada.</p>
                 </div>
                 <div>
                     <label class="block text-xs font-semibold text-gray-600 mb-1.5">Catatan / Briefing</label>
@@ -1461,7 +1466,8 @@
                             <option value="{{ $sup->id }}">{{ $sup->name }} (HR Staff)</option>
                         @endforeach
                     </select>
-                    <p id="edit-sup-note" class="text-[11px] text-gray-400 mt-1">Staff HR yang berwenang memverifikasi tugas jika PM/Asisten tidak ada.</p>
+                    <p id="edit-sup-note" class="text-[11px] text-gray-400 mt-1">Staff HR yang berwenang memverifikasi tugas
+                        jika PM/Asisten tidak ada.</p>
                 </div>
 
                 {{-- Catatan / Arahan Penugasan --}}
@@ -1640,11 +1646,11 @@
                 const searchBox = document.createElement('div');
                 searchBox.className = 'p-2 border-b border-gray-100 sticky top-0 bg-white rounded-t-lg';
                 searchBox.innerHTML = `
-                                                                                                                                                <div class="relative">
-                                                                                                                                                    <input type="text" placeholder="Cari..." class="w-full pl-8 pr-2 py-1.5 text-xs border border-gray-200 rounded-md focus:outline-none focus:ring-1 focus:ring-primary-500 bg-gray-50 transition">
-                                                                                                                                                    <svg class="w-3.5 h-3.5 text-gray-400 absolute left-2.5 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
-                                                                                                                                                </div>
-                                                                                                                                            `;
+                                                                                                                                                        <div class="relative">
+                                                                                                                                                            <input type="text" placeholder="Cari..." class="w-full pl-8 pr-2 py-1.5 text-xs border border-gray-200 rounded-md focus:outline-none focus:ring-1 focus:ring-primary-500 bg-gray-50 transition">
+                                                                                                                                                            <svg class="w-3.5 h-3.5 text-gray-400 absolute left-2.5 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                                                                                                                                                        </div>
+                                                                                                                                                    `;
                 const searchInput = searchBox.querySelector('input');
 
                 const list = document.createElement('ul');
@@ -1969,11 +1975,11 @@
                     item.rel = 'noopener noreferrer';
                     item.className = 'flex items-start gap-2.5 p-3 rounded-lg border border-gray-100 hover:border-primary-300 hover:bg-primary-50/50 transition group';
                     item.innerHTML = `
-                                                                                                                                                            <span class="flex-shrink-0 w-5 h-5 rounded-full bg-primary-100 text-primary-700 text-[10px] font-bold flex items-center justify-center mt-0.5">${i + 1}</span>
-                                                                                                                                                            <span class="text-xs text-primary-700 group-hover:underline break-all leading-relaxed">${url}</span>
-                                                                                                                                                            <svg class="w-3.5 h-3.5 flex-shrink-0 text-gray-400 group-hover:text-primary-600 mt-0.5 ml-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                                                                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
-                                                                                                                                                            </svg>`;
+                                                                                                                                                                    <span class="flex-shrink-0 w-5 h-5 rounded-full bg-primary-100 text-primary-700 text-[10px] font-bold flex items-center justify-center mt-0.5">${i + 1}</span>
+                                                                                                                                                                    <span class="text-xs text-primary-700 group-hover:underline break-all leading-relaxed">${url}</span>
+                                                                                                                                                                    <svg class="w-3.5 h-3.5 flex-shrink-0 text-gray-400 group-hover:text-primary-600 mt-0.5 ml-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                                                                                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+                                                                                                                                                                    </svg>`;
                     body.appendChild(item);
                 });
             }

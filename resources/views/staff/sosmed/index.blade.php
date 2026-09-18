@@ -65,7 +65,7 @@
         <div class="flex border-b border-gray-200 overflow-x-auto">
             <a href="{{ route('staff.sosmed.index', ['tab' => 'accounts']) }}"
                 class="flex items-center gap-2 px-5 py-3.5 text-sm font-medium whitespace-nowrap border-b-2 transition
-                                                                                      {{ $tab === 'accounts' ? 'border-primary-600 text-primary-600 bg-primary-50/50' : 'border-transparent text-gray-500 hover:text-gray-700' }}">
+                                                                                                          {{ $tab === 'accounts' ? 'border-primary-600 text-primary-600 bg-primary-50/50' : 'border-transparent text-gray-500 hover:text-gray-700' }}">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                         d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
@@ -74,7 +74,7 @@
             </a>
             <a href="{{ route('staff.sosmed.index', ['tab' => 'approvals']) }}"
                 class="flex items-center gap-2 px-5 py-3.5 text-sm font-medium whitespace-nowrap border-b-2 transition
-                                                                                      {{ $tab === 'approvals' ? 'border-primary-600 text-primary-600 bg-primary-50/50' : 'border-transparent text-gray-500 hover:text-gray-700' }}">
+                                                                                                          {{ $tab === 'approvals' ? 'border-primary-600 text-primary-600 bg-primary-50/50' : 'border-transparent text-gray-500 hover:text-gray-700' }}">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                         d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -88,7 +88,7 @@
             </a>
             <a href="{{ route('staff.sosmed.index', ['tab' => 'tasks']) }}"
                 class="flex items-center gap-2 px-5 py-3.5 text-sm font-medium whitespace-nowrap border-b-2 transition
-                                                                                      {{ $tab === 'tasks' ? 'border-primary-600 text-primary-600 bg-primary-50/50' : 'border-transparent text-gray-500 hover:text-gray-700' }}">
+                                                                                                          {{ $tab === 'tasks' ? 'border-primary-600 text-primary-600 bg-primary-50/50' : 'border-transparent text-gray-500 hover:text-gray-700' }}">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                         d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
@@ -97,7 +97,7 @@
             </a>
             <a href="{{ route('staff.sosmed.index', ['tab' => 'my_accounts']) }}"
                 class="flex items-center gap-2 px-5 py-3.5 text-sm font-medium whitespace-nowrap border-b-2 transition
-                                                                                      {{ $tab === 'my_accounts' ? 'border-primary-600 text-primary-600 bg-primary-50/50' : 'border-transparent text-gray-500 hover:text-gray-700' }}">
+                                                                                                          {{ $tab === 'my_accounts' ? 'border-primary-600 text-primary-600 bg-primary-50/50' : 'border-transparent text-gray-500 hover:text-gray-700' }}">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                         d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
@@ -132,7 +132,8 @@
                                         class="inline-flex items-center justify-center h-9 w-9 text-gray-500 hover:text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition shrink-0"
                                         title="Reset pencarian">
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M6 18L18 6M6 6l12 12" />
                                         </svg>
                                     </a>
                                 @endif
@@ -512,12 +513,14 @@
         <div class="p-4 sm:p-5">
             <div class="mb-4">
                 <h3 class="text-sm font-semibold text-gray-800">Tugas Siap Approval Final (Level 2) & Pengawasan</h3>
-                <p class="text-xs text-gray-500 mt-0.5">Tugas-tugas di bawah ini telah diverifikasi oleh PM atau memerlukan verifikasi langsung oleh Anda sebagai Staff Pengawas.</p>
+                <p class="text-xs text-gray-500 mt-0.5">Tugas-tugas di bawah ini telah diverifikasi oleh PM atau memerlukan
+                    verifikasi langsung oleh Anda sebagai Staff Pengawas.</p>
             </div>
 
             <div class="space-y-3 mb-6">
                 @forelse($needHrApproval as $task)
-                    <div class="p-4 {{ $task->status === 'done_by_staff' ? 'bg-blue-50/60 border-blue-200 hover:border-blue-300' : 'bg-purple-50/60 border-purple-200 hover:border-purple-300' }} border rounded-xl transition">
+                    <div
+                        class="p-4 {{ $task->status === 'done_by_staff' ? 'bg-blue-50/60 border-blue-200 hover:border-blue-300' : 'bg-purple-50/60 border-purple-200 hover:border-purple-300' }} border rounded-xl transition">
                         <div class="flex items-start justify-between gap-3">
                             <div class="min-w-0 flex-1">
                                 <div class="flex items-center gap-2 flex-wrap">
@@ -528,9 +531,11 @@
                                         ({{ $task->account?->platform }})
                                     </span>
                                     @if($task->status === 'done_by_staff')
-                                        <span class="px-2 py-0.5 rounded text-[11px] bg-blue-100 text-blue-700 font-medium inline-flex items-center gap-1">
+                                        <span
+                                            class="px-2 py-0.5 rounded text-[11px] bg-blue-100 text-blue-700 font-medium inline-flex items-center gap-1">
                                             <svg class="w-3 h-3 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M13 10V3L4 14h7v7l9-11h-7z" />
                                             </svg>
                                             Verifikasi Langsung (Staff Pengawas)
                                         </span>
@@ -938,10 +943,11 @@
 
                     {{-- Dropdown Trigger --}}
                     <button type="button" @click="open = !open"
-                        class="w-full flex items-center justify-between border border-gray-300 rounded-lg px-3 py-2.5 text-sm bg-white hover:bg-gray-50 focus:ring-2 focus:ring-primary-500 focus:outline-none transition">
-                        <span x-show="selectedId" class="font-medium text-gray-800" x-text="selectedLabel"></span>
+                        class="w-full flex items-center justify-between gap-2 border border-gray-300 rounded-lg px-3 py-2.5 text-sm bg-white hover:bg-gray-50 focus:ring-2 focus:ring-primary-500 focus:outline-none transition min-w-0">
+                        <span x-show="selectedId" class="font-medium text-gray-800 truncate min-w-0 text-left"
+                            :title="selectedLabel" x-text="selectedLabel"></span>
                         <span x-show="!selectedId" class="text-gray-400">-- Pilih Akun Tersedia --</span>
-                        <svg class="w-4 h-4 text-gray-400 transition-transform duration-150"
+                        <svg class="w-4 h-4 text-gray-400 shrink-0 transition-transform duration-150"
                             :class="open ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                         </svg>
@@ -969,11 +975,11 @@
                         <div class="overflow-y-auto max-h-48 divide-y divide-gray-50">
                             <template x-for="acc in filteredAccounts" :key="acc.id">
                                 <button type="button" @click="selectAccount(acc)"
-                                    class="w-full text-left px-3 py-2 text-xs hover:bg-primary-50 hover:text-primary-700 transition flex items-center justify-between"
-                                    :class="selectedId == acc.id ? 'bg-primary-50/70 font-semibold text-primary-700' : 'text-gray-700'">
-                                    {{-- Hanya nama akun dan platform --}}
-                                    <span x-text="`${acc.name} (${acc.platform})`"></span>
-                                    <span x-show="selectedId == acc.id" class="text-primary-600">
+                                    class="w-full text-left px-3 py-2 text-xs hover:bg-primary-50 hover:text-primary-700 transition flex items-center justify-between gap-2 min-w-0"
+                                    :class="selectedId == acc.id ? 'bg-primary-50/70 font-semibold text-primary-700' : 'text-gray-700'"
+                                    :title="`${acc.name} (${acc.platform})`">
+                                    <span class="truncate min-w-0" x-text="`${acc.name} (${acc.platform})`"></span>
+                                    <span x-show="selectedId == acc.id" class="text-primary-600 shrink-0">
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                 d="M5 13l4 4L19 7" />
@@ -1082,7 +1088,8 @@
                             <option value="{{ $sup->id }}">{{ $sup->name }} (Staff)</option>
                         @endforeach
                     </select>
-                    <p class="text-[11px] text-gray-400 mt-1">Staff HR yang berwenang langsung memverifikasi tugas sosmed akun ini.</p>
+                    <p class="text-[11px] text-gray-400 mt-1">Staff HR yang berwenang langsung memverifikasi tugas sosmed
+                        akun ini.</p>
                 </div>
 
                 {{-- Catatan / Arahan --}}
@@ -1229,7 +1236,8 @@
                             <option value="{{ $sup->id }}">{{ $sup->name }} (Staff)</option>
                         @endforeach
                     </select>
-                    <p id="assign-sup-note" class="text-[11px] text-gray-400 mt-1">Staff HR yang berwenang langsung memverifikasi tugas tanpa menunggu PM/Asisten.</p>
+                    <p id="assign-sup-note" class="text-[11px] text-gray-400 mt-1">Staff HR yang berwenang langsung
+                        memverifikasi tugas tanpa menunggu PM/Asisten.</p>
                 </div>
 
                 {{-- Catatan / Arahan Penugasan --}}
@@ -1535,11 +1543,11 @@
                 const searchBox = document.createElement('div');
                 searchBox.className = 'p-2 border-b border-gray-100 sticky top-0 bg-white rounded-t-lg';
                 searchBox.innerHTML = `
-                                                                    <div class="relative">
-                                                                        <input type="text" placeholder="Cari..." class="w-full pl-8 pr-2 py-1.5 text-xs border border-gray-200 rounded-md focus:outline-none focus:ring-1 focus:ring-primary-500 bg-gray-50 transition">
-                                                                        <svg class="w-3.5 h-3.5 text-gray-400 absolute left-2.5 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
-                                                                    </div>
-                                                                `;
+                                                                                        <div class="relative">
+                                                                                            <input type="text" placeholder="Cari..." class="w-full pl-8 pr-2 py-1.5 text-xs border border-gray-200 rounded-md focus:outline-none focus:ring-1 focus:ring-primary-500 bg-gray-50 transition">
+                                                                                            <svg class="w-3.5 h-3.5 text-gray-400 absolute left-2.5 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                                                                                        </div>
+                                                                                    `;
                 const searchInput = searchBox.querySelector('input');
 
                 const list = document.createElement('ul');
@@ -1640,45 +1648,67 @@
 
         function syncSupervisorState(staffSelect, pmSelectId, hintId, astSelectId) {
             if (!staffSelect) return;
+
             const pmSelect = document.getElementById(pmSelectId);
-            const assistantSelect = astSelectId ? document.getElementById(astSelectId) : document.getElementById('assign-assistant-sel');
+            const assistantSelect = astSelectId
+                ? document.getElementById(astSelectId)
+                : document.getElementById('assign-assistant-sel');
             const hint = document.getElementById(hintId);
             if (!pmSelect) return;
 
             const selectedOption = staffSelect.options[staffSelect.selectedIndex];
             const role = selectedOption ? selectedOption.getAttribute('data-role') : null;
 
-            if (role === 'pm') {
+            // Role yang langsung ke HR → PM & Asisten dinonaktifkan
+            const isDirectToHr = ['pm', 'hr_assistant', 'hr_staff'].includes(role);
+
+            if (isDirectToHr) {
                 pmSelect.value = '';
                 pmSelect.disabled = true;
                 pmSelect.classList.add('bg-gray-100', 'text-gray-400', 'cursor-not-allowed');
+                // Sync custom dropdown button (jika ada)
+                if (typeof setCustomSelectDisabled === 'function') {
+                    setCustomSelectDisabled(pmSelect, true);
+                }
 
-                // Also disable assistant selection
                 if (assistantSelect) {
                     assistantSelect.value = '';
                     assistantSelect.disabled = true;
                     assistantSelect.classList.add('bg-gray-100', 'text-gray-400', 'cursor-not-allowed');
+                    if (typeof setCustomSelectDisabled === 'function') {
+                        setCustomSelectDisabled(assistantSelect, true);
+                    }
                 }
 
                 if (hint) {
-                    hint.innerHTML = '<span class="text-indigo-600 font-semibold">🔒 PM Mandiri:</span> Akun dikelola langsung oleh PM. Hasil pengerjaan otomatis lolos Level 1 dan langsung diverifikasi HR Staff (supervisor dan asisten otomatis dinonaktifkan).';
+                    if (role === 'pm') {
+                        hint.innerHTML = '<span class="text-indigo-600 font-semibold">🔒 PM Mandiri:</span> Akun dikelola langsung oleh PM. Hasil pengerjaan otomatis lolos Level 1 dan langsung diverifikasi HR Staff (supervisor dan asisten otomatis dinonaktifkan).';
+                    } else if (role === 'hr_assistant') {
+                        hint.innerHTML = '<span class="text-teal-600 font-semibold">🔒 HR Asisten:</span> Eksekutor adalah Asisten HR. Supervisor PM dan Asisten Pengawas tidak diperlukan (langsung ke HR).';
+                    } else {
+                        hint.innerHTML = '<span class="text-amber-600 font-semibold">🔒 HR Staff:</span> Eksekutor adalah Staff HR. Supervisor PM dan Asisten Pengawas dinonaktifkan.';
+                    }
                 }
             } else {
                 pmSelect.disabled = false;
                 pmSelect.classList.remove('bg-gray-100', 'text-gray-400', 'cursor-not-allowed');
+                if (typeof setCustomSelectDisabled === 'function') {
+                    setCustomSelectDisabled(pmSelect, false);
+                }
 
-                // Enable assistant selection
                 if (assistantSelect) {
                     assistantSelect.disabled = false;
                     assistantSelect.classList.remove('bg-gray-100', 'text-gray-400', 'cursor-not-allowed');
+                    if (typeof setCustomSelectDisabled === 'function') {
+                        setCustomSelectDisabled(assistantSelect, false);
+                    }
                 }
 
                 if (hint) {
-                    hint.innerHTML = 'PM yang berwenang meninjau & approve tugas. Jika PM mengelola akun mandiri, bagian ini otomatis dinonaktifkan.';
+                    hint.innerHTML = 'PM yang berwenang meninjau & approve tugas.';
                 }
             }
         }
-
         // Helper: set disabled state on a custom-dropdown-wrapped select AND update its trigger button visually
         function setCustomSelectDisabled(select, disabled) {
             select.disabled = disabled;
@@ -1824,17 +1854,17 @@
             // Reset links container to single empty input
             const container = document.getElementById('my-links-container');
             container.innerHTML = `
-                                <div class="flex gap-2 link-row">
-                                    <input type="text" name="links[]" required
-                                        placeholder="https://instagram.com/p/xxx"
-                                        class="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 focus:outline-none">
-                                    <button type="button" onclick="removeMyLinkRow(this)"
-                                        class="text-gray-300 hover:text-rose-500 px-1 transition hidden remove-btn">
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                                        </svg>
-                                    </button>
-                                </div>`;
+                                                    <div class="flex gap-2 link-row">
+                                                        <input type="text" name="links[]" required
+                                                            placeholder="https://instagram.com/p/xxx"
+                                                            class="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 focus:outline-none">
+                                                        <button type="button" onclick="removeMyLinkRow(this)"
+                                                            class="text-gray-300 hover:text-rose-500 px-1 transition hidden remove-btn">
+                                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                                            </svg>
+                                                        </button>
+                                                    </div>`;
 
             document.getElementById('modal-my-submit').classList.remove('hidden');
         }
@@ -1988,15 +2018,15 @@
             const newRow = document.createElement('div');
             newRow.className = 'flex gap-2 link-row';
             newRow.innerHTML = `
-                                                                <input type="text" name="links[]" required
-                                                                    placeholder="https://instagram.com/p/xxx"
-                                                                    class="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 focus:outline-none">
-                                                                <button type="button" onclick="removeMyLinkRow(this)"
-                                                                    class="text-gray-300 hover:text-rose-500 px-1 transition remove-btn">
-                                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                                                                    </svg>
-                                                                </button>`;
+                                                                                    <input type="text" name="links[]" required
+                                                                                        placeholder="https://instagram.com/p/xxx"
+                                                                                        class="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 focus:outline-none">
+                                                                                    <button type="button" onclick="removeMyLinkRow(this)"
+                                                                                        class="text-gray-300 hover:text-rose-500 px-1 transition remove-btn">
+                                                                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                                                                        </svg>
+                                                                                    </button>`;
             container.appendChild(newRow);
             // Show all remove buttons when more than one row
             container.querySelectorAll('.remove-btn').forEach(btn => btn.classList.remove('hidden'));
@@ -2027,11 +2057,11 @@
                     item.rel = 'noopener noreferrer';
                     item.className = 'flex items-start gap-2.5 p-3 rounded-lg border border-gray-100 hover:border-primary-300 hover:bg-primary-50/50 transition group';
                     item.innerHTML = `
-                                                                                    <span class="flex-shrink-0 w-5 h-5 rounded-full bg-primary-100 text-primary-700 text-[10px] font-bold flex items-center justify-center mt-0.5">${i + 1}</span>
-                                                                                    <span class="text-xs text-primary-700 group-hover:underline break-all leading-relaxed">${url}</span>
-                                                                                    <svg class="w-3.5 h-3.5 flex-shrink-0 text-gray-400 group-hover:text-primary-600 mt-0.5 ml-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
-                                                                                    </svg>`;
+                                                                                                        <span class="flex-shrink-0 w-5 h-5 rounded-full bg-primary-100 text-primary-700 text-[10px] font-bold flex items-center justify-center mt-0.5">${i + 1}</span>
+                                                                                                        <span class="text-xs text-primary-700 group-hover:underline break-all leading-relaxed">${url}</span>
+                                                                                                        <svg class="w-3.5 h-3.5 flex-shrink-0 text-gray-400 group-hover:text-primary-600 mt-0.5 ml-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+                                                                                                        </svg>`;
                     body.appendChild(item);
                 });
             }

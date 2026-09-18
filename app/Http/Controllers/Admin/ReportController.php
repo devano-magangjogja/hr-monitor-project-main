@@ -14,15 +14,16 @@ class ReportController extends Controller
     public function __construct(
         protected TaskService $taskService,
         protected UserService $userService,
-    ) {}
+    ) {
+    }
 
     public function history(Request $request)
     {
-        $date   = $request->query('date');
+        $date = $request->query('date');
         $search = $request->query('search');
         $userId = $request->query('user_id');
-        $users  = $this->userService->getAllUsers();
-        $tasks  = $this->taskService->getHistoryForAdmin(
+        $users = $this->userService->getAllUsers();
+        $tasks = $this->taskService->getHistoryForAdmin(
             $userId ? (int) $userId : null,
             $date,
             $search
@@ -32,11 +33,11 @@ class ReportController extends Controller
 
     public function productivity(Request $request)
     {
-        $today        = Carbon::today()->toDateString();
-        $dateFrom     = $request->query('date_from', $today);
-        $dateTo       = $request->query('date_to',   $today);
+        $today = Carbon::today()->toDateString();
+        $dateFrom = $request->query('date_from', $today);
+        $dateTo = $request->query('date_to', $today);
         $selectedRole = $request->query('role', 'all');
-        $search       = $request->query('search');
+        $search = $request->query('search');
 
         // Normalise: pastikan dateFrom <= dateTo
         if ($dateFrom > $dateTo) {
@@ -45,7 +46,7 @@ class ReportController extends Controller
 
         $report = $this->taskService->getProductivityByRange($dateFrom, $dateTo, $selectedRole);
         if ($search) {
-            $report = $report->filter(fn ($item) => str_contains(strtolower($item['user']->name), strtolower($search)))->values();
+            $report = $report->filter(fn($item) => str_contains(strtolower($item['user']->name), strtolower($search)))->values();
         }
 
         // Daftar role selain admin untuk dropdown filter
@@ -56,11 +57,9 @@ class ReportController extends Controller
 
     public function productivityDetail(Request $request, \App\Models\User $user)
     {
-        abort_if($user->role === 'admin', 403);
-
-        $today    = Carbon::today()->toDateString();
+        $today = \Carbon\Carbon::today()->toDateString();
         $dateFrom = $request->query('date_from', $today);
-        $dateTo   = $request->query('date_to',   $today);
+        $dateTo = $request->query('date_to', $today);
 
         if ($dateFrom > $dateTo) {
             [$dateFrom, $dateTo] = [$dateTo, $dateFrom];
@@ -68,39 +67,50 @@ class ReportController extends Controller
 
         $tasks = $this->taskService->getProductivityDetailForUser($user->id, $dateFrom, $dateTo);
 
-        // Hitung ringkasan
-        $total     = $tasks->count();
-        $completed = 0; $notDone = 0; $pending = 0;
+        $total = $tasks->count();
+        $completed = $notDone = $pending = 0;
         foreach ($tasks as $task) {
             $s = $task->assignments->first()?->is_completed ?? 'pending';
-            if ($s === 'completed')      $completed++;
-            elseif ($s === 'not_done')   $notDone++;
-            else                         $pending++;
+            if ($s === 'completed') {
+                $completed++;
+            } elseif ($s === 'not_done') {
+                $notDone++;
+            } else {
+                $pending++;
+            }
         }
         $pct = $total > 0 ? round(($completed / $total) * 100) : 0;
 
-        // Kelompokkan per hari untuk tampilan yang lebih rapi
         $tasksByDate = $tasks->groupBy(fn($t) => $t->task_date->toDateString());
 
-        return view('admin.reports.productivity-detail',
-            compact('user', 'tasks', 'tasksByDate', 'dateFrom', 'dateTo',
-                    'total', 'completed', 'notDone', 'pending', 'pct'));
+        return view('admin.reports.productivity-detail', compact(
+            'user',
+            'tasks',
+            'tasksByDate',
+            'dateFrom',
+            'dateTo',
+            'total',
+            'completed',
+            'notDone',
+            'pending',
+            'pct'
+        ));
     }
 
     public function ranking(Request $request)
     {
         $period = $request->query('period', 'week');
-        $users  = $this->userService->getAllUsers();
-    
+        $users = $this->userService->getAllUsers();
+
         $rankings = $users->map(function ($user) use ($period) {
             return [
-                'user'  => $user,
+                'user' => $user,
                 'score' => $this->taskService->getUserScore($user->id, $period),
             ];
         })
-        ->sortByDesc('score')
-        ->values();
-    
+            ->sortByDesc('score')
+            ->values();
+
         return view('admin.reports.ranking', compact('rankings', 'period'));
     }
 
@@ -143,13 +153,13 @@ class ReportController extends Controller
     public function purgeHistory(Request $request)
     {
         $validated = $request->validate([
-            'period_type'    => ['required', 'in:older_than_year,older_than_months,by_year,by_month,before_date,all'],
-            'year'           => ['nullable', 'integer', 'min:2020', 'max:2099'],
-            'month'          => ['nullable', 'integer', 'min:1', 'max:12'],
-            'before_date'    => ['nullable', 'date'],
-            'targets'        => ['required', 'array', 'min:1'],
-            'targets.*'      => ['in:tasks,sosmed,presensi'],
-            'role'           => ['nullable', 'string'],
+            'period_type' => ['required', 'in:older_than_year,older_than_months,by_year,by_month,before_date,all'],
+            'year' => ['nullable', 'integer', 'min:2020', 'max:2099'],
+            'month' => ['nullable', 'integer', 'min:1', 'max:12'],
+            'before_date' => ['nullable', 'date'],
+            'targets' => ['required', 'array', 'min:1'],
+            'targets.*' => ['in:tasks,sosmed,presensi'],
+            'role' => ['nullable', 'string'],
             'confirm_phrase' => ['nullable', 'string'],
         ]);
 
@@ -167,7 +177,7 @@ class ReportController extends Controller
                 return back()->with('error', 'Silakan pilih tahun yang ingin dihapus.');
             }
             $dateStart = Carbon::createFromDate($validated['year'], 1, 1)->startOfYear()->toDateString();
-            $dateEnd   = Carbon::createFromDate($validated['year'], 1, 1)->endOfYear()->toDateString();
+            $dateEnd = Carbon::createFromDate($validated['year'], 1, 1)->endOfYear()->toDateString();
             if ($dateEnd >= $today) {
                 $dateEnd = Carbon::yesterday()->toDateString();
             }
@@ -177,7 +187,7 @@ class ReportController extends Controller
             }
             $dt = Carbon::createFromDate($validated['year'], $validated['month'], 1);
             $dateStart = $dt->copy()->startOfMonth()->toDateString();
-            $dateEnd   = $dt->copy()->endOfMonth()->toDateString();
+            $dateEnd = $dt->copy()->endOfMonth()->toDateString();
             if ($dateEnd >= $today) {
                 $dateEnd = Carbon::yesterday()->toDateString();
             }

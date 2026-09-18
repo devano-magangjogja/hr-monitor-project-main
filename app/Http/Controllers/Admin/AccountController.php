@@ -44,16 +44,33 @@ class AccountController extends Controller
 
         $accounts = $accountsQuery->paginate(15)->appends($request->query());
 
-        $pendingAccounts = SosmedAccount::with('creator')
-            ->where('verification_status', 'pending')
+        $pendingQuery = SosmedAccount::with('creator')
+            ->where('verification_status', 'pending');
+
+        if ($search) {
+            $pendingQuery->where(function ($q) use ($search) {
+                $q->where('name', 'like', '%' . $search . '%')
+                    ->orWhere('platform', 'like', '%' . $search . '%')
+                    ->orWhere('email', 'like', '%' . $search . '%')
+                    ->orWhereHas('creator', function ($c) use ($search) {
+                        $c->where('name', 'like', '%' . $search . '%');
+                    });
+            });
+        }
+
+        if ($platform) {
+            $pendingQuery->where('platform', $platform);
+        }
+
+        $pendingAccounts = $pendingQuery
             ->latest()
             ->paginate(15, ['*'], 'pending_page')
-            ->appends(['tab' => 'pending']);
+            ->appends($request->only(['tab', 'search', 'platform']));
 
         $stats = [
-            'total'     => SosmedAccount::where('verification_status', 'approved')->count(),
-            'assigned'  => SosmedAccount::where('verification_status', 'approved')->whereNotNull('staff_id')->count(),
-            'unassigned'=> SosmedAccount::where('verification_status', 'approved')->whereNull('staff_id')->count(),
+            'total' => SosmedAccount::where('verification_status', 'approved')->count(),
+            'assigned' => SosmedAccount::where('verification_status', 'approved')->whereNotNull('staff_id')->count(),
+            'unassigned' => SosmedAccount::where('verification_status', 'approved')->whereNull('staff_id')->count(),
         ];
 
         $platformList = ['Instagram', 'TikTok', 'YouTube', 'Facebook', 'Twitter/X', 'LinkedIn', 'Threads', 'Website', 'Lainnya'];
@@ -186,19 +203,19 @@ class AccountController extends Controller
 
         $updateData = [
             'verification_status' => $validated['verification_status'],
-            'email_recovery'      => $validated['email_recovery'] ?? null,
-            'phone'               => $validated['phone'] ?? null,
-            'two_factor_enabled'  => $request->boolean('two_factor_enabled'),
-            'rejection_note'      => $isRejected ? $validated['rejection_note'] : null,
+            'email_recovery' => $validated['email_recovery'] ?? null,
+            'phone' => $validated['phone'] ?? null,
+            'two_factor_enabled' => $request->boolean('two_factor_enabled'),
+            'rejection_note' => $isRejected ? $validated['rejection_note'] : null,
         ];
 
         // Jika ditolak: lepas semua penugasan dan keluarkan dari kelola sosmed
         if ($isRejected) {
-            $updateData['staff_id']            = null;
-            $updateData['pm_id']               = null;
-            $updateData['assistant_id']        = null;
+            $updateData['staff_id'] = null;
+            $updateData['pm_id'] = null;
+            $updateData['assistant_id'] = null;
             $updateData['supervisor_staff_id'] = null;
-            $updateData['is_in_sosmed']        = false;
+            $updateData['is_in_sosmed'] = false;
         }
 
         $account->update($updateData);
@@ -215,7 +232,7 @@ class AccountController extends Controller
         $search = $request->query('search');
         $accounts = SosmedAccount::query()
             ->where('created_by', Auth::id())
-            ->when($search, fn ($query) => $query->where(function ($nested) use ($search) {
+            ->when($search, fn($query) => $query->where(function ($nested) use ($search) {
                 $nested->where('name', 'like', "%{$search}%")
                     ->orWhere('platform', 'like', "%{$search}%")
                     ->orWhere('email', 'like', "%{$search}%");
@@ -234,7 +251,7 @@ class AccountController extends Controller
         $accounts = SosmedAccount::query()
             ->where('verification_status', 'approved')
             ->where('created_by', $userId)
-            ->when($search, fn ($query) => $query->where(function ($nested) use ($search) {
+            ->when($search, fn($query) => $query->where(function ($nested) use ($search) {
                 $nested->where('name', 'like', "%{$search}%")
                     ->orWhere('platform', 'like', "%{$search}%")
                     ->orWhere('email', 'like', "%{$search}%");
@@ -249,6 +266,7 @@ class AccountController extends Controller
     public function ownStore(Request $request)
     {
         $validated = $request->validate([
+            'name' => ['required', 'string', 'max:200'],
             'platform' => ['required', 'string', 'max:50'],
             'custom_platform' => ['required_if:platform,Lainnya', 'nullable', 'string', 'max:50'],
             'email' => ['required', 'email', 'max:255'],
@@ -256,8 +274,10 @@ class AccountController extends Controller
         ]);
 
         SosmedAccount::create([
-            'name' => strstr($validated['email'], '@', true) ?: $validated['email'],
-            'platform' => $validated['platform'] === 'Lainnya' ? $validated['custom_platform'] : $validated['platform'],
+            'name' => $validated['name'],
+            'platform' => $validated['platform'] === 'Lainnya'
+                ? $validated['custom_platform']
+                : $validated['platform'],
             'email' => $validated['email'],
             'password' => $validated['password'],
             'created_by' => Auth::id(),
