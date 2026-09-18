@@ -188,15 +188,18 @@
                 </div>
 
                 {{-- Tabel tugas per hari --}}
-                <div class="overflow-x-auto">
-                    <table class="w-full text-sm min-w-[540px]">
+                {{-- Desktop table (md+) --}}
+                <div class="hidden md:block overflow-x-auto">
+                    <table class="w-full text-sm table-fixed">
                         <thead>
-                            <tr class="border-b border-gray-100">
-                                <th class="text-left px-4 sm:px-6 py-3 font-semibold text-gray-500 text-xs w-44">Judul</th>
-                                <th class="text-left px-4 sm:px-6 py-3 font-semibold text-gray-500 text-xs">Deskripsi</th>
-                                <th class="text-left px-4 sm:px-6 py-3 font-semibold text-gray-500 text-xs w-28">Sumber</th>
-                                <th class="text-left px-4 sm:px-6 py-3 font-semibold text-gray-500 text-xs w-36">Status</th>
-                                <th class="text-left px-4 sm:px-6 py-3 font-semibold text-gray-500 text-xs w-28">Catatan</th>
+                            <tr class="border-b border-gray-100 bg-gray-50/50">
+                                <th class="text-left px-4 py-3 font-semibold text-gray-500 text-xs w-[18%]">Judul</th>
+                                <th class="text-left px-4 py-3 font-semibold text-gray-500 text-xs w-[24%]">Deskripsi</th>
+                                <th class="text-left px-4 py-3 font-semibold text-gray-500 text-xs w-[12%]">Sumber</th>
+                                <th class="text-left px-4 py-3 font-semibold text-gray-500 text-xs w-[12%]">Kantor</th>
+                                <th class="text-left px-4 py-3 font-semibold text-gray-500 text-xs w-[16%]">Status</th>
+                                <th class="text-left px-4 py-3 font-semibold text-gray-500 text-xs w-[12%]">Catatan</th>
+                                <th class="text-center px-4 py-3 font-semibold text-gray-500 text-xs w-[6%]">Aksi</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-gray-50">
@@ -206,52 +209,121 @@
                                     $status     = $assignment?->is_completed ?? 'pending';
                                 @endphp
                                 <tr class="hover:bg-gray-50 transition">
-                                    <td class="px-4 sm:px-6 py-3.5 w-44">
-                                        <div class="font-medium text-gray-800 truncate max-w-[160px]"
-                                             title="{{ $task->title }}">
-                                            {{ $task->title }}
-                                        </div>
+                                    <td class="px-4 py-3">
+                                        <div class="font-medium text-gray-800 truncate" title="{{ $task->title }}">{{ $task->title }}</div>
                                     </td>
-                                    <td class="px-4 sm:px-6 py-3.5">
-                                        <div class="text-gray-500 truncate max-w-[180px]"
-                                             title="{{ $task->description ?? '-' }}">
+                                    <td class="px-4 py-3">
+                                        <div class="text-gray-500 truncate" title="{{ $task->description ?? '-' }}">
                                             @if($task->description)
-                                                {!! linkify(e($task->description)) !!}
+                                                {{ Str::limit(strip_tags($task->description), 50) }}
                                             @else
                                                 <span class="text-gray-300">—</span>
                                             @endif
                                         </div>
                                     </td>
-                                    <td class="px-4 sm:px-6 py-3.5 w-28">
+                                    <td class="px-4 py-3">
                                         @if($task->type === 'default')
                                             <span class="inline-flex px-2 py-0.5 rounded-full text-xs font-medium bg-purple-50 text-purple-700">Rutin</span>
                                         @elseif($task->type === 'self')
                                             <span class="inline-flex px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600">Mandiri</span>
                                         @else
-                                            <span class="inline-flex px-2 py-0.5 rounded-full text-xs font-medium bg-blue-50 text-blue-700"
-                                                  title="{{ $task->creator?->name ?? 'Atasan' }}">
-                                                {{ Str::limit($task->creator?->name ?? 'Atasan', 10) }}
+                                            <span class="inline-flex max-w-full truncate px-2 py-0.5 rounded-full text-xs font-medium bg-blue-50 text-blue-700"
+                                                title="{{ $task->creator?->name ?? 'Atasan' }}">
+                                                {{ Str::limit($task->creator?->name ?? 'Atasan', 12) }}
                                             </span>
                                         @endif
                                     </td>
-                                    <td class="px-4 sm:px-6 py-3.5 w-36">
+                                    <td class="px-4 py-3">
+                                        @if($task->kantor)
+                                            <span class="inline-flex px-2 py-0.5 rounded-md text-xs font-medium bg-slate-50 text-slate-700 border border-slate-200 whitespace-nowrap">
+                                                {{ $task->kantor }}
+                                            </span>
+                                        @else
+                                            <span class="text-xs text-gray-300">—</span>
+                                        @endif
+                                    </td>
+                                    <td class="px-4 py-3">
                                         <x-task-status-badge :status="$status" :completedAt="$assignment?->completed_at" />
                                     </td>
-                                    <td class="px-4 sm:px-6 py-3.5 w-28">
+                                    <td class="px-4 py-3">
                                         @if($assignment?->note)
-                                            <div class="text-xs text-gray-500 italic truncate max-w-[100px]"
-                                                 title="{{ $assignment->note }}">
-                                                {{ $assignment->note }}
+                                            <div class="text-xs text-gray-500 italic truncate" title="{{ $assignment->note }}">
+                                                {{ Str::limit($assignment->note, 25) }}
                                             </div>
                                         @else
                                             <span class="text-xs text-gray-300">—</span>
                                         @endif
+                                    </td>
+                                    <td class="px-4 py-3 text-center">
+                                        <button type="button"
+                                            class="p-1.5 text-gray-400 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition"
+                                            title="Lihat detail">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                                <path stroke-linecap="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                                            </svg>
+                                        </button>
                                     </td>
                                 </tr>
                             @endforeach
                         </tbody>
                     </table>
                 </div>
+
+                {{-- Mobile cards (< md) --}}
+                <div class="md:hidden space-y-3 p-3">
+                    @foreach($dayTasks as $task)
+                        @php
+                            $assignment = $task->assignments->first();
+                            $status     = $assignment?->is_completed ?? 'pending';
+                        @endphp
+                        <div class="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
+                            <div class="flex items-start justify-between gap-3 mb-2">
+                                <div class="min-w-0 flex-1">
+                                    <p class="font-semibold text-gray-800 text-sm leading-snug">{{ $task->title }}</p>
+                                    @if($task->description)
+                                        <p class="text-xs text-gray-500 mt-1 line-clamp-2">{{ strip_tags($task->description) }}</p>
+                                    @endif
+                                </div>
+                                <button type="button"
+                                    class="p-1.5 text-gray-400 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition shrink-0"
+                                    title="Lihat detail">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                        <path stroke-linecap="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                                    </svg>
+                                </button>
+                            </div>
+
+                            <div class="flex flex-wrap items-center gap-1.5 mb-2">
+                                @if($task->type === 'default')
+                                    <span class="inline-flex px-2 py-0.5 rounded-full text-[10px] font-medium bg-purple-50 text-purple-700">Rutin</span>
+                                @elseif($task->type === 'self')
+                                    <span class="inline-flex px-2 py-0.5 rounded-full text-[10px] font-medium bg-gray-100 text-gray-600">Mandiri</span>
+                                @else
+                                    <span class="inline-flex px-2 py-0.5 rounded-full text-[10px] font-medium bg-blue-50 text-blue-700">
+                                        {{ Str::limit($task->creator?->name ?? 'Atasan', 14) }}
+                                    </span>
+                                @endif
+
+                                @if($task->kantor)
+                                    <span class="inline-flex px-2 py-0.5 rounded-md text-[10px] font-medium bg-slate-50 text-slate-700 border border-slate-200">
+                                        {{ $task->kantor }}
+                                    </span>
+                                @endif
+                            </div>
+
+                            <div class="flex items-center justify-between gap-2 pt-2 border-t border-gray-100">
+                                <x-task-status-badge :status="$status" :completedAt="$assignment?->completed_at" />
+                                @if($assignment?->note)
+                                    <p class="text-[11px] text-gray-400 italic truncate max-w-[50%] text-right" title="{{ $assignment->note }}">
+                                        {{ Str::limit($assignment->note, 40) }}
+                                    </p>
+                                @endif
+                            </div>
+                        </div>
+                    @endforeach
+                </div>     
             </div>
         @endforeach
     </div>

@@ -10,14 +10,52 @@
 
 @section('content')
 
-{{-- Header + Tombol Tambah --}}
-<div class="flex items-center justify-between mb-6">
-    <p class="text-sm text-gray-500">
-        Total <span class="font-semibold text-gray-700">{{ $users->count() }}</span> Pengguna
-    </p>
+{{-- Header + Search + Tombol Tambah --}}
+<div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
+
+    {{-- Kiri: Total + Search --}}
+    <div class="flex flex-col sm:flex-row sm:items-center gap-3 w-full md:w-auto">
+        <p class="text-sm text-gray-500 whitespace-nowrap">
+            Total <span class="font-semibold text-gray-700">{{ $users->count() }}</span> Pengguna
+        </p>
+
+        <form action="{{ route('staff.users.index') }}" method="GET"
+              class="relative w-full sm:w-72">
+            <div class="relative">
+                <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                              d="M21 21l-4.35-4.35M17 11a6 6 0 11-12 0 6 6 0 0112 0z"/>
+                    </svg>
+                </span>
+                <input type="text" name="search" value="{{ request('search') }}"
+                       placeholder="Cari nama atau email..."
+                       class="w-full pl-9 pr-9 py-2 border border-gray-300 rounded-lg text-sm
+                              focus:outline-none focus:ring-2 focus:ring-primary-500
+                              focus:border-primary-500 transition">
+                @if(request('search'))
+                    <a href="{{ route('staff.users.index') }}"
+                       class="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-gray-600"
+                       title="Hapus pencarian">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                  d="M6 18L18 6M6 6l12 12"/>
+                        </svg>
+                    </a>
+                @endif
+            </div>
+
+            {{-- Pertahankan filter role kalau ada --}}
+            @if(request('role'))
+                <input type="hidden" name="role" value="{{ request('role') }}">
+            @endif
+        </form>
+    </div>
+
+    {{-- Kanan: Tombol Tambah --}}
     <button onclick="document.getElementById('modal-create').classList.remove('hidden')"
-            class="flex items-center gap-2 px-4 py-2 bg-primary-600 hover:bg-primary-700
-                   text-white text-sm font-medium rounded-lg transition">
+            class="flex items-center justify-center gap-2 px-4 py-2 bg-primary-600 hover:bg-primary-700
+                   text-white text-sm font-medium rounded-lg transition whitespace-nowrap">
         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
         </svg>

@@ -27,15 +27,15 @@
     {{-- Tabel --}}
     <div class="bg-white rounded-xl border border-gray-200 overflow-hidden">
         <div class="overflow-x-auto">
-            <table class="w-full text-xs sm:text-sm min-w-[580px]">
+            <table class="w-full text-xs sm:text-sm min-w-[580px] table-fixed">
                 <thead>
                     <tr class="bg-gray-50 border-b border-gray-200">
-                        <th class="text-left px-3 sm:px-6 py-2.5 sm:py-3.5 font-semibold text-gray-600 w-36 sm:w-44 whitespace-nowrap">Judul</th>
-                        <th class="text-left px-3 sm:px-6 py-2.5 sm:py-3.5 font-semibold text-gray-600">Deskripsi</th>
-                        <th class="text-left px-3 sm:px-6 py-2.5 sm:py-3.5 font-semibold text-gray-600 w-32 whitespace-nowrap">Target Role</th>
-                        <th class="text-left px-3 sm:px-6 py-2.5 sm:py-3.5 font-semibold text-gray-600 w-24 whitespace-nowrap">Status</th>
-                        <th class="text-left px-3 sm:px-6 py-2.5 sm:py-3.5 font-semibold text-gray-600 w-28 sm:w-36 whitespace-nowrap">Dibuat Oleh</th>
-                        <th class="text-right px-3 sm:px-6 py-2.5 sm:py-3.5 font-semibold text-gray-600 w-20 whitespace-nowrap">Aksi</th>
+                        <th class="text-left px-3 sm:px-6 py-2.5 sm:py-3.5 font-semibold text-gray-600 w-36 sm:w-44">Judul</th>
+                        <th class="text-left px-3 sm:px-6 py-2.5 sm:py-3.5 font-semibold text-gray-600 w-auto">Deskripsi</th>
+                        <th class="text-left px-3 sm:px-6 py-2.5 sm:py-3.5 font-semibold text-gray-600 w-28 sm:w-36">Target Role</th>
+                        <th class="text-left px-3 sm:px-6 py-2.5 sm:py-3.5 font-semibold text-gray-600 w-20 sm:w-28">Status</th>
+                        <th class="text-left px-3 sm:px-6 py-2.5 sm:py-3.5 font-semibold text-gray-600 w-28 sm:w-36">Dibuat Oleh</th>
+                        <th class="text-right px-3 sm:px-6 py-2.5 sm:py-3.5 font-semibold text-gray-600 w-20 sm:w-24">Aksi</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-100">
@@ -44,14 +44,14 @@
 
                             {{-- Judul --}}
                             <td class="px-3 sm:px-6 py-3 sm:py-4">
-                                <div class="truncate max-w-[120px] sm:max-w-[160px] font-medium text-gray-800" title="{{ $task->title }}">
+                                <div class="truncate font-medium text-gray-800" title="{{ $task->title }}">
                                     {{ $task->title }}
                                 </div>
                             </td>
 
                             {{-- Deskripsi --}}
                             <td class="px-3 sm:px-6 py-3 sm:py-4">
-                                <div class="truncate max-w-[180px] sm:max-w-[280px] text-gray-500" title="{{ $task->description ?? '-' }}">
+                                <div class="truncate max-w-[200px] sm:max-w-[320px] text-gray-500" title="{{ $task->description ?? '-' }}">
                                     @if($task->description)
                                         {!! linkify(e($task->description)) !!}
                                     @else
@@ -65,14 +65,14 @@
                                 @php
                                     $targetRoleModel = $roles->firstWhere('name', $task->target_role);
                                 @endphp
-                                <span class="inline-flex items-center whitespace-nowrap px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-full text-[10px] sm:text-xs font-semibold {{ $targetRoleModel?->badge_class ?? 'bg-gray-100 text-gray-700' }}">
+                                <span class="inline-flex items-center truncate max-w-full px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-full text-[10px] sm:text-xs font-semibold {{ $targetRoleModel?->badge_class ?? 'bg-gray-100 text-gray-700' }}">
                                     {{ $targetRoleModel?->label ?? strtoupper($task->target_role) }}
                                 </span>
                             </td>
 
                             {{-- Status --}}
                             <td class="px-3 sm:px-6 py-3 sm:py-4">
-                                <span class="inline-flex items-center whitespace-nowrap px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-full text-[10px] sm:text-xs font-medium
+                                <span class="inline-flex items-center px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-full text-[10px] sm:text-xs font-medium
                                     {{ $task->is_active ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700' }}">
                                     {{ $task->is_active ? 'Aktif' : 'Nonaktif' }}
                                 </span>
@@ -80,7 +80,7 @@
 
                             {{-- Dibuat Oleh --}}
                             <td class="px-3 sm:px-6 py-3 sm:py-4">
-                                <div class="truncate max-w-[90px] sm:max-w-[120px] text-gray-500" title="{{ $task->creator?->name ?? '-' }}">
+                                <div class="truncate text-gray-500" title="{{ $task->creator?->name ?? '-' }}">
                                     {{ $task->creator?->name ?? '-' }}
                                 </div>
                             </td>
