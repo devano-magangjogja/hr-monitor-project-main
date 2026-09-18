@@ -30,16 +30,21 @@
     <p class="px-4 text-[11px] font-semibold text-slate-500 uppercase tracking-widest">AKUN</p>
 </div>
 
-{{-- Tugas Sosmed Utama --}}
-<a href="{{ route('sosmed.sosmed.index') }}"
+{{-- Tambah Akun Sosmed --}}
+<a href="{{ route('sosmed.accounts.index') }}"
     class="flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-all
-          {{ request()->routeIs('sosmed.sosmed.*') ? 'bg-white/10 text-white' : 'text-slate-400 hover:bg-white/5 hover:text-white' }}">
-    <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" <svg class="w-6 h-6 text-gray-800 dark:text-white"
-        aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
-        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+          {{ request()->routeIs('sosmed.accounts.index') ? 'bg-white/10 text-white' : 'text-slate-400 hover:bg-white/5 hover:text-white' }}">
+    <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
             d="M12 7.757v8.486M7.757 12h8.486M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
     </svg>
     Tambah Akun Sosmed
+</a>
+<a href="{{ route('sosmed.accounts.submissions') }}"
+    class="flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-all
+          {{ request()->routeIs('sosmed.accounts.submissions') ? 'bg-white/10 text-white' : 'text-slate-400 hover:bg-white/5 hover:text-white' }}">
+    <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke="currentColor" stroke-width="2" d="M9 5h6m-7 4h8m-8 4h8m-8 4h5M5 3h10a2 2 0 012 2v14a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2z"/></svg>
+    Pengajuan Akun Saya
 </a>
 
 {{-- Divider --}}

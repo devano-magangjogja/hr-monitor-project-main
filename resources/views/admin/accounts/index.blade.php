@@ -5,10 +5,12 @@
 @section('page-subtitle', 'Kelola daftar akun sosial media dan kredensial akses untuk penugasan tim')
 
 @section('sidebar')
-    @include('components.sidebar-admin')
+    @include(auth()->user()->isAdmin() ? 'components.sidebar-admin' : 'components.sidebar-staff')
 @endsection
 
 @section('content')
+
+    @php($accountPrefix = auth()->user()->isAdmin() ? 'admin' : 'staff')
 
     {{-- ── STATS CARDS ─────────────────────────────────────────────── --}}
     <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
@@ -55,10 +57,215 @@
         </div>
     </div>
 
+    <div class="flex items-center gap-2 border-b border-gray-200 mb-6">
+        <a href="{{ route($accountPrefix . '.accounts.index', ['tab' => 'accounts']) }}"
+            class="px-4 py-3 text-sm font-semibold border-b-2 {{ $tab === 'accounts' ? 'border-primary-600 text-primary-600' : 'border-transparent text-gray-500 hover:text-gray-700' }}">
+            Daftar Akun Terverifikasi
+        </a>
+        <a href="{{ route($accountPrefix . '.accounts.index', ['tab' => 'pending']) }}"
+            class="px-4 py-3 text-sm font-semibold border-b-2 {{ $tab === 'pending' ? 'border-amber-500 text-amber-600' : 'border-transparent text-gray-500 hover:text-gray-700' }}">
+            Pengajuan Akun Baru
+            @if($pendingAccounts->total() > 0)
+                <span class="ml-1 px-1.5 py-0.5 rounded-full text-[10px] bg-amber-100 text-amber-700">{{ $pendingAccounts->total() }}</span>
+            @endif
+        </a>
+    </div>
+
+    @if($tab === 'pending')
+    <div class="bg-white rounded-xl border border-amber-200 shadow-sm overflow-hidden">
+        <!-- Header Section -->
+        <div class="px-4 sm:px-6 py-4 border-b border-amber-100 bg-amber-50/50">
+            <h2 class="text-base font-bold text-gray-800">Pengajuan Akun Menunggu Verifikasi</h2>
+            <p class="text-xs text-gray-500 mt-0.5">Lengkapi atribut keamanan sebelum menyetujui atau menolak pengajuan.</p>
+        </div>
+
+        <!-- TAMPILAN MOBILE (Card View) - Tampil di layar < md -->
+        <div class="block md:hidden divide-y divide-gray-100">
+            @forelse($pendingAccounts as $pending)
+                <div class="p-4 space-y-3">
+                    <!-- Info Pengaju & Platform -->
+                    <div class="flex items-start justify-between gap-2">
+                        <div>
+                            <span class="inline-flex px-2 py-0.5 rounded-md border text-[11px] font-semibold {{ $pending->platform_color }} mb-1">
+                                {{ $pending->platform }}
+                            </span>
+                            <h3 class="font-bold text-gray-900 text-sm leading-snug">{{ $pending->name }}</h3>
+                        </div>
+                        <div class="text-right">
+                            <span class="text-[11px] font-medium text-gray-500 block">{{ $pending->creator?->name ?? '-' }}</span>
+                            <span class="text-[10px] text-gray-400 block">{{ $pending->creator?->role_label ?? '' }}</span>
+                        </div>
+                    </div>
+
+                    <!-- Detail Email & Password -->
+                    <div class="bg-gray-50 rounded-lg p-2.5 space-y-1.5 text-xs">
+                        <div class="flex justify-between items-center">
+                            <span class="text-gray-400">Email:</span>
+                            <span class="font-medium text-gray-700 truncate max-w-[200px]">{{ $pending->email ?: '-' }}</span>
+                        </div>
+                        <div class="flex justify-between items-center" x-data="{ show: false }">
+                            <span class="text-gray-400">Password:</span>
+                            @if($pending->password)
+                                <div class="flex items-center gap-1.5">
+                                    <span x-show="!show" class="font-mono text-gray-400 tracking-widest">••••••••</span>
+                                    <span x-show="show" x-cloak class="font-mono font-semibold text-gray-800">{{ $pending->password }}</span>
+                                    <button type="button" @click="show = !show" class="text-gray-400 hover:text-primary-600 p-1">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.477 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                                    </button>
+                                </div>
+                            @else
+                                <span class="text-gray-400">-</span>
+                            @endif
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-2 pt-1">
+                        <button type="button" onclick="openRejectAccountModal({{ $pending->id }}, @js($pending->name))" class="w-full py-2 rounded-lg border border-rose-200 bg-rose-50 hover:bg-rose-100 text-rose-700 text-xs font-semibold transition">Reject</button>
+                        <button type="button" onclick="openApproveAccountModal({{ $pending->id }}, @js($pending->name), @js($pending->email_recovery), @js($pending->phone), {{ $pending->two_factor_enabled ? 'true' : 'false' }})" class="w-full py-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold shadow-sm transition">Approve</button>
+                    </div>
+                </div>
+            @empty
+                <div class="p-8 text-center text-xs text-gray-400">Tidak ada pengajuan akun baru.</div>
+            @endforelse
+        </div>
+
+        <!-- TAMPILAN DESKTOP (Table View) - Tampil di layar >= md -->
+        <div class="hidden md:block overflow-x-auto">
+            <table class="w-full text-sm text-left">
+                <thead class="bg-gray-50 border-b border-gray-200 text-[11px] font-bold uppercase tracking-wider text-gray-500">
+                    <tr>
+                        <th class="px-5 py-3.5 w-2/12">Pengaju & Akun</th>
+                        <th class="px-5 py-3.5 w-1/12">Platform</th>
+                        <th class="px-5 py-3.5 w-2/12">Email</th>
+                        <th class="px-5 py-3.5 w-2/12">Password</th>
+                        <th class="px-5 py-3.5 w-5/12">Aksi</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-100">
+                    @forelse($pendingAccounts as $pending)
+                        <tr class="align-top hover:bg-amber-50/20 transition">
+                            <!-- Pengaju -->
+                            <td class="px-5 py-4">
+                                <div class="font-bold text-gray-900 leading-snug">{{ $pending->name }}</div>
+                                <div class="text-xs text-gray-500 mt-1 flex items-center gap-1">
+                                    <span class="font-medium text-gray-700">{{ $pending->creator?->name ?? '-' }}</span>
+                                </div>
+                                <div class="text-[10px] text-gray-400">{{ $pending->creator?->role_label ?? '' }}</div>
+                            </td>
+
+                            <!-- Platform -->
+                            <td class="px-5 py-4">
+                                <span class="inline-flex px-2.5 py-1 rounded-md border text-xs font-semibold {{ $pending->platform_color }}">
+                                    {{ $pending->platform }}
+                                </span>
+                            </td>
+
+                            <!-- Email -->
+                            <td class="px-5 py-4 text-xs text-gray-700 font-medium">
+                                {{ $pending->email ?: '-' }}
+                            </td>
+
+                            <!-- Password Toggle -->
+                            <td class="px-5 py-4" x-data="{ show: false }">
+                                @if($pending->password)
+                                    <div class="flex items-center gap-2">
+                                        <span x-show="!show" class="font-mono text-xs tracking-widest text-gray-400">••••••••</span>
+                                        <span x-show="show" x-cloak class="font-mono text-xs font-semibold text-gray-800 bg-gray-100 px-1.5 py-0.5 rounded">{{ $pending->password }}</span>
+                                        <button type="button" @click="show = !show" class="text-gray-400 hover:text-amber-600 transition p-0.5" title="Lihat/sembunyikan password">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.477 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                                        </button>
+                                    </div>
+                                @else 
+                                    <span class="text-xs text-gray-400">-</span> 
+                                @endif
+                            </td>
+
+                            <!-- Form Atribut Security & Action -->
+                            <td class="px-5 py-4">
+                                <div class="flex items-center justify-end gap-2">
+                                    <button type="button" onclick="openRejectAccountModal({{ $pending->id }}, @js($pending->name))" class="px-3 py-1.5 rounded-md border border-rose-200 bg-rose-50 hover:bg-rose-100 text-rose-700 text-xs font-semibold transition">Reject</button>
+                                    <button type="button" onclick="openApproveAccountModal({{ $pending->id }}, @js($pending->name), @js($pending->email_recovery), @js($pending->phone), {{ $pending->two_factor_enabled ? 'true' : 'false' }})" class="px-3 py-1.5 rounded-md bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold transition">Approve</button>
+                                </div>
+                            </td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="5" class="px-5 py-12 text-center text-sm text-gray-400">
+                                Tidak ada pengajuan akun baru.
+                            </td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Pagination -->
+        @if($pendingAccounts->hasPages())
+            <div class="px-5 py-4 border-t border-gray-100 bg-gray-50/50">
+                {{ $pendingAccounts->links() }}
+            </div>
+        @endif
+    </div>
+
+    <div id="modal-approve-account" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div class="absolute inset-0 bg-black/50" onclick="closeAccountDecisionModals()"></div>
+        <div class="relative z-10 w-full max-w-md rounded-xl bg-white shadow-2xl p-6">
+            <h3 class="text-base font-bold text-gray-800">Lengkapi Atribut Keamanan</h3>
+            <p class="mt-1 text-xs text-gray-500">Approve akun <strong id="approve-account-name"></strong> setelah data keamanan diisi.</p>
+            <form id="form-approve-account" method="POST" class="mt-5 space-y-4">
+                @csrf @method('PATCH')
+                <input type="hidden" name="verification_status" value="approved">
+                <div><label class="block text-xs font-semibold text-gray-700 mb-1.5">Email Recovery</label><input id="approve-recovery" type="email" name="email_recovery" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"></div>
+                <div><label class="block text-xs font-semibold text-gray-700 mb-1.5">Nomor HP / Telepon</label><input id="approve-phone" type="text" name="phone" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"></div>
+                <label class="inline-flex items-center gap-2 text-sm text-gray-700"><input id="approve-2fa" type="checkbox" name="two_factor_enabled" value="1" class="rounded border-gray-300"> 2FA aktif</label>
+                <div class="flex gap-2 pt-2"><button type="button" onclick="closeAccountDecisionModals()" class="flex-1 rounded-lg border border-gray-300 px-4 py-2 text-sm text-gray-700">Batal</button><button class="flex-1 rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white">Approve</button></div>
+            </form>
+        </div>
+    </div>
+
+    <div id="modal-reject-account" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div class="absolute inset-0 bg-black/50" onclick="closeAccountDecisionModals()"></div>
+        <div class="relative z-10 w-full max-w-md rounded-xl bg-white shadow-2xl p-6">
+            <h3 class="text-base font-bold text-gray-800">Tolak Pengajuan Akun</h3>
+            <p class="mt-1 text-xs text-gray-500">Berikan catatan untuk pengaju agar penolakan dapat ditindaklanjuti.</p>
+            <form id="form-reject-account" method="POST" class="mt-5 space-y-4">
+                @csrf @method('PATCH')
+                <input type="hidden" name="verification_status" value="rejected">
+                <textarea name="rejection_note" required maxlength="1000" rows="4" placeholder="Tuliskan alasan penolakan..." class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"></textarea>
+                <div class="flex gap-2"><button type="button" onclick="closeAccountDecisionModals()" class="flex-1 rounded-lg border border-gray-300 px-4 py-2 text-sm text-gray-700">Batal</button><button class="flex-1 rounded-lg bg-rose-600 px-4 py-2 text-sm font-semibold text-white">Reject</button></div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        const accountPrefix = @json($accountPrefix);
+
+        function openApproveAccountModal(id, name, recovery, phone, twoFactor) {
+            document.getElementById('form-approve-account').action = `/${accountPrefix}/accounts/${id}/verify`;
+            document.getElementById('approve-account-name').textContent = name;
+            document.getElementById('approve-recovery').value = recovery || '';
+            document.getElementById('approve-phone').value = phone || '';
+            document.getElementById('approve-2fa').checked = Boolean(twoFactor);
+            document.getElementById('modal-approve-account').classList.remove('hidden');
+        }
+
+        function openRejectAccountModal(id) {
+            document.getElementById('form-reject-account').action = `/${accountPrefix}/accounts/${id}/verify`;
+            document.getElementById('modal-reject-account').classList.remove('hidden');
+            document.querySelector('#form-reject-account textarea').focus();
+        }
+
+        function closeAccountDecisionModals() {
+            document.getElementById('modal-approve-account').classList.add('hidden');
+            document.getElementById('modal-reject-account').classList.add('hidden');
+        }
+    </script>
+@else
+
     {{-- ── FILTER & ACTION BAR ──────────────────────────────────────── --}}
     <div class="bg-white rounded-xl border border-gray-200 p-4 shadow-sm mb-6">
         <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-            <form action="{{ route('admin.accounts.index') }}" method="GET"
+            <form action="{{ route($accountPrefix . '.accounts.index') }}" method="GET"
                 class="flex flex-col sm:flex-row sm:items-center gap-3 flex-1">
                 {{-- Search --}}
                 <div class="relative flex-1 min-w-[220px]">
@@ -91,7 +298,7 @@
                     </select>
 
                     @if($search || $platform || $status)
-                        <a href="{{ route('admin.accounts.index') }}"
+                        <a href="{{ route($accountPrefix . '.accounts.index') }}"
                             class="flex items-center justify-center h-10 w-10 text-gray-500 hover:text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition shrink-0"
                             title="Reset Filter">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -123,6 +330,7 @@
                         <th class="px-5 py-3.5">Link Akun</th>
                         <th class="px-5 py-3.5">Email</th>
                         <th class="px-5 py-3.5">Password</th>
+                        <th class="px-5 py-3.5">2FA</th>
                         <th class="px-5 py-3.5">Status Penugasan</th>
                         <th class="px-5 py-3.5 text-center w-28">Aksi</th>
                     </tr>
@@ -147,6 +355,7 @@
                                 @endif
                             </td>
 
+                            {{-- Link Akun --}}
                             {{-- Link Akun --}}
                             <td class="px-5 py-4 whitespace-nowrap">
                                 @if($acc->link)
@@ -233,8 +442,20 @@
                                 @endif
                             </td>
 
+                            {{-- 2FA --}}
+                            <td class="px-5 py-4 whitespace-nowrap text-xs font-semibold {{ $acc->two_factor_enabled ? 'text-emerald-600' : 'text-gray-400' }}">
+                                {{ $acc->two_factor_enabled ? 'Ya' : 'Tidak' }}
+                            </td>
+
                             {{-- Status Penugasan --}}
                             <td class="px-5 py-4 whitespace-nowrap">
+                                @if(($acc->verification_status ?? 'approved') === 'pending')
+                                    <form method="POST" action="{{ route($accountPrefix . '.accounts.verify', $acc) }}" class="mb-2 flex items-center gap-1">
+                                        @csrf @method('PATCH')
+                                        <input type="hidden" name="verification_status" value="approved">
+                                        <button class="px-2 py-1 text-[11px] font-semibold rounded bg-emerald-600 text-white">Verifikasi</button>
+                                    </form>
+                                @endif
                                 @if($acc->is_in_sosmed)
                                     @if($acc->staffUser)
                                         <div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-blue-50 text-blue-700 border border-blue-200">
@@ -259,12 +480,32 @@
                             <td class="px-5 py-4 whitespace-nowrap text-center">
                                 <div class="flex items-center justify-center gap-1">
                                     <button type="button"
+                                        onclick="openAccountDetail({{ json_encode([
+                                            'platform' => $acc->platform,
+                                            'name' => $acc->name,
+                                            'link' => $acc->link ?? '',
+                                            'email' => $acc->email ?? '',
+                                            'password' => $acc->password ?? '',
+                                            'email_recovery' => $acc->email_recovery ?? '',
+                                            'phone' => $acc->phone ?? '',
+                                            'two_factor' => $acc->two_factor_enabled ? 'Ya' : 'Tidak',
+                                            'notes' => $acc->notes ?? '',
+                                            'status' => $acc->is_in_sosmed ? 'Dikelola' : 'Belum ditambahkan ke Sosmed',
+                                        ]) }})"
+                                        class="p-1.5 text-gray-400 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition"
+                                        title="Lihat detail akun">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.477 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7z"/><path stroke-linecap="round" stroke-width="2" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0z"/></svg>
+                                    </button>
+                                    <button type="button"
                                         onclick="openEditAccountModal({{ json_encode([
                                             'id' => $acc->id,
                                             'name' => $acc->name,
                                             'platform' => $acc->platform,
                                             'link' => $acc->link ?? '',
                                             'email' => $acc->email ?? '',
+                                            'email_recovery' => $acc->email_recovery ?? '',
+                                            'phone' => $acc->phone ?? '',
+                                            'two_factor_enabled' => (bool) $acc->two_factor_enabled,
                                             'notes' => $acc->notes ?? '',
                                         ]) }})"
                                         class="p-1.5 text-gray-400 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition"
@@ -289,7 +530,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="7" class="px-6 py-12 text-center text-gray-400">
+                            <td colspan="8" class="px-6 py-12 text-center text-gray-400">
                                 <div class="flex flex-col items-center justify-center">
                                     <svg class="w-12 h-12 text-gray-300 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
@@ -331,7 +572,7 @@
                 </button>
             </div>
 
-            <form method="POST" action="{{ route('admin.accounts.store') }}" class="p-6 pt-1 space-y-4 overflow-y-auto">
+            <form method="POST" action="{{ route($accountPrefix . '.accounts.store') }}" class="p-6 pt-1 space-y-4 overflow-y-auto">
                 @csrf
 
                 <div>
@@ -343,10 +584,12 @@
                             <option value="{{ $p }}">{{ $p }}</option>
                         @endforeach
                     </select>
+                    <input type="text" name="custom_platform" id="create-custom-platform" placeholder="Masukkan nama platform"
+                        class="hidden mt-2 w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 focus:outline-none">
                 </div>
 
                 <div>
-                    <label class="block text-xs font-semibold text-gray-700 mb-1.5">Nama Akun / Username <span class="text-red-500">*</span></label>
+                    <label class="block text-xs font-semibold text-gray-700 mb-1.5">Nama Akun <span class="text-red-500">*</span></label>
                     <input type="text" name="name" required placeholder="Contoh: @republikweb_net"
                         class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 focus:outline-none">
                 </div>
@@ -373,6 +616,12 @@
                         <p class="text-[10px] text-amber-600 mt-1">Tersimpan aman & terenkripsi.</p>
                     </div>
                 </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div><label class="block text-xs font-semibold text-gray-700 mb-1.5">Email Recovery</label><input type="email" name="email_recovery" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"></div>
+                    <div><label class="block text-xs font-semibold text-gray-700 mb-1.5">Nomor HP / Telepon</label><input type="text" name="phone" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"></div>
+                </div>
+                <label class="inline-flex items-center gap-2 text-xs font-semibold text-gray-700"><input type="checkbox" name="two_factor_enabled" value="1" class="rounded border-gray-300"> 2FA aktif</label>
 
                 <div>
                     <label class="block text-xs font-semibold text-gray-700 mb-1.5">Catatan / Keterangan</label>
@@ -421,17 +670,19 @@
                             <option value="{{ $p }}">{{ $p }}</option>
                         @endforeach
                     </select>
+                    <input type="text" name="custom_platform" id="edit-custom-platform" placeholder="Masukkan nama platform"
+                        class="hidden mt-2 w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 focus:outline-none">
                 </div>
 
                 <div>
-                    <label class="block text-xs font-semibold text-gray-700 mb-1.5">Nama Akun / Username <span class="text-red-500">*</span></label>
+                    <label class="block text-xs font-semibold text-gray-700 mb-1.5">Nama Akun <span class="text-red-500">*</span></label>
                     <input type="text" name="name" id="edit-acc-name" required
                         class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 focus:outline-none">
                 </div>
 
                 <div>
                     <label class="block text-xs font-semibold text-gray-700 mb-1.5">Link Akun (URL Profil)</label>
-                    <input type="text" name="link" id="edit-acc-link" placeholder="https://instagram.com/username"
+                    <input type="text" name="link" id="edit-acc-link" placeholder="https://instagram.com/nama-akun"
                         class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 focus:outline-none">
                 </div>
 
@@ -449,6 +700,12 @@
                         <p class="text-[10px] text-gray-400 mt-1">Kosongkan jika tidak ingin mengubah password.</p>
                     </div>
                 </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div><label class="block text-xs font-semibold text-gray-700 mb-1.5">Email Recovery</label><input type="email" name="email_recovery" id="edit-acc-recovery" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"></div>
+                    <div><label class="block text-xs font-semibold text-gray-700 mb-1.5">Nomor HP / Telepon</label><input type="text" name="phone" id="edit-acc-phone" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"></div>
+                </div>
+                <label class="inline-flex items-center gap-2 text-xs font-semibold text-gray-700"><input type="checkbox" name="two_factor_enabled" id="edit-acc-2fa" value="1" class="rounded border-gray-300"> 2FA aktif</label>
 
                 <div>
                     <label class="block text-xs font-semibold text-gray-700 mb-1.5">Catatan / Keterangan</label>
@@ -495,20 +752,108 @@
         </div>
     </div>
 
+    <div id="modal-account-detail" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div class="absolute inset-0 bg-black/50" onclick="closeAccountDetail()"></div>
+        <div class="relative z-10 w-full max-w-lg rounded-xl bg-white shadow-2xl p-6">
+            <div class="flex items-center justify-between border-b border-gray-100 pb-4"><div><h3 class="text-base font-bold text-gray-800">Detail Akun Sosmed</h3><p id="detail-account-name" class="text-xs text-gray-500"></p></div><button type="button" onclick="closeAccountDetail()" class="text-gray-400 text-xl">&times;</button></div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 py-4 text-sm">
+                <div><p class="text-xs text-gray-400">Platform</p><p id="detail-platform" class="font-semibold text-gray-800"></p></div>
+                <div><p class="text-xs text-gray-400">Nama Akun</p><p id="detail-name" class="font-semibold text-gray-800"></p></div>
+                <div class="sm:col-span-2"><p class="text-xs text-gray-400">Link Akun</p><p id="detail-link" class="break-all text-primary-600"></p></div>
+                <div><p class="text-xs text-gray-400">Email</p><p id="detail-email" class="break-all text-gray-800"></p></div>
+                <div><p class="text-xs text-gray-400">Password</p><p id="detail-password" class="break-all font-mono text-gray-800"></p></div>
+                <div><p class="text-xs text-gray-400">Email Recovery</p><p id="detail-recovery" class="break-all text-gray-800"></p></div>
+                <div><p class="text-xs text-gray-400">Nomor HP</p><p id="detail-phone" class="text-gray-800"></p></div>
+                <div><p class="text-xs text-gray-400">2FA</p><p id="detail-2fa" class="text-gray-800"></p></div>
+                <div><p class="text-xs text-gray-400">Status Penugasan</p><p id="detail-status" class="text-gray-800"></p></div>
+                <div class="sm:col-span-2"><p class="text-xs text-gray-400">Catatan</p><p id="detail-notes" class="whitespace-pre-wrap text-gray-800"></p></div>
+            </div>
+        </div>
+    </div>
+
     {{-- ── JAVASCRIPT MODAL HANDLERS ────────────────────────────────── --}}
     <script>
+        const accountPrefix = @json($accountPrefix);
+
+        function openApproveAccountModal(id, name, recovery, phone, twoFactor) {
+            document.getElementById('form-approve-account').action = `/${accountPrefix}/accounts/${id}/verify`;
+            document.getElementById('approve-account-name').textContent = name;
+            document.getElementById('approve-recovery').value = recovery || '';
+            document.getElementById('approve-phone').value = phone || '';
+            document.getElementById('approve-2fa').checked = Boolean(twoFactor);
+            document.getElementById('modal-approve-account').classList.remove('hidden');
+        }
+
+        function openRejectAccountModal(id, name) {
+            document.getElementById('form-reject-account').action = `/${accountPrefix}/accounts/${id}/verify`;
+            document.getElementById('modal-reject-account').classList.remove('hidden');
+            document.querySelector('#form-reject-account textarea').focus();
+        }
+
+        function closeAccountDecisionModals() {
+            document.getElementById('modal-approve-account').classList.add('hidden');
+            document.getElementById('modal-reject-account').classList.add('hidden');
+        }
+
+        function openAccountDetail(data) {
+            const fields = {
+                platform: data.platform,
+                name: data.name,
+                link: data.link || '-',
+                email: data.email || '-',
+                password: data.password || '-',
+                recovery: data.email_recovery || '-',
+                phone: data.phone || '-',
+                '2fa': data.two_factor || 'Tidak',
+                status: data.status || '-',
+                notes: data.notes || '-',
+            };
+            Object.entries(fields).forEach(([key, value]) => {
+                const element = document.getElementById(`detail-${key}`);
+                if (element) element.textContent = value;
+            });
+            document.getElementById('modal-account-detail').classList.remove('hidden');
+        }
+
+        function closeAccountDetail() {
+            document.getElementById('modal-account-detail').classList.add('hidden');
+        }
+
         function openCreateAccountModal() {
             document.getElementById('modal-create-account').classList.remove('hidden');
         }
 
+        document.querySelector('#modal-create-account select[name="platform"]').addEventListener('change', function () {
+            toggleAdminCustomPlatform(this, 'create-custom-platform');
+        });
+
+        document.querySelector('#edit-acc-platform').addEventListener('change', function () {
+            toggleAdminCustomPlatform(this, 'edit-custom-platform');
+        });
+
+        function toggleAdminCustomPlatform(select, inputId, value = '') {
+            const input = document.getElementById(inputId);
+            const isCustom = select.value === 'Lainnya';
+            input.classList.toggle('hidden', !isCustom);
+            input.required = isCustom;
+            if (isCustom && value) input.value = value;
+            if (!isCustom) input.value = '';
+        }
+
         function openEditAccountModal(data) {
             const form = document.getElementById('form-edit-account');
-            form.action = `/admin/accounts/${data.id}`;
+            form.action = `/${accountPrefix}/accounts/${data.id}`;
 
             document.getElementById('edit-acc-name').value = data.name || '';
-            document.getElementById('edit-acc-platform').value = data.platform || '';
+            const standardPlatforms = Array.from(document.getElementById('edit-acc-platform').options).map(option => option.value);
+            const isCustomPlatform = data.platform && !standardPlatforms.includes(data.platform);
+            document.getElementById('edit-acc-platform').value = isCustomPlatform ? 'Lainnya' : (data.platform || '');
+            toggleAdminCustomPlatform(document.getElementById('edit-acc-platform'), 'edit-custom-platform', isCustomPlatform ? data.platform : '');
             document.getElementById('edit-acc-link').value = data.link || '';
             document.getElementById('edit-acc-email').value = data.email || '';
+            document.getElementById('edit-acc-recovery').value = data.email_recovery || '';
+            document.getElementById('edit-acc-phone').value = data.phone || '';
+            document.getElementById('edit-acc-2fa').checked = Boolean(data.two_factor_enabled);
             document.getElementById('edit-acc-password').value = '';
             document.getElementById('edit-acc-notes').value = data.notes || '';
 
@@ -517,10 +862,65 @@
 
         function openDeleteAccountModal(id, name, platform) {
             const form = document.getElementById('form-delete-account');
-            form.action = `/admin/accounts/${id}`;
+            form.action = `/${accountPrefix}/accounts/${id}`;
             document.getElementById('del-acc-name').textContent = `${name} (${platform})`;
             document.getElementById('modal-delete-account').classList.remove('hidden');
         }
     </script>
+
+    @endif
+
+    {{-- ── TAB: AKUN YANG DITOLAK ──────────────────────────── --}}
+    @if($tab === 'rejected')
+    <div class="bg-white rounded-xl border border-rose-200 shadow-sm overflow-hidden">
+        <div class="px-4 sm:px-6 py-4 border-b border-rose-100 bg-rose-50/50">
+            <h2 class="text-base font-bold text-gray-800">Pengajuan Akun yang Ditolak</h2>
+            <p class="text-xs text-gray-500 mt-0.5">Akun-akun ini telah ditolak dan tidak muncul di daftar manajemen maupun kelola sosmed.</p>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="w-full text-xs sm:text-sm">
+                <thead>
+                    <tr class="bg-rose-50 border-b border-rose-100 text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                        <th class="px-4 py-3 text-left">Platform</th>
+                        <th class="px-4 py-3 text-left">Nama / Email</th>
+                        <th class="px-4 py-3 text-left">Diajukan Oleh</th>
+                        <th class="px-4 py-3 text-left">Alasan Penolakan</th>
+                        <th class="px-4 py-3 text-left">Tanggal</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-100">
+                    @forelse($rejectedAccounts as $rej)
+                        <tr class="hover:bg-rose-50/30 transition">
+                            <td class="px-4 py-3">
+                                <span class="inline-flex px-2 py-0.5 rounded-md border text-[11px] font-semibold {{ $rej->platform_color }}">
+                                    {{ $rej->platform }}
+                                </span>
+                            </td>
+                            <td class="px-4 py-3">
+                                <p class="font-medium text-gray-800">{{ $rej->name ?: '—' }}</p>
+                                <p class="text-gray-400 text-[11px]">{{ $rej->email ?: '—' }}</p>
+                            </td>
+                            <td class="px-4 py-3">
+                                <p class="font-medium text-gray-700">{{ $rej->creator?->name ?? '—' }}</p>
+                                <p class="text-gray-400 text-[11px]">{{ $rej->creator?->role_label ?? '' }}</p>
+                            </td>
+                            <td class="px-4 py-3 text-rose-600 text-xs">{{ $rej->rejection_note ?: '—' }}</td>
+                            <td class="px-4 py-3 text-gray-400 whitespace-nowrap">{{ $rej->updated_at->translatedFormat('d M Y') }}</td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="5" class="px-4 py-10 text-center text-sm text-gray-400">Tidak ada pengajuan yang ditolak.</td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
+        @if($rejectedAccounts->hasPages())
+            <div class="px-4 py-3 border-t border-gray-100">
+                {{ $rejectedAccounts->links() }}
+            </div>
+        @endif
+    </div>
+    @endif
 
 @endsection

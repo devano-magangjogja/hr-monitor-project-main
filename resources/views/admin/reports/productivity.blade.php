@@ -16,7 +16,7 @@
             class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-3 items-end">
 
             {{-- Dari Tanggal --}}
-            <div class="lg:col-span-3">
+            <div class="lg:col-span-2">
                 <label class="block text-[11px] font-semibold text-gray-500 uppercase tracking-wider mb-1">
                     Dari Tanggal
                 </label>
@@ -27,7 +27,7 @@
             </div>
 
             {{-- Sampai Tanggal --}}
-            <div class="lg:col-span-3">
+            <div class="lg:col-span-2">
                 <label class="block text-[11px] font-semibold text-gray-500 uppercase tracking-wider mb-1">
                     Sampai Tanggal
                 </label>
@@ -38,7 +38,7 @@
             </div>
 
             {{-- Filter Role --}}
-            <div class="lg:col-span-3">
+            <div class="lg:col-span-2">
                 <label class="block text-[11px] font-semibold text-gray-500 uppercase tracking-wider mb-1">
                     Filter Role
                 </label>
@@ -55,6 +55,12 @@
                 </div>
             </div>
 
+            <div class="lg:col-span-3">
+                <label class="block text-[11px] font-semibold text-gray-500 uppercase tracking-wider mb-1">Cari Nama</label>
+                <input type="search" name="search" value="{{ $search ?? '' }}" placeholder="Cari pengguna..."
+                    class="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-xs sm:text-sm font-medium text-gray-800 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:bg-white transition">
+            </div>
+
             {{-- Tombol Aksi --}}
             <div class="sm:col-span-2 lg:col-span-3 flex items-center gap-2">
                 <button type="submit"
@@ -66,7 +72,7 @@
                     <span>Tampilkan</span>
                 </button>
 
-                @if($dateFrom !== $today || $dateTo !== $today || ($selectedRole ?? 'all') !== 'all')
+                @if($dateFrom !== $today || $dateTo !== $today || ($selectedRole ?? 'all') !== 'all' || ($search ?? ''))
                     <a href="{{ route('admin.reports.productivity') }}"
                         class="px-3.5 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs sm:text-sm font-semibold rounded-lg transition text-center flex-shrink-0"
                         title="Reset Filter">
@@ -128,7 +134,7 @@
                                 ? 'text-green-600'
                                 : ($item['pct'] >= 50 ? 'text-primary-600' : 'text-yellow-600');
                         @endphp
-                        <tr class="hover:bg-gray-50 transition">
+                        <tr class="hover:bg-gray-50 transition cursor-pointer" onclick="openProductivityDetail({{ json_encode(['name' => $item['user']->name, 'details' => $item['details']]) }})">
                             {{-- Nama --}}
                             <td class="px-3 sm:px-6 py-3 sm:py-3.5">
                                 <div class="flex items-center gap-2 sm:gap-3 min-w-0">
@@ -173,7 +179,7 @@
                             </td>
                             {{-- Aksi --}}
                             <td class="px-3 sm:px-6 py-3 sm:py-3.5 text-right">
-                                <a href="{{ route('admin.reports.productivity.detail', $item['user']->id) }}?date_from={{ $dateFrom }}&date_to={{ $dateTo }}&role={{ $selectedRole }}"
+                                <button type="button" onclick="event.stopPropagation(); openProductivityDetail({{ json_encode(['name' => $item['user']->name, 'details' => $item['details']]) }})"
                                     class="p-1.5 inline-flex text-gray-400 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition"
                                     title="Lihat Detail Tugas">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -183,7 +189,7 @@
                                             d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943
                                                9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                                     </svg>
-                                </a>
+                                </button>
                             </td>
                         </tr>
                     @empty
@@ -197,5 +203,24 @@
             </table>
         </div>
     </div>
+
+    <div id="productivity-detail-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div class="absolute inset-0 bg-black/50" onclick="closeProductivityDetail()"></div>
+        <div class="relative z-10 w-full max-w-2xl max-h-[85vh] overflow-hidden bg-white rounded-xl shadow-xl">
+            <div class="flex items-center justify-between px-5 py-4 border-b border-gray-200"><div><h2 class="font-bold text-gray-800">Detail Produktivitas</h2><p id="productivity-detail-user" class="text-xs text-gray-500"></p></div><button type="button" onclick="closeProductivityDetail()" class="text-xl text-gray-400">&times;</button></div>
+            <div id="productivity-detail-list" class="p-5 space-y-3 overflow-y-auto max-h-[65vh]"></div>
+        </div>
+    </div>
+
+    <script>
+        function openProductivityDetail(data) {
+            document.getElementById('productivity-detail-user').textContent = data.name;
+            const list = document.getElementById('productivity-detail-list');
+            list.innerHTML = data.details.length ? data.details.map(detail => `<article class="border border-gray-200 rounded-lg p-3"><div class="flex justify-between gap-3"><h3 class="text-sm font-semibold text-gray-800">${escapeHtml(detail.title)}</h3><span class="text-xs text-gray-500">${escapeHtml(detail.date)}</span></div><p class="mt-1 text-xs text-gray-600">${escapeHtml(detail.description || 'Tidak ada deskripsi')}</p><span class="inline-block mt-2 text-xs font-semibold ${detail.status === 'completed' ? 'text-emerald-600' : (detail.status === 'not_done' ? 'text-rose-600' : 'text-amber-600')}\">${escapeHtml(detail.status)}</span></article>`).join('') : '<p class="text-sm text-gray-400 text-center py-8">Belum ada tugas pada periode ini.</p>';
+            document.getElementById('productivity-detail-modal').classList.remove('hidden');
+        }
+        function closeProductivityDetail() { document.getElementById('productivity-detail-modal').classList.add('hidden'); }
+        function escapeHtml(value) { const div = document.createElement('div'); div.textContent = value; return div.innerHTML; }
+    </script>
 
 @endsection

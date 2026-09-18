@@ -132,6 +132,7 @@ class SosmedController extends Controller
 
         // Akun yang tersedia / belum dimasukkan ke daftar kelola sosmed
         $availableAccounts = SosmedAccount::notInSosmed()
+            ->where('verification_status', 'approved')
             ->select('id', 'name', 'platform', 'link')
             ->orderBy('platform')
             ->orderBy('name')

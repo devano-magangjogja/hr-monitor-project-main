@@ -21,6 +21,7 @@ class PemagangController extends Controller
         $search = $request->input('search');
         $divisi = $request->input('divisi');
         $kampus = $request->input('kampus');
+        $tanggal = $request->input('tanggal');
 
         $query = Pemagang::withCount('presensis');
 
@@ -40,6 +41,10 @@ class PemagangController extends Controller
         // Filter Asal Kampus / Sekolah
         if ($request->filled('kampus')) {
             $query->where('kampus', $kampus);
+        }
+
+        if ($request->filled('tanggal')) {
+            $query->whereHas('presensis', fn ($presensi) => $presensi->whereDate('tanggal', $tanggal));
         }
 
         $pemagangs = $query->orderBy('nama_lengkap', 'asc')
@@ -75,6 +80,7 @@ class PemagangController extends Controller
             'search',
             'divisi',
             'kampus'
+            , 'tanggal'
         ));
     }
 

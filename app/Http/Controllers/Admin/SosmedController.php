@@ -149,8 +149,9 @@ class SosmedController extends Controller
             'completed'         => $tasksStats['approved_hr'],
         ];
 
-        // Akun dari Manajemen Akun yang belum dimasukkan ke daftar kelola sosmed
+        // Akun dari Manajemen Akun yang sudah disetujui (approved) tapi belum dimasukkan ke daftar kelola sosmed
         $availableAccounts = SosmedAccount::notInSosmed()
+            ->where('verification_status', 'approved')
             ->select('id', 'name', 'platform', 'link')
             ->orderBy('platform')
             ->orderBy('name')

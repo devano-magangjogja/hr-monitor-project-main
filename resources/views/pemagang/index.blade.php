@@ -100,7 +100,7 @@
             <form method="GET" action="{{ route($routePrefix . '.pemagang.index') }}"
                 class="flex-1 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-12 gap-3 items-end">
                 {{-- SEARCH --}}
-                <div class="md:col-span-5">
+                <div class="md:col-span-4">
                     <label class="block text-[11px] font-semibold text-gray-500 uppercase tracking-wider mb-1.5">
                         Cari Pemagang
                     </label>
@@ -118,7 +118,7 @@
                 </div>
 
                 {{-- DIVISI --}}
-                <div class="md:col-span-3">
+                <div class="md:col-span-2">
                     <label class="block text-[11px] font-semibold text-gray-500 uppercase tracking-wider mb-1.5">
                         Divisi
                     </label>
@@ -131,6 +131,13 @@
                             </option>
                         @endforeach
                     </select>
+                </div>
+
+                {{-- TANGGAL KEHADIRAN --}}
+                <div class="md:col-span-2">
+                    <label class="block text-[11px] font-semibold text-gray-500 uppercase tracking-wider mb-1.5">Tanggal</label>
+                    <input type="date" name="tanggal" value="{{ $tanggal ?? '' }}"
+                        class="w-full h-[42px] px-3 bg-gray-50 border border-gray-200 rounded-lg text-xs sm:text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:bg-white transition">
                 </div>
 
                 {{-- KAMPUS / SEKOLAH --}}
@@ -160,7 +167,7 @@
                         <span>Filter</span>
                     </button>
 
-                    @if($search || $divisi || $kampus)
+                    @if($search || $divisi || $kampus || $tanggal)
                         <a href="{{ route($routePrefix . '.pemagang.index') }}"
                             class="h-[42px] px-3 inline-flex items-center justify-center bg-gray-100 hover:bg-gray-200 text-gray-600 text-xs sm:text-sm font-semibold rounded-lg transition whitespace-nowrap">
                             Reset

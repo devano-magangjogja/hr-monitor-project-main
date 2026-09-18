@@ -853,6 +853,7 @@ class TaskRepository
 
         return $users->map(function ($user) use ($dateFrom, $dateTo) {
             $assignments = TaskAssignment::query()
+                ->with('task:id,title,description,task_date')
                 ->where('user_id', $user->id)
                 ->whereHas('task', function ($q) use ($dateFrom, $dateTo) {
                     $q->whereBetween('task_date', [$dateFrom, $dateTo]);
@@ -865,7 +866,15 @@ class TaskRepository
             $pending   = $total - $completed - $notDone;
             $pct       = $total > 0 ? round(($completed / $total) * 100) : 0;
 
-            return compact('user', 'total', 'completed', 'pending', 'notDone', 'pct');
+            $details = $assignments->map(fn ($assignment) => [
+                'title' => $assignment->task?->title ?? 'Tugas tanpa judul',
+                'description' => $assignment->task?->description ?? '',
+                'date' => $assignment->task?->task_date?->format('d M Y') ?? '-',
+                'status' => $assignment->is_completed,
+                'note' => $assignment->note ?? '',
+            ])->values()->all();
+
+            return compact('user', 'total', 'completed', 'pending', 'notDone', 'pct', 'details');
         });
     }
 

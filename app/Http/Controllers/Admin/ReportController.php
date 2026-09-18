@@ -36,6 +36,7 @@ class ReportController extends Controller
         $dateFrom     = $request->query('date_from', $today);
         $dateTo       = $request->query('date_to',   $today);
         $selectedRole = $request->query('role', 'all');
+        $search       = $request->query('search');
 
         // Normalise: pastikan dateFrom <= dateTo
         if ($dateFrom > $dateTo) {
@@ -43,11 +44,14 @@ class ReportController extends Controller
         }
 
         $report = $this->taskService->getProductivityByRange($dateFrom, $dateTo, $selectedRole);
+        if ($search) {
+            $report = $report->filter(fn ($item) => str_contains(strtolower($item['user']->name), strtolower($search)))->values();
+        }
 
         // Daftar role selain admin untuk dropdown filter
         $availableRoles = \App\Models\Role::where('name', '!=', 'admin')->orderBy('label')->get();
 
-        return view('admin.reports.productivity', compact('report', 'dateFrom', 'dateTo', 'today', 'selectedRole', 'availableRoles'));
+        return view('admin.reports.productivity', compact('report', 'dateFrom', 'dateTo', 'today', 'selectedRole', 'availableRoles', 'search'));
     }
 
     public function productivityDetail(Request $request, \App\Models\User $user)

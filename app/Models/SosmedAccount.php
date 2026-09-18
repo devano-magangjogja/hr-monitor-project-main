@@ -10,10 +10,14 @@ class SosmedAccount extends Model
 
     protected $fillable = [
         'name',
+        'username',
         'platform',
         'link',
         'email',
+        'email_recovery',
         'password',
+        'two_factor_enabled',
+        'phone',
         'pm_id',
         'assistant_id',
         'supervisor_staff_id',
@@ -22,6 +26,8 @@ class SosmedAccount extends Model
         'created_by',
         'notes',
         'is_in_sosmed',
+        'verification_status',
+        'rejection_note',
     ];
 
     protected function casts(): array
@@ -29,6 +35,7 @@ class SosmedAccount extends Model
         return [
             'password' => 'encrypted',
             'is_in_sosmed' => 'boolean',
+            'two_factor_enabled' => 'boolean',
         ];
     }
 

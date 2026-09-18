@@ -14,11 +14,13 @@ class AccountController extends Controller
 
     public function index(Request $request)
     {
+        $tab = $request->query('tab', 'accounts');
         $search = $request->query('search');
         $platform = $request->query('platform');
         $status = $request->query('status'); // 'assigned', 'unassigned'
 
         $accountsQuery = SosmedAccount::with(['pmUser', 'staffUser', 'assistantUser', 'creator'])
+            ->where('verification_status', 'approved')   // hanya tampilkan yang sudah disetujui
             ->orderBy('platform')
             ->orderBy('name');
 
@@ -42,13 +44,19 @@ class AccountController extends Controller
 
         $accounts = $accountsQuery->paginate(15)->appends($request->query());
 
+        $pendingAccounts = SosmedAccount::with('creator')
+            ->where('verification_status', 'pending')
+            ->latest()
+            ->paginate(15, ['*'], 'pending_page')
+            ->appends(['tab' => 'pending']);
+
         $stats = [
-            'total' => SosmedAccount::count(),
-            'assigned' => SosmedAccount::whereNotNull('staff_id')->count(),
-            'unassigned' => SosmedAccount::whereNull('staff_id')->count(),
+            'total'     => SosmedAccount::where('verification_status', 'approved')->count(),
+            'assigned'  => SosmedAccount::where('verification_status', 'approved')->whereNotNull('staff_id')->count(),
+            'unassigned'=> SosmedAccount::where('verification_status', 'approved')->whereNull('staff_id')->count(),
         ];
 
-        $platformList = ['Instagram', 'TikTok', 'YouTube', 'Facebook', 'Twitter/X', 'LinkedIn', 'Threads', 'Website'];
+        $platformList = ['Instagram', 'TikTok', 'YouTube', 'Facebook', 'Twitter/X', 'LinkedIn', 'Threads', 'Website', 'Lainnya'];
 
         return view('admin.accounts.index', compact(
             'accounts',
@@ -56,7 +64,9 @@ class AccountController extends Controller
             'search',
             'platform',
             'status',
-            'platformList'
+            'platformList',
+            'pendingAccounts',
+            'tab'
         ));
     }
 
@@ -65,20 +75,28 @@ class AccountController extends Controller
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:200'],
             'platform' => ['required', 'string', 'max:50'],
+            'custom_platform' => ['required_if:platform,Lainnya', 'nullable', 'string', 'max:50'],
             'link' => ['nullable', 'string', 'max:500'],
             'email' => ['nullable', 'string', 'email', 'max:255'],
+            'email_recovery' => ['nullable', 'string', 'email', 'max:255'],
             'password' => ['nullable', 'string', 'max:255'],
+            'two_factor_enabled' => ['nullable', 'boolean'],
+            'phone' => ['nullable', 'string', 'max:30'],
             'notes' => ['nullable', 'string', 'max:1000'],
         ]);
 
         $data = [
             'name' => $validated['name'],
-            'platform' => $validated['platform'],
+            'platform' => $validated['platform'] === 'Lainnya' ? $validated['custom_platform'] : $validated['platform'],
             'link' => $validated['link'] ?? null,
             'email' => $validated['email'] ?? null,
+            'email_recovery' => $validated['email_recovery'] ?? null,
             'password' => !empty($validated['password']) ? $validated['password'] : null,
+            'two_factor_enabled' => $request->boolean('two_factor_enabled'),
+            'phone' => $validated['phone'] ?? null,
             'notes' => $validated['notes'] ?? null,
             'is_in_sosmed' => false,
+            'verification_status' => 'approved',
             'created_by' => Auth::id(),
         ];
 
@@ -91,7 +109,7 @@ class AccountController extends Controller
             $account
         );
 
-        return redirect()->route('admin.accounts.index')
+        return redirect()->route($this->accountRoute('index'))
             ->with('success', "Akun '{$account->name}' ({$account->platform}) berhasil ditambahkan.");
     }
 
@@ -100,17 +118,24 @@ class AccountController extends Controller
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:200'],
             'platform' => ['required', 'string', 'max:50'],
+            'custom_platform' => ['required_if:platform,Lainnya', 'nullable', 'string', 'max:50'],
             'link' => ['nullable', 'string', 'max:500'],
             'email' => ['nullable', 'string', 'email', 'max:255'],
+            'email_recovery' => ['nullable', 'string', 'email', 'max:255'],
             'password' => ['nullable', 'string', 'max:255'],
+            'two_factor_enabled' => ['nullable', 'boolean'],
+            'phone' => ['nullable', 'string', 'max:30'],
             'notes' => ['nullable', 'string', 'max:1000'],
         ]);
 
         $data = [
             'name' => $validated['name'],
-            'platform' => $validated['platform'],
+            'platform' => $validated['platform'] === 'Lainnya' ? $validated['custom_platform'] : $validated['platform'],
             'link' => $validated['link'] ?? null,
             'email' => $validated['email'] ?? null,
+            'email_recovery' => $validated['email_recovery'] ?? null,
+            'two_factor_enabled' => $request->boolean('two_factor_enabled'),
+            'phone' => $validated['phone'] ?? null,
             'notes' => $validated['notes'] ?? null,
         ];
 
@@ -128,7 +153,7 @@ class AccountController extends Controller
             $account
         );
 
-        return redirect()->route('admin.accounts.index')
+        return redirect()->route($this->accountRoute('index'))
             ->with('success', "Akun '{$account->name}' berhasil diperbarui.");
     }
 
@@ -144,7 +169,107 @@ class AccountController extends Controller
             "Menghapus akun '{$name}' ({$platform})"
         );
 
-        return redirect()->route('admin.accounts.index')
+        return redirect()->route($this->accountRoute('index'))
             ->with('success', "Akun '{$name}' ({$platform}) berhasil dihapus.");
+    }
+
+    public function verify(Request $request, SosmedAccount $account)
+    {
+        $validated = $request->validate([
+            'verification_status' => ['required', 'in:approved,rejected'],
+            'email_recovery' => ['nullable', 'email', 'max:255'],
+            'phone' => ['nullable', 'string', 'max:30'],
+            'two_factor_enabled' => ['nullable', 'boolean'],
+            'rejection_note' => ['required_if:verification_status,rejected', 'nullable', 'string', 'max:1000'],
+        ]);
+        $isRejected = $validated['verification_status'] === 'rejected';
+
+        $updateData = [
+            'verification_status' => $validated['verification_status'],
+            'email_recovery'      => $validated['email_recovery'] ?? null,
+            'phone'               => $validated['phone'] ?? null,
+            'two_factor_enabled'  => $request->boolean('two_factor_enabled'),
+            'rejection_note'      => $isRejected ? $validated['rejection_note'] : null,
+        ];
+
+        // Jika ditolak: lepas semua penugasan dan keluarkan dari kelola sosmed
+        if ($isRejected) {
+            $updateData['staff_id']            = null;
+            $updateData['pm_id']               = null;
+            $updateData['assistant_id']        = null;
+            $updateData['supervisor_staff_id'] = null;
+            $updateData['is_in_sosmed']        = false;
+        }
+
+        $account->update($updateData);
+
+        $message = $isRejected
+            ? 'Pengajuan akun ditolak dan dikeluarkan dari daftar manajemen akun.'
+            : 'Pengajuan akun berhasil disetujui.';
+
+        return back()->with('success', $message);
+    }
+
+    public function ownIndex(Request $request)
+    {
+        $search = $request->query('search');
+        $accounts = SosmedAccount::query()
+            ->where('created_by', Auth::id())
+            ->when($search, fn ($query) => $query->where(function ($nested) use ($search) {
+                $nested->where('name', 'like', "%{$search}%")
+                    ->orWhere('platform', 'like', "%{$search}%")
+                    ->orWhere('email', 'like', "%{$search}%");
+            }))
+            ->latest()
+            ->paginate(15)
+            ->withQueryString();
+
+        return view('accounts.my', compact('accounts', 'search'));
+    }
+
+    public function ownSubmissions(Request $request)
+    {
+        $search = $request->query('search');
+        $userId = Auth::id();
+        $accounts = SosmedAccount::query()
+            ->where('verification_status', 'approved')
+            ->where('created_by', $userId)
+            ->when($search, fn ($query) => $query->where(function ($nested) use ($search) {
+                $nested->where('name', 'like', "%{$search}%")
+                    ->orWhere('platform', 'like', "%{$search}%")
+                    ->orWhere('email', 'like', "%{$search}%");
+            }))
+            ->latest()
+            ->paginate(15)
+            ->withQueryString();
+
+        return view('accounts.submissions', compact('accounts', 'search'));
+    }
+
+    public function ownStore(Request $request)
+    {
+        $validated = $request->validate([
+            'platform' => ['required', 'string', 'max:50'],
+            'custom_platform' => ['required_if:platform,Lainnya', 'nullable', 'string', 'max:50'],
+            'email' => ['required', 'email', 'max:255'],
+            'password' => ['required', 'string', 'max:255'],
+        ]);
+
+        SosmedAccount::create([
+            'name' => strstr($validated['email'], '@', true) ?: $validated['email'],
+            'platform' => $validated['platform'] === 'Lainnya' ? $validated['custom_platform'] : $validated['platform'],
+            'email' => $validated['email'],
+            'password' => $validated['password'],
+            'created_by' => Auth::id(),
+            'verification_status' => 'pending',
+            'is_in_sosmed' => false,
+        ]);
+
+        return redirect()->back()->with('success', 'Pengajuan akun berhasil dikirim untuk verifikasi admin.');
+    }
+
+    private function accountRoute(string $action): string
+    {
+        return (Auth::user()?->isAdmin() ? 'admin' : 'staff') . '.accounts.' . $action;
     }
 }

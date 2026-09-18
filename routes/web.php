@@ -125,6 +125,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin'])->grou
     // Manajemen Akun (Kredensial & Master Akun Sosmed)
     Route::resource('accounts', AdminAccountController::class)
         ->only(['index', 'store', 'update', 'destroy']);
+    Route::patch('/accounts/{account}/verify', [AdminAccountController::class, 'verify'])->name('accounts.verify');
 
     // Monitoring & Penugasan Sosmed
     Route::get('/sosmed', [AdminSosmedController::class, 'index'])->name('sosmed.index');
@@ -184,6 +185,9 @@ Route::prefix('staff')->name('staff.')->middleware(['auth', 'role:hr_staff'])->g
     Route::delete('/pemagang', [PemagangController::class, 'bulkDestroy'])->name('pemagang.bulk-destroy');
 
     // Manajemen Sosmed & Approval Level 2
+    Route::resource('accounts', AdminAccountController::class)
+        ->only(['index', 'store', 'update', 'destroy']);
+    Route::patch('/accounts/{account}/verify', [AdminAccountController::class, 'verify'])->name('accounts.verify');
     Route::get('/sosmed', [StaffSosmedController::class, 'index'])->name('sosmed.index');
     Route::post('/sosmed/assign', [StaffSosmedController::class, 'assignTask'])->name('sosmed.assign');
     Route::post('/sosmed/accounts/{account}/submit', [StaffSosmedController::class, 'submitAccountTask'])->name('sosmed.accounts.submit');
@@ -223,6 +227,9 @@ Route::prefix('ob')->name('ob.')->middleware(['auth', 'role:ob'])->group(functio
 
 // ── HR Assistant ─────────────────────────────────────────────────────────────
 Route::prefix('assistant')->name('assistant.')->middleware(['auth', 'role:hr_assistant'])->group(function () {
+    Route::get('/accounts', [AdminAccountController::class, 'ownIndex'])->name('accounts.index');
+    Route::get('/accounts/submissions', [AdminAccountController::class, 'ownSubmissions'])->name('accounts.submissions');
+    Route::post('/accounts', [AdminAccountController::class, 'ownStore'])->name('accounts.store');
     Route::get('/dashboard', [AssistantDashboard::class, 'index'])->name('dashboard');
     Route::get('/tasks/routine', [AssistantTaskController::class, 'routineIndex'])->name('tasks.routine');
     Route::patch('/tasks/routine/{task}/complete', [AssistantTaskController::class, 'routineComplete'])->name('tasks.routine.complete');
@@ -297,6 +304,9 @@ Route::prefix('vg')->name('vg.')->middleware(['auth', 'role:vg'])->group(functio
 
 // ── PM (Project Manager) ─────────────────────────────────────────────────────
 Route::prefix('pm')->name('pm.')->middleware(['auth', 'role:pm'])->group(function () {
+    Route::get('/accounts', [AdminAccountController::class, 'ownIndex'])->name('accounts.index');
+    Route::get('/accounts/submissions', [AdminAccountController::class, 'ownSubmissions'])->name('accounts.submissions');
+    Route::post('/accounts', [AdminAccountController::class, 'ownStore'])->name('accounts.store');
     Route::get('/dashboard', [PMDashboard::class, 'index'])->name('dashboard');
     Route::resource('tasks', PMTaskController::class)->only(['index', 'store', 'update', 'destroy']);
     Route::patch('/tasks/{task}/complete', [PMTaskController::class, 'complete'])->name('tasks.complete');
@@ -317,6 +327,9 @@ Route::prefix('pm')->name('pm.')->middleware(['auth', 'role:pm'])->group(functio
 
 // ── Sosmed (Social Media Specialist) ─────────────────────────────────────────
 Route::prefix('sosmed')->name('sosmed.')->middleware(['auth', 'role:sosmed,digital_marketing'])->group(function () {
+    Route::get('/accounts', [AdminAccountController::class, 'ownIndex'])->name('accounts.index');
+    Route::get('/accounts/submissions', [AdminAccountController::class, 'ownSubmissions'])->name('accounts.submissions');
+    Route::post('/accounts', [AdminAccountController::class, 'ownStore'])->name('accounts.store');
     Route::get('/dashboard', [SosmedDashboard::class, 'index'])->name('dashboard');
     Route::resource('tasks', SosmedTaskController::class)->only(['index', 'store', 'update', 'destroy']);
     Route::patch('/tasks/{task}/complete', [SosmedTaskController::class, 'complete'])->name('tasks.complete');
