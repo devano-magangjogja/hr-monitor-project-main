@@ -168,6 +168,10 @@ class TaskController extends Controller
                     ->where('sosmed_account_id', $acc->id)
                     ->whereDate('task_date', $forDate)
                     ->first();
+                // Pastikan relasi account ter-load agar accessor status_label bisa membaca pm_id/assistant_id
+                if ($task) {
+                    $task->setRelation('account', $acc);
+                }
 
                 $rows->push((object)[
                     'account'        => $acc,
@@ -239,7 +243,7 @@ class TaskController extends Controller
                         'executor_role'  => $t->assignedUser?->role_label ?? '',
                         'task_date'      => $date,
                         'status'         => $t->status,
-                        'status_label'   => 'Menunggu Verif PM',
+                        'status_label'   => $t->status_label,
                         'status_class'   => 'bg-blue-50 text-blue-700 border border-blue-200',
                         'rejection_note' => null,
                         'is_verif_row'   => true,
@@ -276,6 +280,31 @@ class TaskController extends Controller
             return redirect($redirect)->with('success', 'Tugas berhasil dihapus.');
         } catch (ValidationException $e) {
             return redirect($redirect)->with('error', $e->errors()['task'][0] ?? 'Gagal menghapus tugas.');
+        }
+    }
+
+    // ── Force Update (Admin edit task siapapun) ──────────
+
+    public function forceUpdate(Request $request, Task $task)
+    {
+        $validated = $request->validate([
+            'title'       => ['required', 'string', 'max:200'],
+            'description' => ['nullable', 'string'],
+            'kantor'      => ['nullable', 'string', 'in:Kantor 1,Kantor 2,Kantor 3,Kantor 4,Kantor 5,Kantor 6,Kantor 7,Kantor 8,Kantor 9,Kantor 10'],
+        ]);
+
+        $redirect = url()->previous();
+
+        try {
+            $task->update([
+                'title'       => $validated['title'],
+                'description' => $validated['description'] ?? null,
+                'kantor'      => $validated['kantor'] ?? null,
+            ]);
+            $this->logActivity('task.updated', 'Tugas', "Force-edit tugas '{$task->title}'", $task);
+            return redirect($redirect)->with('success', 'Tugas berhasil diperbarui.');
+        } catch (\Throwable $e) {
+            return redirect($redirect)->with('error', 'Gagal memperbarui tugas.');
         }
     }
 }

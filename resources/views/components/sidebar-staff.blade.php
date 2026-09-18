@@ -88,10 +88,10 @@
 
 {{-- Divider --}}
 <div class="pt-4 pb-2">
-    <p class="px-4 text-[11px] font-semibold text-slate-500 uppercase tracking-widest">Kelola Assistant</p>
+    <p class="px-4 text-[11px] font-semibold text-slate-500 uppercase tracking-widest">Kelola Akun</p>
 </div>
 
-{{-- Manajemen HR Assistant --}}
+{{-- Manajemen Akun --}}
 <a href="{{ route('staff.users.index') }}"
     class="flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-all
           {{ request()->routeIs('staff.users.*') ? 'bg-white/10 text-white' : 'text-slate-400 hover:bg-white/5 hover:text-white' }}">
@@ -99,9 +99,8 @@
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
             d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
     </svg>
-    Manajemen HR Assistant
+    Manajemen Akun
 </a>
-
 {{-- Kirim Notifikasi --}}
 <a href="{{ route('staff.notifications.index') }}"
     class="flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-all
@@ -112,6 +111,11 @@
     </svg>
     Kirim Notifikasi
 </a>
+
+{{-- Divider --}}
+<div class="pt-4 pb-2">
+    <p class="px-4 text-[11px] font-semibold text-slate-500 uppercase tracking-widest">Kelola Assistant</p>
+</div>
 
 {{-- Buat Tugas Assistant --}}
 <a href="{{ route('staff.assign.index') }}"
@@ -147,10 +151,24 @@
 
 {{-- Divider --}}
 <div class="pt-4 pb-2">
-    <p class="px-4 text-[11px] font-semibold text-slate-500 uppercase tracking-widest">Kelola Project Manager</p>
+    <p class="px-4 text-[11px] font-semibold text-slate-500 uppercase tracking-widest">Sosial Media</p>
 </div>
 
-{{-- Sosmed Management --}}
+{{-- Manajemen Akun Sosmed --}}
+<a href="{{ route('staff.accounts.index') }}"
+    class="flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-all
+          {{ request()->routeIs('staff.accounts.*') ? 'bg-white/10 text-white' : 'text-slate-400 hover:bg-white/5 hover:text-white' }}">
+    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-person-add shrink-0"
+        viewBox="0 0 16 16">
+        <path
+            d="M12.5 16a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7m.5-5v1h1a.5.5 0 0 1 0 1h-1v1a.5.5 0 0 1-1 0v-1h-1a.5.5 0 0 1 0-1h1v-1a.5.5 0 0 1 1 0m-2-6a3 3 0 1 1-6 0 3 3 0 0 1 6 0M8 7a2 2 0 1 0 0-4 2 2 0 0 0 0 4" />
+        <path
+            d="M8.256 14a4.5 4.5 0 0 1-.229-1.004H3c.001-.246.154-.986.832-1.664C4.484 10.68 5.711 10 8 10q.39 0 .74.025c.226-.341.496-.65.804-.918Q8.844 9.002 8 9c-5 0-6 3-6 4s1 1 1 1z" />
+    </svg>
+    Manajemen Akun
+</a>
+
+{{-- Manajemen Sosmed --}}
 <a href="{{ route('staff.sosmed.index') }}"
     class="flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-all
           {{ request()->routeIs('staff.sosmed.*') ? 'bg-white/10 text-white' : 'text-slate-400 hover:bg-white/5 hover:text-white' }}">
@@ -158,7 +176,7 @@
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
             d="M8 12H8.01M12 12H12.01M16 12H16.01M21.0039 12C21.0039 16.9706 16.9745 21 12.0039 21C9.9675 21 3.00463 21 3.00463 21C3.00463 21 4.56382 17.2561 3.93982 16.0008C3.34076 14.7956 3.00391 13.4372 3.00391 12C3.00391 7.02944 7.03334 3 12.0039 3C16.9745 3 21.0039 7.02944 21.0039 12Z" />
     </svg>
-    Sosmed
+    Manajemen Sosmed
 </a>
 
 {{-- Divider --}}

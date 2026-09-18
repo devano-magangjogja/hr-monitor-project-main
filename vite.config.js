@@ -10,7 +10,10 @@ export default defineConfig({
     ],
     server: {
         watch: {
-            ignored: ['**/public/images/**', '**/public/storage/**'],
+            // Gunakan polling untuk menghindari error "notify file events failed" di Windows/WSL
+            usePolling: true,
+            interval: 1000,
+            ignored: ['**/public/images/**', '**/public/storage/**', '**/node_modules/**', '**/.git/**'],
         },
     },
 });

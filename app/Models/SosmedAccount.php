@@ -10,17 +10,24 @@ class SosmedAccount extends Model
 
     protected $fillable = [
         'name',
+        'username',
         'platform',
         'link',
         'email',
+        'email_recovery',
         'password',
+        'two_factor_enabled',
+        'phone',
         'pm_id',
         'assistant_id',
+        'supervisor_staff_id',
         'staff_id',
         'assigned_to', // fallback compatibility
         'created_by',
         'notes',
         'is_in_sosmed',
+        'verification_status',
+        'rejection_note',
     ];
 
     protected function casts(): array
@@ -28,6 +35,7 @@ class SosmedAccount extends Model
         return [
             'password' => 'encrypted',
             'is_in_sosmed' => 'boolean',
+            'two_factor_enabled' => 'boolean',
         ];
     }
 
@@ -43,6 +51,16 @@ class SosmedAccount extends Model
         return $this->belongsTo(User::class, 'assistant_id');
     }
 
+    public function supervisorStaff()
+    {
+        return $this->belongsTo(User::class, 'supervisor_staff_id');
+    }
+
+    public function supervisorUser()
+    {
+        return $this->supervisorStaff();
+    }
+
     public function staffUser()
     {
         return $this->belongsTo(User::class, 'staff_id');
@@ -56,6 +74,32 @@ class SosmedAccount extends Model
     public function creator()
     {
         return $this->belongsTo(User::class, 'created_by');
+    }
+
+    public function finalVerifier(): ?User
+    {
+        if ($this->supervisorStaff) {
+            return $this->supervisorStaff;
+        }
+
+        $creator = $this->creator;
+        if ($creator && $creator->role === 'hr_staff') {
+            return $creator;
+        }
+
+        return null;
+    }
+
+    public function levelOneVerifier(): ?User
+    {
+        return $this->pmUser ?: $this->assistantUser;
+    }
+
+    public function finalVerifierLabel(): string
+    {
+        $verifier = $this->finalVerifier();
+
+        return $verifier ? 'HR Staff (' . $verifier->name . ')' : 'Admin';
     }
 
     public function sosmedTasks()

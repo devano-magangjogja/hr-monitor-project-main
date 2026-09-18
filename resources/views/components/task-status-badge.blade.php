@@ -1,6 +1,7 @@
 @props([
     'status',
     'completedAt' => null,
+    'task'        => null,
 ])
 
 @if(in_array($status, ['completed', 'approved_hr']))
@@ -22,12 +23,26 @@
     </div>
 
 @elseif($status === 'done_by_staff')
-    <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-amber-50 text-amber-700 border border-amber-200">
-        <svg class="w-2.5 h-2.5 fill-amber-500 animate-pulse" viewBox="0 0 8 8">
-            <circle cx="4" cy="4" r="3" />
-        </svg>
-        Menunggu Verif PM
-    </span>
+    @php
+        $noPmNoAst = isset($task) && $task->relationLoaded('account')
+            ? (is_null($task->account?->pm_id) && is_null($task->account?->assistant_id))
+            : false;
+    @endphp
+    @if($noPmNoAst)
+        <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-orange-50 text-orange-700 border border-orange-200">
+            <svg class="w-2.5 h-2.5 fill-orange-500 animate-pulse" viewBox="0 0 8 8">
+                <circle cx="4" cy="4" r="3" />
+            </svg>
+            Menunggu Verifikasi Staff
+        </span>
+    @else
+        <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-amber-50 text-amber-700 border border-amber-200">
+            <svg class="w-2.5 h-2.5 fill-amber-500 animate-pulse" viewBox="0 0 8 8">
+                <circle cx="4" cy="4" r="3" />
+            </svg>
+            Menunggu Verif PM
+        </span>
+    @endif
 
 @elseif($status === 'verified_by_pm')
     <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-blue-50 text-blue-700 border border-blue-200">

@@ -572,7 +572,7 @@
                 </button>
             </div>
 
-            <form id="form-verify" method="POST" action="" class="p-6 space-y-4">
+            <form id="form-verify" method="POST" action="" class="p-6 pt-1 space-y-4">
                 @csrf @method('PATCH')
                 <input type="hidden" name="action" :value="action">
 
@@ -675,7 +675,7 @@
                     </svg>
                 </button>
             </div>
-            <form id="form-my-submit" method="POST" action="" onsubmit="handleMyFormSubmit(event)" class="p-6 pt-4 space-y-4">
+            <form id="form-my-submit" method="POST" action="" onsubmit="handleMyFormSubmit(event)" class="p-6 pt-1 space-y-4">
                 @csrf
                 <div class="bg-gray-50 p-3 rounded-lg border border-gray-200">
                     <p class="text-xs text-gray-500 mb-0.5">Nama Akun Sosmed</p>
@@ -683,12 +683,12 @@
                 </div>
                 <div>
                     <label class="block text-xs font-semibold text-gray-600 mb-1.5">
-                        Link / URL Hasil Konten <span class="text-red-500">*</span>
+                        Bukti Konten <span class="text-red-500">*</span>
                         <span class="font-normal text-gray-400 ml-1">(bisa lebih dari satu)</span>
                     </label>
                     <div id="my-links-container" class="space-y-2 max-h-[200px] overflow-y-auto pr-1">
                         <div class="flex gap-2 link-row">
-                            <input type="text" name="links[]" required placeholder="https://instagram.com/p/xxx"
+                            <input type="text" name="links[]" required placeholder="Tulis link atau keterangan bukti..."
                                 class="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 focus:outline-none">
                             <button type="button" onclick="removeMyLinkRow(this)"
                                 class="text-gray-300 hover:text-rose-500 px-1 transition hidden remove-btn">
@@ -698,7 +698,7 @@
                             </button>
                         </div>
                     </div>
-                    <p class="text-[11px] text-gray-400 mt-1">Pastikan link diawali https://</p>
+                    <p class="text-[11px] text-gray-400 mt-1">Isi link atau keterangan hasil konten yang dikerjakan.</p>
                     <button type="button" onclick="addMyLinkRow()"
                         class="mt-1.5 inline-flex items-center gap-1 text-xs text-primary-600 hover:text-primary-700 font-medium">
                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -788,7 +788,7 @@
         const container = document.getElementById('my-links-container');
         container.innerHTML = `
             <div class="flex gap-2 link-row">
-                <input type="text" name="links[]" required placeholder="https://instagram.com/p/xxx"
+                <input type="text" name="links[]" required placeholder="Tulis link atau keterangan bukti..."
                     class="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 focus:outline-none">
                 <button type="button" onclick="removeMyLinkRow(this)"
                     class="text-gray-300 hover:text-rose-500 px-1 transition hidden remove-btn">

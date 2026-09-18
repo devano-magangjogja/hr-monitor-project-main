@@ -43,6 +43,7 @@
         </div>
     </div>
 
+
     {{-- ═══ TABEL AKUN ════════════════════════════════════════════════════ --}}
     <div class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
         <div class="px-6 py-4 border-b border-gray-200 bg-gray-50/50 flex justify-between items-center flex-wrap gap-2">
@@ -292,6 +293,7 @@
     </div>
     </div>
 
+
     {{-- ═══ MODAL: SUBMIT BUKTI (MULTI-LINK) ═══════════════════════════════ --}}
     <div id="modal-submit" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4">
         <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" onclick="closeSubmitModal()"></div>
@@ -314,13 +316,13 @@
                 {{-- Multi-link input --}}
                 <div>
                     <label class="block text-xs font-semibold text-gray-600 mb-1.5">
-                        Link / URL Hasil Konten <span class="text-red-500">*</span>
+                        Bukti Konten <span class="text-red-500">*</span>
                         <span class="font-normal text-gray-400 ml-1">(bisa lebih dari satu)</span>
                     </label>
                     <div id="links-container" class="space-y-2 max-h-[220px] overflow-y-auto pr-1">
                         <div class="flex gap-2 link-row">
-                            <input type="url" name="links[]" required
-                                placeholder="https://instagram.com/p/xxx atau https://tiktok.com/@xxx/video/xxx"
+                            <input type="text" name="links[]" required
+                                placeholder="Tulis link atau keterangan bukti..."
                                 class="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 focus:outline-none">
                             <button type="button" onclick="removeLinkRow(this)"
                                 class="text-gray-300 hover:text-rose-500 px-1 transition hidden remove-btn">
@@ -451,8 +453,8 @@
             const row = document.createElement('div');
             row.className = 'flex gap-2 link-row';
             row.innerHTML = `
-                        <input type="url" name="links[]" ${isFirst ? 'required' : ''} value="${value}"
-                            placeholder="${isFirst ? 'https://instagram.com/p/xxx atau https://tiktok.com/@xxx/video/xxx' : 'https://tiktok.com/@xxx/video/xxx'}"
+                        <input type="text" name="links[]" ${isFirst ? 'required' : ''} value="${value}"
+                            placeholder="${isFirst ? 'Tulis link atau keterangan bukti...' : 'Tulis bukti lainnya...'}"
                             class="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 focus:outline-none">
                         <button type="button" onclick="removeLinkRow(this)"
                             class="text-gray-300 hover:text-rose-500 px-1 transition remove-btn ${isFirst ? 'hidden' : ''}">

@@ -18,35 +18,58 @@ class SosmedController extends Controller
     public function index(Request $request)
     {
         $tab = $request->query('tab', 'accounts');
+        $accountSearch = $request->query('account_search');
 
         // Akun yang bisa dikelola Staff: exclude akun yang eksekutornya HR Staff
         // (akun tersebut sudah ditetapkan langsung oleh Admin, tersimpan di tab "Tugas Sosmed Saya")
-        $accounts = SosmedAccount::inSosmed()
-            ->with(['pmUser', 'staffUser', 'assistantUser', 'creator'])
+        $accountsQuery = SosmedAccount::inSosmed()
+            ->with(['pmUser', 'staffUser', 'assistantUser', 'supervisorStaff', 'creator'])
             ->where(function ($q) {
                 $q->whereNull('staff_id')
                   ->orWhereHas('staffUser', fn($u) => $u->where('role', '!=', 'hr_staff'));
-            })
-            ->orderBy('platform')
-            ->paginate(5);
+            });
 
-        // Tasks needing final HR approval (tugas yang diverifikasi HR Staff, bukan tugas staff sendiri)
-        $needHrApproval = SosmedTask::with(['account', 'assignedUser', 'assignedBy', 'verifiedBy'])
-            ->where('status', 'verified_by_pm')
+        if ($accountSearch) {
+            $accountsQuery->where('name', 'like', '%' . $accountSearch . '%');
+        }
+
+        $accounts = $accountsQuery->orderBy('platform')
+            ->paginate(15)
+            ->appends($request->all());
+
+        // Tasks needing HR approval:
+        // 1. Tugas level 2: sudah diverifikasi PM / Asisten (verified_by_pm)
+        // 2. ATAU: Tugas level 1 (done_by_staff) pada akun di mana Staff ini adalah Staff Pengawas (supervisor_staff_id = Auth::id())
+        $needHrApproval = SosmedTask::with(['account.supervisorStaff', 'account.pmUser', 'account.assistantUser', 'assignedUser', 'assignedBy', 'verifiedBy'])
+            ->where(function ($q) {
+                $q->where('status', 'verified_by_pm')
+                  ->orWhere(function ($sub) {
+                    $sub->where('status', 'done_by_staff')
+                        ->whereHas('account', function ($acc) {
+                            $acc->whereNull('pm_id')
+                                ->whereNull('assistant_id')
+                                ->where(function ($verifier) {
+                                    $verifier->whereNull('supervisor_staff_id')
+                                        ->orWhere('supervisor_staff_id', Auth::id());
+                                });
+                        });
+                });
+            })
             ->where('assigned_to', '!=', Auth::id())
-            ->orderBy('verified_at', 'desc')
-            ->paginate(5);
+            ->orderByRaw("CASE WHEN status = 'done_by_staff' THEN 0 ELSE 1 END")
+            ->orderBy('updated_at', 'desc')
+            ->paginate(10);
 
         // All tasks for monitoring
         $allTasks = SosmedTask::with(['account', 'assignedUser', 'assignedBy', 'verifiedBy', 'hrVerifiedBy'])
             ->orderBy('task_date', 'desc')
-            ->paginate(5);
+            ->paginate(15);
 
         // Akun Mandiri yang Dikelola oleh Staff yang sedang login
         $myAccounts = SosmedAccount::with(['creator'])
             ->where('staff_id', Auth::id())
             ->orderBy('platform')
-            ->paginate(5);
+            ->paginate(15);
         $myAccountIds = $myAccounts->pluck('id');
 
         $todayTasks = SosmedTask::with(['verifiedBy', 'hrVerifiedBy'])
@@ -77,6 +100,15 @@ class SosmedController extends Controller
             ->orderBy('name')
             ->get();
 
+        // List Staff Pengawas (Semua user role HR Staff aktif)
+        $supervisors = User::where(function ($q) {
+                $q->where('role', 'hr_staff')
+                  ->orWhereHas('roleModel', fn($r) => $r->where('base_type', 'staff'));
+            })
+            ->where('is_active', true)
+            ->orderBy('name')
+            ->get();
+
         // Eksekutor Akun: Staff Sosmed, Digital Marketing, PM, dan HR Assistant
         // HR Staff tidak termasuk — Staff tidak bisa mendelegasikan ke sesama Staff
         $executors = User::whereIn('role', ['sosmed', 'pm', 'hr_assistant', 'digital_marketing'])
@@ -100,6 +132,7 @@ class SosmedController extends Controller
 
         // Akun yang tersedia / belum dimasukkan ke daftar kelola sosmed
         $availableAccounts = SosmedAccount::notInSosmed()
+            ->where('verification_status', 'approved')
             ->select('id', 'name', 'platform', 'link')
             ->orderBy('platform')
             ->orderBy('name')
@@ -108,6 +141,7 @@ class SosmedController extends Controller
         return view('staff.sosmed.index', compact(
             'tab',
             'accounts',
+            'accountSearch',
             'availableAccounts',
             'myAccounts',
             'todayTasks',
@@ -116,6 +150,7 @@ class SosmedController extends Controller
             'approvalLogs',
             'pms',
             'assistants',
+            'supervisors',
             'staffs',
             'executors',
             'stats'
@@ -167,13 +202,13 @@ class SosmedController extends Controller
             'user_name'      => Auth::user()->name,
             'role_name'      => 'HR Staff',
             'action'         => 'submitted',
-            'notes'          => 'HR Staff submit bukti laporan sosmed (' . count($links) . ' link). Menunggu verifikasi langsung oleh Admin.',
+            'notes'          => 'HR Staff submit bukti laporan sosmed (' . count($links) . ' item). Menunggu verifikasi ' . $account->finalVerifierLabel() . '.',
         ]);
 
         $this->logActivity('sosmed.submitted', 'Sosmed', "Submit bukti laporan sosmed untuk akun '{$account->name}'", $task);
 
         return redirect()->route('staff.sosmed.index', ['tab' => 'my_accounts'])
-            ->with('success', 'Bukti konten untuk ' . $account->name . ' berhasil dikirim. Menunggu verifikasi langsung oleh Admin.');
+            ->with('success', 'Bukti konten untuk ' . $account->name . ' berhasil dikirim. Menunggu verifikasi ' . $account->finalVerifierLabel() . '.');
     }
 
     /**
@@ -182,11 +217,12 @@ class SosmedController extends Controller
     public function assignTask(Request $request)
     {
         $validated = $request->validate([
-            'sosmed_account_id' => ['required', 'exists:sosmed_accounts,id'],
-            'staff_id'          => ['nullable', 'exists:users,id'],
-            'pm_id'             => ['nullable', 'exists:users,id'],
-            'assistant_id'      => ['nullable', 'exists:users,id'],
-            'notes'             => ['nullable', 'string', 'max:1000'],
+            'sosmed_account_id'   => ['required', 'exists:sosmed_accounts,id'],
+            'staff_id'            => ['nullable', 'exists:users,id'],
+            'pm_id'               => ['nullable', 'exists:users,id'],
+            'assistant_id'        => ['nullable', 'exists:users,id'],
+            'supervisor_staff_id' => ['nullable', 'exists:users,id'],
+            'notes'               => ['nullable', 'string', 'max:1000'],
         ]);
 
         $account = SosmedAccount::findOrFail($validated['sosmed_account_id']);
@@ -194,6 +230,11 @@ class SosmedController extends Controller
         $newStaffId = $validated['staff_id'] ?? null;
         $newPmId = $validated['pm_id'] ?? null;
         $newAssistantId = $validated['assistant_id'] ?? null;
+        $newSupervisorStaffId = $validated['supervisor_staff_id'] ?? null;
+
+        if (!$newSupervisorStaffId && ($newPmId || $newAssistantId)) {
+            $newSupervisorStaffId = Auth::id();
+        }
 
         if ($newStaffId) {
             $oversight = PmSosmedOversight::where('sosmed_id', $newStaffId)->first();
@@ -205,11 +246,12 @@ class SosmedController extends Controller
         $oldStaffId = $account->staff_id;
 
         $account->update([
-            'is_in_sosmed' => true,
-            'staff_id'     => $newStaffId,
-            'pm_id'        => $newPmId,
-            'assistant_id' => $newAssistantId,
-            'notes'        => $validated['notes'] ?? $account->notes,
+            'is_in_sosmed'        => true,
+            'staff_id'            => $newStaffId,
+            'pm_id'               => $newPmId,
+            'assistant_id'        => $newAssistantId,
+            'supervisor_staff_id' => $newSupervisorStaffId,
+            'notes'               => $validated['notes'] ?? $account->notes,
         ]);
 
         if ($newStaffId && $newStaffId !== $oldStaffId) {
@@ -258,16 +300,22 @@ class SosmedController extends Controller
         }
 
         $validated = $request->validate([
-            'sosmed_account_id' => ['nullable', 'exists:sosmed_accounts,id'],
-            'pm_id'             => ['nullable', 'exists:users,id'],
-            'assistant_id'      => ['nullable', 'exists:users,id'],
-            'staff_id'          => ['nullable', 'exists:users,id'],
-            'notes'             => ['nullable', 'string', 'max:1000'],
+            'sosmed_account_id'   => ['nullable', 'exists:sosmed_accounts,id'],
+            'pm_id'               => ['nullable', 'exists:users,id'],
+            'assistant_id'        => ['nullable', 'exists:users,id'],
+            'supervisor_staff_id' => ['nullable', 'exists:users,id'],
+            'staff_id'            => ['nullable', 'exists:users,id'],
+            'notes'               => ['nullable', 'string', 'max:1000'],
         ]);
 
         $newStaffId = $validated['staff_id'] ?? null;
         $newPmId = $validated['pm_id'] ?? null;
         $newAssistantId = $validated['assistant_id'] ?? null;
+        $newSupervisorStaffId = $validated['supervisor_staff_id'] ?? null;
+
+        if (!$newSupervisorStaffId && ($newPmId || $newAssistantId)) {
+            $newSupervisorStaffId = Auth::id();
+        }
 
         // Enforce role restriction: Staff cannot assign to HR Staff or Admin
         if ($newStaffId) {
@@ -294,9 +342,10 @@ class SosmedController extends Controller
         if (!empty($validated['sosmed_account_id']) && (int)$validated['sosmed_account_id'] !== (int)$account->id) {
             $targetAccount = SosmedAccount::findOrFail($validated['sosmed_account_id']);
             $account->update([
-                'staff_id'     => null,
-                'pm_id'        => null,
-                'assistant_id' => null,
+                'staff_id'            => null,
+                'pm_id'               => null,
+                'assistant_id'        => null,
+                'supervisor_staff_id' => null,
             ]);
             $isSwitched = true;
         }
@@ -304,10 +353,11 @@ class SosmedController extends Controller
         $oldStaffId = $targetAccount->staff_id;
 
         $targetAccount->update([
-            'pm_id'        => $newPmId,
-            'assistant_id' => $newAssistantId,
-            'staff_id'     => $newStaffId,
-            'notes'        => array_key_exists('notes', $validated) ? $validated['notes'] : $targetAccount->notes,
+            'pm_id'               => $newPmId,
+            'assistant_id'        => $newAssistantId,
+            'supervisor_staff_id' => $newSupervisorStaffId,
+            'staff_id'            => $newStaffId,
+            'notes'               => array_key_exists('notes', $validated) ? $validated['notes'] : $targetAccount->notes,
         ]);
 
         // Auto-generate today's daily task for the newly assigned sosmed user
@@ -344,9 +394,10 @@ class SosmedController extends Controller
         $platform = $account->platform;
 
         $account->update([
-            'staff_id'     => null,
-            'pm_id'        => null,
-            'assistant_id' => null,
+            'staff_id'            => null,
+            'pm_id'               => null,
+            'assistant_id'        => null,
+            'supervisor_staff_id' => null,
         ]);
 
         $this->logActivity('sosmed.unassigned', 'Sosmed', "Melepas penugasan akun '{$name}' ({$platform})", $account);
@@ -363,10 +414,11 @@ class SosmedController extends Controller
 
         $name = $account->name;
         $account->update([
-            'is_in_sosmed' => false,
-            'staff_id'     => null,
-            'pm_id'        => null,
-            'assistant_id' => null,
+            'is_in_sosmed'        => false,
+            'staff_id'            => null,
+            'pm_id'               => null,
+            'assistant_id'        => null,
+            'supervisor_staff_id' => null,
         ]);
 
         SosmedTask::where('sosmed_account_id', $account->id)
@@ -421,7 +473,9 @@ class SosmedController extends Controller
     }
 
     /**
-     * Final approval (Level 2) by HR Staff.
+     * Approval oleh HR Staff:
+     * - Level 2 (verified_by_pm) dari PM / Asisten
+     * - ATAU Verifikasi Langsung oleh Staff Pengawas yang dipilih (status done_by_staff)
      */
     public function verifyTask(Request $request, SosmedTask $task)
     {
@@ -430,29 +484,43 @@ class SosmedController extends Controller
             'rejection_note' => ['nullable', 'string', 'max:500'],
         ]);
 
+        $isSupervisorDirect = ($task->status === 'done_by_staff');
+
+        if ($isSupervisorDirect && $task->account?->supervisor_staff_id && $task->account->supervisor_staff_id !== Auth::id()) {
+            abort(403, 'Akses ditolak. Anda bukan Staff Pengawas yang ditugaskan untuk akun ini.');
+        }
+
         if ($validated['action'] === 'verify') {
             $task->update([
-                'status' => 'approved_hr',
+                'status'         => 'approved_hr',
+                'verified_by'    => $task->verified_by ?? Auth::id(),
+                'verified_at'    => $task->verified_at ?? now(),
                 'hr_verified_by' => Auth::id(),
                 'hr_verified_at' => now(),
             ]);
 
             SosmedApprovalLog::create([
                 'sosmed_task_id' => $task->id,
-                'user_id' => Auth::id(),
-                'user_name' => Auth::user()->name,
-                'role_name' => 'HR Staff',
-                'action' => 'approved_hr',
-                'notes' => 'Disetujui secara final oleh HR Staff.',
+                'user_id'        => Auth::id(),
+                'user_name'      => Auth::user()->name,
+                'role_name'      => $isSupervisorDirect ? 'Staff Pengawas (HR Staff)' : 'HR Staff',
+                'action'         => 'approved_hr',
+                'notes'          => $isSupervisorDirect
+                    ? 'Diverifikasi & disetujui langsung oleh Staff Pengawas (' . Auth::user()->name . ') sebagai pengganti PM/Asisten.'
+                    : 'Disetujui secara final oleh HR Staff.',
             ]);
 
             $this->logActivity('sosmed.verified', 'Sosmed', "Menyetujui tugas sosmed '{$task->title}'", $task);
 
             return redirect()->route('staff.sosmed.index', ['tab' => 'approvals'])
-                ->with('success', 'Tugas berhasil disetujui secara final oleh HR Staff.');
+                ->with('success', $isSupervisorDirect
+                    ? 'Tugas berhasil diverifikasi & disetujui langsung oleh Staff Pengawas.'
+                    : 'Tugas berhasil disetujui secara final oleh HR Staff.');
         } else {
             $task->update([
-                'status' => 'rejected',
+                'status'         => 'rejected',
+                'verified_by'    => $task->verified_by ?? Auth::id(),
+                'verified_at'    => $task->verified_at ?? now(),
                 'hr_verified_by' => Auth::id(),
                 'hr_verified_at' => now(),
                 'rejection_note' => $validated['rejection_note'],
@@ -460,11 +528,11 @@ class SosmedController extends Controller
 
             SosmedApprovalLog::create([
                 'sosmed_task_id' => $task->id,
-                'user_id' => Auth::id(),
-                'user_name' => Auth::user()->name,
-                'role_name' => 'HR Staff',
-                'action' => 'rejected',
-                'notes' => $validated['rejection_note'] ?? 'Ditolak oleh HR Staff',
+                'user_id'        => Auth::id(),
+                'user_name'      => Auth::user()->name,
+                'role_name'      => $isSupervisorDirect ? 'Staff Pengawas (HR Staff)' : 'HR Staff',
+                'action'         => 'rejected',
+                'notes'          => $validated['rejection_note'] ?? ($isSupervisorDirect ? 'Ditolak oleh Staff Pengawas' : 'Ditolak oleh HR Staff'),
             ]);
 
             $this->logActivity('sosmed.verified', 'Sosmed', "Menolak tugas sosmed '{$task->title}' dengan catatan: {$validated['rejection_note']}", $task);

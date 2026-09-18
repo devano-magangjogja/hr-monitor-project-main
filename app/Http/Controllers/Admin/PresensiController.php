@@ -59,11 +59,16 @@ class PresensiController extends Controller
             });
         }
 
-        // 1. Tabel Hadir (Lebih Awal, Tepat Waktu, Terlambat) - 5 data per halaman
+        // 1. Tabel Hadir (Lebih Awal, Tepat Waktu, Terlambat)
+        $allowedHadir   = ['Lebih Awal', 'Tepat Waktu', 'Terlambat'];
+        $filterKet      = in_array($request->input('keterangan'), $allowedHadir)
+                            ? $request->input('keterangan') : null;
+
         $presensiHadir = (clone $baseQuery)
-            ->whereIn('keterangan', ['Lebih Awal', 'Tepat Waktu', 'Terlambat'])
+            ->whereIn('keterangan', $allowedHadir)
+            ->when($filterKet, fn($q) => $q->where('keterangan', $filterKet))
             ->orderBy('waktu_masuk', 'asc')
-            ->paginate(5, ['*'], 'page_hadir')
+            ->paginate(15, ['*'], 'page_hadir')
             ->withQueryString()
             ->fragment('tabel-hadir');
 
@@ -71,7 +76,7 @@ class PresensiController extends Controller
         $presensiTidakHadir = (clone $baseQuery)
             ->where('keterangan', 'Tidak Hadir')
             ->orderBy('id', 'desc')
-            ->paginate(5, ['*'], 'page_tidak_hadir')
+            ->paginate(15, ['*'], 'page_tidak_hadir')
             ->withQueryString()
             ->fragment('tabel-tidak-hadir');
 
@@ -156,7 +161,9 @@ class PresensiController extends Controller
 
         $presensi = Presensi::create($validated);
         $pemagang = \App\Models\Pemagang::find($validated['pemagang_id']);
-        $this->logActivity('presensi.created', 'Presensi',
+        $this->logActivity(
+            'presensi.created',
+            'Presensi',
             "Mencatat presensi pemagang '{$pemagang?->nama_lengkap}' ({$validated['keterangan']}) di {$validated['kantor']}",
             $presensi
         );
@@ -181,7 +188,9 @@ class PresensiController extends Controller
         $validated['notes'] = $validated['notes'] ?? '-';
 
         $presensi->update($validated);
-        $this->logActivity('presensi.updated', 'Presensi',
+        $this->logActivity(
+            'presensi.updated',
+            'Presensi',
             "Memperbarui presensi pemagang '{$presensi->pemagang?->nama_lengkap}' tanggal {$presensi->tanggal}",
             $presensi
         );
@@ -198,7 +207,9 @@ class PresensiController extends Controller
         $tanggal = $presensi->tanggal;
         $namaPemagang = $presensi->pemagang?->nama_lengkap ?? 'Pemagang';
         $presensi->delete();
-        $this->logActivity('presensi.deleted', 'Presensi',
+        $this->logActivity(
+            'presensi.deleted',
+            'Presensi',
             "Menghapus catatan presensi '{$namaPemagang}' tanggal {$tanggal}"
         );
 
@@ -235,7 +246,7 @@ class PresensiController extends Controller
 
         // Tabel 1: Rekapitulasi per Pemagang (10 per halaman)
         $pemagangs = $queryPemagang->orderBy('nama_lengkap', 'asc')
-            ->paginate(10, ['*'], 'page_rekap')
+            ->paginate(15, ['*'], 'page_rekap')
             ->withQueryString()
             ->fragment('tabel-rekap-pemagang');
 
@@ -318,7 +329,7 @@ class PresensiController extends Controller
 
         $logs = $logQuery->orderBy('tanggal', 'desc')
             ->orderBy('id', 'desc')
-            ->paginate(5, ['*'], 'page_logs')
+            ->paginate(15, ['*'], 'page_logs')
             ->withQueryString()
             ->fragment('tabel-log-presensi');
 

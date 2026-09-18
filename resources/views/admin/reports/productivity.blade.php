@@ -10,52 +10,42 @@
 
 @section('content')
 
-    {{-- Filter Rentang Tanggal --}}
+    {{-- Filter --}}
     <div class="bg-white rounded-xl border border-gray-200 p-4 sm:p-5 mb-6 shadow-sm">
         <form method="GET" action="{{ route('admin.reports.productivity') }}"
             class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-3 items-end">
 
-            {{-- Dari Tanggal --}}
-            <div class="lg:col-span-3">
-                <label class="block text-[11px] font-semibold text-gray-500 uppercase tracking-wider mb-1">
-                    Dari Tanggal
-                </label>
-                <div class="relative">
-                    <input type="date" name="date_from" value="{{ $dateFrom }}" max="{{ $today }}"
-                        class="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-xs sm:text-sm font-medium text-gray-800 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:bg-white transition">
-                </div>
+            <div class="lg:col-span-2">
+                <label class="block text-[11px] font-semibold text-gray-500 uppercase tracking-wider mb-1">Dari Tanggal</label>
+                <input type="date" name="date_from" value="{{ $dateFrom }}" max="{{ $today }}"
+                    class="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-xs sm:text-sm font-medium text-gray-800 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:bg-white transition">
             </div>
 
-            {{-- Sampai Tanggal --}}
-            <div class="lg:col-span-3">
-                <label class="block text-[11px] font-semibold text-gray-500 uppercase tracking-wider mb-1">
-                    Sampai Tanggal
-                </label>
-                <div class="relative">
-                    <input type="date" name="date_to" value="{{ $dateTo }}" max="{{ $today }}"
-                        class="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-xs sm:text-sm font-medium text-gray-800 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:bg-white transition">
-                </div>
+            <div class="lg:col-span-2">
+                <label class="block text-[11px] font-semibold text-gray-500 uppercase tracking-wider mb-1">Sampai Tanggal</label>
+                <input type="date" name="date_to" value="{{ $dateTo }}" max="{{ $today }}"
+                    class="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-xs sm:text-sm font-medium text-gray-800 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:bg-white transition">
             </div>
 
-            {{-- Filter Role --}}
-            <div class="lg:col-span-3">
-                <label class="block text-[11px] font-semibold text-gray-500 uppercase tracking-wider mb-1">
-                    Filter Role
-                </label>
-                <div class="relative">
-                    <select name="role"
-                        class="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-xs sm:text-sm font-medium text-gray-800 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:bg-white transition">
-                        <option value="all" {{ ($selectedRole ?? 'all') === 'all' ? 'selected' : '' }}>Semua Role</option>
-                        @foreach($availableRoles as $roleOption)
-                            <option value="{{ $roleOption->name }}" {{ ($selectedRole ?? 'all') === $roleOption->name ? 'selected' : '' }}>
-                                {{ $roleOption->label }}
-                            </option>
-                        @endforeach
-                    </select>
-                </div>
+            <div class="lg:col-span-2">
+                <label class="block text-[11px] font-semibold text-gray-500 uppercase tracking-wider mb-1">Filter Role</label>
+                <select name="role"
+                    class="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-xs sm:text-sm font-medium text-gray-800 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:bg-white transition">
+                    <option value="all" {{ ($selectedRole ?? 'all') === 'all' ? 'selected' : '' }}>Semua Role</option>
+                    @foreach($availableRoles as $roleOption)
+                        <option value="{{ $roleOption->name }}" {{ ($selectedRole ?? 'all') === $roleOption->name ? 'selected' : '' }}>
+                            {{ $roleOption->label }}
+                        </option>
+                    @endforeach
+                </select>
             </div>
 
-            {{-- Tombol Aksi --}}
+            <div class="lg:col-span-3">
+                <label class="block text-[11px] font-semibold text-gray-500 uppercase tracking-wider mb-1">Cari Nama</label>
+                <input type="search" name="search" value="{{ $search ?? '' }}" placeholder="Cari pengguna..."
+                    class="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-xs sm:text-sm font-medium text-gray-800 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:bg-white transition">
+            </div>
+
             <div class="sm:col-span-2 lg:col-span-3 flex items-center gap-2">
                 <button type="submit"
                     class="flex-1 flex items-center justify-center gap-1.5 px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white text-xs sm:text-sm font-semibold rounded-lg transition shadow-sm hover:shadow">
@@ -66,7 +56,7 @@
                     <span>Tampilkan</span>
                 </button>
 
-                @if($dateFrom !== $today || $dateTo !== $today || ($selectedRole ?? 'all') !== 'all')
+                @if($dateFrom !== $today || $dateTo !== $today || ($selectedRole ?? 'all') !== 'all' || ($search ?? ''))
                     <a href="{{ route('admin.reports.productivity') }}"
                         class="px-3.5 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs sm:text-sm font-semibold rounded-lg transition text-center flex-shrink-0"
                         title="Reset Filter">
@@ -76,13 +66,13 @@
             </div>
         </form>
 
-        {{-- Info periode aktif --}}
         <div class="mt-3 pt-3 border-t border-gray-100 flex items-center gap-2 text-xs text-gray-500">
             <svg class="w-4 h-4 text-primary-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                     d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
             </svg>
-            <span>Menampilkan produktivitas periode:
+            <span>
+                Menampilkan produktivitas periode:
                 <strong class="font-semibold text-gray-800">
                     {{ \Carbon\Carbon::parse($dateFrom)->locale('id')->translatedFormat('d M Y') }}
                     @if($dateFrom !== $dateTo)
@@ -98,7 +88,7 @@
         </div>
     </div>
 
-    {{-- Tabel Ringkasan Produktivitas --}}
+    {{-- Tabel --}}
     <div class="bg-white rounded-xl border border-gray-200 overflow-hidden mb-6">
         <div class="px-4 sm:px-6 py-4 border-b border-gray-200 flex items-center justify-between">
             <h2 class="text-sm font-semibold text-gray-700">Ringkasan per Pengguna</h2>
@@ -121,15 +111,10 @@
                 <tbody class="divide-y divide-gray-100">
                     @forelse($report as $item)
                         @php
-                            $barColor = $item['pct'] === 100
-                                ? 'bg-green-500'
-                                : ($item['pct'] >= 50 ? 'bg-primary-500' : 'bg-yellow-500');
-                            $pctColor = $item['pct'] === 100
-                                ? 'text-green-600'
-                                : ($item['pct'] >= 50 ? 'text-primary-600' : 'text-yellow-600');
+                            $barColor = $item['pct'] === 100 ? 'bg-green-500' : ($item['pct'] >= 50 ? 'bg-primary-500' : 'bg-yellow-500');
+                            $pctColor = $item['pct'] === 100 ? 'text-green-600' : ($item['pct'] >= 50 ? 'text-primary-600' : 'text-yellow-600');
                         @endphp
                         <tr class="hover:bg-gray-50 transition">
-                            {{-- Nama --}}
                             <td class="px-3 sm:px-6 py-3 sm:py-3.5">
                                 <div class="flex items-center gap-2 sm:gap-3 min-w-0">
                                     <div class="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-primary-100 flex items-center justify-center flex-shrink-0">
@@ -140,29 +125,23 @@
                                     <span class="font-medium text-gray-800 truncate max-w-[10rem]">{{ $item['user']->name }}</span>
                                 </div>
                             </td>
-                            {{-- Role --}}
                             <td class="px-3 sm:px-6 py-3 sm:py-3.5">
                                 <span class="inline-flex items-center whitespace-nowrap px-2 py-0.5 sm:py-1 rounded-full text-[10px] sm:text-xs font-medium {{ $item['user']->role_badge_class }}">
                                     {{ $item['user']->role_label }}
                                 </span>
                             </td>
-                            {{-- Total --}}
                             <td class="px-3 sm:px-6 py-3 sm:py-3.5 text-center">
                                 <span class="text-gray-700 font-medium">{{ $item['total'] }}</span>
                             </td>
-                            {{-- Selesai --}}
                             <td class="px-3 sm:px-6 py-3 sm:py-3.5 text-center">
                                 <span class="text-green-600 font-semibold">{{ $item['completed'] }}</span>
                             </td>
-                            {{-- Pending --}}
                             <td class="px-3 sm:px-6 py-3 sm:py-3.5 text-center">
                                 <span class="text-yellow-600 font-medium">{{ $item['pending'] }}</span>
                             </td>
-                            {{-- Tdk Dikerjakan --}}
                             <td class="px-3 sm:px-6 py-3 sm:py-3.5 text-center">
                                 <span class="text-red-500 font-medium">{{ $item['notDone'] }}</span>
                             </td>
-                            {{-- Produktivitas --}}
                             <td class="px-3 sm:px-6 py-3 sm:py-3.5">
                                 <div class="flex items-center gap-2">
                                     <div class="flex-1 h-1.5 sm:h-2 bg-gray-100 rounded-full overflow-hidden min-w-[50px] max-w-[150px]">
@@ -171,17 +150,15 @@
                                     <span class="text-[10px] sm:text-xs font-bold {{ $pctColor }} w-8 text-right">{{ $item['pct'] }}%</span>
                                 </div>
                             </td>
-                            {{-- Aksi --}}
                             <td class="px-3 sm:px-6 py-3 sm:py-3.5 text-right">
-                                <a href="{{ route('admin.reports.productivity.detail', $item['user']->id) }}?date_from={{ $dateFrom }}&date_to={{ $dateTo }}&role={{ $selectedRole }}"
+                                <a href="{{ route('admin.reports.productivity.detail', $item['user']->id) }}?date_from={{ $dateFrom }}&date_to={{ $dateTo }}&role={{ $selectedRole ?? 'all' }}{{ !empty($search) ? '&search=' . urlencode($search) : '' }}"
                                     class="p-1.5 inline-flex text-gray-400 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition"
                                     title="Lihat Detail Tugas">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                             d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943
-                                               9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                            d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                                     </svg>
                                 </a>
                             </td>
