@@ -256,8 +256,16 @@
                                     </td>
                                     <td class="px-4 py-3 text-center">
                                         <button type="button"
-                                            class="p-1.5 text-gray-400 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition"
-                                            title="Lihat detail">
+                                            class="task-detail-btn p-1.5 text-gray-400 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition"
+                                            title="Lihat detail"
+                                            data-title="{{ e($task->title) }}"
+                                            data-description="{{ e(strip_tags($task->description ?? '')) }}"
+                                            data-type="{{ $task->type }}"
+                                            data-creator="{{ e($task->creator?->name ?? '') }}"
+                                            data-kantor="{{ e($task->kantor ?? '') }}"
+                                            data-status="{{ $status }}"
+                                            data-note="{{ e($assignment?->note ?? '') }}"
+                                            data-completed-at="{{ $assignment?->completed_at ? \Carbon\Carbon::parse($assignment->completed_at)->locale('id')->translatedFormat('d M Y, H:i') : '' }}">
                                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
                                                 <path stroke-linecap="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
@@ -286,8 +294,16 @@
                                     @endif
                                 </div>
                                 <button type="button"
-                                    class="p-1.5 text-gray-400 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition shrink-0"
-                                    title="Lihat detail">
+                                    class="task-detail-btn p-1.5 text-gray-400 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition shrink-0"
+                                    title="Lihat detail"
+                                    data-title="{{ e($task->title) }}"
+                                    data-description="{{ e(strip_tags($task->description ?? '')) }}"
+                                    data-type="{{ $task->type }}"
+                                    data-creator="{{ e($task->creator?->name ?? '') }}"
+                                    data-kantor="{{ e($task->kantor ?? '') }}"
+                                    data-status="{{ $status }}"
+                                    data-note="{{ e($assignment?->note ?? '') }}"
+                                    data-completed-at="{{ $assignment?->completed_at ? \Carbon\Carbon::parse($assignment->completed_at)->locale('id')->translatedFormat('d M Y, H:i') : '' }}">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
                                         <path stroke-linecap="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
@@ -330,3 +346,216 @@
 @endif
 
 @endsection
+
+{{-- Modal Detail Tugas --}}
+<div id="taskDetailModal"
+     class="fixed inset-0 z-50 flex items-center justify-center p-4 hidden"
+     role="dialog" aria-modal="true" aria-labelledby="modalTaskTitle">
+
+    {{-- Backdrop --}}
+    <div id="taskModalBackdrop"
+         class="absolute inset-0 bg-gray-900/50 backdrop-blur-sm opacity-0 transition-opacity duration-200"></div>
+
+    {{-- Panel --}}
+    <div id="taskModalPanel"
+         class="relative bg-white rounded-2xl shadow-2xl w-full max-w-lg mx-auto
+                transform scale-95 opacity-0 transition-all duration-200 overflow-hidden">
+
+        {{-- Header --}}
+        <div class="flex items-start justify-between gap-3 px-6 pt-5 pb-4 border-b border-gray-100">
+            <div class="flex items-center gap-3 min-w-0">
+                <div class="w-9 h-9 rounded-xl bg-primary-50 flex items-center justify-center flex-shrink-0">
+                    <svg class="w-5 h-5 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                              d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                    </svg>
+                </div>
+                <div class="min-w-0">
+                    <p class="text-[11px] font-medium text-gray-400 uppercase tracking-wide">Detail Tugas</p>
+                    <h3 id="modalTaskTitle" class="text-base font-bold text-gray-800 leading-snug break-words"></h3>
+                </div>
+            </div>
+            <button id="taskModalClose"
+                    type="button"
+                    class="flex-shrink-0 p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition"
+                    aria-label="Tutup">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+            </button>
+        </div>
+
+        {{-- Body --}}
+        <div class="px-6 py-4 space-y-4 max-h-[70vh] overflow-y-auto">
+
+            {{-- Status badge --}}
+            <div id="modalStatusWrap"></div>
+
+            {{-- Deskripsi --}}
+            <div>
+                <p class="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-1.5">Deskripsi</p>
+                <div id="modalDescription"
+                     class="text-sm text-gray-700 leading-relaxed bg-gray-50 rounded-xl px-4 py-3 whitespace-pre-wrap break-words">
+                </div>
+            </div>
+
+            {{-- Meta info grid --}}
+            <div class="grid grid-cols-2 gap-3">
+                <div class="bg-gray-50 rounded-xl px-4 py-3">
+                    <p class="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-1">Sumber</p>
+                    <div id="modalSource" class="text-sm font-medium text-gray-700"></div>
+                </div>
+                <div class="bg-gray-50 rounded-xl px-4 py-3">
+                    <p class="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-1">Kantor</p>
+                    <div id="modalKantor" class="text-sm font-medium text-gray-700"></div>
+                </div>
+            </div>
+
+            {{-- Waktu selesai --}}
+            <div id="modalCompletedAtWrap" class="hidden">
+                <p class="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-1.5">Waktu Selesai</p>
+                <div class="flex items-center gap-2 text-sm text-green-700 bg-green-50 rounded-xl px-4 py-3">
+                    <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                    </svg>
+                    <span id="modalCompletedAt" class="font-medium"></span>
+                </div>
+            </div>
+
+            {{-- Catatan --}}
+            <div id="modalNoteWrap" class="hidden">
+                <p class="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-1.5">Catatan Penyelesaian</p>
+                <div class="flex items-start gap-2 bg-amber-50 border border-amber-100 rounded-xl px-4 py-3">
+                    <svg class="w-4 h-4 text-amber-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                              d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z"/>
+                    </svg>
+                    <p id="modalNote" class="text-sm text-amber-800 italic leading-relaxed break-words"></p>
+                </div>
+            </div>
+
+        </div>
+
+        {{-- Footer --}}
+        <div class="px-6 py-4 border-t border-gray-100 flex justify-end">
+            <button id="taskModalCloseFooter"
+                    type="button"
+                    class="px-4 py-2 text-sm font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-lg transition">
+                Tutup
+            </button>
+        </div>
+    </div>
+</div>
+
+@push('scripts')
+<script>
+(function () {
+    const modal      = document.getElementById('taskDetailModal');
+    const backdrop   = document.getElementById('taskModalBackdrop');
+    const panel      = document.getElementById('taskModalPanel');
+    const btnClose   = document.getElementById('taskModalClose');
+    const btnCloseF  = document.getElementById('taskModalCloseFooter');
+
+    const statusMap = {
+        completed : { label: 'Selesai',          cls: 'bg-green-100 text-green-700 border border-green-200' },
+        pending   : { label: 'Belum Dikerjakan', cls: 'bg-yellow-100 text-yellow-700 border border-yellow-200' },
+        not_done  : { label: 'Tidak Dikerjakan', cls: 'bg-red-100 text-red-700 border border-red-200' },
+    };
+
+    const sourceMap = {
+        default : { label: 'Rutin',   cls: 'bg-purple-50 text-purple-700' },
+        self    : { label: 'Mandiri', cls: 'bg-gray-100 text-gray-600' },
+    };
+
+    function openModal(btn) {
+        const d = btn.dataset;
+
+        document.getElementById('modalTaskTitle').textContent = d.title || '—';
+
+        const st = statusMap[d.status] ?? { label: d.status, cls: 'bg-gray-100 text-gray-600' };
+        document.getElementById('modalStatusWrap').innerHTML =
+            `<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold ${st.cls}">
+                ${d.status === 'completed'
+                    ? '<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>'
+                    : d.status === 'not_done'
+                        ? '<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>'
+                        : '<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>'
+                }
+                ${st.label}
+            </span>`;
+
+        const descEl = document.getElementById('modalDescription');
+        if (d.description && d.description.trim() !== '') {
+            descEl.textContent = d.description;
+            descEl.classList.remove('text-gray-400', 'italic');
+        } else {
+            descEl.textContent = 'Tidak ada deskripsi.';
+            descEl.classList.add('text-gray-400', 'italic');
+        }
+
+        const srcEl = document.getElementById('modalSource');
+        if (sourceMap[d.type]) {
+            const s = sourceMap[d.type];
+            srcEl.innerHTML = `<span class="inline-flex px-2 py-0.5 rounded-full text-xs font-medium ${s.cls}">${s.label}</span>`;
+        } else {
+            const creatorName = d.creator || 'Atasan';
+            srcEl.innerHTML = `<span class="inline-flex px-2 py-0.5 rounded-full text-xs font-medium bg-blue-50 text-blue-700">${creatorName}</span>`;
+        }
+
+        const kantorEl = document.getElementById('modalKantor');
+        if (d.kantor && d.kantor.trim() !== '') {
+            kantorEl.innerHTML = `<span class="inline-flex px-2 py-0.5 rounded-md text-xs font-medium bg-slate-50 text-slate-700 border border-slate-200">${d.kantor}</span>`;
+        } else {
+            kantorEl.innerHTML = `<span class="text-gray-300 text-xs">—</span>`;
+        }
+
+        const completedWrap = document.getElementById('modalCompletedAtWrap');
+        if (d.completedAt && d.completedAt.trim() !== '') {
+            document.getElementById('modalCompletedAt').textContent = d.completedAt;
+            completedWrap.classList.remove('hidden');
+        } else {
+            completedWrap.classList.add('hidden');
+        }
+
+        const noteWrap = document.getElementById('modalNoteWrap');
+        if (d.note && d.note.trim() !== '') {
+            document.getElementById('modalNote').textContent = d.note;
+            noteWrap.classList.remove('hidden');
+        } else {
+            noteWrap.classList.add('hidden');
+        }
+
+        modal.classList.remove('hidden');
+        document.body.style.overflow = 'hidden';
+        requestAnimationFrame(() => {
+            backdrop.classList.add('opacity-100');
+            panel.classList.remove('scale-95', 'opacity-0');
+            panel.classList.add('scale-100', 'opacity-100');
+        });
+    }
+
+    function closeModal() {
+        backdrop.classList.remove('opacity-100');
+        panel.classList.remove('scale-100', 'opacity-100');
+        panel.classList.add('scale-95', 'opacity-0');
+        setTimeout(() => {
+            modal.classList.add('hidden');
+            document.body.style.overflow = '';
+        }, 200);
+    }
+
+    document.addEventListener('click', function (e) {
+        const btn = e.target.closest('.task-detail-btn');
+        if (btn) openModal(btn);
+    });
+
+    btnClose.addEventListener('click', closeModal);
+    btnCloseF.addEventListener('click', closeModal);
+    backdrop.addEventListener('click', closeModal);
+
+    document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape' && !modal.classList.contains('hidden')) closeModal();
+    });
+})();
+</script>
+@endpush

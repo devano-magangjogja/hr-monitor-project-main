@@ -47,17 +47,21 @@
                     <div class="flex items-start gap-3">
                         <div class="w-2.5 h-2.5 rounded-full flex-shrink-0 mt-1.5
                                     {{ $isCustom ? 'bg-amber-400' : 'bg-primary-500' }}"></div>
-                        <div class="flex-1 min-w-0">
-                            <p class="text-xs sm:text-sm font-semibold text-gray-800">{{ $title }}</p>
-                            <p class="text-xs text-gray-600 mt-0.5 leading-relaxed">{{ $body }}</p>
+                        <div class="flex-1 min-w-0 overflow-hidden">
+                            <p class="text-xs sm:text-sm font-semibold text-gray-800 truncate">
+                                {{ $title }}
+                            </p>
+                            <p class="text-xs text-gray-600 mt-0.5 leading-relaxed line-clamp-2 break-words">
+                                {{ $body }}
+                            </p>
                             <div class="flex items-center gap-2 mt-1.5 text-[11px] text-gray-400">
                                 <span>{{ $notification->created_at->locale('id')->diffForHumans() }}</span>
                                 <span>&bull;</span>
-                                <span>Dari: {{ $sender }}</span>
+                                <span class="truncate">Dari: {{ $sender }}</span>
                             </div>
                         </div>
                         <form action="{{ route('notifications.read', $notification->id) }}"
-                              method="POST" class="flex-shrink-0">
+                            method="POST" class="flex-shrink-0">
                             @csrf
                             @method('PATCH')
                             <button type="submit"
@@ -202,46 +206,46 @@
 
     // Render daftar notifikasi ke modal
     function renderPopupNotifications(notifications, totalCount) {
-        if (!listEl) return;
+    if (!listEl) return;
 
-        if (countEl) countEl.textContent = totalCount;
+    if (countEl) countEl.textContent = totalCount;
 
-        if (!notifications || notifications.length === 0) {
-            listEl.innerHTML = '<div id="notif-empty-state" class="px-6 py-8 text-center text-xs text-gray-400">Tidak ada notifikasi baru yang belum dibaca</div>';
-            return;
-        }
+    if (!notifications || notifications.length === 0) {
+        listEl.innerHTML = '<div id="notif-empty-state" class="px-6 py-8 text-center text-xs text-gray-400">Tidak ada notifikasi baru yang belum dibaca</div>';
+        return;
+    }
 
-        var html = '';
-        notifications.forEach(function(n) {
-            var dotBg = n.is_custom ? 'bg-amber-400' : 'bg-primary-500';
-            var sender = n.sender_name || 'Admin / HR';
-            var readUrl = '/notifications/' + n.id + '/read';
+    var html = '';
+    notifications.forEach(function(n) {
+        var dotBg = n.is_custom ? 'bg-amber-400' : 'bg-primary-500';
+        var sender = n.sender_name || 'Admin / HR';
+        var readUrl = '/notifications/' + n.id + '/read';
 
-            html += `
-                <div class="px-5 sm:px-6 py-3.5 hover:bg-gray-50 transition" id="notif-row-${n.id}">
-                    <div class="flex items-start gap-3">
-                        <div class="w-2.5 h-2.5 rounded-full flex-shrink-0 mt-1.5 ${dotBg}"></div>
-                        <div class="flex-1 min-w-0">
-                            <p class="text-xs sm:text-sm font-semibold text-gray-800">${n.title}</p>
-                            <p class="text-xs text-gray-600 mt-0.5 leading-relaxed">${n.message}</p>
-                            <div class="flex items-center gap-2 mt-1.5 text-[11px] text-gray-400">
-                                <span>${n.time_ago}</span>
-                                <span>&bull;</span>
-                                <span>Dari: ${sender}</span>
-                            </div>
+        html += `
+            <div class="px-5 sm:px-6 py-3.5 hover:bg-gray-50 transition" id="notif-row-${n.id}">
+                <div class="flex items-start gap-3">
+                    <div class="w-2.5 h-2.5 rounded-full flex-shrink-0 mt-1.5 ${dotBg}"></div>
+                    <div class="flex-1 min-w-0 overflow-hidden">
+                        <p class="text-xs sm:text-sm font-semibold text-gray-800 truncate">${n.title}</p>
+                        <p class="text-xs text-gray-600 mt-0.5 leading-relaxed line-clamp-2 break-words">${n.message}</p>
+                        <div class="flex items-center gap-2 mt-1.5 text-[11px] text-gray-400">
+                            <span>${n.time_ago}</span>
+                            <span>&bull;</span>
+                            <span class="truncate">Dari: ${sender}</span>
                         </div>
-                        <form action="${readUrl}" method="POST" class="flex-shrink-0">
-                            <input type="hidden" name="_token" value="${csrfToken}">
-                            <input type="hidden" name="_method" value="PATCH">
-                            <button type="submit"
-                                    class="text-xs text-primary-600 hover:text-primary-700 font-medium px-2 py-1 rounded hover:bg-primary-50 transition">
-                                Dibaca
-                            </button>
-                        </form>
                     </div>
+                    <form action="${readUrl}" method="POST" class="flex-shrink-0">
+                        <input type="hidden" name="_token" value="${csrfToken}">
+                        <input type="hidden" name="_method" value="PATCH">
+                        <button type="submit"
+                                class="text-xs text-primary-600 hover:text-primary-700 font-medium px-2 py-1 rounded hover:bg-primary-50 transition">
+                            Dibaca
+                        </button>
+                    </form>
                 </div>
-            `;
-        });
+            </div>
+        `;
+    });
 
         listEl.innerHTML = html;
     }
