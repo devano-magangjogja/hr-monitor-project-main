@@ -239,9 +239,9 @@ class TaskService
 
         $items = collect();
 
-        // A. Akun di mana user ini menjadi penanggung jawab langsung (staff_id)
+        // A. Akun di mana user ini menjadi penanggung jawab langsung (staffUsers)
         $accounts = SosmedAccount::with(['pmUser', 'creator'])
-            ->where('staff_id', $userId)
+            ->whereHas('staffUsers', fn($q) => $q->where('users.id', $userId))
             ->orderBy('platform')
             ->get();
 
@@ -249,6 +249,7 @@ class TaskService
             // 1. Tugas masa lalu yang BELUM disetujui final (status != 'approved_hr')
             $unapprovedTasks = SosmedTask::with(['verifiedBy', 'hrVerifiedBy'])
                 ->where('sosmed_account_id', $account->id)
+                ->where('assigned_to', $userId)
                 ->whereDate('task_date', '<', $today)
                 ->where('status', '!=', 'approved_hr')
                 ->orderByDesc('task_date')
@@ -258,9 +259,10 @@ class TaskService
                 $items->push($this->formatSosmedTaskItem($pt, $account, $userId, true));
             }
 
-            // 2. Tugas hari ini untuk akun tersebut
+            // 2. Tugas hari ini untuk akun tersebut bagi user ini
             $todayTask = SosmedTask::with(['verifiedBy', 'hrVerifiedBy'])
                 ->where('sosmed_account_id', $account->id)
+                ->where('assigned_to', $userId)
                 ->whereDate('task_date', $today)
                 ->first();
 
@@ -275,8 +277,7 @@ class TaskService
         // B. Jika user adalah PM, ambil juga tugas verifikasi konten staff yang menunggu verifikasi PM
         if ($user->role === 'pm') {
             $supervisedAccountIds = SosmedAccount::where('pm_id', $userId)
-                ->where('staff_id', '!=', $userId)
-                ->whereNotNull('staff_id')
+                ->whereHas('staffUsers', fn($q) => $q->where('users.id', '!=', $userId))
                 ->pluck('id');
 
             if ($supervisedAccountIds->isNotEmpty()) {

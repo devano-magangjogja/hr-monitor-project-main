@@ -25,7 +25,7 @@ class SosmedController extends Controller
 
         // ── Kapasitas 1: Akun Mandiri yang Dikelola Sendiri oleh PM (Eksekutor) ────
         $myAccounts = SosmedAccount::with(['creator'])
-            ->where('staff_id', $currentUserId)
+            ->whereHas('staffUsers', fn($q) => $q->where('users.id', $currentUserId))
             ->orderBy('platform')
             ->paginate(5);
 
@@ -41,10 +41,9 @@ class SosmedController extends Controller
 
         // ── Kapasitas 2: Akun & Staff yang Disupervisi oleh PM (Supervisor/Approver) ─
         // 1. Akun langsung di mana pm_id = me tapi dikerjakan staff lain
-        $directSupervisedAccounts = SosmedAccount::with(['staffUser', 'creator'])
+        $directSupervisedAccounts = SosmedAccount::with(['staffUsers', 'creator'])
             ->where('pm_id', $currentUserId)
-            ->where('staff_id', '!=', $currentUserId)
-            ->whereNotNull('staff_id')
+            ->whereHas('staffUsers', fn($q) => $q->where('users.id', '!=', $currentUserId))
             ->get();
 
         // 2. Akun via pivot oversight (PM -> Sosmed staff)
@@ -55,15 +54,13 @@ class SosmedController extends Controller
         $oversightStaffIds = $oversightLinks->pluck('sosmed_id')->filter();
 
         // Semua akun staff yang berada di bawah pengawasan PM ini
-        $allSupervisedAccounts = SosmedAccount::with(['staffUser', 'creator'])
+        $allSupervisedAccounts = SosmedAccount::with(['staffUsers', 'creator'])
             ->where(function ($q) use ($currentUserId, $oversightStaffIds) {
                 $q->where(function ($q2) use ($currentUserId) {
                     $q2->where('pm_id', $currentUserId)
-                       ->where('staff_id', '!=', $currentUserId)
-                       ->whereNotNull('staff_id');
+                       ->whereHas('staffUsers', fn($sub) => $sub->where('users.id', '!=', $currentUserId));
                 })->orWhere(function ($q2) use ($oversightStaffIds, $currentUserId) {
-                    $q2->whereIn('staff_id', $oversightStaffIds)
-                       ->where('staff_id', '!=', $currentUserId);
+                    $q2->whereHas('staffUsers', fn($sub) => $sub->whereIn('users.id', $oversightStaffIds)->where('users.id', '!=', $currentUserId));
                 });
             })
             ->orderBy('platform')
@@ -81,9 +78,9 @@ class SosmedController extends Controller
             ->keyBy('sosmed_account_id');
 
         // Oversight data grouping per staff user
-        $oversightStaffUsers = $allSupervisedAccounts->pluck('staffUser')->filter()->unique('id');
+        $oversightStaffUsers = $allSupervisedAccounts->pluck('staffUsers')->flatten()->filter()->unique('id');
         $oversightData = $oversightStaffUsers->map(function ($staffUser) use ($supervisedTodayTasks) {
-            $userAccounts = SosmedAccount::where('staff_id', $staffUser->id)
+            $userAccounts = SosmedAccount::whereHas('staffUsers', fn($q) => $q->where('users.id', $staffUser->id))
                 ->orderBy('platform')
                 ->get();
             $userAccountIds = $userAccounts->pluck('id');
@@ -295,13 +292,14 @@ class SosmedController extends Controller
         $currentUserId = Auth::id();
         $supervisedAccountIds = SosmedAccount::where(function ($q) use ($currentUserId) {
                 $q->where('pm_id', $currentUserId)
-                   ->where('staff_id', '!=', $currentUserId)
-                   ->whereNotNull('staff_id');
+                   ->whereHas('staffUsers', fn($sub) => $sub->where('users.id', '!=', $currentUserId));
             })
             ->orWhere(function ($q) use ($currentUserId) {
-                $q->whereIn('staff_id', function ($q2) use ($currentUserId) {
-                    $q2->select('sosmed_id')->from('pm_sosmed_oversights')->where('pm_id', $currentUserId);
-                })->where('staff_id', '!=', $currentUserId);
+                $q->whereHas('staffUsers', function ($q2) use ($currentUserId) {
+                    $q2->whereIn('users.id', function ($q3) use ($currentUserId) {
+                        $q3->select('sosmed_id')->from('pm_sosmed_oversights')->where('pm_id', $currentUserId);
+                    })->where('users.id', '!=', $currentUserId);
+                });
             })
             ->pluck('id')
             ->unique();

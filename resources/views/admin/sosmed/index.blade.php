@@ -7,6 +7,19 @@
 @endsection
 
 @section('content')
+    @php
+        $executorsJson = json_encode($executors->map(fn($e) => [
+            'id' => $e->id,
+            'name' => $e->name,
+            'role' => $e->role,
+            'role_label' => match($e->role) {
+                'pm' => 'PM Mandiri',
+                'sosmed' => 'Staff Sosmed',
+                'digital_marketing' => 'Digital Marketing',
+                default => $e->role_label ?? strtoupper($e->role)
+            }
+        ]));
+    @endphp
     @include('components.notification-popup')
 
     {{-- ═══════════════════════════════════════════════════════════════ --}}
@@ -173,183 +186,199 @@
                             </thead>
                             <tbody class="divide-y divide-gray-100">
                                 @forelse($accounts as $acc)
-                                    <tr class="hover:bg-gray-50/80 transition align-middle">
-                                        <td class="px-4 py-3.5 min-w-[180px]">
-                                            <span class="font-semibold text-gray-800 block break-words"
-                                                title="{{ $acc->name }}">{{ $acc->name }}</span>
-                                            @if($acc->notes)
-                                                <p class="text-xs text-gray-400 mt-0.5 truncate max-w-full block" title="{{ $acc->notes }}">
-                                                    {{ $acc->notes }}
-                                                </p>
-                                            @endif
-                                        </td>
-                                        <td class="px-4 py-3.5">
-                                            <span
-                                                class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-medium border whitespace-nowrap {{ $acc->platform_color }}">
-                                                {{ $acc->platform_icon }} {{ $acc->platform }}
-                                            </span>
-                                        </td>
-                                        <td class="px-4 py-3.5">
-                                            @if($acc->link)
-                                                <a href="{{ $acc->link }}" target="_blank"
+                                    @php
+                                        $managers = $acc->staffUsers;
+                                        $hasManagers = $managers->count() > 0;
+                                        // Kalau belum ada pengelola, tetap tampilkan 1 baris kosong
+                                        $rows = $hasManagers ? $managers : collect([null]);
+                                    @endphp
+
+                                    @foreach($rows as $stUser)
+                                        @php
+                                            $staffRoleTag = $stUser ? match ($stUser->role) {
+                                                'pm' => 'PM Mandiri',
+                                                'sosmed' => 'Staff Sosmed',
+                                                'digital_marketing' => 'Digital Marketing',
+                                                'hr_assistant' => 'HR Assistant',
+                                                'hr_staff' => 'HR Staff',
+                                                default => $stUser->role_label ?? strtoupper($stUser->role)
+                                            } : null;
+
+                                            // Logic verifikasi berdasarkan ROLE pengelola di baris ini
+                                            $isDirectAdmin = $stUser && $stUser->role === 'hr_staff';
+                                            $isDirectHr    = $stUser && in_array($stUser->role, ['pm', 'hr_assistant']);
+                                        @endphp
+
+                                        <tr class="hover:bg-gray-50/80 transition align-middle">
+                                            {{-- Nama Akun --}}
+                                            <td class="px-4 py-3.5 min-w-[180px]">
+                                                <span class="font-semibold text-gray-800 block break-words" title="{{ $acc->name }}">
+                                                    {{ $acc->name }}
+                                                </span>
+                                                @if($acc->notes)
+                                                    <p class="text-xs text-gray-400 mt-0.5 truncate max-w-full block" title="{{ $acc->notes }}">
+                                                        {{ $acc->notes }}
+                                                    </p>
+                                                @endif
+                                            </td>
+
+                                            {{-- Platform --}}
+                                            <td class="px-4 py-3.5">
+                                                <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-medium border whitespace-nowrap {{ $acc->platform_color }}">
+                                                    {{ $acc->platform_icon }} {{ $acc->platform }}
+                                                </span>
+                                            </td>
+
+                                            {{-- URL --}}
+                                            <td class="px-4 py-3.5">
+                                                @if($acc->link)
+                                                    <a href="{{ $acc->link }}" target="_blank"
                                                     class="inline-flex items-center gap-1 text-xs text-primary-600 hover:underline truncate max-w-full block"
                                                     title="{{ $acc->link }}">
-                                                    <svg class="w-3 h-3 flex-shrink-0" fill="none" stroke="currentColor"
-                                                        viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                            d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                                                    </svg>
-                                                    <span class="truncate">Buka</span>
-                                                </a>
-                                            @else
-                                                <span class="text-xs text-gray-300">—</span>
-                                            @endif
-                                        </td>
-                                        <td class="px-4 py-3 text-xs min-w-0">
-                                            @if($acc->staffUser)
-                                                @php
-                                                    $staffRoleTag = match ($acc->staffUser->role) {
-                                                        'pm' => 'PM Mandiri',
-                                                        'sosmed' => 'Staff Sosmed',
-                                                        'digital_marketing' => 'Digital Marketing',
-                                                        default => $acc->staffUser->role_label ?? strtoupper($acc->staffUser->role)
-                                                    };
-                                                @endphp
-                                                <div class="min-w-0">
-                                                    <span class="font-semibold text-gray-800 block truncate"
-                                                        title="{{ $acc->staffUser->name }}">
-                                                        {{ $acc->staffUser->name }}
-                                                    </span>
-                                                    <span
-                                                        class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold mt-1 {{ $acc->staffUser->role === 'pm' ? 'bg-indigo-50 text-indigo-700 border border-indigo-200' : 'bg-pink-50 text-pink-700 border border-pink-200' }}">
-                                                        {{ $staffRoleTag }}
-                                                    </span>
-                                                </div>
-                                            @else
-                                                <span
-                                                    class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600 whitespace-nowrap">
-                                                    Belum Ditugaskan
-                                                </span>
-                                            @endif
-                                        </td>
-                                        <td class="px-4 py-3 text-xs min-w-0">
-                                            @if($acc->staffUser && $acc->staffUser->role === 'hr_staff')
-                                                <span class="text-gray-400 text-[11px] block">Langsung ke Admin</span>
-                                            @elseif($acc->staffUser && in_array($acc->staffUser->role, ['pm', 'hr_assistant']))
-                                                <span class="text-gray-400 text-[11px] block">Langsung ke HR</span>
-                                            @elseif($acc->pmUser)
-                                                <div class="min-w-0">
-                                                    <span class="font-semibold text-gray-800 block truncate"
-                                                        title="{{ $acc->pmUser->name }}">
-                                                        {{ $acc->pmUser->name }}
-                                                    </span>
-                                                    <span
-                                                        class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold mt-1 bg-purple-50 text-purple-700 border border-purple-200">
-                                                        Supervisor PM
-                                                    </span>
-                                                </div>
-                                            @else
-                                                <span
-                                                    class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600 whitespace-nowrap">
-                                                    Belum Ada PM
-                                                </span>
-                                            @endif
-                                        </td>
+                                                        <svg class="w-3 h-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                                d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+                                                        </svg>
+                                                        <span class="truncate">Buka</span>
+                                                    </a>
+                                                @else
+                                                    <span class="text-xs text-gray-300">—</span>
+                                                @endif
+                                            </td>
 
-                                        {{-- Asisten Pengawas --}}
-                                        <td class="px-4 py-3 text-xs min-w-0">
-                                            @if($acc->staffUser && $acc->staffUser->role === 'hr_staff')
-                                                <span class="text-gray-400 text-[11px] block">Langsung ke Admin</span>
-                                            @elseif($acc->staffUser && in_array($acc->staffUser->role, ['pm', 'hr_assistant']))
-                                                <span class="text-gray-400 text-[11px] block">Langsung ke HR</span>
-                                            @elseif($acc->assistantUser)
-                                                <div class="min-w-0">
+                                            {{-- Dikelola (1 orang saja per baris) --}}
+                                            <td class="px-4 py-3 text-xs min-w-0">
+                                                @if($stUser)
                                                     <div class="min-w-0">
-                                                        <span class="font-semibold text-gray-800 block truncate"
-                                                            title="{{ $acc->assistantUser->name }}">
+                                                        <span class="font-semibold text-gray-800 block truncate" title="{{ $stUser->name }}">
+                                                            {{ $stUser->name }}
+                                                        </span>
+                                                        <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold mt-0.5
+                                                            {{ $stUser->role === 'pm' ? 'bg-indigo-50 text-indigo-700 border border-indigo-200' : 'bg-pink-50 text-pink-700 border border-pink-200' }}">
+                                                            {{ $staffRoleTag }}
+                                                        </span>
+                                                    </div>
+                                                @else
+                                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600 whitespace-nowrap">
+                                                        Belum Ditugaskan
+                                                    </span>
+                                                @endif
+                                            </td>
+
+                                            {{-- PM (berdasarkan role pengelola di baris ini) --}}
+                                            <td class="px-4 py-3 text-xs min-w-0">
+                                                @if($isDirectAdmin)
+                                                    <span class="text-gray-400 text-[11px] block">Langsung ke Admin</span>
+                                                @elseif($isDirectHr)
+                                                    <span class="text-gray-400 text-[11px] block">Langsung ke HR</span>
+                                                @elseif($acc->pmUser)
+                                                    <div class="min-w-0">
+                                                        <span class="font-semibold text-gray-800 block truncate" title="{{ $acc->pmUser->name }}">
+                                                            {{ $acc->pmUser->name }}
+                                                        </span>
+                                                        <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold mt-1 bg-purple-50 text-purple-700 border border-purple-200">
+                                                            Supervisor PM
+                                                        </span>
+                                                    </div>
+                                                @else
+                                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600 whitespace-nowrap">
+                                                        Belum Ada PM
+                                                    </span>
+                                                @endif
+                                            </td>
+
+                                            {{-- Asisten Pengawas --}}
+                                            <td class="px-4 py-3 text-xs min-w-0">
+                                                @if($isDirectAdmin)
+                                                    <span class="text-gray-400 text-[11px] block">Langsung ke Admin</span>
+                                                @elseif($isDirectHr)
+                                                    <span class="text-gray-400 text-[11px] block">Langsung ke HR</span>
+                                                @elseif($acc->assistantUser)
+                                                    <div class="min-w-0">
+                                                        <span class="font-semibold text-gray-800 block truncate" title="{{ $acc->assistantUser->name }}">
                                                             {{ $acc->assistantUser->name }}
                                                         </span>
-                                                        <span
-                                                            class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold mt-0.5 bg-teal-50 text-teal-700 border border-teal-200">
+                                                        <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold mt-0.5 bg-teal-50 text-teal-700 border border-teal-200">
                                                             Asisten HR
                                                         </span>
                                                     </div>
-                                                </div>
-                                            @else
-                                                <span
-                                                    class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600 whitespace-nowrap">
-                                                    Tanpa Asisten
-                                                </span>
-                                            @endif
-                                        </td>
+                                                @else
+                                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600 whitespace-nowrap">
+                                                        Tanpa Asisten
+                                                    </span>
+                                                @endif
+                                            </td>
 
-                                        {{-- Staff Pengawas --}}
-                                        <td class="px-4 py-3 text-xs min-w-0">
-                                            @if($acc->supervisorStaff)
-                                                <div class="min-w-0">
+                                            {{-- Staff Pengawas (tetap level akun) --}}
+                                            <td class="px-4 py-3 text-xs min-w-0">
+                                                @if($acc->supervisorStaff)
                                                     <div class="min-w-0">
-                                                        <span class="font-semibold text-gray-800 block truncate"
-                                                            title="{{ $acc->supervisorStaff->name }}">
+                                                        <span class="font-semibold text-gray-800 block truncate" title="{{ $acc->supervisorStaff->name }}">
                                                             {{ $acc->supervisorStaff->name }}
                                                         </span>
-                                                        <span
-                                                            class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold mt-0.5 bg-blue-50 text-blue-700 border border-blue-200">
+                                                        <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold mt-0.5 bg-blue-50 text-blue-700 border border-blue-200">
                                                             Staff Pengawas
                                                         </span>
                                                     </div>
-                                                </div>
-                                            @else
-                                                <span
-                                                    class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-500 whitespace-nowrap">
-                                                    Tanpa Pengawas
-                                                </span>
-                                            @endif
-                                        </td>
-                                        <td class="px-4 py-3.5 text-center">
-                                            <div class="flex items-center justify-center gap-1">
-                                                <button type="button"
-                                                    onclick="openEditAccountModal({{ $acc->id }}, '{{ addslashes($acc->name) }}', '{{ addslashes($acc->platform) }}', '{{ addslashes($acc->link ?? '') }}', {{ $acc->pm_id ?? 'null' }}, {{ $acc->staff_id ?? 'null' }}, '{{ addslashes(str_replace(["\r", "\n"], [' ', ' '], $acc->notes ?? '')) }}', {{ $acc->assistant_id ?? 'null' }}, {{ $acc->supervisor_staff_id ?? 'null' }})"
-                                                    class="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition"
-                                                    title="Atur Penugasan">
-                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                            d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                                                    </svg>
-                                                </button>
-                                                @if($acc->staff_id)
-                                                    <form method="POST" action="{{ route('admin.sosmed.accounts.unassign', $acc) }}"
-                                                        onsubmit="return confirm('Lepas penugasan untuk akun {{ addslashes($acc->name) }}? Akun tetap berada di daftar kelola sosmed dengan status belum ditugaskan.')"
-                                                        class="inline">
-                                                        @csrf
-                                                        <button type="submit"
-                                                            class="p-1.5 text-gray-400 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition"
-                                                            title="Lepas Penugasan (Jadikan Belum Ditugaskan)">
-                                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                                    d="M13 7a4 4 0 11-8 0 4 4 0 018 0zM9 14a6 6 0 00-6 6v1h12v-1a6 6 0 00-6-6zM21 12h-6" />
-                                                            </svg>
-                                                        </button>
-                                                    </form>
+                                                @else
+                                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-500 whitespace-nowrap">
+                                                        Tanpa Pengawas
+                                                    </span>
                                                 @endif
-                                                <form method="POST" action="{{ route('admin.sosmed.accounts.destroy', $acc) }}"
-                                                    onsubmit="return confirm('Hapus akun {{ addslashes($acc->name) }} dari daftar kelola sosmed? Data kredensial tetap aman di Manajemen Akun.')">
-                                                    @csrf @method('DELETE')
-                                                    <button type="submit"
-                                                        class="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition"
-                                                        title="Hapus dari Kelola Sosmed">
+                                            </td>
+
+                                            {{-- Aksi --}}
+                                            <td class="px-4 py-3.5 text-center">
+                                                <div class="flex items-center justify-center gap-1">
+                                                    {{-- Edit penugasan akun --}}
+                                                    <button type="button"
+                                                        onclick="openEditAccountModal({
+                                                            id: {{ $acc->id }},
+                                                            name: '{{ addslashes($acc->name) }}',
+                                                            platform: '{{ addslashes($acc->platform) }}',
+                                                            link: '{{ addslashes($acc->link ?? '') }}',
+                                                            pm_id: {{ $acc->pm_id ?? 'null' }},
+                                                            assistant_id: {{ $acc->assistant_id ?? 'null' }},
+                                                            supervisor_staff_id: {{ $acc->supervisor_staff_id ?? 'null' }},
+                                                            notes: '{{ addslashes(str_replace(["\r", "\n"], [' ', ' '], $acc->notes ?? '')) }}',
+                                                            staff_users: {{ json_encode($acc->staffUsers->map(fn($u) => ['id' => $u->id, 'name' => $u->name, 'role' => $u->role, 'role_label' => match($u->role) { 'pm' => 'PM Mandiri', 'sosmed' => 'Staff Sosmed', 'digital_marketing' => 'Digital Marketing', default => $u->role_label ?? strtoupper($u->role) }])) }},
+                                                            managers_count: {{ $acc->staffUsers->count() }},
+                                                            assigned_user_ids: {{ json_encode($acc->staffUsers->pluck('id')) }}
+                                                        })"
+                                                        class="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition"
+                                                        title="Atur Penugasan">
                                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                                                d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
                                                         </svg>
                                                     </button>
-                                                </form>
-                                            </div>
-                                        </td>
-                                    </tr>
+
+                                                    {{-- Ikon sampah = lepas HANYA pengelola di baris ini --}}
+                                                    @if($stUser)
+                                                        <form method="POST" action="{{ route('admin.sosmed.accounts.unassign', $acc) }}"
+                                                            onsubmit="return confirm('Lepas akses {{ addslashes($stUser->name) }} dari akun {{ addslashes($acc->name) }}?')"
+                                                            class="inline">
+                                                            @csrf
+                                                            <input type="hidden" name="user_id" value="{{ $stUser->id }}">
+                                                            <button type="submit"
+                                                                    class="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition"
+                                                                    title="Lepas {{ $stUser->name }} dari akun ini">
+                                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                                                </svg>
+                                                            </button>
+                                                        </form>
+                                                    @endif
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    @endforeach
                                 @empty
                                     <tr>
-                                        <td colspan="7" class="px-4 py-8 text-center text-sm text-gray-400">Belum ada akun sosial media
-                                            yang didaftarkan.</td>
+                                        <td colspan="8" class="px-4 py-8 text-center text-sm text-gray-400">
+                                            Belum ada akun sosial media yang didaftarkan.
+                                        </td>
                                     </tr>
                                 @endforelse
                             </tbody>
@@ -357,15 +386,36 @@
                     </div>
 
                     {{-- Mobile Cards (< md) --}} <div class="md:hidden space-y-3">
-                        @forelse($accounts as $acc)
+                    @forelse($accounts as $acc)
+                        @php
+                            $managers = $acc->staffUsers;
+                            $hasManagers = $managers->count() > 0;
+                            $rows = $hasManagers ? $managers : collect([null]);
+                        @endphp
+
+                        @foreach($rows as $stUser)
+                            @php
+                                $staffRoleTag = $stUser ? match ($stUser->role) {
+                                    'pm' => 'PM Mandiri',
+                                    'sosmed' => 'Staff Sosmed',
+                                    'digital_marketing' => 'Digital Marketing',
+                                    'hr_assistant' => 'HR Assistant',
+                                    'hr_staff' => 'HR Staff',
+                                    default => $stUser->role_label ?? strtoupper($stUser->role)
+                                } : null;
+
+                                $isDirectAdmin = $stUser && $stUser->role === 'hr_staff';
+                                $isDirectHr    = $stUser && in_array($stUser->role, ['pm', 'hr_assistant']);
+                            @endphp
+
                             <div class="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
+                                {{-- Header: Nama + Platform + Aksi --}}
                                 <div class="flex items-start justify-between gap-2 mb-3">
                                     <div class="min-w-0">
                                         <p class="font-semibold text-gray-800 text-sm truncate" title="{{ $acc->name }}">
                                             {{ $acc->name }}
                                         </p>
-                                        <span
-                                            class="inline-flex items-center gap-1 mt-1 px-2 py-0.5 rounded-md text-xs font-medium border {{ $acc->platform_color }}">
+                                        <span class="inline-flex items-center gap-1 mt-1 px-2 py-0.5 rounded-md text-xs font-medium border {{ $acc->platform_color }}">
                                             {{ $acc->platform_icon }} {{ $acc->platform }}
                                         </span>
                                         @if($acc->notes)
@@ -374,43 +424,33 @@
                                             </p>
                                         @endif
                                     </div>
-                                    <div class="flex items-center gap-1">
+
+                                    <div class="flex items-center gap-1 flex-shrink-0">
+                                        {{-- Edit --}}
                                         <button type="button"
-                                            onclick="openEditAccountModal({{ $acc->id }}, '{{ addslashes($acc->name) }}', '{{ addslashes($acc->platform) }}', '{{ addslashes($acc->link ?? '') }}', {{ $acc->pm_id ?? 'null' }}, {{ $acc->staff_id ?? 'null' }}, '{{ addslashes(str_replace(["\r", "\n"], [' ', ' '], $acc->notes ?? '')) }}', {{ $acc->assistant_id ?? 'null' }}, {{ $acc->supervisor_staff_id ?? 'null' }})"
+                                            onclick="openEditAccountModal({ ... })"
                                             class="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition"
                                             title="Atur Penugasan">
-                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                    d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                                            </svg>
+                                            {{-- svg edit --}}
                                         </button>
-                                        @if($acc->staff_id)
+
+                                        {{-- Ikon sampah = lepas HANYA pengelola di card ini --}}
+                                        @if($stUser)
                                             <form method="POST" action="{{ route('admin.sosmed.accounts.unassign', $acc) }}"
-                                                onsubmit="return confirm('Lepas penugasan untuk akun {{ addslashes($acc->name) }}? Akun tetap berada di daftar kelola sosmed dengan status belum ditugaskan.')"
+                                                onsubmit="return confirm('Lepas akses {{ addslashes($stUser->name) }} dari akun {{ addslashes($acc->name) }}?')"
                                                 class="inline">
                                                 @csrf
+                                                <input type="hidden" name="user_id" value="{{ $stUser->id }}">
                                                 <button type="submit"
-                                                    class="p-1.5 text-gray-400 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition"
-                                                    title="Lepas Penugasan (Jadikan Belum Ditugaskan)">
+                                                        class="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition"
+                                                        title="Lepas {{ $stUser->name }} dari akun ini">
                                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                            d="M13 7a4 4 0 11-8 0 4 4 0 018 0zM9 14a6 6 0 00-6 6v1h12v-1a6 6 0 00-6-6zM21 12h-6" />
+                                                            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
                                                     </svg>
                                                 </button>
                                             </form>
                                         @endif
-                                        <form method="POST" action="{{ route('admin.sosmed.accounts.destroy', $acc) }}"
-                                            onsubmit="return confirm('Hapus akun {{ addslashes($acc->name) }} dari daftar kelola sosmed? Data kredensial tetap aman di Manajemen Akun.')">
-                                            @csrf @method('DELETE')
-                                            <button type="submit"
-                                                class="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition"
-                                                title="Hapus dari Kelola Sosmed">
-                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                                </svg>
-                                            </button>
-                                        </form>
                                     </div>
                                 </div>
 
@@ -419,64 +459,71 @@
                                     <div class="border-t border-gray-100 pt-2.5 mt-2.5">
                                         <p class="text-gray-400 text-xs mb-1">Link Akun</p>
                                         <a href="{{ $acc->link }}" target="_blank" rel="noopener noreferrer"
-                                            class="inline-flex items-center gap-1 text-xs text-primary-600 hover:text-primary-800 hover:underline truncate">
+                                        class="inline-flex items-center gap-1 text-xs text-primary-600 hover:text-primary-800 hover:underline truncate">
                                             <svg class="w-3 h-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                    d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                                                    d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
                                             </svg>
                                             <span class="truncate">Buka Link</span>
                                         </a>
                                     </div>
                                 @endif
 
-                                {{-- Row Eksekutor (Kiri) & Supervisor PM (Kanan) --}}
-                                <div class="flex items-center justify-between gap-2 pt-1">
+                                {{-- Eksekutor (1 orang) & Supervisor PM --}}
+                                <div class="flex items-center justify-between gap-2 pt-2.5 mt-2.5 border-t border-gray-100">
                                     <div class="min-w-0">
-                                        <p class="text-gray-400 mb-0.5">Eksekutor</p>
-                                        <p class="font-medium text-gray-800 truncate block">
-                                            @if($acc->staffUser)
-                                                @php
-                                                    $mRoleTag = match ($acc->staffUser->role) {
-                                                        'pm' => 'PM Mandiri',
-                                                        'sosmed' => 'Staff Sosmed',
-                                                        'digital_marketing' => 'Digital Marketing',
-                                                        default => $acc->staffUser->role_label ?? strtoupper($acc->staffUser->role)
-                                                    };
-                                                @endphp
-                                                {{ $acc->staffUser->name }} <span
-                                                    class="text-[10px] text-gray-500 font-normal">({{ $mRoleTag }})</span>
+                                        <p class="text-gray-400 text-xs mb-0.5">Eksekutor</p>
+                                        <div class="font-medium text-gray-800 text-xs">
+                                            @if($stUser)
+                                                <div class="truncate">
+                                                    {{ $stUser->name }}
+                                                    <span class="text-[10px] text-gray-500 font-normal">({{ $staffRoleTag }})</span>
+                                                </div>
                                             @else
                                                 <span class="text-amber-600 font-medium">Belum Ditugaskan</span>
                                             @endif
-                                        </p>
+                                        </div>
                                     </div>
                                     <div class="min-w-0 text-right">
-                                        <p class="text-gray-400 mb-0.5">Supervisor PM</p>
+                                        <p class="text-gray-400 text-xs mb-0.5">Supervisor PM</p>
                                         <p class="font-medium text-gray-800 truncate block text-xs">
-                                            {{ ($acc->staffUser && $acc->staffUser->role === 'hr_staff') ? 'Langsung ke Admin' : (($acc->staffUser && in_array($acc->staffUser->role, ['pm', 'hr_assistant'])) ? 'Langsung ke HR' : ($acc->pmUser?->name ?? 'Belum Ada PM')) }}
+                                            @if($isDirectAdmin)
+                                                Langsung ke Admin
+                                            @elseif($isDirectHr)
+                                                Langsung ke HR
+                                            @else
+                                                {{ $acc->pmUser?->name ?? 'Belum Ada PM' }}
+                                            @endif
                                         </p>
                                     </div>
                                 </div>
 
-                                {{-- Row Asisten Pengawas Mobile --}}
-                                <div class="pt-1 border-t border-gray-50 flex items-center justify-between text-xs">
+                                {{-- Asisten Pengawas --}}
+                                <div class="pt-2 border-t border-gray-50 flex items-center justify-between text-xs mt-2">
                                     <span class="text-gray-400">Asisten Pengawas:</span>
                                     <span class="font-medium text-gray-800 truncate text-xs">
-                                        {{ ($acc->staffUser && $acc->staffUser->role === 'hr_staff') ? 'Langsung ke Admin' : (($acc->staffUser && in_array($acc->staffUser->role, ['pm', 'hr_assistant'])) ? 'Langsung ke HR' : ($acc->assistantUser?->name ?? 'Tanpa Asisten')) }}
+                                        @if($isDirectAdmin)
+                                            Langsung ke Admin
+                                        @elseif($isDirectHr)
+                                            Langsung ke HR
+                                        @else
+                                            {{ $acc->assistantUser?->name ?? 'Tanpa Asisten' }}
+                                        @endif
                                     </span>
                                 </div>
 
-                                {{-- Row Staff Pengawas Mobile --}}
-                                <div class="pt-1 border-t border-gray-50 flex items-center justify-between text-xs">
+                                {{-- Staff Pengawas --}}
+                                <div class="pt-2 border-t border-gray-50 flex items-center justify-between text-xs mt-1">
                                     <span class="text-gray-400">Staff Pengawas:</span>
                                     <span class="font-medium text-gray-800 truncate text-xs">
                                         {{ $acc->supervisorStaff?->name ?? 'Tanpa Pengawas' }}
                                     </span>
                                 </div>
                             </div>
-                        @empty
-                            <div class="py-8 text-center text-sm text-gray-400">Belum ada akun sosial media.</div>
-                        @endforelse
+                        @endforeach
+                    @empty
+                        <div class="py-8 text-center text-sm text-gray-400">Belum ada akun sosial media.</div>
+                    @endforelse
                 </div>
 
                 {{-- Pagination --}}
@@ -1040,11 +1087,11 @@
         <div class="absolute inset-0 bg-black/50 backdrop-blur-sm"
             onclick="document.getElementById('modal-assign-task').classList.add('hidden')"></div>
         <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-lg z-10 max-h-[90vh] flex flex-col overflow-visible"
-            x-data="assignTaskDropdown({{ json_encode($availableAccounts) }})">
+            x-data="assignTaskDropdown({{ json_encode($availableAccounts) }}, {{ $executorsJson }})">
             <div class="flex items-center justify-between px-6 py-4 border-b border-gray-200">
                 <div>
                     <h3 class="text-base font-bold text-gray-800">Beri Tugas Pengelolaan Sosmed</h3>
-                    <p class="text-xs text-gray-400 mt-0.5">Tugaskan akun yang belum dikelola kepada eksekutor</p>
+                    <p class="text-xs text-gray-400 mt-0.5">Tugaskan akun kepada eksekutor (dapat dikelola lebih dari satu user)</p>
                 </div>
                 <button type="button" onclick="document.getElementById('modal-assign-task').classList.add('hidden')"
                     class="text-gray-400 hover:text-gray-600 transition">
@@ -1067,8 +1114,14 @@
                     {{-- Dropdown Trigger --}}
                     <button type="button" @click="open = !open"
                         class="w-full flex items-center justify-between gap-2 border border-gray-300 rounded-lg px-3 py-2.5 text-sm bg-white hover:bg-gray-50 focus:ring-2 focus:ring-primary-500 focus:outline-none transition min-w-0">
-                        <span x-show="selectedId" class="font-medium text-gray-800 truncate min-w-0 text-left"
-                            :title="selectedLabel" x-text="selectedLabel"></span>
+                        <div x-show="selectedId" class="flex items-center gap-2 truncate min-w-0 text-left">
+                            <span class="font-medium text-gray-800 truncate" :title="selectedLabel" x-text="selectedLabel"></span>
+                            <template x-if="selectedManagersCount > 0">
+                                <span class="inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-indigo-100 text-indigo-700 border border-indigo-200 shrink-0"
+                                    :title="`${selectedManagersCount} user sedang mengelola`"
+                                    x-text="selectedManagersCount"></span>
+                            </template>
+                        </div>
                         <span x-show="!selectedId" class="text-gray-400">-- Pilih Akun Tersedia --</span>
                         <svg class="w-4 h-4 text-gray-400 shrink-0 transition-transform duration-150"
                             :class="open ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1101,7 +1154,14 @@
                                     class="w-full text-left px-3 py-2 text-xs hover:bg-primary-50 hover:text-primary-700 transition flex items-center justify-between gap-2 min-w-0"
                                     :class="selectedId == acc.id ? 'bg-primary-50/70 font-semibold text-primary-700' : 'text-gray-700'"
                                     :title="`${acc.name} (${acc.platform})`">
-                                    <span class="truncate min-w-0" x-text="`${acc.name} (${acc.platform})`"></span>
+                                    <div class="flex items-center gap-1.5 min-w-0">
+                                        <span class="truncate min-w-0" x-text="`${acc.name} (${acc.platform})`"></span>
+                                        <template x-if="acc.managers_count > 0">
+                                            <span class="inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-indigo-50 text-indigo-700 border border-indigo-200 shrink-0"
+                                                :title="`${acc.managers_count} user sedang mengelola`"
+                                                x-text="acc.managers_count"></span>
+                                        </template>
+                                    </div>
                                     <span x-show="selectedId == acc.id" class="text-primary-600 shrink-0">
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -1149,22 +1209,17 @@
                         Eksekutor Akun (Dikelola Oleh) <span class="text-gray-400 font-normal">(Opsional)</span>
                     </label>
                     <select name="staff_id" id="assign-task-staff"
-                        onchange="syncSupervisorState(this, 'assign-task-pm', 'assign-task-pm-hint', 'assign-task-ast')"
+                        x-model="selectedStaffId"
+                        @change="syncSupervisorState($el, 'assign-task-pm', 'assign-task-pm-hint', 'assign-task-ast')"
                         class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 focus:outline-none">
                         <option value="" data-role="">-- Belum Ditugaskan / Pilih Nanti --</option>
-                        @foreach($executors as $ex)
-                            @php
-                                $exRoleLabel = match ($ex->role) {
-                                    'pm' => 'PM Mandiri',
-                                    'sosmed' => 'Staff Sosmed',
-                                    'digital_marketing' => 'Digital Marketing',
-                                    default => $ex->role_label ?? strtoupper($ex->role)
-                                };
-                            @endphp
-                            <option value="{{ $ex->id }}" data-role="{{ $ex->role }}">{{ $ex->name }} ({{ $exRoleLabel }})
-                            </option>
-                        @endforeach
+                        <template x-for="ex in availableExecutors" :key="ex.id">
+                            <option :value="ex.id" :data-role="ex.role" x-text="`${ex.name} (${ex.role_label})`"></option>
+                        </template>
                     </select>
+                    <p x-show="selectedAccount && availableExecutors.length === 0" class="text-[11px] text-amber-600 mt-1 italic">
+                        Semua user yang berwenang sudah mengelola akun ini.
+                    </p>
                 </div>
 
                 {{-- Supervisor PM --}}
@@ -1340,7 +1395,7 @@
 
     {{-- ── MODAL EDIT DELEGASI AKUN (ADMIN) ─────────────────────────── --}}
     <div id="modal-edit-account" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4"
-        x-data="editAccountDropdown({{ json_encode($availableAccounts) }})"
+        x-data="editAccountDropdown({{ json_encode($availableAccounts) }}, {{ $executorsJson }})"
         @open-edit-account.window="initAccount($event.detail)">
         <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" onclick="closeEditAccountModal()"></div>
         <div
@@ -1398,28 +1453,38 @@
                 {{-- Eksekutor Akun --}}
                 <div>
                     <label class="block text-xs font-semibold text-gray-700 mb-1.5">
-                        Eksekutor Akun (Dikelola Oleh) <span class="text-red-500">*</span>
+                        Eksekutor Akun (Dikelola Oleh)
                     </label>
-                    <select name="staff_id" id="edit-acc-staff" required
+
+                    {{-- Daftar pengelola saat ini --}}
+                    <div x-show="currentStaffUsers && currentStaffUsers.length > 0" class="mb-2.5 space-y-1.5">
+                        <p class="text-[11px] font-medium text-gray-500">Pengelola saat ini:</p>
+                        <div class="flex flex-wrap gap-1.5">
+                            <template x-for="u in currentStaffUsers" :key="u.id">
+                                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium bg-primary-50 text-primary-700 border border-primary-200">
+                                    <span x-text="u.name"></span>
+                                    <span class="text-[10px] text-primary-500 font-semibold" x-text="`(${u.role_label})`"></span>
+                                </span>
+                            </template>
+                        </div>
+                    </div>
+
+                    <label class="block text-[11px] font-medium text-gray-600 mb-1">
+                        Tambah Eksekutor Baru <span class="text-gray-400 font-normal">(Pilih untuk menambahkan user lain)</span>
+                    </label>
+                    <select name="staff_id" id="edit-acc-staff"
+                        x-model="selectedStaffId"
                         onchange="syncSupervisorState(this, 'edit-acc-pm', 'edit-pm-hint', 'edit-acc-ast')"
                         class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 focus:outline-none">
-                        <option value="" data-role="">-- Belum Ditugaskan --</option>
-                        @foreach($executors as $ex)
-                            @php
-                                $exRoleLabel = match ($ex->role) {
-                                    'pm' => 'PM Mandiri',
-                                    'sosmed' => 'Staff Sosmed',
-                                    'digital_marketing' => 'Digital Marketing',
-                                    default => $ex->role_label ?? strtoupper($ex->role)
-                                };
-                            @endphp
-                            <option value="{{ $ex->id }}" data-role="{{ $ex->role }}">
-                                {{ $ex->name }} ({{ $exRoleLabel }})
-                            </option>
-                        @endforeach
+                        <option value="" data-role="">-- Pilih User untuk Ditambahkan (Opsional) --</option>
+                        <template x-for="ex in availableExecutors" :key="ex.id">
+                            <option :value="ex.id" :data-role="ex.role" x-text="`${ex.name} (${ex.role_label})`"></option>
+                        </template>
                     </select>
-                    <p id="edit-staff-note" class="text-[11px] text-gray-400 mt-1">Pelaksana harian akun (Staff Sosmed atau
-                        PM mandiri).</p>
+                    <p x-show="currentStaffUsers.length > 0 && availableExecutors.length === 0" class="text-[11px] text-amber-600 mt-1 italic">
+                        Semua user dalam sistem sudah mengelola akun ini.
+                    </p>
+                    <p id="edit-staff-note" class="text-[11px] text-gray-400 mt-1">Satu akun dapat dikelola oleh lebih dari satu eksekutor.</p>
                 </div>
 
                 {{-- Supervisor PM --}}
@@ -1914,7 +1979,10 @@
                     staff_id: currentStaffId,
                     notes: notes,
                     assistant_id: currentAssistantId,
-                    supervisor_staff_id: currentSupervisorStaffId
+                    supervisor_staff_id: currentSupervisorStaffId,
+                    staff_users: [],
+                    managers_count: 0,
+                    assigned_user_ids: []
                 };
             }
 
@@ -1923,7 +1991,7 @@
             window.dispatchEvent(new CustomEvent('open-edit-account', { detail: accData }));
 
             const staffSel = document.getElementById('edit-acc-staff');
-            if (staffSel) staffSel.value = accData.staff_id ?? '';
+            if (staffSel) staffSel.value = '';
 
             const pmSel = document.getElementById('edit-acc-pm');
             if (pmSel) pmSel.value = accData.pm_id ?? '';
@@ -1937,7 +2005,7 @@
             const notesEl = document.getElementById('edit-acc-notes');
             if (notesEl) notesEl.value = accData.notes ?? '';
 
-            syncSupervisorState(staffSel, 'edit-acc-pm', 'edit-pm-hint', 'edit-acc-ast');
+            if (staffSel) syncSupervisorState(staffSel, 'edit-acc-pm', 'edit-pm-hint', 'edit-acc-ast');
 
             // Dispatch change event to update custom dropdown labels
             if (staffSel) staffSel.dispatchEvent(new Event('change', { bubbles: true }));
@@ -2003,18 +2071,24 @@
             document.getElementById('modal-assign-task').classList.remove('hidden');
         }
 
-        function assignTaskDropdown(accountsList) {
+        function assignTaskDropdown(accountsList, executorsList) {
             return {
                 accounts: accountsList || [],
+                executors: executorsList || [],
                 selectedId: '',
                 selectedName: '',
                 selectedPlatform: '',
                 selectedLink: '',
+                selectedAccount: null,
+                selectedStaffId: '',
                 search: '',
                 open: false,
                 get selectedLabel() {
                     if (!this.selectedId) return '';
                     return this.selectedName + ' (' + this.selectedPlatform + ')';
+                },
+                get selectedManagersCount() {
+                    return this.selectedAccount ? (this.selectedAccount.managers_count || 0) : 0;
                 },
                 get filteredAccounts() {
                     if (!this.search || !this.search.trim()) {
@@ -2026,39 +2100,57 @@
                         return target.includes(q);
                     });
                 },
+                get availableExecutors() {
+                    if (!this.selectedAccount || !this.selectedAccount.assigned_user_ids) {
+                        return this.executors;
+                    }
+                    const assigned = this.selectedAccount.assigned_user_ids.map(Number);
+                    return this.executors.filter(u => !assigned.includes(Number(u.id)));
+                },
                 selectAccount(acc) {
                     this.selectedId = acc.id;
                     this.selectedName = acc.name;
                     this.selectedPlatform = acc.platform;
                     this.selectedLink = acc.link || '';
+                    this.selectedAccount = acc;
                     this.open = false;
+
+                    // If currently selected staff is already assigned to this account, reset it
+                    if (this.selectedStaffId && acc.assigned_user_ids && acc.assigned_user_ids.map(Number).includes(Number(this.selectedStaffId))) {
+                        this.selectedStaffId = '';
+                        const sel = document.getElementById('assign-task-staff');
+                        if (sel) {
+                            sel.value = '';
+                            syncSupervisorState(sel, 'assign-task-pm', 'assign-task-pm-hint', 'assign-task-ast');
+                        }
+                    }
                 }
             };
         }
 
-        function editAccountDropdown(availableList) {
+        function editAccountDropdown(availableList, executorsList) {
             return {
                 availableAccounts: availableList || [],
+                executors: executorsList || [],
                 accountsList: [],
                 selectedId: '',
                 selectedName: '',
                 selectedPlatform: '',
                 selectedLink: '',
+                currentStaffUsers: [],
+                selectedStaffId: '',
                 search: '',
                 open: false,
                 get selectedLabel() {
                     if (!this.selectedId) return '';
                     return this.selectedName + ' (' + this.selectedPlatform + ')';
                 },
-                get filteredAccounts() {
-                    if (!this.search || !this.search.trim()) {
-                        return this.accountsList;
+                get availableExecutors() {
+                    if (!this.currentStaffUsers || this.currentStaffUsers.length === 0) {
+                        return this.executors;
                     }
-                    const q = this.search.toLowerCase();
-                    return this.accountsList.filter(acc => {
-                        const target = (acc.name + ' ' + acc.platform).toLowerCase();
-                        return target.includes(q);
-                    });
+                    const assigned = this.currentStaffUsers.map(u => Number(u.id));
+                    return this.executors.filter(u => !assigned.includes(Number(u.id)));
                 },
                 selectAccount(acc) {
                     this.selectedId = acc.id;
@@ -2072,6 +2164,8 @@
                     this.selectedName = accData.name;
                     this.selectedPlatform = accData.platform;
                     this.selectedLink = accData.link || '';
+                    this.currentStaffUsers = accData.staff_users || [];
+                    this.selectedStaffId = '';
                     this.search = '';
                     this.open = false;
 
@@ -2079,7 +2173,9 @@
                         id: accData.id,
                         name: accData.name,
                         platform: accData.platform,
-                        link: accData.link || ''
+                        link: accData.link || '',
+                        managers_count: accData.managers_count || 0,
+                        assigned_user_ids: accData.assigned_user_ids || []
                     }];
                     this.availableAccounts.forEach(a => {
                         if (String(a.id) !== String(accData.id)) {

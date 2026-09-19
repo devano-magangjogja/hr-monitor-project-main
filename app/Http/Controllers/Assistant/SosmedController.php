@@ -36,15 +36,16 @@ class SosmedController extends Controller
             ->take(50)
             ->get();
 
-        // Akun yang Dikelola oleh HR Assistant sebagai eksekutor (staff_id = asisten ini)
+        // Akun yang Dikelola oleh HR Assistant sebagai eksekutor (staffUsers includes asisten ini)
         $myAccounts = \App\Models\SosmedAccount::with(['creator', 'pmUser'])
-            ->where('staff_id', $currentUserId)
+            ->whereHas('staffUsers', fn($q) => $q->where('users.id', $currentUserId))
             ->orderBy('platform')
             ->get();
         $myAccountIds = $myAccounts->pluck('id');
 
         $todayTasks = SosmedTask::with(['verifiedBy', 'hrVerifiedBy'])
             ->whereIn('sosmed_account_id', $myAccountIds)
+            ->where('assigned_to', $currentUserId)
             ->whereDate('task_date', now()->toDateString())
             ->get()
             ->keyBy('sosmed_account_id');

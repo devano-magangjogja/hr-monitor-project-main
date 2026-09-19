@@ -582,11 +582,16 @@ TAB: PENDING ACCOUNTS
                                             </form>
                                         @endif
                                         @if($acc->is_in_sosmed)
-                                            @if($acc->staffUser)
+                                            @if($acc->staffUsers->count() > 0)
                                                 <div class="inline-flex max-w-full items-center gap-1.5 px-2 py-1 rounded-full text-xs font-medium bg-blue-50 text-blue-700 border border-blue-200"
-                                                    title="Dikelola: {{ $acc->staffUser->name }}">
+                                                    title="Dikelola: {{ $acc->staffUsers->pluck('name')->join(', ') }}">
                                                     <span class="w-1.5 h-1.5 rounded-full bg-blue-500 shrink-0"></span>
-                                                    <span class="truncate">{{ $acc->staffUser->name }}</span>
+                                                    <span class="truncate">{{ $acc->staffUsers->pluck('name')->join(', ') }}</span>
+                                                    @if($acc->staffUsers->count() > 1)
+                                                        <span class="inline-flex items-center px-1 py-0.2 rounded-full text-[10px] font-bold bg-blue-200 text-blue-800">
+                                                            {{ $acc->staffUsers->count() }}
+                                                        </span>
+                                                    @endif
                                                 </div>
                                             @else
                                                 <div

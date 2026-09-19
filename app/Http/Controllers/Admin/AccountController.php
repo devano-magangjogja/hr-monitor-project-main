@@ -19,7 +19,7 @@ class AccountController extends Controller
         $platform = $request->query('platform');
         $status = $request->query('status'); // 'assigned', 'unassigned'
 
-        $accountsQuery = SosmedAccount::with(['pmUser', 'staffUser', 'assistantUser', 'creator'])
+        $accountsQuery = SosmedAccount::with(['pmUser', 'staffUsers', 'assistantUser', 'creator'])
             ->where('verification_status', 'approved')   // hanya tampilkan yang sudah disetujui
             ->orderBy('platform')
             ->orderBy('name');
@@ -37,9 +37,9 @@ class AccountController extends Controller
         }
 
         if ($status === 'assigned') {
-            $accountsQuery->whereNotNull('staff_id');
+            $accountsQuery->whereHas('staffUsers');
         } elseif ($status === 'unassigned') {
-            $accountsQuery->whereNull('staff_id');
+            $accountsQuery->whereDoesntHave('staffUsers');
         }
 
         $accounts = $accountsQuery->paginate(15)->appends($request->query());
@@ -69,8 +69,8 @@ class AccountController extends Controller
 
         $stats = [
             'total' => SosmedAccount::where('verification_status', 'approved')->count(),
-            'assigned' => SosmedAccount::where('verification_status', 'approved')->whereNotNull('staff_id')->count(),
-            'unassigned' => SosmedAccount::where('verification_status', 'approved')->whereNull('staff_id')->count(),
+            'assigned' => SosmedAccount::where('verification_status', 'approved')->whereHas('staffUsers')->count(),
+            'unassigned' => SosmedAccount::where('verification_status', 'approved')->whereDoesntHave('staffUsers')->count(),
         ];
 
         $platformList = ['Instagram', 'TikTok', 'YouTube', 'Facebook', 'Twitter/X', 'LinkedIn', 'Threads', 'Website', 'Lainnya'];

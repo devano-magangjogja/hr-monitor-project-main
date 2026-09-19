@@ -21,7 +21,7 @@ class SosmedController extends Controller
         // Seluruh Akun Sosmed di Sistem Pemantauan Sosmed
         $accountSearch = $request->query('account_search');
         $accountsQuery = SosmedAccount::inSosmed()
-            ->with(['pmUser', 'staffUser', 'assistantUser', 'supervisorStaff', 'creator'])
+            ->with(['pmUser', 'staffUsers', 'assistantUser', 'supervisorStaff', 'creator'])
             ->orderBy('platform');
 
         if ($accountSearch) {
@@ -33,7 +33,7 @@ class SosmedController extends Controller
         $accountsStats = [
             'total' => $totalAccountsCount,
             'unassigned_pm' => (clone $accountsQuery)->whereNull('pm_id')->count(),
-            'unassigned_staff' => (clone $accountsQuery)->whereNull('staff_id')->count(),
+            'unassigned_staff' => (clone $accountsQuery)->whereDoesntHave('staffUsers')->count(),
         ];
 
         $accounts = $accountsQuery->paginate(15)->appends($request->all());
@@ -149,13 +149,24 @@ class SosmedController extends Controller
             'completed'         => $tasksStats['approved_hr'],
         ];
 
-        // Akun dari Manajemen Akun yang sudah disetujui (approved) tapi belum dimasukkan ke daftar kelola sosmed
-        $availableAccounts = SosmedAccount::notInSosmed()
-            ->where('verification_status', 'approved')
-            ->select('id', 'name', 'platform', 'link')
+        // Akun yang sudah disetujui (approved) untuk penugasan sosmed beserta info pengelola saat ini
+        $availableAccounts = SosmedAccount::where('verification_status', 'approved')
+            ->with(['staffUsers:id,name'])
+            ->select('id', 'name', 'platform', 'link', 'is_in_sosmed')
             ->orderBy('platform')
             ->orderBy('name')
-            ->get();
+            ->get()
+            ->map(function ($acc) {
+                return [
+                    'id' => $acc->id,
+                    'name' => $acc->name,
+                    'platform' => $acc->platform,
+                    'link' => $acc->link,
+                    'is_in_sosmed' => (bool)$acc->is_in_sosmed,
+                    'managers_count' => $acc->staffUsers->count(),
+                    'assigned_user_ids' => $acc->staffUsers->pluck('id')->values()->all(),
+                ];
+            });
 
         return view('admin.sosmed.index', compact(
             'tab',
@@ -190,8 +201,11 @@ class SosmedController extends Controller
             'notes' => ['nullable', 'string'],
         ]);
 
-        if (!empty($validated['staff_id'])) {
-            $staff = User::find($validated['staff_id']);
+        $staffId = $validated['staff_id'] ?? null;
+        unset($validated['staff_id']);
+
+        if (!empty($staffId)) {
+            $staff = User::find($staffId);
             if ($staff && $staff->role === 'pm') {
                 $validated['pm_id'] = null;
             }
@@ -202,6 +216,14 @@ class SosmedController extends Controller
             'is_in_sosmed' => true,
             'created_by' => Auth::id(),
         ]);
+
+        if (!empty($staffId)) {
+            $account->staffUsers()->attach($staffId, [
+                'assigned_by' => Auth::id(),
+                'assigned_at' => now(),
+            ]);
+        }
+
         $this->logActivity('sosmed.created', 'Sosmed', "Menambahkan akun sosial media '{$validated['name']}' ({$validated['platform']})", $account);
 
         return redirect()->route('admin.sosmed.index', ['tab' => 'accounts'])
@@ -221,17 +243,28 @@ class SosmedController extends Controller
             'notes' => ['nullable', 'string'],
         ]);
 
-        if (!empty($validated['staff_id'])) {
-            $staff = User::find($validated['staff_id']);
+        $staffId = $validated['staff_id'] ?? null;
+        unset($validated['staff_id']);
+        unset($validated['link']);
+
+        if (!empty($staffId)) {
+            $staff = User::find($staffId);
             if ($staff && $staff->role === 'pm') {
                 $validated['pm_id'] = null;
             }
         }
 
-        // Link akun paten (dikelola melalui menu Manajemen Akun) dan tidak boleh diubah dari form ini
-        unset($validated['link']);
-
         $account->update($validated);
+
+        if (!empty($staffId)) {
+            if (!$account->staffUsers()->where('users.id', $staffId)->exists()) {
+                $account->staffUsers()->attach($staffId, [
+                    'assigned_by' => Auth::id(),
+                    'assigned_at' => now(),
+                ]);
+            }
+        }
+
         $this->logActivity('sosmed.updated', 'Sosmed', "Memperbarui akun sosial media '{$account->name}'", $account);
 
         return redirect()->route('admin.sosmed.index', ['tab' => 'accounts'])
@@ -258,27 +291,41 @@ class SosmedController extends Controller
             }
         }
 
-        $oldStaffId = $account->staff_id;
+        $accountData = [
+            'is_in_sosmed' => true,
+            'notes'        => $validated['notes'] ?? $account->notes,
+        ];
 
-        $account->update([
-            'is_in_sosmed'        => true,
-            'staff_id'            => $validated['staff_id'] ?? null,
-            'pm_id'               => $validated['pm_id'] ?? null,
-            'assistant_id'        => $validated['assistant_id'] ?? null,
-            'supervisor_staff_id' => $validated['supervisor_staff_id'] ?? null,
-            'notes'               => $validated['notes'] ?? $account->notes,
-        ]);
+        if (!empty($validated['pm_id'])) {
+            $accountData['pm_id'] = $validated['pm_id'];
+        }
+        if (!empty($validated['assistant_id'])) {
+            $accountData['assistant_id'] = $validated['assistant_id'];
+        }
+        if (!empty($validated['supervisor_staff_id'])) {
+            $accountData['supervisor_staff_id'] = $validated['supervisor_staff_id'];
+        }
 
-        if (!empty($validated['staff_id']) && $validated['staff_id'] !== $oldStaffId) {
+        $account->update($accountData);
+
+        if (!empty($validated['staff_id'])) {
+            $staffId = $validated['staff_id'];
+            if (!$account->staffUsers()->where('users.id', $staffId)->exists()) {
+                $account->staffUsers()->attach($staffId, [
+                    'assigned_by' => Auth::id(),
+                    'assigned_at' => now(),
+                ]);
+            }
+
             $exists = SosmedTask::where('sosmed_account_id', $account->id)
                 ->whereDate('task_date', now()->toDateString())
-                ->where('assigned_to', $validated['staff_id'])
+                ->where('assigned_to', $staffId)
                 ->exists();
 
             if (!$exists) {
                 SosmedTask::create([
                     'sosmed_account_id' => $account->id,
-                    'assigned_to'       => $validated['staff_id'],
+                    'assigned_to'       => $staffId,
                     'assigned_by'       => Auth::id(),
                     'type'              => 'daily',
                     'title'             => 'Laporan Konten Harian - ' . $account->name,
@@ -325,36 +372,34 @@ class SosmedController extends Controller
         // Jika user memilih akun lain dari dropdown di form edit
         if (!empty($validated['sosmed_account_id']) && (int)$validated['sosmed_account_id'] !== (int)$account->id) {
             $targetAccount = SosmedAccount::findOrFail($validated['sosmed_account_id']);
-            // Lepas penugasan akun lama
-            $account->update([
-                'staff_id'            => null,
-                'pm_id'               => null,
-                'assistant_id'        => null,
-                'supervisor_staff_id' => null,
-            ]);
             $isSwitched = true;
         }
 
-        $oldStaffId = $targetAccount->staff_id;
-
         $targetAccount->update([
-            'staff_id'            => $validated['staff_id'] ?? null,
             'pm_id'               => $validated['pm_id'] ?? null,
             'assistant_id'        => $validated['assistant_id'] ?? null,
             'supervisor_staff_id' => $validated['supervisor_staff_id'] ?? null,
             'notes'               => array_key_exists('notes', $validated) ? $validated['notes'] : $targetAccount->notes,
         ]);
 
-        if (!empty($validated['staff_id']) && ($validated['staff_id'] !== $oldStaffId || $isSwitched)) {
+        if (!empty($validated['staff_id'])) {
+            $newStaffId = $validated['staff_id'];
+            if (!$targetAccount->staffUsers()->where('users.id', $newStaffId)->exists()) {
+                $targetAccount->staffUsers()->attach($newStaffId, [
+                    'assigned_by' => Auth::id(),
+                    'assigned_at' => now(),
+                ]);
+            }
+
             $exists = SosmedTask::where('sosmed_account_id', $targetAccount->id)
                 ->whereDate('task_date', now()->toDateString())
-                ->where('assigned_to', $validated['staff_id'])
+                ->where('assigned_to', $newStaffId)
                 ->exists();
 
             if (!$exists) {
                 SosmedTask::create([
                     'sosmed_account_id' => $targetAccount->id,
-                    'assigned_to'       => $validated['staff_id'],
+                    'assigned_to'       => $newStaffId,
                     'assigned_by'       => Auth::id(),
                     'type'              => 'daily',
                     'title'             => 'Laporan Konten Harian - ' . $targetAccount->name,
@@ -372,30 +417,50 @@ class SosmedController extends Controller
             ->with('success', 'Penanggung jawab akun berhasil diperbarui.' . ($isSwitched ? ' Akun telah dialihkan ke ' . $targetAccount->name . '.' : ''));
     }
 
-    public function unassignAccount(SosmedAccount $account)
+    public function unassignAccount(Request $request, SosmedAccount $account)
     {
         $name = $account->name;
         $platform = $account->platform;
+        $userId = $request->input('user_id');
 
+        if ($userId) {
+            $account->staffUsers()->detach($userId);
+            SosmedTask::where('sosmed_account_id', $account->id)
+                ->where('assigned_to', $userId)
+                ->where('status', 'pending')
+                ->delete();
+
+            $targetUser = User::find($userId);
+            $userName = $targetUser ? $targetUser->name : "User #{$userId}";
+            $this->logActivity('sosmed.unassigned', 'Sosmed', "Melepas akses user '{$userName}' dari akun '{$name}' ({$platform})", $account);
+
+            return redirect()->route('admin.sosmed.index', ['tab' => 'accounts'])
+                ->with('success', "Akses user '{$userName}' untuk akun '{$name}' berhasil dilepas.");
+        }
+
+        $account->staffUsers()->detach();
         $account->update([
-            'staff_id'            => null,
             'pm_id'               => null,
             'assistant_id'        => null,
             'supervisor_staff_id' => null,
         ]);
 
-        $this->logActivity('sosmed.unassigned', 'Sosmed', "Melepas penugasan akun '{$name}' ({$platform})", $account);
+        SosmedTask::where('sosmed_account_id', $account->id)
+            ->where('status', 'pending')
+            ->delete();
+
+        $this->logActivity('sosmed.unassigned', 'Sosmed', "Melepas seluruh penugasan akun '{$name}' ({$platform})", $account);
 
         return redirect()->route('admin.sosmed.index', ['tab' => 'accounts'])
-            ->with('success', "Penugasan akun '{$name}' berhasil dilepas. Akun tetap berada di daftar kelola sosmed dengan status belum ditugaskan.");
+            ->with('success', "Seluruh penugasan akun '{$name}' berhasil dilepas. Akun tetap berada di daftar kelola sosmed dengan status belum ditugaskan.");
     }
 
     public function destroyAccount(SosmedAccount $account)
     {
         $name = $account->name;
+        $account->staffUsers()->detach();
         $account->update([
             'is_in_sosmed'        => false,
-            'staff_id'            => null,
             'pm_id'               => null,
             'assistant_id'        => null,
             'supervisor_staff_id' => null,

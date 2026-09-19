@@ -40,7 +40,7 @@ class DashboardController extends Controller
 
         // Statistik khusus akun sosmed & tugas konten
         $myAccounts = SosmedAccount::with(['pmUser', 'creator'])
-            ->where('staff_id', $userId)
+            ->whereHas('staffUsers', fn($q) => $q->where('users.id', $userId))
             ->orderBy('platform')
             ->get();
 
@@ -48,6 +48,7 @@ class DashboardController extends Controller
 
         $todaySosmedTasks = SosmedTask::with(['verifiedBy', 'hrVerifiedBy'])
             ->whereIn('sosmed_account_id', $accountIds)
+            ->where('assigned_to', $userId)
             ->whereDate('task_date', now()->toDateString())
             ->get()
             ->keyBy('sosmed_account_id');
