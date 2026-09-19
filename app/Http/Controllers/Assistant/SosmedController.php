@@ -135,7 +135,7 @@ class SosmedController extends Controller
      */
     public function submitAccountTask(Request $request, \App\Models\SosmedAccount $account)
     {
-        if ($account->staff_id !== Auth::id()) {
+        if (! $account->staffUsers()->where('users.id', Auth::id())->exists()) {
             abort(403, 'Akses ditolak. Anda bukan eksekutor akun ini.');
         }
 

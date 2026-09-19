@@ -193,16 +193,23 @@
     <p class="px-4 text-[11px] font-semibold text-slate-500 uppercase tracking-widest">Presensi Pemagang</p>
 </div>
 
-{{-- Presensi --}}
-<a href="{{ route('admin.presensi.index') }}"
-    class="flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-all
-          {{ request()->routeIs('admin.presensi.index') ? 'bg-white/10 text-white' : 'text-slate-400 hover:bg-white/5 hover:text-white' }}">
+{{-- Presensi (collapsible) --}}
+@php($presensiActive = request()->routeIs('admin.presensi.*'))
+<div x-data="{ open: {{ $presensiActive ? 'true' : 'false' }} }">
+<button @click="open = !open" class="w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-all
+          {{ $presensiActive ? 'bg-white/10 text-white' : 'text-slate-400 hover:bg-white/5 hover:text-white' }}">
     <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
             d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
     </svg>
-    Presensi
-</a>
+    <span class="flex-1 text-left">Presensi</span>
+    <svg class="w-4 h-4 transition-transform" :class="open ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
+</button>
+<div x-show="open" x-transition class="mt-1 ml-4 pl-4 border-l border-white/10 space-y-1">
+    <a href="{{ route('admin.presensi.index') }}" class="block rounded-lg px-3 py-2 text-sm {{ request()->routeIs('admin.presensi.index') ? 'bg-white/10 text-white' : 'text-slate-400 hover:bg-white/5 hover:text-white' }}">Presensi Masuk</a>
+    <a href="{{ route('admin.presensi.istirahat') }}" class="block rounded-lg px-3 py-2 text-sm {{ request()->routeIs('admin.presensi.istirahat*') ? 'bg-white/10 text-white' : 'text-slate-400 hover:bg-white/5 hover:text-white' }}">Presensi Istirahat</a>
+</div>
+</div>
 
 {{-- Laporan Presensi --}}
 <a href="{{ route('admin.presensi.laporan') }}"

@@ -29,7 +29,9 @@ class PresensiController extends Controller
         $formattedDate = Carbon::parse($tanggal)->locale('id')->translatedFormat('l, d F Y');
 
         // Query dasar berdasarkan tanggal yang dipilih
-        $baseQuery = Presensi::with(['pemagang', 'creator'])->where('tanggal', $tanggal);
+        $baseQuery = Presensi::with(['pemagang', 'creator'])
+            ->where('tanggal', $tanggal)
+            ->where('session', 'entry');
 
         // Filter Kantor
         if ($request->filled('kantor')) {
@@ -81,7 +83,7 @@ class PresensiController extends Controller
             ->fragment('tabel-tidak-hadir');
 
         // Statistik Ringkasan untuk TANGGAL YANG DIPILIH
-        $statsQuery = Presensi::where('tanggal', $tanggal);
+        $statsQuery = Presensi::where('tanggal', $tanggal)->where('session', 'entry');
         if ($request->filled('kantor')) {
             $statsQuery->where('kantor', $request->input('kantor'));
         }
@@ -155,6 +157,7 @@ class PresensiController extends Controller
 
         // Tanggal otomatis dikunci pada hari ini
         $validated['tanggal'] = $today;
+        $validated['session'] = 'entry';
         $validated['kantor'] = $validated['kantor'] ?? 'Kantor 1';
         $validated['created_by'] = Auth::id();
         $validated['notes'] = $validated['notes'] ?? ($validated['keterangan'] === 'Tidak Hadir' ? 'Tidak hadir tanpa keterangan' : 'Presensi tercatat');
@@ -222,12 +225,12 @@ class PresensiController extends Controller
      */
     public function laporan(Request $request)
     {
-        $queryPemagang = Pemagang::with('presensis');
+        $queryPemagang = Pemagang::with(['presensis' => fn ($q) => $q->where('session', 'entry')]);
 
         if ($request->filled('kantor')) {
             $kantor = $request->input('kantor');
             $queryPemagang->whereHas('presensis', function ($q) use ($kantor) {
-                $q->where('kantor', $kantor);
+                $q->where('kantor', $kantor)->where('session', 'entry');
             });
         }
 
@@ -277,7 +280,7 @@ class PresensiController extends Controller
         });
 
         // Global stats
-        $statsBase = Presensi::query();
+        $statsBase = Presensi::where('session', 'entry');
         if ($request->filled('kantor')) {
             $statsBase->where('kantor', $request->input('kantor'));
         }
@@ -300,7 +303,7 @@ class PresensiController extends Controller
         ];
 
         // Tabel 2: Riwayat detail log presensi (5 per halaman)
-        $logQuery = Presensi::with(['pemagang', 'creator']);
+        $logQuery = Presensi::with(['pemagang', 'creator'])->where('session', 'entry');
         if ($request->filled('kantor')) {
             $logQuery->where('kantor', $request->input('kantor'));
         }

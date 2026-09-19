@@ -343,7 +343,11 @@ class TaskService
         ]));
 
         $user = User::find($userId);
-        $actionRoute = ($user && $user->role === 'pm') ? route('pm.sosmed.index') : route('sosmed.sosmed.index');
+        $actionRoute = $user?->role === 'pm'
+            ? route('pm.sosmed.index')
+            : (($user?->role === 'hr_assistant' || $user?->isHrAssistant())
+                ? route('assistant.sosmed.index')
+                : route('sosmed.sosmed.index'));
 
         $item->is_sosmed = true;
         $item->sosmed_status = $task->status;
@@ -384,7 +388,11 @@ class TaskService
         ]));
 
         $user = User::find($userId);
-        $actionRoute = ($user && $user->role === 'pm') ? route('pm.sosmed.index') : route('sosmed.sosmed.index');
+        $actionRoute = $user?->role === 'pm'
+            ? route('pm.sosmed.index')
+            : (($user?->role === 'hr_assistant' || $user?->isHrAssistant())
+                ? route('assistant.sosmed.index')
+                : route('sosmed.sosmed.index'));
 
         $item->is_sosmed = true;
         $item->sosmed_status = 'pending';

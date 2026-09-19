@@ -41,7 +41,6 @@ class PemagangFactory extends Factory
             'divisi' => $this->faker->randomElement([
                 "Administrasi",
                 "UI/UX Designer",
-                "Programmer",
                 "Human Resource",
                 "Social Media Specialist",
                 "Photographer/Videographer",

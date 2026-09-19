@@ -38,7 +38,8 @@ class PresensiController extends Controller
         $hasKantor = !is_null($assignedKantor);
 
         $baseQuery = Presensi::with(['pemagang', 'creator'])
-            ->where('tanggal', $tanggal);
+            ->where('tanggal', $tanggal)
+            ->where('session', 'entry');
 
         if ($selectedKantor) {
             $baseQuery->where('kantor', $selectedKantor);
@@ -96,7 +97,7 @@ class PresensiController extends Controller
 
         // Statistik Ringkasan untuk TANGGAL YANG DIPILIH
         // Jika belum ada penugasan kantor, semua stats = 0
-        $statsQuery = Presensi::where('tanggal', $tanggal);
+        $statsQuery = Presensi::where('tanggal', $tanggal)->where('session', 'entry');
         if ($hasKantor) {
             $statsQuery->where('kantor', $selectedKantor);
         } else {
@@ -193,6 +194,7 @@ class PresensiController extends Controller
 
         // Tanggal otomatis dikunci pada hari ini
         $validated['tanggal'] = $today;
+        $validated['session'] = 'entry';
         $validated['kantor'] = $kantorTujuan;
         $validated['created_by'] = Auth::id();
         $validated['notes'] = $validated['notes'] ?? ($validated['keterangan'] === 'Tidak Hadir' ? 'Tidak hadir tanpa keterangan' : 'Presensi tercatat');
@@ -288,11 +290,13 @@ class PresensiController extends Controller
         // Tabel 1: Rekapitulasi Pemagang HANYA untuk pemagang yang presensi di kantor tersebut pada hari itu
         $queryPemagang = Pemagang::whereHas('presensis', function ($q) use ($tanggal, $selectedKantor) {
             $q->where('tanggal', $tanggal)
-                ->where('kantor', $selectedKantor);
+                ->where('kantor', $selectedKantor)
+                ->where('session', 'entry');
         })->with([
                     'presensis' => function ($q) use ($tanggal, $selectedKantor) {
                         $q->where('tanggal', $tanggal)
-                            ->where('kantor', $selectedKantor);
+                            ->where('kantor', $selectedKantor)
+                            ->where('session', 'entry');
                     }
                 ]);
 
@@ -339,7 +343,7 @@ class PresensiController extends Controller
         });
 
         // Global stats HANYA untuk hari itu dan kantor tersebut
-        $statsBase = Presensi::where('tanggal', $tanggal)->where('kantor', $selectedKantor);
+        $statsBase = Presensi::where('tanggal', $tanggal)->where('kantor', $selectedKantor)->where('session', 'entry');
         $totalPresensi = (clone $statsBase)->count();
         $totalAwal = (clone $statsBase)->where('keterangan', 'Lebih Awal')->count();
         $totalTepat = (clone $statsBase)->where('keterangan', 'Tepat Waktu')->count();
@@ -360,7 +364,8 @@ class PresensiController extends Controller
         // Tabel 2: Riwayat detail log presensi HANYA untuk hari itu dan kantor tersebut
         $logQuery = Presensi::with(['pemagang', 'creator'])
             ->where('tanggal', $tanggal)
-            ->where('kantor', $selectedKantor);
+            ->where('kantor', $selectedKantor)
+            ->where('session', 'entry');
 
         if ($request->filled('shift')) {
             $logQuery->where('shift', $request->input('shift'));
