@@ -19,12 +19,25 @@ class UserController extends Controller
     ) {
     }
 
-    public function index()
+    public function index(Request $request)
     {
-        $users = $this->userService->getAllUsers();
+        $search = $request->query('search');
+
+        $users = User::query()
+            ->when($search, function ($q) use ($search) {
+                $q->where(function ($nested) use ($search) {
+                    $nested->where('name', 'like', "%{$search}%")
+                        ->orWhere('email', 'like', "%{$search}%");
+                });
+            })
+            ->orderBy('name')
+            ->get();
+
         $roles = \App\Models\Role::where('name', '!=', 'admin')->orderBy('id')->get();
-        return view('admin.users.index', compact('users', 'roles'));
+
+        return view('admin.users.index', compact('users', 'roles', 'search'));
     }
+    
 
     public function store(Request $request)
     {

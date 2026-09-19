@@ -65,9 +65,13 @@
             $isUnread = is_null($notification->read_at);
             $data     = $notification->data;
             $isCustom = ($data['type'] ?? null) === 'custom';
+            $title    = $isCustom ? ($data['title'] ?? 'Pengumuman') : ($data['task_title'] ?? 'Tugas Baru');
+            $message  = $data['message'] ?? '';
+            $sender   = $data['sender_name'] ?? null;
+            $taskDate = $data['task_date'] ?? null;
         @endphp
         <div class="bg-white rounded-xl border {{ $isUnread ? 'border-primary-200 bg-primary-50/30' : 'border-gray-200' }}
-                    p-4 flex items-start gap-4 transition">
+                    p-4 flex items-start gap-4 transition overflow-hidden">
 
             {{-- Icon --}}
             <div class="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0
@@ -88,58 +92,57 @@
             </div>
 
             {{-- Konten --}}
-            <div class="flex-1 min-w-0">
+            <div class="flex-1 min-w-0 overflow-hidden">
                 <div class="flex items-start justify-between gap-4">
-                    <div>
-                        @if($isCustom)
-                            <p class="text-sm font-semibold text-gray-800">
-                                {{ $data['title'] ?? 'Pengumuman' }}
-                            </p>
-                            <p class="text-sm text-gray-600 mt-0.5">
-                                {{ $data['message'] ?? '' }}
-                            </p>
-                            <div class="flex items-center gap-3 mt-2">
-                                <span class="text-xs text-gray-400">
-                                    {{ $notification->created_at->locale('id')->diffForHumans() }}
+                    <div class="min-w-0 flex-1 overflow-hidden">
+                        <p class="text-sm font-semibold text-gray-800 truncate">
+                            {{ $title }}
+                        </p>
+                        <p class="text-sm text-gray-600 mt-0.5 line-clamp-2 break-all">
+                            {{ $message }}
+                        </p>
+
+                        <div class="flex items-center gap-3 mt-2 flex-wrap">
+                            <span class="text-xs text-gray-400 whitespace-nowrap">
+                                {{ $notification->created_at->locale('id')->diffForHumans() }}
+                            </span>
+
+                            @if($isCustom && !empty($sender))
+                                <span class="text-xs text-gray-400">•</span>
+                                <span class="text-xs text-gray-400 truncate">Dari: {{ $sender }}</span>
+                            @endif
+
+                            @if(!$isCustom && $taskDate)
+                                <span class="text-xs text-gray-400">•</span>
+                                <span class="text-xs text-gray-400 whitespace-nowrap">
+                                    Tanggal tugas:
+                                    {{ \Carbon\Carbon::parse($taskDate)->locale('id')->translatedFormat('d M Y') }}
                                 </span>
-                                @if(!empty($data['sender_name']))
-                                    <span class="text-xs text-gray-400">•</span>
-                                    <span class="text-xs text-gray-400">Dari: {{ $data['sender_name'] }}</span>
-                                @endif
-                            </div>
-                        @else
-                            <p class="text-sm font-semibold text-gray-800">
-                                {{ $data['task_title'] ?? 'Tugas Baru' }}
-                            </p>
-                            <p class="text-sm text-gray-600 mt-0.5">
-                                {{ $data['message'] ?? '' }}
-                            </p>
-                            <div class="flex items-center gap-3 mt-2">
-                                <span class="text-xs text-gray-400">
-                                    {{ $notification->created_at->locale('id')->diffForHumans() }}
-                                </span>
-                                @if(isset($data['task_date']))
-                                    <span class="text-xs text-gray-400">•</span>
-                                    <span class="text-xs text-gray-400">
-                                        Tanggal tugas:
-                                        {{ \Carbon\Carbon::parse($data['task_date'])->locale('id')->translatedFormat('d M Y') }}
-                                    </span>
-                                @endif
-                            </div>
-                        @endif
+                            @endif
+                        </div>
+
+                        {{-- Tombol Lihat Detail --}}
+                        <button type="button"
+                                onclick="openNotifDetail(
+                                    @js($title),
+                                    @js($message),
+                                    @js($notification->created_at->locale('id')->diffForHumans()),
+                                    @js($isCustom ? ($sender ? 'Dari: '.$sender : null) : ($taskDate ? 'Tanggal tugas: '.\Carbon\Carbon::parse($taskDate)->locale('id')->translatedFormat('d M Y') : null))
+                                )"
+                                class="mt-2 text-xs text-primary-600 hover:text-primary-700 font-medium">
+                            Lihat selengkapnya
+                        </button>
                     </div>
 
                     {{-- Badge + Aksi --}}
                     <div class="flex items-center gap-2 flex-shrink-0">
                         @if($isUnread)
                             <span class="w-2 h-2 rounded-full bg-primary-600 flex-shrink-0"></span>
-                            <form action="{{ route('notifications.read', $notification->id) }}"
-                                  method="POST">
+                            <form action="{{ route('notifications.read', $notification->id) }}" method="POST">
                                 @csrf
                                 @method('PATCH')
                                 <button type="submit"
-                                        class="text-xs text-primary-600 hover:text-primary-700
-                                               font-medium whitespace-nowrap">
+                                        class="text-xs text-primary-600 hover:text-primary-700 font-medium whitespace-nowrap">
                                     Tandai Dibaca
                                 </button>
                             </form>
@@ -164,6 +167,44 @@
     @endforelse
 </div>
 
+{{-- Modal Detail Notifikasi --}}
+<div id="notif-detail-modal"
+     class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg mx-auto overflow-hidden">
+        <div class="flex items-center justify-between px-5 py-4 border-b border-gray-100 bg-gray-50/50">
+            <h3 class="text-sm font-bold text-gray-800">Detail Notifikasi</h3>
+            <button type="button" onclick="closeNotifDetail()"
+                    class="text-gray-400 hover:text-gray-600 p-1.5 rounded-lg hover:bg-gray-100 transition">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+            </button>
+        </div>
+
+        <div class="px-5 py-5 space-y-4">
+            <div>
+                <p class="text-xs text-gray-400 mb-1">Judul</p>
+                <p id="notif-detail-title" class="text-sm font-semibold text-gray-800 break-words"></p>
+            </div>
+            <div>
+                <p class="text-xs text-gray-400 mb-1">Pesan</p>
+                <p id="notif-detail-message" class="text-sm text-gray-700 break-words whitespace-pre-wrap leading-relaxed"></p>
+            </div>
+            <div class="flex items-center gap-3 text-xs text-gray-400 pt-2 border-t border-gray-100">
+                <span id="notif-detail-time"></span>
+                <span id="notif-detail-meta" class="hidden"></span>
+            </div>
+        </div>
+
+        <div class="px-5 py-3.5 border-t border-gray-100 bg-gray-50/50 flex justify-end">
+            <button type="button" onclick="closeNotifDetail()"
+                    class="px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg transition">
+                Tutup
+            </button>
+        </div>
+    </div>
+</div>
+
 {{-- Pagination --}}
 @if($notifications->hasPages())
     <div class="mt-6 bg-white rounded-xl border border-gray-200 px-6 py-3.5">
@@ -171,4 +212,32 @@
     </div>
 @endif
 
+<script>
+    function openNotifDetail(title, message, time, meta) {
+        document.getElementById('notif-detail-title').textContent = title || '-';
+        document.getElementById('notif-detail-message').textContent = message || '-';
+        document.getElementById('notif-detail-time').textContent = time || '';
+
+        var metaEl = document.getElementById('notif-detail-meta');
+        if (meta) {
+            metaEl.textContent = '• ' + meta;
+            metaEl.classList.remove('hidden');
+        } else {
+            metaEl.classList.add('hidden');
+        }
+
+        document.getElementById('notif-detail-modal').classList.remove('hidden');
+    }
+
+    function closeNotifDetail() {
+        document.getElementById('notif-detail-modal').classList.add('hidden');
+    }
+
+    // Tutup modal jika klik area gelap
+    document.getElementById('notif-detail-modal')?.addEventListener('click', function (e) {
+        if (e.target === this) closeNotifDetail();
+    });
+</script>
+
 @endsection
+

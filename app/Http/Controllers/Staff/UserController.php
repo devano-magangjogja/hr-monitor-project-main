@@ -30,13 +30,25 @@ class UserController extends Controller
         };
     }
 
-    public function index()
+    public function index(Request $request)
     {
+        $search = trim((string) $request->query('search', ''));
+        $role   = $request->query('role');
+
         $users = User::whereIn('role', $this->allowedRoles)
+            ->when($search !== '', function ($query) use ($search) {
+                $query->where(function ($q) use ($search) {
+                    $q->where('name', 'like', "%{$search}%")
+                    ->orWhere('email', 'like', "%{$search}%");
+                });
+            })
+            ->when($role && in_array($role, $this->allowedRoles, true), function ($query) use ($role) {
+                $query->where('role', $role);
+            })
             ->orderBy('name')
             ->get();
 
-        return view('staff.users.index', compact('users'));
+        return view('staff.users.index', compact('users', 'search', 'role'));
     }
 
     public function store(Request $request)

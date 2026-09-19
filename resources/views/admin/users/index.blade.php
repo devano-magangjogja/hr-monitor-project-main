@@ -10,15 +10,39 @@
 
 @section('content')
 
-    {{-- Header + Tombol Tambah --}}
-    <div class="flex items-center justify-between mb-6">
-        <div>
-            <p class="text-sm text-gray-500">
+    {{-- Header + Search + Tombol Tambah --}}
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
+        <div class="flex flex-col sm:flex-row sm:items-center gap-3 flex-1">
+            <p class="text-sm text-gray-500 shrink-0">
                 Total <span class="font-semibold text-gray-700">{{ $users->count() }}</span> pengguna
             </p>
+
+            <form method="GET" action="{{ route('admin.users.index') }}" class="flex-1 max-w-md">
+                <div class="relative">
+                    <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-gray-400">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                        </svg>
+                    </span>
+                    <input type="search" name="search" value="{{ $search ?? '' }}"
+                        placeholder="Cari nama atau email..."
+                        class="w-full h-10 pl-9 pr-9 text-sm bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary-500 focus:outline-none transition">
+                    @if($search ?? false)
+                        <a href="{{ route('admin.users.index') }}"
+                            class="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-gray-600"
+                            title="Reset">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </a>
+                    @endif
+                </div>
+            </form>
         </div>
-        <button onclick="document.getElementById('modal-create').classList.remove('hidden')" class="flex items-center gap-2 px-4 py-2 bg-primary-600 hover:bg-primary-700
-                                               text-white text-sm font-medium rounded-lg transition">
+
+        <button onclick="document.getElementById('modal-create').classList.remove('hidden')"
+            class="flex items-center justify-center gap-2 h-10 px-4 bg-primary-600 hover:bg-primary-700 text-white text-sm font-medium rounded-lg transition shrink-0">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
             </svg>
@@ -622,6 +646,10 @@
                 });
             }
         }
+
+        document.querySelector('input[name="search"]')?.addEventListener('keydown', function (e) {
+            if (e.key === 'Enter') this.form.submit();
+        });
 
         document.addEventListener('DOMContentLoaded', function () {
             const createForm = document.querySelector('#modal-create form');

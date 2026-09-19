@@ -29,137 +29,137 @@
 {{-- Tabel --}}
 <div class="bg-white rounded-xl border border-gray-200 overflow-hidden">
     <div class="overflow-x-auto">
-    <table class="w-full text-sm min-w-[580px]">
-        <thead>
-            <tr class="bg-gray-50 border-b border-gray-200">
-                <th class="text-left px-6 py-3.5 font-semibold text-gray-600 w-48">Judul</th>
-                <th class="text-left px-6 py-3.5 font-semibold text-gray-600 w-32">Kantor</th>
-                <th class="text-left px-6 py-3.5 font-semibold text-gray-600">Deskripsi</th>
-                <th class="text-left px-6 py-3.5 font-semibold text-gray-600 w-48">Penerima</th>
-                <th class="text-right px-6 py-3.5 font-semibold text-gray-600 w-28">Aksi</th>
-            </tr>
-        </thead>
-        <tbody class="divide-y divide-gray-100">
-            @forelse($tasks as $task)
-                @php
-                    $hasCompleted = $task->assignments->where('is_completed', 1)->count() > 0;
-                @endphp
-                <tr class="hover:bg-gray-50 transition">
-                    {{-- Judul --}}
-                    <td class="px-6 py-4 w-48">
-                        <span class="font-medium text-gray-800" title="{{ $task->title }}">
-                            {{ $task->title }}
-                        </span>
-                    </td>
-
-                    {{-- Kantor --}}
-                    <td class="px-6 py-4 w-32">
-                        @if($task->kantor)
-                            <span class="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-semibold bg-blue-50 text-blue-700 border border-blue-200">
-                                {{ $task->kantor }}
+        <table class="w-full text-sm min-w-[580px] table-fixed">
+            <thead>
+                <tr class="bg-gray-50 border-b border-gray-200">
+                    <th class="text-left px-6 py-3.5 font-semibold text-gray-600 w-48">Judul</th>
+                    <th class="text-left px-6 py-3.5 font-semibold text-gray-600 w-32">Kantor</th>
+                    <th class="text-left px-6 py-3.5 font-semibold text-gray-600">Deskripsi</th>
+                    <th class="text-left px-6 py-3.5 font-semibold text-gray-600 w-48">Penerima</th>
+                    <th class="text-right px-6 py-3.5 font-semibold text-gray-600 w-28">Aksi</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-100">
+                @forelse($tasks as $task)
+                    @php
+                        $hasCompleted = $task->assignments->where('is_completed', 1)->count() > 0;
+                    @endphp
+                    <tr class="hover:bg-gray-50 transition">
+                        {{-- Judul --}}
+                        <td class="px-6 py-4 w-48">
+                            <span class="font-medium text-gray-800 truncate block max-w-full" title="{{ $task->title }}">
+                                {{ $task->title }}
                             </span>
-                        @else
-                            <span class="text-gray-400 text-sm font-medium">-</span>
-                        @endif
-                    </td>
-                    <td class="px-6 py-4">
-                        <div class="truncate max-w-[220px] text-gray-500"
-                             title="{{ $task->description ?? '-' }}">
-                            @if($task->description)
-                                {!! linkify(e($task->description)) !!}
-                            @else
-                                -
-                            @endif
-                        </div>
-                    </td>
-                    <td class="px-6 py-4 w-48">
-                        <div class="flex flex-wrap gap-1">
-                            @foreach($task->assignedUsers as $assignee)
-                                @php
-                                    $assignment = $task->assignments->firstWhere('user_id', $assignee->id);
-                                    $done = $assignment?->is_completed;
-                                @endphp
-                                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium
-                                    {{ $done ? 'bg-green-50 text-green-700' : 'bg-gray-100 text-gray-600' }}">
-                                    @if($done)
-                                        <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                                            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
-                                        </svg>
-                                    @endif
-                                    {{ $assignee->name }}
+                        </td>
+
+                        {{-- Kantor --}}
+                        <td class="px-6 py-4 w-32">
+                            @if($task->kantor)
+                                <span class="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-semibold bg-blue-50 text-blue-700 border border-blue-200 truncate max-w-full">
+                                    {{ $task->kantor }}
                                 </span>
-                            @endforeach
-                        </div>
-                    </td>
-                    <td class="px-6 py-4 w-28">
-                        <div class="flex items-center justify-end gap-2 whitespace-nowrap">
+                            @else
+                                <span class="text-gray-400 text-sm font-medium">-</span>
+                            @endif
+                        </td>
+                        <td class="px-6 py-4">
+                            <div class="truncate text-gray-500"
+                                 title="{{ $task->description ?? '-' }}">
+                                @if($task->description)
+                                    {!! linkify(e($task->description)) !!}
+                                @else
+                                    -
+                                @endif
+                            </div>
+                        </td>
+                        <td class="px-6 py-4 w-48">
+                            <div class="flex flex-wrap gap-1">
+                                @foreach($task->assignedUsers as $assignee)
+                                    @php
+                                        $assignment = $task->assignments->firstWhere('user_id', $assignee->id);
+                                        $done = $assignment?->is_completed;
+                                    @endphp
+                                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium
+                                        {{ $done ? 'bg-green-50 text-green-700' : 'bg-gray-100 text-gray-600' }}">
+                                        @if($done)
+                                            <svg class="w-3 h-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                                            </svg>
+                                        @endif
+                                        <span class="truncate max-w-[100px]">{{ $assignee->name }}</span>
+                                    </span>
+                                @endforeach
+                            </div>
+                        </td>
+                        <td class="px-6 py-4 w-28">
+                            <div class="flex items-center justify-end gap-2 whitespace-nowrap">
 
-                            {{-- Tombol Detail — selalu tampil --}}
-                            <button
-                                onclick="openDetailModal(
-                                    '{{ addslashes($task->title) }}',
-                                    '{{ addslashes($task->description ?? '') }}',
-                                    '{{ $task->task_date->translatedFormat('d M Y') }}',
-                                    {{ json_encode($task->assignedUsers->map(function($u) use ($task) {
-                                        $a = $task->assignments->firstWhere('user_id', $u->id);
-                                        return [
-                                            'name'         => $u->name,
-                                            'status'       => $a?->is_completed ?? 'pending',
-                                            'note'         => $a?->note ?? '',
-                                            'completed_at' => $a?->completed_at?->translatedFormat('d M Y, H:i') ?? '',
-                                        ];
-                                    })->values()) }}
-                                )"
-                                class="p-1.5 text-gray-400 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition"
-                                title="Lihat Detail">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                          d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                          d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
-                                </svg>
-                            </button>
-
-                            @if(!$hasCompleted)
+                                {{-- Tombol Detail — selalu tampil --}}
                                 <button
-                                    onclick="openEditModal(
-                                        {{ $task->id }},
+                                    onclick="openDetailModal(
                                         '{{ addslashes($task->title) }}',
                                         '{{ addslashes($task->description ?? '') }}',
-                                        {{ json_encode($task->assignedUsers->pluck('id')) }},
-                                        '{{ $task->kantor ?? '' }}'
+                                        '{{ $task->task_date->translatedFormat('d M Y') }}',
+                                        {{ json_encode($task->assignedUsers->map(function($u) use ($task) {
+                                            $a = $task->assignments->firstWhere('user_id', $u->id);
+                                            return [
+                                                'name'         => $u->name,
+                                                'status'       => $a?->is_completed ?? 'pending',
+                                                'note'         => $a?->note ?? '',
+                                                'completed_at' => $a?->completed_at?->translatedFormat('d M Y, H:i') ?? '',
+                                            ];
+                                        })->values()) }}
                                     )"
                                     class="p-1.5 text-gray-400 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition"
-                                    title="Edit">
+                                    title="Lihat Detail">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                              d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
-                                    </svg>
-                                </button>
-                                <button
-                                    onclick="openDeleteModal({{ $task->id }}, '{{ addslashes($task->title) }}')"
-                                    class="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition"
-                                    title="Hapus">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                              d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                              d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                              d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
                                     </svg>
                                 </button>
-                            @else
-                                <span class="text-xs text-gray-400 italic">Terkunci</span>
-                            @endif
-                        </div>
-                    </td>
-                </tr>
-            @empty
-                <tr>
-                    <td colspan="4" class="px-6 py-12 text-center text-gray-400 text-sm">
-                        Belum ada tugas yang kamu buat hari ini.
-                    </td>
-                </tr>
-            @endforelse
-        </tbody>
-    </table>
+
+                                @if(!$hasCompleted)
+                                    <button
+                                        onclick="openEditModal(
+                                            {{ $task->id }},
+                                            '{{ addslashes($task->title) }}',
+                                            '{{ addslashes($task->description ?? '') }}',
+                                            {{ json_encode($task->assignedUsers->pluck('id')) }},
+                                            '{{ $task->kantor ?? '' }}'
+                                        )"
+                                        class="p-1.5 text-gray-400 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition"
+                                        title="Edit">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                  d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                                        </svg>
+                                    </button>
+                                    <button
+                                        onclick="openDeleteModal({{ $task->id }}, '{{ addslashes($task->title) }}')"
+                                        class="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition"
+                                        title="Hapus">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                  d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                        </svg>
+                                    </button>
+                                @else
+                                    <span class="text-xs text-gray-400 italic">Terkunci</span>
+                                @endif
+                            </div>
+                        </td>
+                    </tr>
+                @empty
+                    <tr>
+                        <td colspan="5" class="px-6 py-12 text-center text-gray-400 text-sm">
+                            Belum ada tugas yang kamu buat hari ini.
+                        </td>
+                    </tr>
+                @endforelse
+            </tbody>
+        </table>
     </div>
 </div>
 
@@ -288,7 +288,7 @@
             </button>
         </div>
         <form id="form-edit" action="" method="POST"
-              class="px-6 py-5 space-y-4 overflow-y-auto flex-1">
+              class="px-6 py-5 pt-1 space-y-4 overflow-y-auto flex-1">
             @csrf
             @method('PATCH')
             <div>

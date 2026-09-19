@@ -60,6 +60,7 @@ class ReportController extends Controller
         $today = \Carbon\Carbon::today()->toDateString();
         $dateFrom = $request->query('date_from', $today);
         $dateTo = $request->query('date_to', $today);
+        $statusFilter = $request->query('status', 'all');
 
         if ($dateFrom > $dateTo) {
             [$dateFrom, $dateTo] = [$dateTo, $dateFrom];
@@ -81,19 +82,21 @@ class ReportController extends Controller
         }
         $pct = $total > 0 ? round(($completed / $total) * 100) : 0;
 
-        $tasksByDate = $tasks->groupBy(fn($t) => $t->task_date->toDateString());
+        $filteredTasks = $tasks;
+        if ($statusFilter !== 'all') {
+            $filteredTasks = $tasks->filter(function ($task) use ($statusFilter) {
+                $s = $task->assignments->first()?->is_completed ?? 'pending';
+                return $s === $statusFilter;
+            })->values();
+        }
+
+        $tasksByDate = $filteredTasks->groupBy(fn ($t) => $t->task_date->toDateString());
 
         return view('admin.reports.productivity-detail', compact(
-            'user',
-            'tasks',
-            'tasksByDate',
-            'dateFrom',
-            'dateTo',
-            'total',
-            'completed',
-            'notDone',
-            'pending',
-            'pct'
+            'user', 'tasks', 'filteredTasks', 'tasksByDate',
+            'dateFrom', 'dateTo',
+            'total', 'completed', 'notDone', 'pending', 'pct',
+            'statusFilter'
         ));
     }
 
