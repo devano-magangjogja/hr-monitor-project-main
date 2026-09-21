@@ -124,34 +124,49 @@
         {{-- ── TAB 1: SELURUH AKUN SOSMED ─────────────────────────────── --}}
         @if($tab === 'accounts')
                 <div class="p-4 sm:p-5">
-                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
-                        <div>
+                    {{-- Header: Judul kiri, Filter + Tombol kanan — semua sejajar satu baris --}}
+                    <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-3 mb-4">
+                        {{-- Kiri: Judul & Deskripsi --}}
+                        <div class="min-w-0">
                             <h3 class="text-sm font-semibold text-gray-800">Distribusi & Penugasan Akun Sosial Media</h3>
-                            <p class="text-xs text-gray-500 mt-0.5">Pemberian tugas pengelolaan akun sosial media kepada eksekutor
-                                (Staff Sosmed / PM)</p>
+                            <p class="text-xs text-gray-500 mt-0.5">Pemberian tugas pengelolaan akun sosial media kepada eksekutor (Staff Sosmed / PM)</p>
                         </div>
-                        <div class="flex items-center gap-2 flex-wrap">
+
+                        {{-- Kanan: Form Pencarian + Tombol Aksi --}}
+                        <div class="flex items-center gap-2 shrink-0 flex-wrap">
                             <form action="{{ route('admin.sosmed.index') }}" method="GET" class="flex items-center gap-2">
                                 <input type="hidden" name="tab" value="accounts">
-                                <input type="text" name="account_search" value="{{ $accountSearch ?? '' }}"
-                                    placeholder="Cari nama akun..."
-                                    class="h-9 px-3 text-xs bg-white border border-gray-300 rounded-lg shadow-sm
-                                                                                                                                                                                                                                                                                           focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500
-                                                                                                                                                                                                                                                                                           text-gray-700 transition w-40 sm:w-auto">
+                                <select name="search_type"
+                                    class="h-9 px-2.5 text-xs bg-white border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 text-gray-700 transition cursor-pointer"
+                                    onchange="if(this.form.account_search.value) this.form.submit()">
+                                    <option value="all" {{ ($searchType ?? 'all') === 'all' ? 'selected' : '' }}>Semua Kriteria</option>
+                                    <option value="manager" {{ ($searchType ?? 'all') === 'manager' ? 'selected' : '' }}>Pengelola Akun</option>
+                                    <option value="pm" {{ ($searchType ?? 'all') === 'pm' ? 'selected' : '' }}>Supervisor PM</option>
+                                    <option value="assistant" {{ ($searchType ?? 'all') === 'assistant' ? 'selected' : '' }}>Asisten Pengawas</option>
+                                    <option value="staff" {{ ($searchType ?? 'all') === 'staff' ? 'selected' : '' }}>Staff Pengawas</option>
+                                    <option value="account" {{ ($searchType ?? 'all') === 'account' ? 'selected' : '' }}>Nama Akun</option>
+                                </select>
+                                <div class="relative flex items-center">
+                                    <input type="text" name="account_search" value="{{ $accountSearch ?? '' }}"
+                                        placeholder="Cari akun, pengelola, PM, asisten..."
+                                        class="h-9 pl-3 pr-8 text-xs bg-white border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 text-gray-700 transition w-52">
+                                    <button type="submit" class="absolute right-2 text-gray-400 hover:text-primary-600 transition" title="Cari">
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                        </svg>
+                                    </button>
+                                </div>
+                                @if($accountSearch || ($searchType ?? 'all') !== 'all')
+                                    <a href="{{ route('admin.sosmed.index', ['tab' => 'accounts']) }}"
+                                        class="inline-flex items-center justify-center h-9 px-2.5 text-xs font-medium text-gray-500 hover:text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition shrink-0"
+                                        title="Reset pencarian & filter">
+                                        Reset
+                                    </a>
+                                @endif
                             </form>
-                            <a href="{{ route('admin.accounts.index') }}"
-                                class="inline-flex items-center justify-center gap-1.5 px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs sm:text-sm font-medium rounded-lg transition border border-gray-300">
-                                <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                </svg>
-                                Manajemen Akun
-                            </a>
                             <button onclick="openAssignTaskModal()"
-                                class="inline-flex items-center justify-center gap-2 px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white text-xs sm:text-sm font-semibold rounded-lg transition shadow-sm">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                class="inline-flex items-center justify-center gap-1.5 px-4 py-2 h-9 bg-primary-600 hover:bg-primary-700 text-white text-xs font-semibold rounded-lg transition shadow-sm shrink-0">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
                                 </svg>
                                 Beri Tugas
@@ -343,7 +358,8 @@
                                                             notes: '{{ addslashes(str_replace(["\r", "\n"], [' ', ' '], $acc->notes ?? '')) }}',
                                                             staff_users: {{ json_encode($acc->staffUsers->map(fn($u) => ['id' => $u->id, 'name' => $u->name, 'role' => $u->role, 'role_label' => match($u->role) { 'pm' => 'PM Mandiri', 'sosmed' => 'Staff Sosmed', 'digital_marketing' => 'Digital Marketing', default => $u->role_label ?? strtoupper($u->role) }])) }},
                                                             managers_count: {{ $acc->staffUsers->count() }},
-                                                            assigned_user_ids: {{ json_encode($acc->staffUsers->pluck('id')) }}
+                                                            assigned_user_ids: {{ json_encode($acc->staffUsers->pluck('id')) }},
+                                                            current_staff_id: {{ $stUser ? $stUser->id : 'null' }}
                                                         })"
                                                         class="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition"
                                                         title="Atur Penugasan">
@@ -377,7 +393,14 @@
                                 @empty
                                     <tr>
                                         <td colspan="8" class="px-4 py-8 text-center text-sm text-gray-400">
-                                            Belum ada akun sosial media yang didaftarkan.
+                                            @if($accountSearch)
+                                                Tidak ditemukan akun yang cocok dengan pencarian "<strong>{{ $accountSearch }}</strong>".
+                                                <div class="mt-2">
+                                                    <a href="{{ route('admin.sosmed.index', ['tab' => 'accounts']) }}" class="text-xs text-primary-600 hover:underline">Reset pencarian</a>
+                                                </div>
+                                            @else
+                                                Belum ada akun sosial media yang didaftarkan.
+                                            @endif
                                         </td>
                                     </tr>
                                 @endforelse
@@ -428,10 +451,26 @@
                                     <div class="flex items-center gap-1 flex-shrink-0">
                                         {{-- Edit --}}
                                         <button type="button"
-                                            onclick="openEditAccountModal({ ... })"
+                                            onclick="openEditAccountModal({
+                                                id: {{ $acc->id }},
+                                                name: '{{ addslashes($acc->name) }}',
+                                                platform: '{{ addslashes($acc->platform) }}',
+                                                link: '{{ addslashes($acc->link ?? '') }}',
+                                                pm_id: {{ $acc->pm_id ?? 'null' }},
+                                                assistant_id: {{ $acc->assistant_id ?? 'null' }},
+                                                supervisor_staff_id: {{ $acc->supervisor_staff_id ?? 'null' }},
+                                                notes: '{{ addslashes(str_replace(["\r", "\n"], [' ', ' '], $acc->notes ?? '')) }}',
+                                                staff_users: {{ json_encode($acc->staffUsers->map(fn($u) => ['id' => $u->id, 'name' => $u->name, 'role' => $u->role, 'role_label' => match($u->role) { 'pm' => 'PM Mandiri', 'sosmed' => 'Staff Sosmed', 'digital_marketing' => 'Digital Marketing', default => $u->role_label ?? strtoupper($u->role) }])) }},
+                                                managers_count: {{ $acc->staffUsers->count() }},
+                                                assigned_user_ids: {{ json_encode($acc->staffUsers->pluck('id')) }},
+                                                current_staff_id: {{ $stUser ? $stUser->id : 'null' }}
+                                            })"
                                             class="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition"
                                             title="Atur Penugasan">
-                                            {{-- svg edit --}}
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                                            </svg>
                                         </button>
 
                                         {{-- Ikon sampah = lepas HANYA pengelola di card ini --}}
@@ -522,7 +561,16 @@
                             </div>
                         @endforeach
                     @empty
-                        <div class="py-8 text-center text-sm text-gray-400">Belum ada akun sosial media.</div>
+                        <div class="py-8 text-center text-sm text-gray-400">
+                            @if($accountSearch)
+                                Tidak ditemukan akun yang cocok dengan pencarian "<strong>{{ $accountSearch }}</strong>".
+                                <div class="mt-2">
+                                    <a href="{{ route('admin.sosmed.index', ['tab' => 'accounts']) }}" class="text-xs text-primary-600 hover:underline">Reset pencarian</a>
+                                </div>
+                            @else
+                                Belum ada akun sosial media.
+                            @endif
+                        </div>
                     @endforelse
                 </div>
 
@@ -1416,6 +1464,7 @@
             <form id="form-edit-account" method="POST" action="" class="p-6 pt-1 space-y-4 overflow-y-auto">
                 @csrf
                 @method('PATCH')
+                <input type="hidden" name="old_staff_id" id="edit-acc-old-staff-id" :value="oldStaffId">
 
                 {{-- Akun yang Dikelola (Readonly / Disabled) --}}
                 <div>
@@ -1456,35 +1505,31 @@
                         Eksekutor Akun (Dikelola Oleh)
                     </label>
 
-                    {{-- Daftar pengelola saat ini --}}
-                    <div x-show="currentStaffUsers && currentStaffUsers.length > 0" class="mb-2.5 space-y-1.5">
-                        <p class="text-[11px] font-medium text-gray-500">Pengelola saat ini:</p>
-                        <div class="flex flex-wrap gap-1.5">
-                            <template x-for="u in currentStaffUsers" :key="u.id">
-                                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium bg-primary-50 text-primary-700 border border-primary-200">
-                                    <span x-text="u.name"></span>
-                                    <span class="text-[10px] text-primary-500 font-semibold" x-text="`(${u.role_label})`"></span>
-                                </span>
-                            </template>
+                    {{-- Pengelola lain di akun ini jika multi-manager --}}
+                    <template x-if="otherManagers && otherManagers.length > 0">
+                        <div class="mb-2.5 p-2.5 bg-gray-50 rounded-lg border border-gray-200">
+                            <p class="text-[11px] text-gray-500 font-medium mb-1">Pengelola lain di akun ini:</p>
+                            <div class="flex flex-wrap gap-1">
+                                <template x-for="u in otherManagers" :key="u.id">
+                                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] bg-white text-gray-700 border border-gray-200">
+                                        <span x-text="u.name"></span>
+                                        <span class="text-[10px] text-gray-400 font-semibold" x-text="`(${u.role_label})`"></span>
+                                    </span>
+                                </template>
+                            </div>
                         </div>
-                    </div>
+                    </template>
 
-                    <label class="block text-[11px] font-medium text-gray-600 mb-1">
-                        Tambah Eksekutor Baru <span class="text-gray-400 font-normal">(Pilih untuk menambahkan user lain)</span>
-                    </label>
                     <select name="staff_id" id="edit-acc-staff"
                         x-model="selectedStaffId"
                         onchange="syncSupervisorState(this, 'edit-acc-pm', 'edit-pm-hint', 'edit-acc-ast')"
                         class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 focus:outline-none">
-                        <option value="" data-role="">-- Pilih User untuk Ditambahkan (Opsional) --</option>
+                        <option value="" data-role="">-- Belum Ditugaskan / Kosongkan --</option>
                         <template x-for="ex in availableExecutors" :key="ex.id">
                             <option :value="ex.id" :data-role="ex.role" x-text="`${ex.name} (${ex.role_label})`"></option>
                         </template>
                     </select>
-                    <p x-show="currentStaffUsers.length > 0 && availableExecutors.length === 0" class="text-[11px] text-amber-600 mt-1 italic">
-                        Semua user dalam sistem sudah mengelola akun ini.
-                    </p>
-                    <p id="edit-staff-note" class="text-[11px] text-gray-400 mt-1">Satu akun dapat dikelola oleh lebih dari satu eksekutor.</p>
+                    <p id="edit-staff-note" class="text-[11px] text-gray-400 mt-1">Mengubah eksekutor penanggung jawab pada baris ini.</p>
                 </div>
 
                 {{-- Supervisor PM --}}
@@ -1977,6 +2022,7 @@
                     link: link,
                     pm_id: currentPmId,
                     staff_id: currentStaffId,
+                    current_staff_id: currentStaffId,
                     notes: notes,
                     assistant_id: currentAssistantId,
                     supervisor_staff_id: currentSupervisorStaffId,
@@ -1991,27 +2037,30 @@
             window.dispatchEvent(new CustomEvent('open-edit-account', { detail: accData }));
 
             const staffSel = document.getElementById('edit-acc-staff');
-            if (staffSel) staffSel.value = '';
-
             const pmSel = document.getElementById('edit-acc-pm');
-            if (pmSel) pmSel.value = accData.pm_id ?? '';
-
             const astSel = document.getElementById('edit-acc-ast');
-            if (astSel) astSel.value = accData.assistant_id ?? '';
-
             const supSel = document.getElementById('edit-acc-sup');
-            if (supSel) supSel.value = accData.supervisor_staff_id ?? '';
-
             const notesEl = document.getElementById('edit-acc-notes');
+
+            if (staffSel) staffSel.value = accData.current_staff_id ? String(accData.current_staff_id) : '';
+            if (pmSel) pmSel.value = accData.pm_id ?? '';
+            if (astSel) astSel.value = accData.assistant_id ?? '';
+            if (supSel) supSel.value = accData.supervisor_staff_id ?? '';
             if (notesEl) notesEl.value = accData.notes ?? '';
 
             if (staffSel) syncSupervisorState(staffSel, 'edit-acc-pm', 'edit-pm-hint', 'edit-acc-ast');
 
             // Dispatch change event to update custom dropdown labels
-            if (staffSel) staffSel.dispatchEvent(new Event('change', { bubbles: true }));
-            if (pmSel) pmSel.dispatchEvent(new Event('change', { bubbles: true }));
-            if (astSel) astSel.dispatchEvent(new Event('change', { bubbles: true }));
-            if (supSel) supSel.dispatchEvent(new Event('change', { bubbles: true }));
+            setTimeout(() => {
+                if (staffSel) {
+                    staffSel.value = accData.current_staff_id ? String(accData.current_staff_id) : '';
+                    syncSupervisorState(staffSel, 'edit-acc-pm', 'edit-pm-hint', 'edit-acc-ast');
+                    staffSel.dispatchEvent(new Event('change', { bubbles: true }));
+                }
+                if (pmSel) pmSel.dispatchEvent(new Event('change', { bubbles: true }));
+                if (astSel) astSel.dispatchEvent(new Event('change', { bubbles: true }));
+                if (supSel) supSel.dispatchEvent(new Event('change', { bubbles: true }));
+            }, 50);
 
             document.getElementById('modal-edit-account').classList.remove('hidden');
         }
@@ -2139,18 +2188,20 @@
                 selectedLink: '',
                 currentStaffUsers: [],
                 selectedStaffId: '',
+                oldStaffId: '',
                 search: '',
                 open: false,
                 get selectedLabel() {
                     if (!this.selectedId) return '';
                     return this.selectedName + ' (' + this.selectedPlatform + ')';
                 },
+                get otherManagers() {
+                    if (!this.currentStaffUsers) return [];
+                    return this.currentStaffUsers.filter(u => Number(u.id) !== Number(this.oldStaffId));
+                },
                 get availableExecutors() {
-                    if (!this.currentStaffUsers || this.currentStaffUsers.length === 0) {
-                        return this.executors;
-                    }
-                    const assigned = this.currentStaffUsers.map(u => Number(u.id));
-                    return this.executors.filter(u => !assigned.includes(Number(u.id)));
+                    const otherIds = this.otherManagers.map(u => Number(u.id));
+                    return this.executors.filter(u => !otherIds.includes(Number(u.id)));
                 },
                 selectAccount(acc) {
                     this.selectedId = acc.id;
@@ -2165,7 +2216,8 @@
                     this.selectedPlatform = accData.platform;
                     this.selectedLink = accData.link || '';
                     this.currentStaffUsers = accData.staff_users || [];
-                    this.selectedStaffId = '';
+                    this.oldStaffId = accData.current_staff_id ? String(accData.current_staff_id) : '';
+                    this.selectedStaffId = this.oldStaffId;
                     this.search = '';
                     this.open = false;
 

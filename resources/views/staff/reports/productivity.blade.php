@@ -13,66 +13,75 @@
     {{-- Filter Rentang Tanggal & Role --}}
     <div class="bg-white rounded-xl border border-gray-200 p-4 sm:p-5 mb-6 shadow-sm">
         <form method="GET" action="{{ route('staff.productivity') }}"
-            class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-3 items-end">
+            class="space-y-3">
 
-            {{-- Dari Tanggal --}}
-            <div class="lg:col-span-3">
-                <label class="block text-[11px] font-semibold text-gray-500 uppercase tracking-wider mb-1">
-                    Dari Tanggal
-                </label>
-                <div class="relative">
-                    <input type="date" name="date_from" value="{{ $dateFrom }}" max="{{ $today }}"
-                        class="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-xs sm:text-sm font-medium text-gray-800 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:bg-white transition">
+            {{-- Baris 1: Tanggal + Role + Tombol --}}
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-3 items-end">
+                {{-- Dari Tanggal --}}
+                <div class="lg:col-span-3">
+                    <label class="block text-[11px] font-semibold text-gray-500 uppercase tracking-wider mb-1">
+                        Dari Tanggal
+                    </label>
+                    <div class="relative">
+                        <input type="date" name="date_from" value="{{ $dateFrom }}" max="{{ $today }}"
+                            class="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-xs sm:text-sm font-medium text-gray-800 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:bg-white transition">
+                    </div>
+                </div>
+
+                {{-- Sampai Tanggal --}}
+                <div class="lg:col-span-3">
+                    <label class="block text-[11px] font-semibold text-gray-500 uppercase tracking-wider mb-1">
+                        Sampai Tanggal
+                    </label>
+                    <div class="relative">
+                        <input type="date" name="date_to" value="{{ $dateTo }}" max="{{ $today }}"
+                            class="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-xs sm:text-sm font-medium text-gray-800 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:bg-white transition">
+                    </div>
+                </div>
+
+                {{-- Filter Role --}}
+                <div class="lg:col-span-3">
+                    <label class="block text-[11px] font-semibold text-gray-500 uppercase tracking-wider mb-1">
+                        Filter Role
+                    </label>
+                    <div class="relative">
+                        <select name="role"
+                            class="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-xs sm:text-sm font-medium text-gray-800 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:bg-white transition">
+                            <option value="all" {{ ($selectedRole ?? 'all') === 'all' ? 'selected' : '' }}>Semua Role (Bawahan)</option>
+                            @foreach($belowStaffRoles as $roleOption)
+                                <option value="{{ $roleOption->name }}" {{ ($selectedRole ?? 'all') === $roleOption->name ? 'selected' : '' }}>
+                                    {{ $roleOption->label }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+                </div>
+
+                {{-- Tombol Aksi --}}
+                <div class="sm:col-span-2 lg:col-span-3 flex items-center gap-2">
+                    <button type="submit"
+                        class="flex-1 flex items-center justify-center gap-1.5 px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white text-xs sm:text-sm font-semibold rounded-lg transition shadow-sm hover:shadow">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+                        </svg>
+                        <span>Tampilkan</span>
+                    </button>
+
+                    @if($dateFrom !== $today || $dateTo !== $today || ($selectedRole ?? 'all') !== 'all' || ($search ?? ''))
+                        <a href="{{ route('staff.productivity') }}"
+                            class="px-3.5 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs sm:text-sm font-semibold rounded-lg transition text-center flex-shrink-0"
+                            title="Reset Filter">
+                            Reset
+                        </a>
+                    @endif
                 </div>
             </div>
 
-            {{-- Sampai Tanggal --}}
-            <div class="lg:col-span-3">
-                <label class="block text-[11px] font-semibold text-gray-500 uppercase tracking-wider mb-1">
-                    Sampai Tanggal
-                </label>
-                <div class="relative">
-                    <input type="date" name="date_to" value="{{ $dateTo }}" max="{{ $today }}"
-                        class="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-xs sm:text-sm font-medium text-gray-800 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:bg-white transition">
-                </div>
-            </div>
-
-            {{-- Filter Role (Role di Bawah Staff) --}}
-            <div class="lg:col-span-3">
-                <label class="block text-[11px] font-semibold text-gray-500 uppercase tracking-wider mb-1">
-                    Filter Role
-                </label>
-                <div class="relative">
-                    <select name="role"
-                        class="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-xs sm:text-sm font-medium text-gray-800 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:bg-white transition">
-                        <option value="all" {{ ($selectedRole ?? 'all') === 'all' ? 'selected' : '' }}>Semua Role (Bawahan)</option>
-                        @foreach($belowStaffRoles as $roleOption)
-                            <option value="{{ $roleOption->name }}" {{ ($selectedRole ?? 'all') === $roleOption->name ? 'selected' : '' }}>
-                                {{ $roleOption->label }}
-                            </option>
-                        @endforeach
-                    </select>
-                </div>
-            </div>
-
-            {{-- Tombol Aksi --}}
-            <div class="sm:col-span-2 lg:col-span-3 flex items-center gap-2">
-                <button type="submit"
-                    class="flex-1 flex items-center justify-center gap-1.5 px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white text-xs sm:text-sm font-semibold rounded-lg transition shadow-sm hover:shadow">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
-                    </svg>
-                    <span>Tampilkan</span>
-                </button>
-
-                @if($dateFrom !== $today || $dateTo !== $today || ($selectedRole ?? 'all') !== 'all')
-                    <a href="{{ route('staff.productivity') }}"
-                        class="px-3.5 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs sm:text-sm font-semibold rounded-lg transition text-center flex-shrink-0"
-                        title="Reset Filter">
-                        Reset
-                    </a>
-                @endif
+            {{-- Baris 2: Cari Nama (full width) --}}
+            <div>
+                <input type="search" name="search" value="{{ $search ?? '' }}" placeholder="Cari pengguna..."
+                    class="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-xs sm:text-sm font-medium text-gray-800 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:bg-white transition">
             </div>
         </form>
 

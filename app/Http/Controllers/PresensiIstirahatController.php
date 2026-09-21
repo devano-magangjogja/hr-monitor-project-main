@@ -76,13 +76,29 @@ class PresensiIstirahatController extends Controller
                 ->get();
         }
 
-        $base = Presensi::where('session', 'entry')->whereDate('tanggal', $tanggal)
-            ->when($kantor, fn ($query) => $query->where('kantor', $kantor));
+        $base = Presensi::where('session', 'entry')
+                ->whereDate('tanggal', $tanggal)
+                ->when($kantor, fn ($query) => $query->where('kantor', $kantor))
+                ->where(function ($query) {
+                    $query->whereNull('keterangan')
+                        ->orWhere('keterangan', '!=', 'Tidak Hadir');
+        });
+
         $stats = [
-            'peserta' => (clone $base)->count(),
-            'kembali' => Presensi::where('session', 'break_return')->whereDate('tanggal', $tanggal)->when($kantor, fn ($query) => $query->where('kantor', $kantor))->count(),
-            'terlambat' => Presensi::where('session', 'break_return')->whereDate('tanggal', $tanggal)->where('keterangan', 'Terlambat')->when($kantor, fn ($query) => $query->where('kantor', $kantor))->count(),
-            'belum_kembali' => max(0, (clone $base)->count() - Presensi::where('session', 'break_return')->whereDate('tanggal', $tanggal)->when($kantor, fn ($query) => $query->where('kantor', $kantor))->count()),
+            'peserta'       => (clone $base)->count(),
+            'kembali'       => Presensi::where('session', 'break_return')
+                                    ->whereDate('tanggal', $tanggal)
+                                    ->when($kantor, fn ($query) => $query->where('kantor', $kantor))
+                                    ->count(),
+            'terlambat'     => Presensi::where('session', 'break_return')
+                                    ->whereDate('tanggal', $tanggal)
+                                    ->where('keterangan', 'Terlambat')
+                                    ->when($kantor, fn ($query) => $query->where('kantor', $kantor))
+                                    ->count(),
+            'belum_kembali' => max(0, (clone $base)->count() - Presensi::where('session', 'break_return')
+                                    ->whereDate('tanggal', $tanggal)
+                                    ->when($kantor, fn ($query) => $query->where('kantor', $kantor))
+                                    ->count()),
         ];
 
         $defaultBreakTime = Presensi::where('session', 'break_return')
@@ -194,8 +210,14 @@ class PresensiIstirahatController extends Controller
         return Presensi::with('pemagang')
             ->where('session', 'entry')
             ->whereDate('tanggal', $tanggal)
+            // ← Exclude yang ditandai Tidak Hadir
+            ->where(function ($query) {
+                $query->whereNull('keterangan')
+                    ->orWhere('keterangan', '!=', 'Tidak Hadir');
+            })
             ->whereDoesntHave('pemagang.presensis', function ($query) use ($tanggal) {
-                $query->where('session', 'break_return')->whereDate('tanggal', $tanggal);
+                $query->where('session', 'break_return')
+                    ->whereDate('tanggal', $tanggal);
             })
             ->when($kantor, fn ($query) => $query->where('kantor', $kantor));
     }

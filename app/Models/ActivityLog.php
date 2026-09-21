@@ -120,6 +120,7 @@ class ActivityLog extends Model
             'Role'      => 'red',
             'Notifikasi' => 'yellow',
             'Pengaturan' => 'gray',
+            'Manajemen Akun' => 'indigo',
             default     => 'gray',
         };
     }

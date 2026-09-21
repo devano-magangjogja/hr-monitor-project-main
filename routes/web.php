@@ -17,6 +17,7 @@ use App\Http\Controllers\Staff\TaskController as StaffTaskController;
 use App\Http\Controllers\Staff\UserController as StaffUserController;
 use App\Http\Controllers\Staff\NotificationController as StaffNotificationController;
 use App\Http\Controllers\Staff\PresensiController as StaffPresensiController;
+use App\Http\Controllers\Staff\ActivityLogController as StaffActivityLogController;
 use App\Http\Controllers\Cs\DashboardController as CsDashboard;
 use App\Http\Controllers\Cs\TaskController as CsTaskController;
 use App\Http\Controllers\Ob\DashboardController as ObDashboard;
@@ -204,6 +205,10 @@ Route::prefix('staff')->name('staff.')->middleware(['auth', 'role:hr_staff'])->g
     Route::post('/sosmed/accounts/{account}/unassign', [StaffSosmedController::class, 'unassignAccount'])->name('sosmed.accounts.unassign');
     Route::delete('/sosmed/accounts/{account}', [StaffSosmedController::class, 'destroyAccount'])->name('sosmed.accounts.destroy');
     Route::patch('/sosmed/tasks/{task}/verify', [StaffSosmedController::class, 'verifyTask'])->name('sosmed.tasks.verify');
+
+    // Log Activity (Staff Monitoring: Manajemen Akun & Sosmed)
+    Route::get('/activity-log', [StaffActivityLogController::class, 'index'])->name('activity-log.index');
+    Route::delete('/activity-log/{activityLog}', [StaffActivityLogController::class, 'destroy'])->name('activity-log.destroy');
 });
 
 // ── CS (Customer Service) ────────────────────────────────────────────────────
