@@ -26,11 +26,6 @@
         </p>
     </div>
     <div class="flex flex-wrap items-center gap-2 shrink-0">
-        <input type="time" id="bulk-waktu-kembali" name="waktu_kembali"
-                lang="id"
-                value="{{ ($defaultBreakTime ?? null) ?: now()->format('H:i') }}"
-                required
-                class="h-10 w-full sm:w-auto rounded-lg border border-gray-300 px-3 text-sm">
         <button type="button" onclick="openBulkReturnModal()"
                 class="h-10 w-full sm:w-auto rounded-lg bg-emerald-600 px-4 text-sm font-semibold text-white hover:bg-emerald-700">
             Tandai Semua Kembali
@@ -297,7 +292,12 @@
 
 {{-- Modal Bulk Return --}}
 <div id="modal-bulk-return" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4">
-    <div class="w-full max-w-lg max-h-[90vh] overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-2xl flex flex-col">
+    <form method="POST" action="{{ route($prefix . '.presensi.istirahat.bulk') }}"
+          class="w-full max-w-lg max-h-[90vh] overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-2xl flex flex-col">
+        @csrf
+        <input type="hidden" name="tanggal" value="{{ $tanggal }}">
+        @if($kantor)<input type="hidden" name="kantor" value="{{ $kantor }}">@endif
+
         <div class="flex items-start justify-between border-b border-gray-200 bg-gray-50 px-4 sm:px-5 py-4 shrink-0">
             <div class="flex items-start gap-3">
                 <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-100 text-emerald-700">
@@ -317,6 +317,24 @@
         </div>
 
         <div class="px-4 sm:px-5 py-4 overflow-y-auto flex-1">
+            {{-- Pilih Waktu Kembali --}}
+            <div class="mb-4">
+                <label class="block text-xs font-semibold text-gray-700 mb-1.5">
+                    Waktu Kembali <span class="text-red-500">*</span>
+                </label>
+                <input type="time" id="modal-bulk-waktu-kembali" name="waktu_kembali"
+                    lang="id"
+                    value="{{ ($defaultBreakTime ?? null) ?: now()->format('H:i') }}"
+                    required
+                    class="w-full h-10 rounded-lg border border-gray-300 px-3 text-sm focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500">
+                
+                {{-- Info AM / PM --}}
+                <div class="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-[11px] text-gray-500">
+                    <span><strong class="text-gray-700">AM</strong>: 00.00 – 12.00</span>
+                    <span><strong class="text-gray-700">PM</strong>: 12.01 – 23.59</span>
+                </div>
+            </div>
+
             <div class="mb-3 flex items-center justify-between rounded-xl border border-emerald-100 bg-emerald-50 px-3 py-2.5">
                 <div class="min-w-0">
                     <p class="text-xs font-semibold text-emerald-800">Peserta yang akan dicatat</p>
@@ -349,13 +367,7 @@
             </div>
         </div>
 
-        <form method="POST" action="{{ route($prefix . '.presensi.istirahat.bulk') }}"
-              class="flex flex-col-reverse sm:flex-row justify-end gap-2 border-t border-gray-200 px-4 sm:px-5 py-4 shrink-0">
-            @csrf
-            <input type="hidden" name="tanggal" value="{{ $tanggal }}">
-            @if($kantor)<input type="hidden" name="kantor" value="{{ $kantor }}">@endif
-            <input type="hidden" id="modal-bulk-waktu-kembali" name="waktu_kembali"
-                   value="{{ ($defaultBreakTime ?? null) ?: now()->format('H:i') }}">
+        <div class="flex flex-col-reverse sm:flex-row justify-end gap-2 border-t border-gray-200 px-4 sm:px-5 py-4 shrink-0">
             <button type="button" onclick="closeBulkReturnModal()"
                     class="w-full sm:w-auto rounded-lg border border-gray-300 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
                 Batal
@@ -365,37 +377,54 @@
                     class="w-full sm:w-auto rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-50">
                 Konfirmasi &amp; Tandai Semua
             </button>
-        </form>
-    </div>
+        </div>
+    </form>
 </div>
 @endsection
 
 @push('scripts')
 <script>
     (() => {
-        const input = document.getElementById('bulk-waktu-kembali');
-        if (!input) return;
-
         const storageKey = `presensi-istirahat-waktu:{{ $prefix }}:{{ $tanggal }}:{{ $kantor ?: 'all' }}`;
-        const savedTime = localStorage.getItem(storageKey);
-        if (savedTime) input.value = savedTime;
+        const timeInput = document.getElementById('modal-bulk-waktu-kembali');
+        const timeLabel = document.getElementById('modal-bulk-time-label');
 
-        input.addEventListener('change', () => {
-            if (input.value) localStorage.setItem(storageKey, input.value);
-        });
+        const updateTimeUI = (val) => {
+            if (timeLabel && val) {
+                timeLabel.textContent = val;
+            }
+        };
 
         window.openBulkReturnModal = () => {
             const modal = document.getElementById('modal-bulk-return');
-            const modalTime = document.getElementById('modal-bulk-waktu-kembali');
-            const modalTimeLabel = document.getElementById('modal-bulk-time-label');
-            if (modalTime) modalTime.value = input.value;
-            if (modalTimeLabel) modalTimeLabel.textContent = input.value;
+
+            // Ambil dari localStorage kalau ada
+            const savedTime = localStorage.getItem(storageKey);
+            if (savedTime && timeInput) {
+                timeInput.value = savedTime;
+            }
+
+            // Update label
+            if (timeInput) {
+                updateTimeUI(timeInput.value);
+            }
+
             modal?.classList.remove('hidden');
         };
 
         window.closeBulkReturnModal = () => {
             document.getElementById('modal-bulk-return')?.classList.add('hidden');
         };
+
+        // Update label + simpan ke localStorage saat waktu diubah (input & change)
+        if (timeInput) {
+            ['input', 'change'].forEach(evt => {
+                timeInput.addEventListener(evt, function () {
+                    updateTimeUI(this.value);
+                    if (this.value) localStorage.setItem(storageKey, this.value);
+                });
+            });
+        }
 
         // Tutup modal kalau klik area gelap
         document.getElementById('modal-bulk-return')?.addEventListener('click', function (e) {

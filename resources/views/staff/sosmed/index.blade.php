@@ -205,7 +205,25 @@
                                     @php
                                         $managers = $acc->staffUsers;
                                         $hasManagers = $managers->count() > 0;
-                                        $rows = $hasManagers ? $managers : collect([null]);
+                                        if ($accountSearch && $searchType === 'manager') {
+                                            $filteredManagers = $managers->filter(
+                                                fn($u) => str_contains(strtolower($u->name), strtolower(trim($accountSearch)))
+                                            );
+                                            $rows = $filteredManagers->count() > 0 ? $filteredManagers : collect([null]);
+                                        } elseif ($accountSearch && $searchType === 'all') {
+                                            $accNameMatch = str_contains(strtolower($acc->name), strtolower(trim($accountSearch)))
+                                                || str_contains(strtolower($acc->username ?? ''), strtolower(trim($accountSearch)));
+                                            if (!$accNameMatch) {
+                                                $filteredManagers = $managers->filter(
+                                                    fn($u) => str_contains(strtolower($u->name), strtolower(trim($accountSearch)))
+                                                );
+                                                $rows = $filteredManagers->count() > 0 ? $filteredManagers : ($hasManagers ? $managers : collect([null]));
+                                            } else {
+                                                $rows = $hasManagers ? $managers : collect([null]);
+                                            }
+                                        } else {
+                                            $rows = $hasManagers ? $managers : collect([null]);
+                                        }
                                         $adminLocked = $acc->staffUsers->contains(fn($u) => $u->role === 'hr_staff');
                                     @endphp
 
@@ -421,7 +439,25 @@
                         @php
                             $managers = $acc->staffUsers;
                             $hasManagers = $managers->count() > 0;
-                            $rows = $hasManagers ? $managers : collect([null]);
+                            if ($accountSearch && $searchType === 'manager') {
+                                $filteredManagers = $managers->filter(
+                                    fn($u) => str_contains(strtolower($u->name), strtolower(trim($accountSearch)))
+                                );
+                                $rows = $filteredManagers->count() > 0 ? $filteredManagers : collect([null]);
+                            } elseif ($accountSearch && $searchType === 'all') {
+                                $accNameMatch = str_contains(strtolower($acc->name), strtolower(trim($accountSearch)))
+                                    || str_contains(strtolower($acc->username ?? ''), strtolower(trim($accountSearch)));
+                                if (!$accNameMatch) {
+                                    $filteredManagers = $managers->filter(
+                                        fn($u) => str_contains(strtolower($u->name), strtolower(trim($accountSearch)))
+                                    );
+                                    $rows = $filteredManagers->count() > 0 ? $filteredManagers : ($hasManagers ? $managers : collect([null]));
+                                } else {
+                                    $rows = $hasManagers ? $managers : collect([null]);
+                                }
+                            } else {
+                                $rows = $hasManagers ? $managers : collect([null]);
+                            }
                             $adminLocked = $acc->staffUsers->contains(fn($u) => $u->role === 'hr_staff');
                         @endphp
 
@@ -1002,7 +1038,8 @@
         <div class="absolute inset-0 bg-black/50 backdrop-blur-sm"
             onclick="document.getElementById('modal-assign-task').classList.add('hidden')"></div>
         <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-lg z-10 max-h-[90vh] flex flex-col overflow-visible"
-            x-data="assignTaskDropdown({{ json_encode($availableAccounts) }}, {{ $executorsJson }})">
+            x-data="assignTaskDropdown({{ json_encode($availableAccounts) }}, {{ $executorsJson }})"
+            @reset-assign-task.window="resetState()">
             <div class="flex items-center justify-between px-6 py-4 border-b border-gray-200">
                 <div>
                     <h3 class="text-base font-bold text-gray-800">Beri Tugas Pengelolaan Sosmed</h3>
@@ -1127,13 +1164,18 @@
                     </label>
                     <select name="staff_id" id="assign-task-staff"
                         x-model="selectedStaffId"
+                        :disabled="!selectedId"
                         @change="syncSupervisorState($el, 'assign-task-pm', 'assign-task-pm-hint', 'assign-task-ast')"
-                        class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 focus:outline-none">
+                        class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 focus:outline-none
+                            disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed">
                         <option value="" data-role="">-- Belum Ditugaskan / Pilih Nanti --</option>
                         <template x-for="ex in availableExecutors" :key="ex.id">
                             <option :value="ex.id" :data-role="ex.role" x-text="`${ex.name} (${ex.role_label})`"></option>
                         </template>
                     </select>
+                    <p x-show="!selectedId" class="text-[11px] text-gray-400 mt-1 italic">
+                        Pilih akun terlebih dahulu untuk mengaktifkan delegasi.
+                    </p>
                     <p x-show="selectedAccount && availableExecutors.length === 0" class="text-[11px] text-amber-600 mt-1 italic">
                         Semua user yang berwenang sudah mengelola akun ini.
                     </p>
@@ -1145,14 +1187,17 @@
                         Supervisor PM <span class="text-gray-400 font-normal">(Opsional)</span>
                     </label>
                     <select name="pm_id" id="assign-task-pm"
-                        class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 focus:outline-none">
+                        :disabled="!selectedId"
+                        class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 focus:outline-none
+                            disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed">
                         <option value="">-- Tanpa Supervisor / Langsung ke HR --</option>
                         @foreach($pms as $pm)
                             <option value="{{ $pm->id }}">{{ $pm->name }} (PM)</option>
                         @endforeach
                     </select>
-                    <p id="assign-task-pm-hint" class="text-[11px] text-gray-400 mt-1">PM yang berwenang meninjau & approve
-                        tugas.</p>
+                    <p id="assign-task-pm-hint" class="text-[11px] text-gray-400 mt-1">
+                        PM yang berwenang meninjau & approve tugas.
+                    </p>
                 </div>
 
                 {{-- Asisten Pengawas --}}
@@ -1161,7 +1206,9 @@
                         Asisten Pengawas <span class="text-gray-400 font-normal">(Opsional)</span>
                     </label>
                     <select name="assistant_id" id="assign-task-ast"
-                        class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 focus:outline-none">
+                        :disabled="!selectedId"
+                        class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 focus:outline-none
+                            disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed">
                         <option value="">-- Tanpa Asisten --</option>
                         @foreach($assistants as $ast)
                             <option value="{{ $ast->id }}">{{ $ast->name }} (Asisten)</option>
@@ -1175,28 +1222,33 @@
                         Staff Pengawas <span class="text-gray-400 font-normal">(Opsional)</span>
                     </label>
                     <select name="supervisor_staff_id" id="assign-task-supervisor"
-                        class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 focus:outline-none">
+                        :disabled="!selectedId"
+                        class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 focus:outline-none
+                            disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed">
                         <option value="">-- Tanpa Pengawas / PM Standard --</option>
                         @foreach($supervisors as $sup)
                             <option value="{{ $sup->id }}">{{ $sup->name }} (Staff)</option>
                         @endforeach
                     </select>
-                    <p class="text-[11px] text-gray-400 mt-1">Staff HR yang berwenang langsung memverifikasi tugas sosmed
-                        akun ini.</p>
+                    <p class="text-[11px] text-gray-400 mt-1">Staff HR yang berwenang langsung memverifikasi tugas sosmed akun ini.</p>
                 </div>
 
                 {{-- Catatan / Arahan --}}
                 <div>
                     <label class="block text-xs font-semibold text-gray-700 mb-1.5">Catatan / Arahan Penugasan</label>
                     <textarea name="notes" rows="2" placeholder="Catatan atau instruksi pengelolaan akun..."
-                        class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 focus:outline-none"></textarea>
+                        :disabled="!selectedId"
+                        class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 focus:outline-none
+                            disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed"></textarea>
                 </div>
 
                 <div class="flex gap-3 pt-2">
                     <button type="button" onclick="document.getElementById('modal-assign-task').classList.add('hidden')"
                         class="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-sm text-gray-700 hover:bg-gray-50 transition">Batal</button>
                     <button type="submit"
-                        class="flex-1 px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-lg text-sm font-semibold shadow-sm transition">Tambahkan
+                        :disabled="!selectedId"
+                        class="flex-1 px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-lg text-sm font-semibold shadow-sm transition
+                            disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-primary-600">Tambahkan
                         ke Sosmed</button>
                 </div>
             </form>
@@ -1732,13 +1784,25 @@
                 });
 
                 const observer = new MutationObserver(() => {
+                    button.disabled = select.disabled;
                     if (select.disabled) {
-                        button.className = 'w-full border border-gray-300 rounded-lg px-3 py-2 text-sm text-left flex justify-between items-center transition bg-gray-100 text-gray-400 cursor-not-allowed';
+                        button.className = 'w-full border border-gray-200 rounded-lg px-3 py-2 text-sm text-left flex justify-between items-center bg-gray-100 text-gray-400 cursor-not-allowed opacity-70 select-none';
+                        const svg = button.querySelector('svg');
+                        if (svg) svg.classList.add('opacity-40');
                     } else {
                         button.className = 'w-full border border-gray-300 rounded-lg px-3 py-2 text-sm text-left flex justify-between items-center transition bg-white text-gray-800 focus:ring-2 focus:ring-primary-500 focus:outline-none';
+                        const svg = button.querySelector('svg');
+                        if (svg) svg.classList.remove('opacity-40');
                     }
                 });
                 observer.observe(select, { attributes: true, attributeFilter: ['disabled'] });
+
+                if (select.disabled) {
+                    button.disabled = true;
+                    button.className = 'w-full border border-gray-200 rounded-lg px-3 py-2 text-sm text-left flex justify-between items-center bg-gray-100 text-gray-400 cursor-not-allowed opacity-70 select-none';
+                    const svg = button.querySelector('svg');
+                    if (svg) svg.classList.add('opacity-40');
+                }
             });
         });
 
@@ -1755,6 +1819,29 @@
                 : document.getElementById('assign-assistant-sel');
             const hint = document.getElementById(hintId);
             if (!pmSelect) return;
+
+            // Jika berada dalam form yang belum memilih akun, tetap disable supervisor
+            const accountInput = staffSelect.form ? staffSelect.form.querySelector('input[name="sosmed_account_id"]') : null;
+            if (accountInput && !accountInput.value) {
+                pmSelect.value = '';
+                pmSelect.disabled = true;
+                pmSelect.classList.add('bg-gray-100', 'text-gray-400', 'cursor-not-allowed');
+                if (typeof setCustomSelectDisabled === 'function') {
+                    setCustomSelectDisabled(pmSelect, true);
+                }
+                if (assistantSelect) {
+                    assistantSelect.value = '';
+                    assistantSelect.disabled = true;
+                    assistantSelect.classList.add('bg-gray-100', 'text-gray-400', 'cursor-not-allowed');
+                    if (typeof setCustomSelectDisabled === 'function') {
+                        setCustomSelectDisabled(assistantSelect, true);
+                    }
+                }
+                if (hint) {
+                    hint.innerHTML = 'Pilih akun terlebih dahulu untuk mengatur supervisor.';
+                }
+                return;
+            }
 
             const selectedOption = staffSelect.options[staffSelect.selectedIndex];
             const role = selectedOption ? selectedOption.getAttribute('data-role') : null;
@@ -2015,22 +2102,34 @@
         }
 
         function openAssignTaskModal() {
+            window.dispatchEvent(new CustomEvent('reset-assign-task'));
             const staffSel = document.getElementById('assign-task-staff');
             if (staffSel) {
                 staffSel.value = '';
-                syncSupervisorState(staffSel, 'assign-task-pm', 'assign-task-pm-hint', 'assign-task-ast');
-                staffSel.dispatchEvent(new Event('change', { bubbles: true }));
+                if (typeof setCustomSelectDisabled === 'function') setCustomSelectDisabled(staffSel, true);
+                else staffSel.disabled = true;
             }
             const pmSel = document.getElementById('assign-task-pm');
             if (pmSel) {
                 pmSel.value = '';
-                pmSel.dispatchEvent(new Event('change', { bubbles: true }));
+                if (typeof setCustomSelectDisabled === 'function') setCustomSelectDisabled(pmSel, true);
+                else pmSel.disabled = true;
             }
             const astSel = document.getElementById('assign-task-ast');
             if (astSel) {
                 astSel.value = '';
-                astSel.dispatchEvent(new Event('change', { bubbles: true }));
+                if (typeof setCustomSelectDisabled === 'function') setCustomSelectDisabled(astSel, true);
+                else astSel.disabled = true;
             }
+            const supSel = document.getElementById('assign-task-supervisor');
+            if (supSel) {
+                supSel.value = '';
+                if (typeof setCustomSelectDisabled === 'function') setCustomSelectDisabled(supSel, true);
+                else supSel.disabled = true;
+            }
+            const hint = document.getElementById('assign-task-pm-hint');
+            if (hint) hint.textContent = 'PM yang berwenang meninjau & approve tugas.';
+
             document.getElementById('modal-assign-task').classList.remove('hidden');
         }
 
@@ -2046,6 +2145,16 @@
                 selectedStaffId: '',
                 search: '',
                 open: false,
+                resetState() {
+                    this.selectedId = '';
+                    this.selectedName = '';
+                    this.selectedPlatform = '';
+                    this.selectedLink = '';
+                    this.selectedAccount = null;
+                    this.selectedStaffId = '';
+                    this.search = '';
+                    this.open = false;
+                },
                 get selectedLabel() {
                     if (!this.selectedId) return '';
                     return this.selectedName + ' (' + this.selectedPlatform + ')';
@@ -2081,12 +2190,19 @@
                     // If currently selected staff is already assigned to this account, reset it
                     if (this.selectedStaffId && acc.assigned_user_ids && acc.assigned_user_ids.map(Number).includes(Number(this.selectedStaffId))) {
                         this.selectedStaffId = '';
-                        const sel = document.getElementById('assign-task-staff');
-                        if (sel) {
-                            sel.value = '';
-                            syncSupervisorState(sel, 'assign-task-pm', 'assign-task-pm-hint', 'assign-task-ast');
-                        }
                     }
+
+                    this.$nextTick(() => {
+                        const staffSel = document.getElementById('assign-task-staff');
+                        const supSel = document.getElementById('assign-task-supervisor');
+                        if (staffSel && typeof setCustomSelectDisabled === 'function') {
+                            setCustomSelectDisabled(staffSel, false);
+                        }
+                        if (supSel && typeof setCustomSelectDisabled === 'function') {
+                            setCustomSelectDisabled(supSel, false);
+                        }
+                        syncSupervisorState(staffSel, 'assign-task-pm', 'assign-task-pm-hint', 'assign-task-ast');
+                    });
                 }
             };
         }

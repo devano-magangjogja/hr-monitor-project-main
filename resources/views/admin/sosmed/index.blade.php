@@ -204,8 +204,31 @@
                                     @php
                                         $managers = $acc->staffUsers;
                                         $hasManagers = $managers->count() > 0;
-                                        // Kalau belum ada pengelola, tetap tampilkan 1 baris kosong
-                                        $rows = $hasManagers ? $managers : collect([null]);
+
+                                        // Ketika search berdasarkan nama pengelola, filter baris agar
+                                        // hanya pengelola yang namanya cocok yang ditampilkan
+                                        if ($accountSearch && $searchType === 'manager') {
+                                            $filteredManagers = $managers->filter(
+                                                fn($u) => str_contains(strtolower($u->name), strtolower(trim($accountSearch)))
+                                            );
+                                            $rows = $filteredManagers->count() > 0 ? $filteredManagers : collect([null]);
+                                        } elseif ($accountSearch && $searchType === 'all') {
+                                            // Mode 'all': jika pencariannya karena pengelola, filter baris ke pengelola yg cocok
+                                            // Jika akun itu sendiri yg cocok (by name), tampilkan semua pengelolanya
+                                            $accNameMatch = str_contains(strtolower($acc->name), strtolower(trim($accountSearch)))
+                                                || str_contains(strtolower($acc->username ?? ''), strtolower(trim($accountSearch)));
+                                            if (!$accNameMatch) {
+                                                $filteredManagers = $managers->filter(
+                                                    fn($u) => str_contains(strtolower($u->name), strtolower(trim($accountSearch)))
+                                                );
+                                                $rows = $filteredManagers->count() > 0 ? $filteredManagers : ($hasManagers ? $managers : collect([null]));
+                                            } else {
+                                                $rows = $hasManagers ? $managers : collect([null]);
+                                            }
+                                        } else {
+                                            // Kalau belum ada pengelola, tetap tampilkan 1 baris kosong
+                                            $rows = $hasManagers ? $managers : collect([null]);
+                                        }
                                     @endphp
 
                                     @foreach($rows as $stUser)
@@ -413,7 +436,25 @@
                         @php
                             $managers = $acc->staffUsers;
                             $hasManagers = $managers->count() > 0;
-                            $rows = $hasManagers ? $managers : collect([null]);
+                            if ($accountSearch && $searchType === 'manager') {
+                                $filteredManagers = $managers->filter(
+                                    fn($u) => str_contains(strtolower($u->name), strtolower(trim($accountSearch)))
+                                );
+                                $rows = $filteredManagers->count() > 0 ? $filteredManagers : collect([null]);
+                            } elseif ($accountSearch && $searchType === 'all') {
+                                $accNameMatch = str_contains(strtolower($acc->name), strtolower(trim($accountSearch)))
+                                    || str_contains(strtolower($acc->username ?? ''), strtolower(trim($accountSearch)));
+                                if (!$accNameMatch) {
+                                    $filteredManagers = $managers->filter(
+                                        fn($u) => str_contains(strtolower($u->name), strtolower(trim($accountSearch)))
+                                    );
+                                    $rows = $filteredManagers->count() > 0 ? $filteredManagers : ($hasManagers ? $managers : collect([null]));
+                                } else {
+                                    $rows = $hasManagers ? $managers : collect([null]);
+                                }
+                            } else {
+                                $rows = $hasManagers ? $managers : collect([null]);
+                            }
                         @endphp
 
                         @foreach($rows as $stUser)
@@ -1135,7 +1176,8 @@
         <div class="absolute inset-0 bg-black/50 backdrop-blur-sm"
             onclick="document.getElementById('modal-assign-task').classList.add('hidden')"></div>
         <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-lg z-10 max-h-[90vh] flex flex-col overflow-visible"
-            x-data="assignTaskDropdown({{ json_encode($availableAccounts) }}, {{ $executorsJson }})">
+            x-data="assignTaskDropdown({{ json_encode($availableAccounts) }}, {{ $executorsJson }})"
+            @reset-assign-task.window="resetState()">
             <div class="flex items-center justify-between px-6 py-4 border-b border-gray-200">
                 <div>
                     <h3 class="text-base font-bold text-gray-800">Beri Tugas Pengelolaan Sosmed</h3>
@@ -1233,14 +1275,14 @@
                 {{-- Link Akun (Readonly & Auto-filled) --}}
                 <div>
                     <label class="block text-xs font-semibold text-gray-700 mb-1.5">
-                        Link Akun <span class="text-xs text-gray-400 font-normal"></span>
+                        Link Akun <span class="text-xs text-gray-400 font-normal">(Otomatis terisi & tidak dapat diubah)</span>
                     </label>
-                    <div class="relative">
+                    <div class="relative flex items-center w-full bg-gray-100/80 border border-gray-300 rounded-lg focus-within:ring-2 focus-within:ring-primary-500">
                         <input type="text" readonly :value="selectedLink || '-'"
-                            class="w-full bg-gray-100/80 border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-600 cursor-not-allowed select-all focus:outline-none">
-                        <template x-if="selectedLink">
+                            class="w-full bg-transparent border-none px-3 py-2 text-sm text-gray-600 cursor-not-allowed select-all focus:outline-none focus:ring-0">
+                        <template x-if="selectedLink && selectedLink !== '-'">
                             <a :href="selectedLink" target="_blank" rel="noopener noreferrer"
-                                class="absolute right-2.5 top-1/2 -translate-y-1/2 p-1 text-primary-600 hover:text-primary-800"
+                                class="shrink-0 mr-2.5 p-1 text-primary-600 hover:text-primary-800"
                                 title="Buka Link di Tab Baru">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -1258,13 +1300,18 @@
                     </label>
                     <select name="staff_id" id="assign-task-staff"
                         x-model="selectedStaffId"
+                        :disabled="!selectedId"
                         @change="syncSupervisorState($el, 'assign-task-pm', 'assign-task-pm-hint', 'assign-task-ast')"
-                        class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 focus:outline-none">
+                        class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 focus:outline-none
+                            disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed">
                         <option value="" data-role="">-- Belum Ditugaskan / Pilih Nanti --</option>
                         <template x-for="ex in availableExecutors" :key="ex.id">
                             <option :value="ex.id" :data-role="ex.role" x-text="`${ex.name} (${ex.role_label})`"></option>
                         </template>
                     </select>
+                    <p x-show="!selectedId" class="text-[11px] text-gray-400 mt-1 italic">
+                        Pilih akun terlebih dahulu untuk mengaktifkan delegasi.
+                    </p>
                     <p x-show="selectedAccount && availableExecutors.length === 0" class="text-[11px] text-amber-600 mt-1 italic">
                         Semua user yang berwenang sudah mengelola akun ini.
                     </p>
@@ -1276,12 +1323,17 @@
                         Supervisor PM <span class="text-gray-400 font-normal">(Opsional)</span>
                     </label>
                     <select name="pm_id" id="assign-task-pm"
-                        class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 focus:outline-none">
-                        <option value="">-- Pilih PM --</option>
+                        :disabled="!selectedId"
+                        class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 focus:outline-none
+                            disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed">
+                        <option value="">-- Tanpa Supervisor / Langsung ke HR --</option>
                         @foreach($pms as $pm)
-                            <option value="{{ $pm->id }}">{{ $pm->name }}</option>
+                            <option value="{{ $pm->id }}">{{ $pm->name }} (PM)</option>
                         @endforeach
                     </select>
+                    <p id="assign-task-pm-hint" class="text-[11px] text-gray-400 mt-1">
+                        PM yang berwenang meninjau & approve tugas.
+                    </p>
                 </div>
 
                 {{-- Asisten Pengawas --}}
@@ -1290,10 +1342,12 @@
                         Asisten Pengawas <span class="text-gray-400 font-normal">(Opsional)</span>
                     </label>
                     <select name="assistant_id" id="assign-task-ast"
-                        class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 focus:outline-none">
-                        <option value="">-- Pilih Asisten --</option>
+                        :disabled="!selectedId"
+                        class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 focus:outline-none
+                            disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed">
+                        <option value="">-- Tanpa Asisten --</option>
                         @foreach($assistants as $asst)
-                            <option value="{{ $asst->id }}">{{ $asst->name }}</option>
+                            <option value="{{ $asst->id }}">{{ $asst->name }} (Asisten)</option>
                         @endforeach
                     </select>
                 </div>
@@ -1304,21 +1358,33 @@
                         Staff Pengawas <span class="text-gray-400 font-normal">(Opsional)</span>
                     </label>
                     <select name="supervisor_staff_id" id="assign-task-sup"
-                        class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 focus:outline-none">
+                        :disabled="!selectedId"
+                        class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 focus:outline-none
+                            disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed">
                         <option value="">-- Tanpa Staff Pengawas --</option>
                         @foreach($supervisors as $sup)
                             <option value="{{ $sup->id }}">{{ $sup->name }} (HR Staff)</option>
                         @endforeach
                     </select>
-                    <p class="text-[11px] text-gray-400 mt-1">Staff HR yang berwenang memverifikasi tugas jika PM/Asisten
-                        tidak ada.</p>
+                    <p class="text-[11px] text-gray-400 mt-1">Staff HR yang berwenang memverifikasi tugas jika PM/Asisten tidak ada.</p>
+                </div>
+
+                {{-- Catatan / Arahan Penugasan --}}
+                <div>
+                    <label class="block text-xs font-semibold text-gray-700 mb-1.5">Catatan / Arahan Penugasan</label>
+                    <textarea name="notes" rows="2" placeholder="Catatan atau instruksi pengelolaan akun..."
+                        :disabled="!selectedId"
+                        class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 focus:outline-none
+                            disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed"></textarea>
                 </div>
 
                 <div class="flex gap-3 pt-2">
                     <button type="button" onclick="document.getElementById('modal-assign-task').classList.add('hidden')"
                         class="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-sm text-gray-700 hover:bg-gray-50 transition">Batal</button>
                     <button type="submit"
-                        class="flex-1 px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-lg text-sm font-semibold shadow-sm transition">Tambahkan
+                        :disabled="!selectedId"
+                        class="flex-1 px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-lg text-sm font-semibold shadow-sm transition
+                            disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-primary-600">Tambahkan
                         ke Sosmed</button>
                 </div>
             </form>
@@ -1921,6 +1987,23 @@
             const hint = document.getElementById(hintId);
             if (!pmSelect) return;
 
+            // Jika berada dalam form yang belum memilih akun, tetap disable supervisor
+            const accountInput = staffSelect.form ? staffSelect.form.querySelector('input[name="sosmed_account_id"]') : null;
+            if (accountInput && !accountInput.value) {
+                pmSelect.value = '';
+                pmSelect.disabled = true;
+                pmSelect.classList.add('bg-gray-100', 'text-gray-400', 'cursor-not-allowed');
+                if (astSelect) {
+                    astSelect.value = '';
+                    astSelect.disabled = true;
+                    astSelect.classList.add('bg-gray-100', 'text-gray-400', 'cursor-not-allowed');
+                }
+                if (hint) {
+                    hint.innerHTML = 'Pilih akun terlebih dahulu untuk mengatur supervisor.';
+                }
+                return;
+            }
+
             const selectedOption = staffSelect.options[staffSelect.selectedIndex];
             const role = selectedOption ? selectedOption.getAttribute('data-role') : null;
 
@@ -2117,6 +2200,17 @@
         }
 
         function openAssignTaskModal() {
+            window.dispatchEvent(new CustomEvent('reset-assign-task'));
+            const staffSel = document.getElementById('assign-task-staff');
+            if (staffSel) staffSel.value = '';
+            const pmSel = document.getElementById('assign-task-pm');
+            if (pmSel) pmSel.value = '';
+            const astSel = document.getElementById('assign-task-ast');
+            if (astSel) astSel.value = '';
+            const supSel = document.getElementById('assign-task-sup');
+            if (supSel) supSel.value = '';
+            const hint = document.getElementById('assign-task-pm-hint');
+            if (hint) hint.textContent = 'PM yang berwenang meninjau & approve tugas.';
             document.getElementById('modal-assign-task').classList.remove('hidden');
         }
 
@@ -2132,6 +2226,16 @@
                 selectedStaffId: '',
                 search: '',
                 open: false,
+                resetState() {
+                    this.selectedId = '';
+                    this.selectedName = '';
+                    this.selectedPlatform = '';
+                    this.selectedLink = '';
+                    this.selectedAccount = null;
+                    this.selectedStaffId = '';
+                    this.search = '';
+                    this.open = false;
+                },
                 get selectedLabel() {
                     if (!this.selectedId) return '';
                     return this.selectedName + ' (' + this.selectedPlatform + ')';
@@ -2167,12 +2271,14 @@
                     // If currently selected staff is already assigned to this account, reset it
                     if (this.selectedStaffId && acc.assigned_user_ids && acc.assigned_user_ids.map(Number).includes(Number(this.selectedStaffId))) {
                         this.selectedStaffId = '';
+                    }
+
+                    this.$nextTick(() => {
                         const sel = document.getElementById('assign-task-staff');
                         if (sel) {
-                            sel.value = '';
                             syncSupervisorState(sel, 'assign-task-pm', 'assign-task-pm-hint', 'assign-task-ast');
                         }
-                    }
+                    });
                 }
             };
         }
