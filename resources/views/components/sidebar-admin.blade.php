@@ -194,7 +194,7 @@
 </div>
 
 {{-- Presensi (collapsible) --}}
-@php($presensiActive = request()->routeIs('admin.presensi.*'))
+@php($presensiActive = request()->routeIs('admin.presensi.*') && !request()->routeIs('admin.presensi.laporan'))
 <div x-data="{ open: {{ $presensiActive ? 'true' : 'false' }} }">
 <button @click="open = !open" class="w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-all
           {{ $presensiActive ? 'bg-white/10 text-white' : 'text-slate-400 hover:bg-white/5 hover:text-white' }}">

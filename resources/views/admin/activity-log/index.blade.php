@@ -11,7 +11,7 @@
 @section('content')
 
     {{-- ── Flash Notifications ─────────────────────────────────────────── --}}
-    @if(session('success'))
+    @if (session('success'))
         <div
             class="mb-3.5 p-3 bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-xl text-xs flex items-center justify-between shadow-sm">
             <div class="flex items-center gap-2">
@@ -27,7 +27,7 @@
             </button>
         </div>
     @endif
-    @if(session('error'))
+    @if (session('error'))
         <div
             class="mb-3.5 p-3 bg-rose-50 border border-rose-200 text-rose-800 rounded-xl text-xs flex items-center justify-between shadow-sm">
             <div class="flex items-center gap-2">
@@ -124,7 +124,7 @@
                     <select name="user_id" onchange="this.form.submit()"
                         class="w-full px-2.5 py-1.5 bg-gray-50 border border-gray-200 rounded-lg text-xs text-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500">
                         <option value="">Semua Pengguna</option>
-                        @foreach($users as $user)
+                        @foreach ($users as $user)
                             <option value="{{ $user->id }}" {{ request('user_id') == $user->id ? 'selected' : '' }}>
                                 {{ $user->name }}</option>
                         @endforeach
@@ -135,8 +135,9 @@
                     <select name="role" onchange="this.form.submit()"
                         class="w-full px-2.5 py-1.5 bg-gray-50 border border-gray-200 rounded-lg text-xs text-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500">
                         <option value="">Semua Role</option>
-                        @foreach($roles as $role)
-                            <option value="{{ $role }}" {{ request('role') == $role ? 'selected' : '' }}>{{ strtoupper($role) }}
+                        @foreach ($roles as $role)
+                            <option value="{{ $role }}" {{ request('role') == $role ? 'selected' : '' }}>
+                                {{ strtoupper($role) }}
                             </option>
                         @endforeach
                     </select>
@@ -146,8 +147,9 @@
                     <select name="module" onchange="this.form.submit()"
                         class="w-full px-2.5 py-1.5 bg-gray-50 border border-gray-200 rounded-lg text-xs text-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500">
                         <option value="">Semua Modul</option>
-                        @foreach($modules as $mod)
-                            <option value="{{ $mod }}" {{ request('module') == $mod ? 'selected' : '' }}>{{ $mod }}</option>
+                        @foreach ($modules as $mod)
+                            <option value="{{ $mod }}" {{ request('module') == $mod ? 'selected' : '' }}>
+                                {{ $mod }}</option>
                         @endforeach
                     </select>
                 </div>
@@ -161,8 +163,10 @@
                         <option value="deleted" {{ request('action') == 'deleted' ? 'selected' : '' }}>Dihapus</option>
                         <option value="completed" {{ request('action') == 'completed' ? 'selected' : '' }}>Diselesaikan
                         </option>
-                        <option value="assigned" {{ request('action') == 'assigned' ? 'selected' : '' }}>Ditugaskan</option>
-                        <option value="verified" {{ request('action') == 'verified' ? 'selected' : '' }}>Diverifikasi</option>
+                        <option value="assigned" {{ request('action') == 'assigned' ? 'selected' : '' }}>Ditugaskan
+                        </option>
+                        <option value="verified" {{ request('action') == 'verified' ? 'selected' : '' }}>Diverifikasi
+                        </option>
                     </select>
                 </div>
             </div>
@@ -178,7 +182,7 @@
                 </div>
 
                 <div class="flex items-center gap-2 w-full sm:w-auto shrink-0 justify-end">
-                    @if(request()->hasAny(['search', 'user_id', 'role', 'module', 'action']))
+                    @if (request()->hasAny(['search', 'user_id', 'role', 'module', 'action']))
                         <a href="{{ route('admin.activity-log.index') }}"
                             class="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition"
                             title="Reset Filter">
@@ -202,11 +206,13 @@
     <div class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
 
         {{-- Header Bar --}}
-        <div class="px-4 sm:px-6 py-3.5 border-b border-gray-100 bg-gray-50/60 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <div
+            class="px-4 sm:px-6 py-3.5 border-b border-gray-100 bg-gray-50/60 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
             <div class="flex-1">
                 <h2 class="text-sm font-bold text-gray-800">Daftar Aktivitas</h2>
                 <p class="text-xs text-gray-500 mt-0.5">
-                    Menampilkan {{ $logs->firstItem() ?? 0 }}–{{ $logs->lastItem() ?? 0 }} dari {{ number_format($logs->total()) }} entri
+                    Menampilkan {{ $logs->firstItem() ?? 0 }}–{{ $logs->lastItem() ?? 0 }} dari
+                    {{ number_format($logs->total()) }} entri
                 </p>
             </div>
             <div class="flex items-center gap-2 flex-shrink-0">
@@ -219,7 +225,8 @@
                     </svg>
                     <span>Bersihkan Log</span>
                 </button>
-                <span class="inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 bg-green-50 text-green-700 rounded-full border border-green-200">
+                <span
+                    class="inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 bg-green-50 text-green-700 rounded-full border border-green-200">
                     <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
                     <span>Live 30s</span>
                 </span>
@@ -270,7 +277,8 @@
                                 <p class="font-medium text-gray-700">
                                     {{ $log->created_at->locale('id')->translatedFormat('d M Y') }}</p>
                                 <p class="text-[10px] text-gray-400">{{ $log->created_at->format('H:i:s') }}
-                                    ({{ $log->created_at->diffForHumans() }})</p>
+                                    ({{ $log->created_at->diffForHumans() }})
+                                </p>
                             </td>
                             <td class="px-4 py-3">
                                 <p class="font-semibold text-gray-800">{{ $log->user_name }}</p>
@@ -295,7 +303,8 @@
                                     <button type="submit"
                                         class="p-1.5 text-gray-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition"
                                         title="Hapus log">
-                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor"
+                                            viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                 d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                                         </svg>
@@ -305,7 +314,8 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="7" class="px-6 py-12 text-center text-gray-400">Belum ada log aktivitas yang sesuai
+                            <td colspan="7" class="px-6 py-12 text-center text-gray-400">Belum ada log aktivitas yang
+                                sesuai
                                 filter.</td>
                         </tr>
                     @endforelse
@@ -388,13 +398,13 @@
                     Belum ada log aktivitas yang sesuai filter.
                 </div>
             @endforelse
-    </div>
-
-    @if($logs->hasPages())
-        <div class="px-3 py-2 border-t border-gray-100 bg-gray-50/50">
-            {{ $logs->links() }}
         </div>
-    @endif
+
+        @if ($logs->hasPages())
+            <div class="px-3 py-2 border-t border-gray-100 bg-gray-50/50">
+                {{ $logs->links() }}
+            </div>
+        @endif
 
     </div>
 
@@ -403,7 +413,8 @@
         <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" onclick="closePurgeModal()"></div>
         <div
             class="relative bg-white rounded-2xl shadow-2xl w-full max-w-sm sm:max-w-md z-10 flex flex-col overflow-hidden">
-            <div class="flex items-center justify-between px-4 sm:px-6 py-3 sm:py-4 border-b border-rose-100 bg-rose-50/70">
+            <div
+                class="flex items-center justify-between px-4 sm:px-6 py-3 sm:py-4 border-b border-rose-100 bg-rose-50/70">
                 <div class="flex items-center gap-2.5">
                     <div class="w-8 h-8 rounded-lg bg-rose-100 text-rose-600 flex items-center justify-center shrink-0">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -423,7 +434,8 @@
                 </button>
             </div>
 
-            <form method="POST" action="{{ route('admin.activity-log.purge') }}" class="p-4 pt-1 sm:pt-1 sm:p-6 space-y-4">
+            <form method="POST" action="{{ route('admin.activity-log.purge') }}"
+                class="p-4 pt-1 sm:pt-1 sm:p-6 space-y-4">
                 @csrf
                 @method('DELETE')
 
@@ -437,7 +449,8 @@
                     <div>
                         <p class="font-semibold">Perhatian Penting</p>
                         <p class="mt-0.5 text-amber-700">Data log yang dihapus tidak dapat dikembalikan. Saat ini tersimpan
-                            <strong>{{ number_format($statsTotal) }}</strong> log aktivitas.</p>
+                            <strong>{{ number_format($statsTotal) }}</strong> log aktivitas.
+                        </p>
                     </div>
                 </div>
 
@@ -446,7 +459,8 @@
                     <div class="space-y-2">
                         <label
                             class="flex items-center gap-2.5 p-2.5 rounded-lg border border-gray-200 hover:bg-gray-50 cursor-pointer transition">
-                            <input type="radio" name="period" value="1_week" class="text-rose-600 focus:ring-rose-500">
+                            <input type="radio" name="period" value="1_week"
+                                class="text-rose-600 focus:ring-rose-500">
                             <div class="text-xs">
                                 <span class="font-medium text-gray-800">Lebih dari 1 Minggu Lalu</span>
                                 <span class="text-gray-400 block text-[10px]">Hapus log yang berusia lebih dari 7
@@ -465,7 +479,8 @@
                         </label>
                         <label
                             class="flex items-center gap-2.5 p-2.5 rounded-lg border border-gray-200 hover:bg-gray-50 cursor-pointer transition">
-                            <input type="radio" name="period" value="3_months" class="text-rose-600 focus:ring-rose-500">
+                            <input type="radio" name="period" value="3_months"
+                                class="text-rose-600 focus:ring-rose-500">
                             <div class="text-xs">
                                 <span class="font-medium text-gray-800">Lebih dari 3 Bulan Lalu</span>
                                 <span class="text-gray-400 block text-[10px]">Hapus log yang berusia lebih dari 90
@@ -474,7 +489,8 @@
                         </label>
                         <label
                             class="flex items-center gap-2.5 p-2.5 rounded-lg border border-gray-200 hover:bg-gray-50 cursor-pointer transition">
-                            <input type="radio" name="period" value="6_months" class="text-rose-600 focus:ring-rose-500">
+                            <input type="radio" name="period" value="6_months"
+                                class="text-rose-600 focus:ring-rose-500">
                             <div class="text-xs">
                                 <span class="font-medium text-gray-800">Lebih dari 6 Bulan Lalu</span>
                                 <span class="text-gray-400 block text-[10px]">Hapus log yang berusia lebih dari 180
@@ -483,7 +499,8 @@
                         </label>
                         <label
                             class="flex items-center gap-2.5 p-2.5 rounded-lg border border-rose-200 bg-rose-50/40 hover:bg-rose-50 cursor-pointer transition">
-                            <input type="radio" name="period" value="all" class="text-rose-600 focus:ring-rose-500">
+                            <input type="radio" name="period" value="all"
+                                class="text-rose-600 focus:ring-rose-500">
                             <div class="text-xs">
                                 <span class="font-semibold text-rose-700">Semua Log Aktivitas</span>
                                 <span class="text-rose-500 block text-[10px]">Kosongkan seluruh riwayat log tanpa
@@ -518,7 +535,7 @@
                 document.getElementById('modal-purge-logs').classList.add('hidden');
             }
 
-            document.addEventListener('keydown', function (e) {
+            document.addEventListener('keydown', function(e) {
                 if (e.key === 'Escape') {
                     closePurgeModal();
                 }

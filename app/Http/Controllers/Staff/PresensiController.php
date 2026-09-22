@@ -62,9 +62,9 @@ class PresensiController extends Controller
         }
 
         // 1. Tabel Hadir (Lebih Awal, Tepat Waktu, Terlambat)
-        $allowedHadir   = ['Lebih Awal', 'Tepat Waktu', 'Terlambat'];
-        $filterKet      = in_array($request->input('keterangan'), $allowedHadir)
-                            ? $request->input('keterangan') : null;
+        $allowedHadir = ['Lebih Awal', 'Tepat Waktu', 'Terlambat'];
+        $filterKet = in_array($request->input('keterangan'), $allowedHadir)
+            ? $request->input('keterangan') : null;
 
         $presensiHadir = (clone $baseQuery)
             ->whereIn('keterangan', $allowedHadir)
@@ -229,12 +229,12 @@ class PresensiController extends Controller
      */
     public function laporan(Request $request)
     {
-        $queryPemagang = Pemagang::with(['presensis' => fn ($q) => $q->where('session', 'entry')]);
+        $queryPemagang = Pemagang::with(['presensis']);
 
         if ($request->filled('kantor')) {
             $kantor = $request->input('kantor');
             $queryPemagang->whereHas('presensis', function ($q) use ($kantor) {
-                $q->where('kantor', $kantor)->where('session', 'entry');
+                $q->where('kantor', $kantor);
             });
         }
 
@@ -251,19 +251,20 @@ class PresensiController extends Controller
             $queryPemagang->where('divisi', $request->input('divisi'));
         }
 
-        // Tabel 1: Rekapitulasi per Pemagang (10 per halaman)
         $pemagangs = $queryPemagang->orderBy('nama_lengkap', 'asc')
             ->paginate(15, ['*'], 'page_rekap')
             ->withQueryString()
             ->fragment('tabel-rekap-pemagang');
 
-        // Hitung metrik per pemagang
+        // Hitung metrik per pemagang (semua session dihitung)
         $kantorFilter = $request->input('kantor');
         $rekapPemagang = $pemagangs->through(function ($p) use ($kantorFilter) {
             $presensiList = $p->presensis;
             if ($kantorFilter) {
                 $presensiList = $presensiList->where('kantor', $kantorFilter);
             }
+
+            // Metrik utama dari SEMUA session → terlambat di istirahat juga menambah poin Telat
             $total = $presensiList->count();
             $awal = $presensiList->where('keterangan', 'Lebih Awal')->count();
             $tepat = $presensiList->where('keterangan', 'Tepat Waktu')->count();
@@ -271,6 +272,12 @@ class PresensiController extends Controller
             $tidakHadir = $presensiList->where('keterangan', 'Tidak Hadir')->count();
             $hadirDisiplin = $awal + $tepat;
             $rate = $total > 0 ? round(($hadirDisiplin / $total) * 100, 1) : 0;
+
+            // Breakdown untuk modal
+            $entryList = $presensiList->where('session', 'entry');
+            $terlambatPagi = $entryList->where('keterangan', 'Terlambat')->count();
+            $breakList = $presensiList->where('session', 'break_return');
+            $terlambatIstirahat = $breakList->where('keterangan', 'Terlambat')->count();
 
             return (object) [
                 'pemagang' => $p,
@@ -280,6 +287,8 @@ class PresensiController extends Controller
                 'terlambat' => $terlambat,
                 'tidak_hadir' => $tidakHadir,
                 'rate' => $rate,
+                'terlambat_pagi' => $terlambatPagi,
+                'terlambat_istirahat' => $terlambatIstirahat,
             ];
         });
 
@@ -306,8 +315,9 @@ class PresensiController extends Controller
             'avg_rate' => $avgDisiplinRate,
         ];
 
-        // Tabel 2: Riwayat detail log presensi (10 per halaman)
-        $logQuery = Presensi::with(['pemagang', 'creator'])->where('session', 'entry');
+        // Tabel 2: Riwayat detail log presensi (semua session)
+        $logQuery = Presensi::with(['pemagang', 'creator']); // hapus where('session', 'entry')
+
         if ($request->filled('kantor')) {
             $logQuery->where('kantor', $request->input('kantor'));
         }
@@ -340,10 +350,70 @@ class PresensiController extends Controller
             ->withQueryString()
             ->fragment('tabel-log-presensi');
 
+        // Tabel 3: Presensi Masuk hari ini (session = 'entry')
+        $tanggalMasuk = $request->input('tanggal_masuk', Carbon::today()->format('Y-m-d'));
+        $presensiMasukQuery = Presensi::with(['pemagang'])
+            ->where('session', 'entry')
+            ->whereDate('tanggal', $tanggalMasuk);
+        if ($request->filled('kantor')) {
+            $presensiMasukQuery->where('kantor', $request->input('kantor'));
+        }
+        if ($request->filled('divisi')) {
+            $divisi = $request->input('divisi');
+            $presensiMasukQuery->whereHas('pemagang', fn($q) => $q->where('divisi', $divisi));
+        }
+        if ($request->filled('search')) {
+            $search = $request->input('search');
+            $presensiMasukQuery->whereHas('pemagang', fn($q) => $q->where('nama_lengkap', 'like', "%{$search}%")
+                ->orWhere('no_hp', 'like', "%{$search}%"));
+        }
+        $presensiMasuk = $presensiMasukQuery
+            ->orderBy('waktu_masuk', 'asc')
+            ->paginate(15, ['*'], 'page_masuk')
+            ->withQueryString()
+            ->fragment('tabel-presensi-masuk');
+        $totalPresensiMasuk = $presensiMasukQuery->count();
+
+        // Tabel 4: Presensi Istirahat hari ini (session = 'break_return')
+        $tanggalIstirahat = $request->input('tanggal_istirahat', Carbon::today()->format('Y-m-d'));
+        $presensiIstirahatQuery = Presensi::with(['pemagang'])
+            ->where('session', 'break_return')
+            ->whereDate('tanggal', $tanggalIstirahat);
+        if ($request->filled('kantor')) {
+            $presensiIstirahatQuery->where('kantor', $request->input('kantor'));
+        }
+        if ($request->filled('divisi')) {
+            $divisi = $request->input('divisi');
+            $presensiIstirahatQuery->whereHas('pemagang', fn($q) => $q->where('divisi', $divisi));
+        }
+        if ($request->filled('search')) {
+            $search = $request->input('search');
+            $presensiIstirahatQuery->whereHas('pemagang', fn($q) => $q->where('nama_lengkap', 'like', "%{$search}%")
+                ->orWhere('no_hp', 'like', "%{$search}%"));
+        }
+        $presensiIstirahat = $presensiIstirahatQuery
+            ->orderBy('waktu_masuk', 'asc')
+            ->paginate(15, ['*'], 'page_istirahat')
+            ->withQueryString()
+            ->fragment('tabel-presensi-istirahat');
+        $totalPresensiIstirahat = $presensiIstirahatQuery->count();
+
         $divisiList = Pemagang::getAllDivisi();
         $kantorList = ['Kantor 1', 'Kantor 2', 'Kantor 3', 'Kantor 4', 'Kantor 5', 'Kantor 6', 'Kantor 7', 'Kantor 8', 'Kantor 9', 'Kantor 10'];
 
-        return view('staff.presensi.laporan-presensi', compact('rekapPemagang', 'stats', 'logs', 'divisiList', 'kantorList'));
+        return view('staff.presensi.laporan-presensi', compact(
+            'rekapPemagang',
+            'stats',
+            'logs',
+            'divisiList',
+            'kantorList',
+            'presensiMasuk',
+            'totalPresensiMasuk',
+            'tanggalMasuk',
+            'presensiIstirahat',
+            'totalPresensiIstirahat',
+            'tanggalIstirahat'
+        ));
     }
 }
 

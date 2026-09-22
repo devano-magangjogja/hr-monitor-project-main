@@ -49,14 +49,15 @@
         </div>
     </div>
 
-    @if($asistenKantors->count() > 0)
+    @if ($asistenKantors->count() > 0)
         <div
             class="mb-5 flex items-center gap-2 flex-wrap bg-blue-50/80 border border-blue-200 rounded-xl px-4 py-2.5 text-xs text-blue-900 shadow-2xs">
             <span class="font-bold flex items-center gap-1">Asisten Bertugas Hari Ini:</span>
-            @foreach($asistenKantors as $ak)
+            @foreach ($asistenKantors as $ak)
                 <span
                     class="inline-flex items-center gap-1 bg-white border border-blue-200 px-2.5 py-1 rounded-lg font-medium text-blue-800 shadow-2xs">
-                    <strong>{{ $ak['name'] }}</strong> &rarr; <span class="text-blue-600 font-bold">{{ $ak['kantor'] }}</span>
+                    <strong>{{ $ak['name'] }}</strong> &rarr; <span
+                        class="text-blue-600 font-bold">{{ $ak['kantor'] }}</span>
                 </span>
             @endforeach
         </div>
@@ -84,9 +85,8 @@
         </div>
 
         {{-- Datang Lebih Awal --}}
-        <div onclick="filterKet('Lebih Awal')"
-             title="Klik untuk filter tabel Lebih Awal"
-             class="rounded-xl border p-4 shadow-sm cursor-pointer transition-all select-none
+        <div onclick="filterKet('Lebih Awal')" title="Klik untuk filter tabel Lebih Awal"
+            class="rounded-xl border p-4 shadow-sm cursor-pointer transition-all select-none
                     {{ $activeKet === 'Lebih Awal'
                         ? 'bg-indigo-50 border-indigo-400 ring-2 ring-indigo-200 shadow-indigo-100'
                         : 'bg-white border-gray-200 hover:border-indigo-300 hover:shadow-md' }}">
@@ -100,15 +100,15 @@
                 </div>
             </div>
             <p class="text-2xl font-bold text-indigo-600">{{ $stats['datang_awal'] }}</p>
-            <p class="text-[11px] mt-0.5 {{ $activeKet === 'Lebih Awal' ? 'text-indigo-500 font-semibold' : 'text-gray-400' }}">
+            <p
+                class="text-[11px] mt-0.5 {{ $activeKet === 'Lebih Awal' ? 'text-indigo-500 font-semibold' : 'text-gray-400' }}">
                 {{ $activeKet === 'Lebih Awal' ? '▼ filter aktif' : 'hadir lebih awal' }}
             </p>
         </div>
 
         {{-- Tepat Waktu --}}
-        <div onclick="filterKet('Tepat Waktu')"
-             title="Klik untuk filter tabel Tepat Waktu"
-             class="rounded-xl border p-4 shadow-sm cursor-pointer transition-all select-none
+        <div onclick="filterKet('Tepat Waktu')" title="Klik untuk filter tabel Tepat Waktu"
+            class="rounded-xl border p-4 shadow-sm cursor-pointer transition-all select-none
                     {{ $activeKet === 'Tepat Waktu'
                         ? 'bg-green-50 border-green-400 ring-2 ring-green-200 shadow-green-100'
                         : 'bg-white border-gray-200 hover:border-green-300 hover:shadow-md' }}">
@@ -121,15 +121,15 @@
                 </div>
             </div>
             <p class="text-2xl font-bold text-green-600">{{ $stats['tepat_waktu'] }}</p>
-            <p class="text-[11px] mt-0.5 {{ $activeKet === 'Tepat Waktu' ? 'text-green-500 font-semibold' : 'text-gray-400' }}">
+            <p
+                class="text-[11px] mt-0.5 {{ $activeKet === 'Tepat Waktu' ? 'text-green-500 font-semibold' : 'text-gray-400' }}">
                 {{ $activeKet === 'Tepat Waktu' ? '▼ filter aktif' : 'hadir tepat waktu' }}
             </p>
         </div>
 
         {{-- Terlambat --}}
-        <div onclick="filterKet('Terlambat')"
-             title="Klik untuk filter tabel Terlambat"
-             class="rounded-xl border p-4 shadow-sm cursor-pointer transition-all select-none
+        <div onclick="filterKet('Terlambat')" title="Klik untuk filter tabel Terlambat"
+            class="rounded-xl border p-4 shadow-sm cursor-pointer transition-all select-none
                     {{ $activeKet === 'Terlambat'
                         ? 'bg-amber-50 border-amber-400 ring-2 ring-amber-200 shadow-amber-100'
                         : 'bg-white border-gray-200 hover:border-amber-300 hover:shadow-md' }}">
@@ -143,15 +143,15 @@
                 </div>
             </div>
             <p class="text-2xl font-bold text-amber-600">{{ $stats['terlambat'] }}</p>
-            <p class="text-[11px] mt-0.5 {{ $activeKet === 'Terlambat' ? 'text-amber-500 font-semibold' : 'text-gray-400' }}">
+            <p
+                class="text-[11px] mt-0.5 {{ $activeKet === 'Terlambat' ? 'text-amber-500 font-semibold' : 'text-gray-400' }}">
                 {{ $activeKet === 'Terlambat' ? '▼ filter aktif' : 'terlambat masuk' }}
             </p>
         </div>
 
         {{-- Tidak Hadir --}}
-        <div onclick="scrollToTidakHadir()"
-             title="Klik untuk langsung ke daftar tidak hadir"
-             class="bg-white rounded-xl border border-gray-200 p-4 shadow-sm cursor-pointer transition-all select-none hover:border-red-300 hover:shadow-md hover:bg-red-50/30">
+        <div onclick="scrollToTidakHadir()" title="Klik untuk langsung ke daftar tidak hadir"
+            class="bg-white rounded-xl border border-gray-200 p-4 shadow-sm cursor-pointer transition-all select-none hover:border-red-300 hover:shadow-md hover:bg-red-50/30">
             <div class="flex items-center justify-between mb-2">
                 <p class="text-xs font-medium text-gray-500">Tidak Hadir</p>
                 <div class="w-8 h-8 rounded-lg bg-red-50 flex items-center justify-center flex-shrink-0">
@@ -174,7 +174,8 @@
                 class="flex-1 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-3">
                 {{-- Search input (PALING KIRI) --}}
                 <div>
-                    <label class="block text-[11px] font-semibold text-gray-500 uppercase tracking-wider mb-1">Cari Pemagang</label>
+                    <label class="block text-[11px] font-semibold text-gray-500 uppercase tracking-wider mb-1">Cari
+                        Pemagang</label>
                     <div class="relative">
                         <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-gray-400">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -190,19 +191,22 @@
 
                 {{-- Filter Kantor --}}
                 <div>
-                    <label class="block text-[11px] font-semibold text-gray-500 uppercase tracking-wider mb-1">Kantor</label>
+                    <label
+                        class="block text-[11px] font-semibold text-gray-500 uppercase tracking-wider mb-1">Kantor</label>
                     <select name="kantor" onchange="this.form.submit()"
                         class="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:bg-white transition text-gray-700">
                         <option value="">Semua Kantor</option>
-                        @foreach($kantorList as $k)
-                            <option value="{{ $k }}" {{ request('kantor') == $k ? 'selected' : '' }}>{{ $k }}</option>
+                        @foreach ($kantorList as $k)
+                            <option value="{{ $k }}" {{ request('kantor') == $k ? 'selected' : '' }}>
+                                {{ $k }}</option>
                         @endforeach
                     </select>
                 </div>
 
                 {{-- Filter Shift --}}
                 <div>
-                    <label class="block text-[11px] font-semibold text-gray-500 uppercase tracking-wider mb-1">Shift</label>
+                    <label
+                        class="block text-[11px] font-semibold text-gray-500 uppercase tracking-wider mb-1">Shift</label>
                     <select name="shift" onchange="this.form.submit()"
                         class="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:bg-white transition text-gray-700">
                         <option value="">Semua Shift</option>
@@ -214,26 +218,29 @@
 
                 {{-- Filter Divisi --}}
                 <div>
-                    <label class="block text-[11px] font-semibold text-gray-500 uppercase tracking-wider mb-1">Divisi</label>
+                    <label
+                        class="block text-[11px] font-semibold text-gray-500 uppercase tracking-wider mb-1">Divisi</label>
                     <select name="divisi" onchange="this.form.submit()"
                         class="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:bg-white transition text-gray-700">
                         <option value="">Semua Divisi</option>
-                        @foreach($divisiList as $div)
-                            <option value="{{ $div }}" {{ request('divisi') == $div ? 'selected' : '' }}>{{ $div }}</option>
+                        @foreach ($divisiList as $div)
+                            <option value="{{ $div }}" {{ request('divisi') == $div ? 'selected' : '' }}>
+                                {{ $div }}</option>
                         @endforeach
                     </select>
                 </div>
 
                 {{-- Input Tanggal (PALING KANAN) --}}
                 <div>
-                    <label class="block text-[11px] font-semibold text-gray-500 uppercase tracking-wider mb-1">Pilih Tanggal</label>
+                    <label class="block text-[11px] font-semibold text-gray-500 uppercase tracking-wider mb-1">Pilih
+                        Tanggal</label>
                     <input type="date" name="tanggal" value="{{ $tanggal }}"
                         max="{{ \Carbon\Carbon::today()->format('Y-m-d') }}" onchange="this.form.submit()"
                         class="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-xs sm:text-sm font-medium text-gray-800 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:bg-white transition">
                 </div>
             </form>
 
-            @if(!$isToday)
+            @if (!$isToday)
                 <div class="flex items-center gap-2 flex-shrink-0 self-end lg:self-center">
                     <a href="{{ route('admin.presensi.index') }}"
                         class="px-3.5 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs sm:text-sm font-semibold rounded-lg transition"
@@ -260,18 +267,20 @@
                 </div>
             </div>
             <div class="flex items-center gap-2">
-                @if($activeKet)
+                @if ($activeKet)
                     <a href="{{ request()->fullUrlWithoutQuery(['keterangan', 'page_hadir']) }}"
-                       class="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-semibold
+                        class="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-semibold
                               bg-gray-100 hover:bg-gray-200 text-gray-600 rounded-full border border-gray-300 transition"
-                       title="Hapus filter">
+                        title="Hapus filter">
                         <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M6 18L18 6M6 6l12 12" />
                         </svg>
                         Reset filter
                     </a>
                 @endif
-                <span class="text-xs font-semibold px-3 py-1 bg-emerald-50 text-emerald-700 rounded-full border border-emerald-200">
+                <span
+                    class="text-xs font-semibold px-3 py-1 bg-emerald-50 text-emerald-700 rounded-full border border-emerald-200">
                     {{ $presensiHadir->total() }} Hadir
                 </span>
             </div>
@@ -314,7 +323,7 @@
 
                             {{-- No --}}
                             <td class="px-6 py-4 text-center text-xs text-gray-400 font-medium">
-                                {{ $presensiHadir->firstItem() ? ($presensiHadir->firstItem() + $index) : ($index + 1) }}
+                                {{ $presensiHadir->firstItem() ? $presensiHadir->firstItem() + $index : $index + 1 }}
                             </td>
 
                             {{-- Nama Pemagang (Cukup Nama, tanpa icon) --}}
@@ -362,7 +371,7 @@
                             <td class="px-6 py-4">
                                 <span
                                     class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium border {{ $badgeStyle }}">
-                                    @if($presensi->keterangan == 'Tepat Waktu' || $presensi->keterangan == 'Lebih Awal')
+                                    @if ($presensi->keterangan == 'Tepat Waktu' || $presensi->keterangan == 'Lebih Awal')
                                         <span class="w-1.5 h-1.5 rounded-full bg-green-500 mr-1.5"></span>
                                     @elseif($presensi->keterangan == 'Terlambat')
                                         <span class="w-1.5 h-1.5 rounded-full bg-amber-500 mr-1.5"></span>
@@ -375,7 +384,8 @@
                             <td class="px-6 py-4 text-right">
                                 <div class="flex items-center justify-end gap-1.5">
                                     {{-- Edit --}}
-                                    <button type="button" onclick="openEditModal(
+                                    <button type="button"
+                                        onclick="openEditModal(
                                                                                     {{ $presensi->id }},
                                                                                     {{ $presensi->pemagang_id }},
                                                                                     '{{ addslashes($pemagang ? $pemagang->nama_lengkap : '') }}',
@@ -395,7 +405,8 @@
                                     </button>
 
                                     {{-- Hapus --}}
-                                    <button type="button" onclick="openDeleteModal(
+                                    <button type="button"
+                                        onclick="openDeleteModal(
                                                                                     {{ $presensi->id }},
                                                                                     '{{ addslashes($pemagang ? $pemagang->nama_lengkap : 'Pemagang') }}',
                                                                                     '{{ $presensi->shift }}',
@@ -415,7 +426,8 @@
                     @empty
                         <tr>
                             <td colspan="8" class="px-6 py-10 text-center text-gray-400">
-                                <p class="font-medium text-gray-600 text-sm">Belum ada pemagang yang hadir pada tanggal ini</p>
+                                <p class="font-medium text-gray-600 text-sm">Belum ada pemagang yang hadir pada tanggal ini
+                                </p>
                                 <p class="text-xs text-gray-400 mt-1">Gunakan tombol "Catat Presensi" untuk menginput data
                                     kehadiran.</p>
                             </td>
@@ -425,7 +437,7 @@
             </table>
         </div>
 
-        @if($presensiHadir->hasPages())
+        @if ($presensiHadir->hasPages())
             <div class="px-6 py-4 pr-20 sm:pr-24 border-t border-gray-200 bg-gray-50/50 print:hidden">
                 {{ $presensiHadir->links() }}
             </div>
@@ -483,7 +495,7 @@
 
                             {{-- No --}}
                             <td class="px-6 py-4 text-center text-xs text-gray-400 font-medium">
-                                {{ $presensiTidakHadir->firstItem() ? ($presensiTidakHadir->firstItem() + $index) : ($index + 1) }}
+                                {{ $presensiTidakHadir->firstItem() ? $presensiTidakHadir->firstItem() + $index : $index + 1 }}
                             </td>
 
                             {{-- Nama Pemagang (Cukup Nama, tanpa icon) --}}
@@ -520,10 +532,11 @@
                             </td>
 
                             {{-- Keterangan / Alasan --}}
-                            <td class="px-6 py-4 text-xs text-red-600 max-w-[200px] truncate" title="{{ $presensi->notes }}">
+                            <td class="px-6 py-4 text-xs text-red-600 max-w-[200px] truncate"
+                                title="{{ $presensi->notes }}">
                                 <span class="inline-flex items-center gap-1">
-                                    <svg class="w-3.5 h-3.5 text-red-500 flex-shrink-0" fill="none" stroke="currentColor"
-                                        viewBox="0 0 24 24">
+                                    <svg class="w-3.5 h-3.5 text-red-500 flex-shrink-0" fill="none"
+                                        stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                             d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                                     </svg>
@@ -533,7 +546,7 @@
 
                             {{-- Tombol Hubungi WhatsApp (Dibuat Sangat Jelas) --}}
                             <td class="px-6 py-4 text-center">
-                                @if($pemagang && $pemagang->no_hp)
+                                @if ($pemagang && $pemagang->no_hp)
                                     <a href="{{ $pemagang->wa_url }}" target="_blank"
                                         class="inline-flex items-center gap-2 px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-semibold shadow-sm transition hover:shadow-md">
                                         <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
@@ -551,7 +564,8 @@
                             <td class="px-6 py-4 text-right">
                                 <div class="flex items-center justify-end gap-1.5">
                                     {{-- Edit --}}
-                                    <button type="button" onclick="openEditModal(
+                                    <button type="button"
+                                        onclick="openEditModal(
                                                                                     {{ $presensi->id }},
                                                                                     {{ $presensi->pemagang_id }},
                                                                                     '{{ addslashes($pemagang ? $pemagang->nama_lengkap : '') }}',
@@ -571,7 +585,8 @@
                                     </button>
 
                                     {{-- Hapus --}}
-                                    <button type="button" onclick="openDeleteModal(
+                                    <button type="button"
+                                        onclick="openDeleteModal(
                                                                                     {{ $presensi->id }},
                                                                                     '{{ addslashes($pemagang ? $pemagang->nama_lengkap : 'Pemagang') }}',
                                                                                     '{{ $presensi->shift }}',
@@ -605,7 +620,7 @@
             </table>
         </div>
 
-        @if($presensiTidakHadir->hasPages())
+        @if ($presensiTidakHadir->hasPages())
             <div class="px-6 py-4 pr-20 sm:pr-24 border-t border-red-100 bg-red-50/30 print:hidden">
                 {{ $presensiTidakHadir->links() }}
             </div>
@@ -682,7 +697,8 @@
                                             d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                                     </svg>
                                 </span>
-                                <input type="text" id="pemagang-search-input" oninput="filterPemagangOptions(this.value)"
+                                <input type="text" id="pemagang-search-input"
+                                    oninput="filterPemagangOptions(this.value)"
                                     placeholder="Ketik nama / kampus / divisi..."
                                     class="w-full pl-8 pr-3 py-1.5 bg-white border border-gray-200 rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
                             </div>
@@ -690,7 +706,7 @@
 
                         {{-- List Opsi Pemagang --}}
                         <div id="pemagang-options-list" class="max-h-44 overflow-y-auto divide-y divide-gray-50">
-                            @foreach($pemagangs as $p)
+                            @foreach ($pemagangs as $p)
                                 <div onclick="selectPemagang('{{ $p->id }}', '{{ addslashes($p->nama_lengkap) }}', '{{ addslashes($p->kampus) }}', '{{ $p->divisi }}')"
                                     data-search="{{ strtolower($p->nama_lengkap . ' ' . $p->kampus . ' ' . $p->divisi) }}"
                                     class="pemagang-option px-3 py-2 hover:bg-primary-50/80 cursor-pointer transition flex items-center justify-between group">
@@ -733,7 +749,7 @@
                         </label>
                         <select name="kantor" required
                             class="w-full border border-gray-300 rounded-lg text-xs sm:text-sm focus:ring-2 focus:ring-primary-500 focus:outline-none">
-                            @foreach($kantorList as $k)
+                            @foreach ($kantorList as $k)
                                 <option value="{{ $k }}">{{ $k }}</option>
                             @endforeach
                         </select>
@@ -886,7 +902,7 @@
                         </label>
                         <select id="edit-kantor" name="kantor" required
                             class="w-full border border-gray-300 rounded-lg text-xs sm:text-sm focus:ring-2 focus:ring-primary-500 focus:outline-none">
-                            @foreach($kantorList as $k)
+                            @foreach ($kantorList as $k)
                                 <option value="{{ $k }}">{{ $k }}</option>
                             @endforeach
                         </select>
@@ -904,8 +920,8 @@
                     <div class="flex items-center gap-2">
                         {{-- Input Jam --}}
                         <div class="relative flex-1">
-                            <input type="text" id="edit-waktu-jam" inputmode="numeric" maxlength="2" placeholder="08"
-                                oninput="validateEditTimeInput(this, 23, 'edit-waktu-menit')"
+                            <input type="text" id="edit-waktu-jam" inputmode="numeric" maxlength="2"
+                                placeholder="08" oninput="validateEditTimeInput(this, 23, 'edit-waktu-menit')"
                                 onblur="formatEditTimeBlur(this, '08')"
                                 class="w-full px-3 py-2 text-center text-sm font-semibold tracking-wider bg-gray-50 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:bg-white transition hover:bg-white hover:border-primary-500">
                         </div>
@@ -914,8 +930,9 @@
 
                         {{-- Input Menit --}}
                         <div class="relative flex-1">
-                            <input type="text" id="edit-waktu-menit" inputmode="numeric" maxlength="2" placeholder="00"
-                                oninput="validateEditTimeInput(this, 59, null)" onblur="formatEditTimeBlur(this, '00')"
+                            <input type="text" id="edit-waktu-menit" inputmode="numeric" maxlength="2"
+                                placeholder="00" oninput="validateEditTimeInput(this, 59, null)"
+                                onblur="formatEditTimeBlur(this, '00')"
                                 class="w-full px-3 py-2 text-center text-sm font-semibold tracking-wider bg-gray-50 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:bg-white transition hover:bg-white hover:border-primary-500">
                         </div>
 
@@ -1020,7 +1037,8 @@
                         Nomor WhatsApp / HP <span class="text-red-500">*</span>
                     </label>
                     <input type="text" name="no_hp" required placeholder="Contoh: 081234567890" inputmode="numeric"
-                        maxlength="14" minlength="10" oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 14)"
+                        maxlength="14" minlength="10"
+                        oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 14)"
                         class="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:bg-white transition hover:bg-white hover:border-primary-500">
                 </div>
 
@@ -1071,8 +1089,9 @@
 
                         {{-- List Opsi Divisi --}}
                         <div id="divisi-options-list" class="max-h-48 overflow-y-auto divide-y divide-gray-50">
-                            @foreach($divisiList as $div)
-                                <div onclick="selectDivisi('{{ addslashes($div) }}')" data-search="{{ strtolower($div) }}"
+                            @foreach ($divisiList as $div)
+                                <div onclick="selectDivisi('{{ addslashes($div) }}')"
+                                    data-search="{{ strtolower($div) }}"
                                     class="divisi-option px-3 py-2 hover:bg-primary-50 cursor-pointer transition flex items-center justify-between text-xs font-medium text-gray-700 hover:text-primary-700">
                                     <span>{{ $div }}</span>
                                     <svg class="w-3.5 h-3.5 text-primary-600 hidden check-icon" fill="currentColor"
@@ -1195,7 +1214,8 @@
         function selectPemagang(id, name, kampus, divisi) {
             document.getElementById('create-pemagang-id').value = id;
             const textEl = document.getElementById('selected-pemagang-text');
-            textEl.innerHTML = `<strong class="text-gray-800 font-semibold">${name}</strong> <span class="text-xs text-gray-500">(${kampus}) - Div. ${divisi}</span>`;
+            textEl.innerHTML =
+                `<strong class="text-gray-800 font-semibold">${name}</strong> <span class="text-xs text-gray-500">(${kampus}) - Div. ${divisi}</span>`;
             document.getElementById('pemagang-dropdown-menu').classList.add('hidden');
         }
 
@@ -1277,7 +1297,7 @@
         }
 
         // Tutup dropdown saat klik di luar area
-        document.addEventListener('click', function (e) {
+        document.addEventListener('click', function(e) {
             const pemagangContainer = document.getElementById('searchable-pemagang-container');
             if (pemagangContainer && !pemagangContainer.contains(e.target)) {
                 const dropdown = document.getElementById('pemagang-dropdown-menu');
@@ -1439,7 +1459,10 @@
         function scrollToTidakHadir() {
             const el = document.getElementById('tabel-tidak-hadir');
             if (el) {
-                el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                el.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'start'
+                });
                 // Highlight singkat
                 el.classList.add('ring-2', 'ring-red-300');
                 setTimeout(() => el.classList.remove('ring-2', 'ring-red-300'), 1500);
