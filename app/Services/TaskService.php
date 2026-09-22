@@ -68,12 +68,13 @@ class TaskService
         $this->validateAssignees($data['user_ids']);
 
         $task = $this->taskRepository->create([
-            'title'       => $data['title'],
-            'description' => $data['description'] ?? null,
-            'task_date'   => Carbon::today(),
-            'type'        => 'assigned',
-            'kantor'      => $data['kantor'] ?? null,
-            'created_by'  => Auth::id(),
+            'title'             => $data['title'],
+            'description'       => $data['description'] ?? null,
+            'task_date'         => Carbon::today(),
+            'type'              => 'assigned',
+            'kantor'            => $data['kantor'] ?? null,
+            'proof_requirement' => $data['proof_requirement'] ?? 'none',
+            'created_by'        => Auth::id(),
         ]);
 
         $this->attachAssigneesAndNotify($task, $data['user_ids']);
@@ -82,23 +83,24 @@ class TaskService
     }
     public function updateTask(Task $task, array $data): bool
     {
+        $updateData = [
+            'title'             => $data['title'],
+            'description'       => $data['description'] ?? null,
+            'kantor'            => $data['kantor'] ?? null,
+        ];
+        if (isset($data['proof_requirement'])) {
+            $updateData['proof_requirement'] = $data['proof_requirement'];
+        }
+
         if ($this->taskRepository->hasAnyCompleted($task->id)) {
             // Jika ada penerima yang sudah menyelesaikan tugas, perbarui informasi tugas (termasuk kantor)
             // tanpa menghapus atau mereset assignment yang sudah selesai
-            return $this->taskRepository->update($task, [
-                'title'       => $data['title'],
-                'description' => $data['description'] ?? null,
-                'kantor'      => $data['kantor'] ?? null,
-            ]);
+            return $this->taskRepository->update($task, $updateData);
         }
 
         $this->validateAssignees($data['user_ids']);
 
-        $updated = $this->taskRepository->update($task, [
-            'title'       => $data['title'],
-            'description' => $data['description'] ?? null,
-            'kantor'      => $data['kantor'] ?? null,
-        ]);
+        $updated = $this->taskRepository->update($task, $updateData);
 
         $this->taskRepository->deleteAssignments($task->id);
         $this->attachAssigneesAndNotify($task, $data['user_ids']);
@@ -174,7 +176,7 @@ class TaskService
         return $this->taskRepository->getSelfTasksToday($userId);
     }
 
-    public function completeTask(Task $task, ?string $note): bool
+    public function completeTask(Task $task, ?string $note, $attachmentFile = null): bool
     {
         $assignment = $this->taskRepository->findAssignment($task->id, Auth::id());
     
@@ -196,7 +198,21 @@ class TaskService
                 'task' => 'Tugas ini sudah ditandai selesai.',
             ]);
         }
-        return $this->taskRepository->completeAssignment($assignment, $note);
+
+        // Validasi kebutuhan foto bukti
+        $proofReq = $task->proof_requirement ?? 'none';
+        if ($proofReq === 'required' && ! $attachmentFile && ! $assignment->attachment) {
+            throw ValidationException::withMessages([
+                'attachment' => 'Tugas ini wajib melampirkan foto bukti penyelesaian.',
+            ]);
+        }
+
+        $attachmentPath = null;
+        if ($attachmentFile) {
+            $attachmentPath = $attachmentFile->store('task-proofs', 'public');
+        }
+
+        return $this->taskRepository->completeAssignment($assignment, $note, $attachmentPath);
     }
 
     public function markAllPendingAsNotDone(): int

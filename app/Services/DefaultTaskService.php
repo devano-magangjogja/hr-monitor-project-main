@@ -27,21 +27,25 @@ class DefaultTaskService
     public function create(array $data): DefaultTask
     {
         return $this->defaultTaskRepository->create([
-            'title'       => $data['title'],
-            'description' => $data['description'] ?? null,
-            'target_role' => $data['target_role'],
-            'is_active'   => $data['is_active'] ?? 1,
-            'created_by'  => Auth::id(),
+            'title'             => $data['title'],
+            'description'       => $data['description'] ?? null,
+            'target_role'       => $data['target_role'],
+            'is_active'         => $data['is_active'] ?? 1,
+            'proof_requirement' => $data['proof_requirement'] ?? 'none',
+            'created_by'        => Auth::id(),
+            'assigned_user_ids' => $data['assigned_user_ids'] ?? null,
         ]);
     }
 
     public function update(DefaultTask $defaultTask, array $data): bool
     {
         return $this->defaultTaskRepository->update($defaultTask, [
-            'title'       => $data['title'],
-            'description' => $data['description'] ?? null,
-            'target_role' => $data['target_role'],
-            'is_active'   => $data['is_active'] ?? 1,
+            'title'             => $data['title'],
+            'description'       => $data['description'] ?? null,
+            'target_role'       => $data['target_role'],
+            'is_active'         => $data['is_active'] ?? 1,
+            'proof_requirement' => $data['proof_requirement'] ?? 'none',
+            'assigned_user_ids' => $data['assigned_user_ids'] ?? null,
         ]);
     }
 
@@ -66,8 +70,14 @@ class DefaultTaskService
                 continue;
             }
 
-            // Ambil semua user aktif sesuai target_role
-            $users = $this->taskRepository->getUsersByRole($defaultTask->target_role);
+            // Ambil user yang dipilih, atau semua user aktif sesuai target_role
+            $users = !empty($defaultTask->assigned_user_ids)
+                ? \App\Models\User::query()
+                    ->whereIn('id', $defaultTask->assigned_user_ids)
+                    ->where('role', $defaultTask->target_role)
+                    ->where('is_active', 1)
+                    ->get()
+                : $this->taskRepository->getUsersByRole($defaultTask->target_role);
 
             if ($users->isEmpty()) {
                 continue;
@@ -75,12 +85,13 @@ class DefaultTaskService
 
             // Buat satu task per default task
             $task = $this->taskRepository->create([
-                'title'           => $defaultTask->title,
-                'description'     => $defaultTask->description,
-                'task_date'       => $today,
-                'type'            => 'default',
-                'created_by'      => null, // dibuat sistem
-                'default_task_id' => $defaultTask->id,
+                'title'             => $defaultTask->title,
+                'description'       => $defaultTask->description,
+                'task_date'         => $today,
+                'type'              => 'default',
+                'proof_requirement' => $defaultTask->proof_requirement ?? 'none',
+                'created_by'        => null, // dibuat sistem
+                'default_task_id'   => $defaultTask->id,
             ]);
 
             // Assign ke semua user dengan role yang sesuai

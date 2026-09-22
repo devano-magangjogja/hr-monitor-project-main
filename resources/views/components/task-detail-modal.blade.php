@@ -67,6 +67,12 @@
                 </div>
             </div>
 
+            {{-- Ketentuan Foto Bukti --}}
+            <div id="detail-proof-wrapper" class="hidden">
+                <p class="text-xs font-medium text-gray-400 uppercase tracking-wider mb-1">Ketentuan Foto Bukti</p>
+                <div id="detail-proof"></div>
+            </div>
+
             {{-- Penerima (hanya tampil jika ada) --}}
             <div id="detail-assignees-wrapper" class="hidden">
                 <p class="text-xs font-medium text-gray-400 uppercase tracking-wider mb-2">Penerima</p>
@@ -78,6 +84,24 @@
                 <p class="text-xs font-medium text-gray-400 uppercase tracking-wider mb-1">Catatan Penyelesaian</p>
                 <div class="bg-gray-50 rounded-lg px-4 py-3">
                     <p id="detail-note" class="text-sm text-gray-600 whitespace-pre-wrap"></p>
+                </div>
+            </div>
+
+            {{-- Foto Bukti Penyelesaian (jika ada) --}}
+            <div id="detail-attachment-wrapper" class="hidden">
+                <p class="text-xs font-medium text-gray-400 uppercase tracking-wider mb-1.5">Foto Bukti Penyelesaian</p>
+                <div class="bg-gray-50 rounded-xl p-3 border border-gray-100 flex flex-col items-start gap-2">
+                    <a id="detail-attachment-link" href="#" target="_blank" rel="noopener noreferrer"
+                       class="block group relative overflow-hidden rounded-lg border border-gray-200 bg-white max-w-full">
+                        <img id="detail-attachment-img" src="" alt="Bukti Foto"
+                             class="max-h-56 max-w-full object-contain rounded-lg transition group-hover:opacity-90">
+                        <div class="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 flex items-center justify-center transition text-white text-xs font-medium gap-1.5">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+                            </svg>
+                            <span>Lihat Gambar Penuh</span>
+                        </div>
+                    </a>
                 </div>
             </div>
 
@@ -228,6 +252,39 @@
             rejEl.textContent = data.rejection_note;
         } else {
             rejWrapper.classList.add('hidden');
+        }
+
+        // Ketentuan Foto Bukti
+        const proofWrapper = document.getElementById('detail-proof-wrapper');
+        const proofEl = document.getElementById('detail-proof');
+        if (proofWrapper && proofEl) {
+            if (data.proof_requirement) {
+                proofWrapper.classList.remove('hidden');
+                const proofMap = {
+                    'required': { label: 'Wajib Foto Bukti', cls: 'bg-rose-50 text-rose-700 border-rose-200' },
+                    'optional': { label: 'Foto Opsional', cls: 'bg-blue-50 text-blue-700 border-blue-200' },
+                    'none':     { label: 'Tanpa Foto Bukti', cls: 'bg-gray-100 text-gray-600 border-gray-200' },
+                };
+                const p = proofMap[data.proof_requirement] || { label: data.proof_requirement, cls: 'bg-gray-100 text-gray-600 border-gray-200' };
+                proofEl.innerHTML = `<span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium border ${p.cls}">${p.label}</span>`;
+            } else {
+                proofWrapper.classList.add('hidden');
+            }
+        }
+
+        // Foto Bukti Penyelesaian
+        const attachWrapper = document.getElementById('detail-attachment-wrapper');
+        const attachLink = document.getElementById('detail-attachment-link');
+        const attachImg = document.getElementById('detail-attachment-img');
+        if (attachWrapper && attachLink && attachImg) {
+            if (data.attachment) {
+                attachWrapper.classList.remove('hidden');
+                attachLink.href = data.attachment;
+                attachImg.src = data.attachment;
+            } else {
+                attachWrapper.classList.add('hidden');
+                attachImg.src = '';
+            }
         }
 
         document.getElementById('modal-detail').classList.remove('hidden');

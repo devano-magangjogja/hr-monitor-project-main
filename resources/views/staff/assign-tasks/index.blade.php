@@ -127,7 +127,8 @@
                                             '{{ addslashes($task->title) }}',
                                             '{{ addslashes($task->description ?? '') }}',
                                             {{ json_encode($task->assignedUsers->pluck('id')) }},
-                                            '{{ $task->kantor ?? '' }}'
+                                            '{{ $task->kantor ?? '' }}',
+                                            '{{ $task->proof_requirement ?? 'none' }}'
                                         )"
                                         class="p-1.5 text-gray-400 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition"
                                         title="Edit">
@@ -215,6 +216,23 @@
                     <option value="Kantor 10" {{ old('kantor') == 'Kantor 10' ? 'selected' : '' }}>Kantor 10</option>
                 </select>
                 <p class="text-[11px] text-gray-400 mt-1">Jika dipilih, asisten akan terhubung ke kantor ini saat mencatat presensi hari ini.</p>
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1.5">Ketentuan Lampiran Foto Bukti</label>
+                <div class="grid grid-cols-3 gap-2">
+                    <label class="flex items-center gap-2 p-2.5 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50 transition has-[:checked]:border-primary-500 has-[:checked]:bg-primary-50/40">
+                        <input type="radio" name="proof_requirement" value="none" checked class="text-primary-600 focus:ring-primary-500">
+                        <span class="text-sm text-gray-700">Tanpa Foto</span>
+                    </label>
+                    <label class="flex items-center gap-2 p-2.5 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50 transition has-[:checked]:border-primary-500 has-[:checked]:bg-primary-50/40">
+                        <input type="radio" name="proof_requirement" value="optional" class="text-primary-600 focus:ring-primary-500">
+                        <span class="text-sm text-gray-700">Foto Opsional</span>
+                    </label>
+                    <label class="flex items-center gap-2 p-2.5 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50 transition has-[:checked]:border-rose-400 has-[:checked]:bg-rose-50/40">
+                        <input type="radio" name="proof_requirement" value="required" class="text-rose-600 focus:ring-rose-500">
+                        <span class="text-sm font-medium text-rose-700">Wajib Foto Bukti</span>
+                    </label>
+                </div>
             </div>
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1.5">
@@ -325,6 +343,23 @@
                     <option value="Kantor 10">Kantor 10</option>
                 </select>
                 <p class="text-[11px] text-gray-400 mt-1">Jika dipilih, asisten akan terhubung ke kantor ini saat mencatat presensi hari ini.</p>
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1.5">Ketentuan Lampiran Foto Bukti</label>
+                <div class="grid grid-cols-3 gap-2">
+                    <label class="flex items-center gap-2 p-2.5 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50 transition has-[:checked]:border-primary-500 has-[:checked]:bg-primary-50/40">
+                        <input type="radio" name="proof_requirement" value="none" id="edit-proof-none" class="text-primary-600 focus:ring-primary-500">
+                        <span class="text-sm text-gray-700">Tanpa Foto</span>
+                    </label>
+                    <label class="flex items-center gap-2 p-2.5 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50 transition has-[:checked]:border-primary-500 has-[:checked]:bg-primary-50/40">
+                        <input type="radio" name="proof_requirement" value="optional" id="edit-proof-optional" class="text-primary-600 focus:ring-primary-500">
+                        <span class="text-sm text-gray-700">Foto Opsional</span>
+                    </label>
+                    <label class="flex items-center gap-2 p-2.5 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50 transition has-[:checked]:border-rose-400 has-[:checked]:bg-rose-50/40">
+                        <input type="radio" name="proof_requirement" value="required" id="edit-proof-required" class="text-rose-600 focus:ring-rose-500">
+                        <span class="text-sm font-medium text-rose-700">Wajib Foto Bukti</span>
+                    </label>
+                </div>
             </div>
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1.5">
@@ -522,7 +557,7 @@
             .replace(/"/g, '&quot;');
     }
 
-    function openEditModal(id, title, description, currentUserIds, kantor) {
+    function openEditModal(id, title, description, currentUserIds, kantor, proofRequirement = 'none') {
         document.getElementById('edit-title').value = title;
         document.getElementById('edit-description').value = description;
         const editKantorEl = document.getElementById('edit-kantor');
@@ -534,6 +569,11 @@
         document.querySelectorAll('.edit-user-checkbox').forEach(cb => {
             cb.checked = currentUserIds.includes(parseInt(cb.value));
         });
+
+        // Set proof_requirement radio
+        const proofRadio = document.querySelector(`input[name="proof_requirement"][value="${proofRequirement}"][id^="edit-proof"]`);
+        if (proofRadio) proofRadio.checked = true;
+        else { const def = document.getElementById('edit-proof-none'); if (def) def.checked = true; }
 
         document.getElementById('modal-edit').classList.remove('hidden');
     }

@@ -37,9 +37,11 @@ class TaskController extends Controller
             'title' => ['required', 'string', 'max:200'],
             'description' => ['nullable', 'string'],
             'kantor' => ['nullable', 'string', 'in:Kantor 1,Kantor 2,Kantor 3,Kantor 4,Kantor 5,Kantor 6,Kantor 7,Kantor 8,Kantor 9,Kantor 10'],
+            'proof_requirement' => ['nullable', 'string', 'in:required,optional,none'],
             'user_ids' => ['required', 'array', 'min:1'],
             'user_ids.*' => ['integer', 'exists:users,id'],
         ]);
+        $validated['proof_requirement'] = $validated['proof_requirement'] ?? 'none';
 
         try {
             $task = $this->taskService->createAssignedTask($validated);
@@ -57,9 +59,11 @@ class TaskController extends Controller
             'title' => ['required', 'string', 'max:200'],
             'description' => ['nullable', 'string'],
             'kantor' => ['nullable', 'string', 'in:Kantor 1,Kantor 2,Kantor 3,Kantor 4,Kantor 5,Kantor 6,Kantor 7,Kantor 8,Kantor 9,Kantor 10'],
+            'proof_requirement' => ['nullable', 'string', 'in:required,optional,none'],
             'user_ids' => ['required', 'array', 'min:1'],
             'user_ids.*' => ['integer', 'exists:users,id'],
         ]);
+        $validated['proof_requirement'] = $validated['proof_requirement'] ?? 'none';
 
         try {
             $this->taskService->updateTask($task, $validated);

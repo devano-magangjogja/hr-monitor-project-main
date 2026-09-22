@@ -95,17 +95,19 @@
                     @endphp
                     <tr class="hover:bg-gray-50/80 transition-colors duration-150 {{ $isPastUnapproved ? 'bg-amber-50/30' : '' }}"
                         data-task="{{ json_encode([
-                            'title'          => $task->title,
-                            'kantor'         => $task->kantor,
-                            'description'    => $task->description ?? '',
-                            'type'           => $task->type,
-                            'date'           => $task->task_date->translatedFormat('d M Y'),
-                            'source'         => $isSosmed ? 'Sosmed' : ($task->type === 'self' ? 'Mandiri' : ($task->type === 'default' ? 'Rutin' : ($task->creator?->name ?? 'Admin'))),
-                            'status'         => $status,
-                            'note'           => $assignment?->note ?? '',
-                            'links'          => $task->links ?? [],
-                            'rejection_note' => $task->rejection_note ?? null,
-                            'assignees'      => [],
+                            'title'             => $task->title,
+                            'kantor'            => $task->kantor,
+                            'description'       => $task->description ?? '',
+                            'type'              => $task->type,
+                            'date'              => $task->task_date->translatedFormat('d M Y'),
+                            'source'            => $isSosmed ? 'Sosmed' : ($task->type === 'self' ? 'Mandiri' : ($task->type === 'default' ? 'Rutin' : ($task->creator?->name ?? 'Admin'))),
+                            'status'            => $status,
+                            'proof_requirement' => $task->proof_requirement ?? 'none',
+                            'attachment'        => $assignment?->attachment ? asset('storage/' . $assignment->attachment) : null,
+                            'note'              => $assignment?->note ?? '',
+                            'links'             => $task->links ?? [],
+                            'rejection_note'    => $task->rejection_note ?? null,
+                            'assignees'         => [],
                         ]) }}">
 
                         {{-- Judul --}}
@@ -232,7 +234,7 @@
                                     @endif
 
                                     @if($status === 'pending')
-                                        <button onclick="openCompleteModal({{ $task->id }}, '{{ addslashes($task->title) }}')"
+                                        <button onclick="openCompleteModal({{ $task->id }}, '{{ addslashes($task->title) }}', '{{ $task->proof_requirement ?? 'none' }}')"
                                                 class="p-1.5 text-gray-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors"
                                                 title="Tandai Selesai">
                                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -271,7 +273,7 @@
                 </svg>
             </button>
         </div>
-        <form id="form-complete" action="" method="POST" class="px-6 py-5 space-y-4">
+        <form id="form-complete" action="" method="POST" enctype="multipart/form-data" class="px-6 py-5 space-y-4">
             @csrf
             @method('PATCH')
             <div>
@@ -279,12 +281,25 @@
                     Catatan Penyelesaian
                     <span class="text-gray-400 font-normal">(opsional)</span>
                 </label>
-                <textarea name="note" rows="4"
+                <textarea name="note" rows="3"
                           placeholder="Tuliskan laporan singkat atau catatan penyelesaian tugas ini..."
                           class="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm
                                  focus:outline-none focus:ring-2 focus:ring-green-500 resize-none"></textarea>
-                <p class="mt-1 text-xs text-gray-400">Setelah ditandai selesai, tugas tidak dapat diubah kembali.</p>
             </div>
+
+            {{-- Input Foto Bukti --}}
+            <div id="complete-attachment-wrapper">
+                <label class="block text-sm font-medium text-gray-700 mb-1">
+                    Foto Bukti
+                    <span id="complete-attachment-badge" class="font-normal text-xs ml-1"></span>
+                </label>
+                <input type="file" name="attachment" id="complete-attachment-input" accept="image/*"
+                       class="w-full px-3 py-2 border border-gray-300 rounded-lg text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-green-500 bg-white file:mr-3 file:py-1 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-primary-50 file:text-primary-700 hover:file:bg-primary-100 cursor-pointer">
+                <p id="complete-attachment-hint" class="mt-1 text-xs text-gray-400"></p>
+            </div>
+
+            <p class="mt-1 text-xs text-gray-400">Setelah ditandai selesai, tugas tidak dapat diubah kembali.</p>
+
             <div class="flex justify-end gap-3 pt-2">
                 <button type="button"
                         onclick="document.getElementById('modal-complete').classList.add('hidden')"
@@ -305,9 +320,33 @@
 </div>
 
 <script>
-    function openCompleteModal(id, title) {
+    function openCompleteModal(id, title, proofRequirement = 'none') {
         document.getElementById('complete-task-title').textContent = title;
         document.getElementById('form-complete').action = `/{{ $role }}/tasks/all/${id}/complete`;
+        
+        const attachWrapper = document.getElementById('complete-attachment-wrapper');
+        const attachBadge = document.getElementById('complete-attachment-badge');
+        const attachInput = document.getElementById('complete-attachment-input');
+        const attachHint = document.getElementById('complete-attachment-hint');
+
+        if (attachInput) attachInput.value = '';
+
+        if (proofRequirement === 'required') {
+            attachWrapper.classList.remove('hidden');
+            attachBadge.innerHTML = '<span class="text-rose-600 font-semibold">(Wajib)</span>';
+            attachInput.required = true;
+            attachHint.textContent = 'Tugas ini mewajibkan lampiran foto bukti penyelesaian (Maks. 5MB).';
+        } else if (proofRequirement === 'optional') {
+            attachWrapper.classList.remove('hidden');
+            attachBadge.innerHTML = '<span class="text-gray-400 font-normal">(Opsional)</span>';
+            attachInput.required = false;
+            attachHint.textContent = 'Anda dapat melampirkan foto bukti jika ada (Maks. 5MB).';
+        } else {
+            attachWrapper.classList.add('hidden');
+            attachInput.required = false;
+            attachHint.textContent = '';
+        }
+
         document.getElementById('modal-complete').classList.remove('hidden');
     }
 </script>

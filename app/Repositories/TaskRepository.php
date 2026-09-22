@@ -161,13 +161,19 @@ class TaskRepository
             ->first();
     }
 
-    public function completeAssignment(TaskAssignment $assignment, ?string $note): bool
+    public function completeAssignment(TaskAssignment $assignment, ?string $note, ?string $attachment = null): bool
     {
-        return (bool) $assignment->update([
+        $data = [
             'is_completed' => 'completed',
             'completed_at' => now(),
             'note'         => $note,
-        ]);
+        ];
+
+        if ($attachment !== null) {
+            $data['attachment'] = $attachment;
+        }
+
+        return (bool) $assignment->update($data);
     }
 
     public function getAllTasksForUserToday(int $userId): Collection
