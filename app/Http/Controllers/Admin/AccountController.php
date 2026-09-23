@@ -4,9 +4,12 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Http\Traits\LogsActivity;
+use App\Models\Brand;
 use App\Models\SosmedAccount;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Validation\Rule;
 
 class AccountController extends Controller
 {
@@ -88,12 +91,27 @@ class AccountController extends Controller
 
         $platformList = ['Instagram', 'TikTok', 'YouTube', 'Facebook', 'Twitter/X', 'LinkedIn', 'Threads', 'Website', 'Lainnya'];
 
-        $brands = SosmedAccount::whereNotNull('brand')
-            ->where('brand', '!=', '')
-            ->distinct()
-            ->pluck('brand')
-            ->sort()
-            ->values();
+        $brands = Brand::orderBy('name')->pluck('name');
+
+        $brandsList = null;
+        if ($tab === 'brands') {
+            $brandsQuery = Brand::query()
+                ->with(['accounts' => function ($q) {
+                    $q->where('verification_status', 'approved')
+                        ->with('staffUsers')
+                        ->orderBy('platform')
+                        ->orderBy('name');
+                }])
+                ->orderBy('name');
+
+            if ($search) {
+                $brandsQuery->where('name', 'like', '%' . $search . '%');
+            }
+
+            $brandsList = $brandsQuery
+                ->paginate(10, ['*'], 'brands_page')
+                ->appends($request->only(['tab', 'search']));
+        }
 
         return view('admin.accounts.index', compact(
             'accounts',
@@ -102,11 +120,73 @@ class AccountController extends Controller
             'platform',
             'brand',
             'brands',
+            'brandsList',
             'status',
             'platformList',
             'pendingAccounts',
             'tab'
         ));
+    }
+
+    public function storeBrand(Request $request)
+    {
+        $validated = $request->validate([
+            'name' => ['required', 'string', 'max:100', 'unique:brands,name'],
+            'logo' => ['nullable', 'file', 'image', 'mimes:jpeg,png,jpg,webp', 'max:2048'],
+        ]);
+
+        $data = ['name' => $validated['name']];
+
+        if ($request->hasFile('logo')) {
+            $data['logo_path'] = store_image_as_webp($request->file('logo'), 'brand-logos');
+        }
+
+        $brand = Brand::create($data);
+
+        $this->logActivity(
+            'brand.created',
+            'Manajemen Akun',
+            "Menambahkan brand '{$brand->name}'",
+            $brand
+        );
+
+        return redirect()->route($this->accountRoute('index'), ['tab' => 'brands'])
+            ->with('success', "Brand '{$brand->name}' berhasil ditambahkan.");
+    }
+
+    public function updateBrand(Request $request, Brand $brand)
+    {
+        $validated = $request->validate([
+            'name' => ['required', 'string', 'max:100', Rule::unique('brands', 'name')->ignore($brand->id)],
+            'logo' => ['nullable', 'file', 'image', 'mimes:jpeg,png,jpg,webp', 'max:2048'],
+        ]);
+
+        $oldName = $brand->name;
+        $data = ['name' => $validated['name']];
+
+        if ($request->hasFile('logo')) {
+            if ($brand->logo_path) {
+                Storage::disk('public')->delete($brand->logo_path);
+            }
+            $data['logo_path'] = store_image_as_webp($request->file('logo'), 'brand-logos');
+        }
+
+        $brand->update($data);
+
+        // Jaga relasi berbasis nama: sinkronkan akun yang memakai nama brand lama
+        if ($oldName !== $brand->name) {
+            SosmedAccount::where('brand', $oldName)->update(['brand' => $brand->name]);
+        }
+
+        $this->logActivity(
+            'brand.updated',
+            'Manajemen Akun',
+            "Memperbarui brand '{$oldName}'" . ($oldName !== $brand->name ? " menjadi '{$brand->name}'" : ''),
+            $brand
+        );
+
+        return redirect()->route($this->accountRoute('index'), ['tab' => 'brands'])
+            ->with('success', "Brand '{$brand->name}' berhasil diperbarui.");
     }
 
     public function store(Request $request)
@@ -142,6 +222,10 @@ class AccountController extends Controller
         ];
 
         $account = SosmedAccount::create($data);
+
+        if (!empty($data['brand'])) {
+            Brand::firstOrCreate(['name' => $data['brand']]);
+        }
 
         $this->logActivity(
             'account.created',
@@ -188,6 +272,10 @@ class AccountController extends Controller
         }
 
         $account->update($data);
+
+        if (!empty($data['brand'])) {
+            Brand::firstOrCreate(['name' => $data['brand']]);
+        }
 
         $this->logActivity(
             'account.updated',

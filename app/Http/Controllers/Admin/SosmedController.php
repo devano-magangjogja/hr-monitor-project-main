@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Http\Traits\LogsActivity;
+use App\Models\Brand;
 use App\Models\SosmedAccount;
 use App\Models\SosmedApprovalLog;
 use App\Models\SosmedTask;
@@ -22,9 +23,10 @@ class SosmedController extends Controller
         $accountSearch = $request->query('account_search');
         $searchType = $request->query('search_type', 'all');
         $brand = $request->query('brand');
+        $accFilter = $request->query('acc_filter');
         $accountsQuery = SosmedAccount::inSosmed()
             ->with(['pmUser', 'staffUsers', 'assistantUser', 'supervisorStaff', 'creator'])
-            ->orderBy('platform');
+            ->orderBy('created_at', 'desc');
 
         if ($brand) {
             $accountsQuery->where('brand', $brand);
@@ -67,6 +69,15 @@ class SosmedController extends Controller
             'unassigned_staff' => (clone $accountsQuery)->whereDoesntHave('staffUsers')->count(),
         ];
 
+        // Filter cepat dari klik kartu statistik (diterapkan setelah angka kartu dihitung)
+        if ($accFilter === 'unassigned_pm') {
+            $accountsQuery->whereNull('pm_id');
+        } elseif ($accFilter === 'unassigned_staff') {
+            $accountsQuery->whereDoesntHave('staffUsers');
+        } else {
+            $accFilter = null;
+        }
+
         $accounts = $accountsQuery->paginate(15)->appends($request->all());
 
         // Filter date for tasks
@@ -91,6 +102,27 @@ class SosmedController extends Controller
             'verified_by_pm' => (clone $tasksQuery)->where('status', 'verified_by_pm')->count(),
             'approved_hr' => (clone $tasksQuery)->where('status', 'approved_hr')->count(),
         ];
+
+        // Filter cepat status tugas dari klik kartu statistik
+        $taskStatus = $request->query('task_status');
+        if (! in_array($taskStatus, ['pending', 'done_by_staff', 'verified_by_pm', 'approved_hr', 'rejected'], true)) {
+            $taskStatus = null;
+        } else {
+            $tasksQuery->where('status', $taskStatus);
+        }
+
+        // Pencarian tugas (diterapkan setelah angka kartu dihitung agar statistik stabil)
+        $taskSearch = trim((string) $request->query('task_search', ''));
+        if ($taskSearch !== '') {
+            $tasksQuery->where(function ($q) use ($taskSearch) {
+                $q->where('title', 'like', '%' . $taskSearch . '%')
+                    ->orWhere('description', 'like', '%' . $taskSearch . '%')
+                    ->orWhereHas('account', fn ($a) => $a->where('name', 'like', '%' . $taskSearch . '%')
+                        ->orWhere('platform', 'like', '%' . $taskSearch . '%')
+                        ->orWhere('brand', 'like', '%' . $taskSearch . '%'))
+                    ->orWhereHas('assignedUser', fn ($u) => $u->where('name', 'like', '%' . $taskSearch . '%'));
+            });
+        }
 
         $tasks = $tasksQuery->paginate(15)->appends($request->all());
 
@@ -161,10 +193,22 @@ class SosmedController extends Controller
 
         // Admin memiliki wewenang untuk meng-acc semua tugas sosmed tanpa terkecuali
         // Menampilkan seluruh tugas yang menunggu verifikasi (baik selesai dikerjakan staff maupun telah diverifikasi PM)
-        $staffPendingTasks = SosmedTask::with(['account.supervisorStaff', 'account.pmUser', 'account.assistantUser', 'assignedUser', 'assignedBy'])
+        $verifySearch = trim((string) $request->query('verify_search', ''));
+        $staffPendingQuery = SosmedTask::with(['account.supervisorStaff', 'account.pmUser', 'account.assistantUser', 'assignedUser', 'assignedBy'])
             ->whereIn('status', ['done_by_staff', 'verified_by_pm'])
-            ->orderBy('updated_at', 'desc')
-            ->get();
+            ->orderBy('updated_at', 'desc');
+
+        if ($verifySearch !== '') {
+            $staffPendingQuery->where(function ($q) use ($verifySearch) {
+                $q->where('title', 'like', '%' . $verifySearch . '%')
+                  ->orWhereHas('account', fn($a) => $a->where('name', 'like', '%' . $verifySearch . '%')
+                      ->orWhere('platform', 'like', '%' . $verifySearch . '%')
+                      ->orWhere('brand', 'like', '%' . $verifySearch . '%'))
+                  ->orWhereHas('assignedUser', fn($u) => $u->where('name', 'like', '%' . $verifySearch . '%'));
+            });
+        }
+
+        $staffPendingTasks = $staffPendingQuery->get();
 
         $stats = [
             'total_accounts'    => $accountsStats['total'],
@@ -173,7 +217,7 @@ class SosmedController extends Controller
             'total_tasks'       => $tasksStats['total'],
             'pending_tasks'     => $tasksStats['pending'],
             'need_pm_verify'    => $tasksStats['done_by_staff'],
-            'need_admin_verify' => $staffPendingTasks->count(),
+            'need_admin_verify' => SosmedTask::whereIn('status', ['done_by_staff', 'verified_by_pm'])->count(),
             'need_hr_verify'    => $tasksStats['verified_by_pm'],
             'completed'         => $tasksStats['approved_hr'],
         ];
@@ -186,6 +230,9 @@ class SosmedController extends Controller
             ->pluck('brand')
             ->sort()
             ->values();
+
+        // Logo brand (nama => path) untuk penanda visual
+        $brandLogos = Brand::whereNotNull('logo_path')->pluck('logo_path', 'name');
 
         // Akun yang sudah disetujui (approved) untuk penugasan sosmed beserta info pengelola saat ini
         $availableAccounts = SosmedAccount::where('verification_status', 'approved')
@@ -215,9 +262,14 @@ class SosmedController extends Controller
             'searchType',
             'brand',
             'brands',
+            'brandLogos',
             'tasks',
             'staffPendingTasks',
             'taskDateFilter',
+            'taskStatus',
+            'taskSearch',
+            'accFilter',
+            'verifySearch',
             'logs',
             'logDateFilter',
             'logRangeFilter',

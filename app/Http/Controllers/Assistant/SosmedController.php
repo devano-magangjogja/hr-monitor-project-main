@@ -25,9 +25,23 @@ class SosmedController extends Controller
         // Tugas yang perlu diverifikasi: status done_by_staff HANYA dari akun yang wewenangnya diberikan ke asisten ini
         $pendingVerification = SosmedTask::with(['account.staffUser', 'account.pmUser', 'assignedUser', 'assignedBy'])
             ->whereIn('sosmed_account_id', $assignedAccountIds)
-            ->where('status', 'done_by_staff')
+            ->where('status', 'done_by_staff');
+
+        $verifySearch = trim((string) $request->query('verify_search', ''));
+        if ($verifySearch !== '') {
+            $pendingVerification->where(function ($q) use ($verifySearch) {
+                $q->where('title', 'like', '%' . $verifySearch . '%')
+                  ->orWhereHas('account', fn($a) => $a->where('name', 'like', '%' . $verifySearch . '%')
+                      ->orWhere('platform', 'like', '%' . $verifySearch . '%')
+                      ->orWhere('brand', 'like', '%' . $verifySearch . '%'))
+                  ->orWhereHas('assignedUser', fn($u) => $u->where('name', 'like', '%' . $verifySearch . '%'));
+            });
+        }
+
+        $pendingVerification = $pendingVerification
             ->orderBy('updated_at', 'desc')
-            ->paginate(15);
+            ->paginate(15)
+            ->appends($request->all());
 
         // Riwayat yang pernah di-approve oleh asisten ini
         $approvalHistory = SosmedApprovalLog::with(['task.account', 'user'])

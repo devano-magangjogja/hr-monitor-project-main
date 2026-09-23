@@ -105,7 +105,20 @@ class SosmedController extends Controller
         $pendingVerification = SosmedTask::with(['account.staffUser', 'assignedUser'])
             ->whereIn('sosmed_account_id', $supervisedAccountIds)
             ->where('assigned_to', '!=', $currentUserId)
-            ->where('status', 'done_by_staff')
+            ->where('status', 'done_by_staff');
+
+        $verifySearch = trim((string) $request->query('verify_search', ''));
+        if ($verifySearch !== '') {
+            $pendingVerification->where(function ($q) use ($verifySearch) {
+                $q->where('title', 'like', '%' . $verifySearch . '%')
+                  ->orWhereHas('account', fn($a) => $a->where('name', 'like', '%' . $verifySearch . '%')
+                      ->orWhere('platform', 'like', '%' . $verifySearch . '%')
+                      ->orWhere('brand', 'like', '%' . $verifySearch . '%'))
+                  ->orWhereHas('assignedUser', fn($u) => $u->where('name', 'like', '%' . $verifySearch . '%'));
+            });
+        }
+
+        $pendingVerification = $pendingVerification
             ->orderBy('updated_at', 'desc')
             ->get();
 

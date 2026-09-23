@@ -55,7 +55,7 @@ class SosmedController extends Controller
             });
         }
 
-        $accounts = $accountsQuery->orderBy('platform')
+        $accounts = $accountsQuery->orderBy('created_at', 'desc')
             ->paginate(15)
             ->appends($request->all());
 
@@ -77,10 +77,24 @@ class SosmedController extends Controller
                         });
                 });
             })
-            ->where('assigned_to', '!=', Auth::id())
+            ->where('assigned_to', '!=', Auth::id());
+
+        $verifySearch = trim((string) $request->query('verify_search', ''));
+        if ($verifySearch !== '') {
+            $needHrApproval->where(function ($q) use ($verifySearch) {
+                $q->where('title', 'like', '%' . $verifySearch . '%')
+                  ->orWhereHas('account', fn($a) => $a->where('name', 'like', '%' . $verifySearch . '%')
+                      ->orWhere('platform', 'like', '%' . $verifySearch . '%')
+                      ->orWhere('brand', 'like', '%' . $verifySearch . '%'))
+                  ->orWhereHas('assignedUser', fn($u) => $u->where('name', 'like', '%' . $verifySearch . '%'));
+            });
+        }
+
+        $needHrApproval = $needHrApproval
             ->orderByRaw("CASE WHEN status = 'done_by_staff' THEN 0 ELSE 1 END")
             ->orderBy('updated_at', 'desc')
-            ->paginate(10);
+            ->paginate(10)
+            ->appends($request->all());
 
         // All tasks for monitoring
         $allTasks = SosmedTask::with(['account', 'assignedUser', 'assignedBy', 'verifiedBy', 'hrVerifiedBy'])

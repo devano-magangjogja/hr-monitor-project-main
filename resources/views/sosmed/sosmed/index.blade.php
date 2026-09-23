@@ -195,9 +195,11 @@
                 </table>
 
                 {{-- Pagination Links --}}
-                <div class="mt-4 px-4 py-3 border-t border-gray-200">
-                    {{ $accounts->links() }}
-                </div>
+                @if($accounts->hasPages())
+                    <div class="mt-4 px-4 py-3 border-t border-gray-200">
+                        {{ $accounts->links() }}
+                    </div>
+                @endif
             </div>
 
             {{-- ── Mobile Cards (< md) ────────────────────────────────────────── --}} <div class="md:hidden space-y-3">
@@ -286,9 +288,11 @@
                 @endforelse
 
                 {{-- Pagination Links --}}
-                <div class="mt-4">
-                    {{ $accounts->links() }}
-                </div>
+                @if($accounts->hasPages())
+                    <div class="mt-4">
+                        {{ $accounts->links() }}
+                    </div>
+                @endif
         </div>
     </div>
     </div>

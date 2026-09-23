@@ -209,7 +209,8 @@ class TaskService
 
         $attachmentPath = null;
         if ($attachmentFile) {
-            $attachmentPath = $attachmentFile->store('task-proofs', 'public');
+            // Simpan sebagai WebP agar hemat storage di hosting
+            $attachmentPath = store_image_as_webp($attachmentFile, 'task-proofs');
         }
 
         return $this->taskRepository->completeAssignment($assignment, $note, $attachmentPath);
@@ -355,6 +356,7 @@ class TaskService
                 'is_completed' => $task->status,
                 'completed_at' => $task->status === 'approved_hr' ? ($task->hr_verified_at ?? $task->updated_at) : null,
                 'note'         => $task->description ?? '',
+                'attachment'   => null,
             ]
         ]));
 
@@ -400,6 +402,7 @@ class TaskService
                 'is_completed' => 'pending',
                 'completed_at' => null,
                 'note'         => '',
+                'attachment'   => null,
             ]
         ]));
 
@@ -447,6 +450,7 @@ class TaskService
                 'is_completed' => 'done_by_staff',
                 'completed_at' => null,
                 'note'         => $tv->description ?? '',
+                'attachment'   => null,
             ]
         ]));
 
@@ -487,6 +491,7 @@ class TaskService
                 'is_completed' => 'done_by_staff',
                 'completed_at' => null,
                 'note'         => $tv->description ?? '',
+                'attachment'   => null,
             ]
         ]));
 

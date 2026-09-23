@@ -628,10 +628,24 @@
     {{-- ── TAB 2: APPROVAL LEVEL 2 (HR STAFF) ────────────────────── --}}
     @if($tab === 'approvals')
         <div class="p-4 sm:p-5">
-            <div class="mb-4">
-                <h3 class="text-sm font-semibold text-gray-800">Tugas Siap Approval Final (Level 2) & Pengawasan</h3>
-                <p class="text-xs text-gray-500 mt-0.5">Tugas-tugas di bawah ini telah diverifikasi oleh PM atau memerlukan
-                    verifikasi langsung oleh Anda sebagai Staff Pengawas.</p>
+            <div class="mb-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                <div>
+                    <h3 class="text-sm font-semibold text-gray-800">Tugas Siap Approval Final (Level 2) & Pengawasan</h3>
+                    <p class="text-xs text-gray-500 mt-0.5">Tugas-tugas di bawah ini telah diverifikasi oleh PM atau memerlukan
+                        verifikasi langsung oleh Anda sebagai Staff Pengawas.</p>
+                </div>
+                <form method="GET" action="{{ route('staff.sosmed.index') }}" class="flex items-center gap-2 w-full sm:w-auto">
+                    <input type="hidden" name="tab" value="approvals">
+                    <input type="text" name="verify_search" value="{{ request()->query('verify_search', '') }}"
+                        placeholder="Cari judul tugas, akun, atau petugas..."
+                        class="w-full sm:w-64 h-9 px-3 text-xs bg-white border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 text-gray-700 transition">
+                    <button type="submit"
+                        class="h-9 px-3 bg-primary-600 hover:bg-primary-700 text-white text-xs font-semibold rounded-lg transition shrink-0">Cari</button>
+                    @if(request()->query('verify_search'))
+                        <a href="{{ route('staff.sosmed.index', ['tab' => 'approvals']) }}"
+                            class="text-xs text-primary-600 hover:underline whitespace-nowrap">Reset</a>
+                    @endif
+                </form>
             </div>
 
             <div class="space-y-3 mb-6">

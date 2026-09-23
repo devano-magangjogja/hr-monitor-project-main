@@ -26,50 +26,55 @@
     {{-- STAT CARDS --}}
     {{-- ═══════════════════════════════════════════════════════════════ --}}
     <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
-        <div class="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
+        <a href="{{ route('admin.sosmed.index', ['tab' => 'accounts']) }}"
+            class="block bg-white rounded-xl border {{ $tab === 'accounts' && !$accFilter ? 'border-gray-400 ring-2 ring-gray-300/40' : 'border-gray-200 hover:border-gray-300' }} p-4 shadow-sm transition">
             <p class="text-xs font-medium text-gray-500 mb-1">Total Akun</p>
             <p class="text-2xl font-bold text-gray-800">{{ $stats['total_accounts'] }}</p>
             <p class="text-[11px] text-gray-400 mt-0.5">akun terdaftar</p>
-        </div>
-        <div
-            class="bg-white rounded-xl border {{ $stats['unassigned_pm'] > 0 ? 'border-amber-300 bg-amber-50/20' : 'border-gray-200' }} p-4 shadow-sm">
+        </a>
+        <a href="{{ route('admin.sosmed.index', ['tab' => 'accounts', 'acc_filter' => 'unassigned_pm']) }}"
+            class="block bg-white rounded-xl border {{ $accFilter === 'unassigned_pm' ? 'border-amber-400 bg-amber-50/30 ring-2 ring-amber-300/50' : ($stats['unassigned_pm'] > 0 ? 'border-amber-300 bg-amber-50/20 hover:border-amber-400' : 'border-gray-200 hover:border-amber-300') }} p-4 shadow-sm transition">
             <p class="text-xs font-medium text-gray-500 mb-1">Belum Ada PM</p>
             <p class="text-2xl font-bold text-amber-600">{{ $stats['unassigned_pm'] }}</p>
             <p class="text-[11px] text-amber-600 mt-0.5">perlu assign PM</p>
-        </div>
-        <div
-            class="bg-white rounded-xl border {{ $stats['unassigned_staff'] > 0 ? 'border-orange-300 bg-orange-50/20' : 'border-gray-200' }} p-4 shadow-sm">
+        </a>
+        <a href="{{ route('admin.sosmed.index', ['tab' => 'accounts', 'acc_filter' => 'unassigned_staff']) }}"
+            class="block bg-white rounded-xl border {{ $accFilter === 'unassigned_staff' ? 'border-orange-400 bg-orange-50/30 ring-2 ring-orange-300/50' : ($stats['unassigned_staff'] > 0 ? 'border-orange-300 bg-orange-50/20 hover:border-orange-400' : 'border-gray-200 hover:border-orange-300') }} p-4 shadow-sm transition">
             <p class="text-xs font-medium text-gray-500 mb-1">Belum Ada Staff</p>
             <p class="text-2xl font-bold text-orange-600">{{ $stats['unassigned_staff'] }}</p>
             <p class="text-[11px] text-orange-600 mt-0.5">perlu assign Sosmed</p>
-        </div>
-        <div class="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
+        </a>
+        <a href="{{ route('admin.sosmed.index', ['tab' => 'tasks']) }}"
+            class="block bg-white rounded-xl border {{ $tab === 'tasks' && !$taskStatus ? 'border-indigo-400 ring-2 ring-indigo-300/40' : 'border-gray-200 hover:border-indigo-300' }} p-4 shadow-sm transition">
             <p class="text-xs font-medium text-gray-500 mb-1">Total Tugas</p>
             <p class="text-2xl font-bold text-indigo-600">{{ $stats['total_tasks'] }}</p>
             <p class="text-[11px] text-gray-400 mt-0.5">harian & custom</p>
-        </div>
-        <div class="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
+        </a>
+        <a href="{{ route('admin.sosmed.index', ['tab' => 'tasks', 'task_status' => 'done_by_staff']) }}"
+            class="block bg-white rounded-xl border {{ $taskStatus === 'done_by_staff' ? 'border-blue-400 bg-blue-50/30 ring-2 ring-blue-300/50' : 'border-gray-200 hover:border-blue-300' }} p-4 shadow-sm transition">
             <p class="text-xs font-medium text-gray-500 mb-1">Verif Level 1 (PM)</p>
             <p class="text-2xl font-bold text-blue-600">{{ $stats['need_pm_verify'] }}</p>
             <p class="text-[11px] text-gray-400 mt-0.5">tugas menunggu PM</p>
-        </div>
-        <div
-            class="bg-white rounded-xl border {{ $stats['need_admin_verify'] > 0 ? 'border-purple-400 bg-purple-50/30 ring-2 ring-purple-400/30' : 'border-gray-200' }} p-4 shadow-sm">
+        </a>
+        <a href="{{ route('admin.sosmed.index', ['tab' => 'staff_approvals']) }}"
+            class="block bg-white rounded-xl border {{ $tab === 'staff_approvals' || $stats['need_admin_verify'] > 0 ? 'border-purple-400 bg-purple-50/30 ring-2 ring-purple-400/30' : 'border-gray-200 hover:border-purple-300' }} p-4 shadow-sm transition">
             <p class="text-xs font-medium text-purple-700 mb-1">Verifikasi Tugas (ACC)</p>
             <p class="text-2xl font-bold text-purple-600">{{ $stats['need_admin_verify'] }}</p>
             <p class="text-[11px] text-purple-600 mt-0.5">menunggu ACC Admin</p>
-        </div>
-        <div class="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
+        </a>
+        <a href="{{ route('admin.sosmed.index', ['tab' => 'tasks', 'task_status' => 'verified_by_pm']) }}"
+            class="block bg-white rounded-xl border {{ $taskStatus === 'verified_by_pm' ? 'border-purple-400 bg-purple-50/30 ring-2 ring-purple-300/50' : 'border-gray-200 hover:border-purple-300' }} p-4 shadow-sm transition">
             <p class="text-xs font-medium text-gray-500 mb-1">Verif Level 2 (HR)</p>
             <p class="text-2xl font-bold text-purple-600">{{ $stats['need_hr_verify'] }}</p>
             <p class="text-[11px] text-gray-400 mt-0.5">tugas menunggu HR</p>
-        </div>
+        </a>
 
-        <div class="col-span-1 bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
+        <a href="{{ route('admin.sosmed.index', ['tab' => 'tasks', 'task_status' => 'approved_hr']) }}"
+            class="col-span-1 block bg-white rounded-xl border {{ $taskStatus === 'approved_hr' ? 'border-emerald-400 bg-emerald-50/30 ring-2 ring-emerald-300/50' : 'border-gray-200 hover:border-emerald-300' }} p-4 shadow-sm transition">
             <p class="text-xs font-medium text-gray-500 mb-1">Selesai Final</p>
             <p class="text-2xl font-bold text-emerald-600">{{ $stats['completed'] }}</p>
             <p class="text-[11px] text-emerald-600 mt-0.5">approved final</p>
-        </div>
+        </a>
     </div>
 
     {{-- ═══════════════════════════════════════════════════════════════ --}}
@@ -130,12 +135,23 @@
                         <div class="min-w-0">
                             <h3 class="text-sm font-semibold text-gray-800">Distribusi & Penugasan Akun Sosial Media</h3>
                             <p class="text-xs text-gray-500 mt-0.5">Pemberian tugas pengelolaan akun sosial media kepada eksekutor (Staff Sosmed / PM)</p>
+                            @if($accFilter)
+                                <span
+                                    class="inline-flex items-center gap-1.5 mt-1.5 px-2 py-1 rounded-md text-[11px] font-semibold {{ $accFilter === 'unassigned_pm' ? 'bg-amber-100 text-amber-700' : 'bg-orange-100 text-orange-700' }}">
+                                    Filter aktif: {{ $accFilter === 'unassigned_pm' ? 'Belum Ada PM' : 'Belum Ada Staff' }}
+                                    <a href="{{ route('admin.sosmed.index', ['tab' => 'accounts']) }}" class="hover:underline"
+                                        title="Hapus filter">&times;</a>
+                                </span>
+                            @endif
                         </div>
 
                         {{-- Kanan: Form Pencarian + Tombol Aksi --}}
                         <div class="flex items-center gap-2 shrink-0 flex-wrap">
                             <form action="{{ route('admin.sosmed.index') }}" method="GET" class="flex items-center gap-2 flex-wrap sm:flex-nowrap">
                                 <input type="hidden" name="tab" value="accounts">
+                                @if($accFilter)
+                                    <input type="hidden" name="acc_filter" value="{{ $accFilter }}">
+                                @endif
                                 <select name="brand"
                                     class="h-9 px-2.5 text-xs bg-white border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 text-gray-700 transition cursor-pointer"
                                     onchange="this.form.submit()">
@@ -165,7 +181,7 @@
                                         </svg>
                                     </button>
                                 </div>
-                                @if($accountSearch || ($searchType ?? 'all') !== 'all' || $brand)
+                                @if($accountSearch || ($searchType ?? 'all') !== 'all' || $brand || $accFilter)
                                     <a href="{{ route('admin.sosmed.index', ['tab' => 'accounts']) }}"
                                         class="inline-flex items-center justify-center h-9 px-2.5 text-xs font-medium text-gray-500 hover:text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition shrink-0"
                                         title="Reset pencarian & filter">
@@ -264,13 +280,20 @@
                                                         {{ $acc->name }}
                                                     </span>
                                                     @if($acc->brand)
-                                                        <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-semibold bg-indigo-50 text-indigo-700 border border-indigo-200"
-                                                            title="Brand: {{ $acc->brand }}">
-                                                            <svg class="w-2.5 h-2.5 text-indigo-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/>
-                                                            </svg>
-                                                            {{ $acc->brand }}
-                                                        </span>
+                                                        @if(($brandLogos[$acc->brand] ?? null))
+                                                            <img src="{{ asset('storage/' . $brandLogos[$acc->brand]) }}"
+                                                                alt="Brand: {{ $acc->brand }}"
+                                                                title="Brand: {{ $acc->brand }}"
+                                                                class="w-5 h-5 shrink-0 rounded object-contain bg-white border border-gray-200 p-px">
+                                                        @else
+                                                            <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-semibold bg-indigo-50 text-indigo-700 border border-indigo-200"
+                                                                title="Brand: {{ $acc->brand }}">
+                                                                <svg class="w-2.5 h-2.5 text-indigo-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/>
+                                                                </svg>
+                                                                {{ $acc->brand }}
+                                                            </span>
+                                                        @endif
                                                     @endif
                                                 </div>
                                                 @if($acc->notes)
@@ -647,10 +670,24 @@
     {{-- ── TAB: VERIFIKASI TUGAS STAFF (ADMIN LANGSUNG) ────────────── --}}
     @if($tab === 'staff_approvals')
         <div class="p-4 sm:p-5">
-            <div class="mb-4">
-                <h3 class="text-sm font-semibold text-gray-800">Verifikasi Tugas Sosmed Staff</h3>
-                <p class="text-xs text-gray-500 mt-0.5">Tugas yang memang belum memiliki verifikator HR Staff dan harus
-                    ditangani langsung oleh Administrator.</p>
+            <div class="mb-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                <div>
+                    <h3 class="text-sm font-semibold text-gray-800">Verifikasi Tugas Sosmed Staff</h3>
+                    <p class="text-xs text-gray-500 mt-0.5">Administrator berwenang meng-acc semua tugas sosmed tanpa
+                        terkecuali, baik yang selesai dikerjakan staff maupun yang telah diverifikasi PM/Asisten.</p>
+                </div>
+                <form method="GET" action="{{ route('admin.sosmed.index') }}" class="flex items-center gap-2 w-full sm:w-auto">
+                    <input type="hidden" name="tab" value="staff_approvals">
+                    <input type="text" name="verify_search" value="{{ $verifySearch }}"
+                        placeholder="Cari judul tugas, akun, atau petugas..."
+                        class="w-full sm:w-64 h-9 px-3 text-xs bg-white border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-purple-500/30 focus:border-purple-500 text-gray-700 transition">
+                    <button type="submit"
+                        class="h-9 px-3 bg-purple-600 hover:bg-purple-700 text-white text-xs font-semibold rounded-lg transition shrink-0">Cari</button>
+                    @if($verifySearch !== '')
+                        <a href="{{ route('admin.sosmed.index', ['tab' => 'staff_approvals']) }}"
+                            class="text-xs text-purple-600 hover:underline whitespace-nowrap">Reset</a>
+                    @endif
+                </form>
             </div>
 
             <div class="space-y-3 mb-6">
@@ -739,9 +776,64 @@
             {{-- Top Bar Filter & Action Buttons --}}
             <div class="mb-4 flex flex-col sm:flex-row items-stretch sm:items-center sm:justify-end gap-2.5 sm:gap-3">
 
+                @if($taskStatus)
+                    <span
+                        class="inline-flex items-center gap-1.5 px-2.5 h-9 rounded-lg text-[11px] font-semibold bg-indigo-100 text-indigo-700 sm:mr-auto w-fit">
+                        Filter status:
+                        {{ match ($taskStatus) {
+                            'pending' => 'Belum Dikerjakan',
+                            'done_by_staff' => 'Menunggu Verifikasi PM/Asisten',
+                            'verified_by_pm' => 'Menunggu HR Staff',
+                            'approved_hr' => 'Disetujui Final',
+                            'rejected' => 'Ditolak',
+                        } }}
+                        <a href="{{ route('admin.sosmed.index', array_filter(['tab' => 'tasks', 'task_date' => $taskDateFilter, 'task_search' => $taskSearch])) }}"
+                            class="hover:underline" title="Hapus filter">&times;</a>
+                    </span>
+                @endif
+
+                {{-- Pencarian Tugas --}}
+                <form action="{{ route('admin.sosmed.index') }}" method="GET" class="flex items-center gap-2 w-full sm:w-auto">
+                    <input type="hidden" name="tab" value="tasks">
+                    @if($taskStatus)
+                        <input type="hidden" name="task_status" value="{{ $taskStatus }}">
+                    @endif
+                    @if($taskDateFilter)
+                        <input type="hidden" name="task_date" value="{{ $taskDateFilter }}">
+                    @endif
+                    <div class="relative flex-1 sm:flex-initial sm:w-64">
+                        <svg class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" fill="none"
+                            stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                        </svg>
+                        <input type="text" name="task_search" value="{{ $taskSearch }}"
+                            placeholder="Cari judul, akun, atau pelaksana..."
+                            class="w-full h-9 pl-9 pr-3 text-xs bg-white border border-gray-300 rounded-lg shadow-sm
+                                focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 text-gray-700 transition">
+                    </div>
+                    <button type="submit"
+                        class="shrink-0 inline-flex items-center justify-center h-9 px-3.5 bg-primary-600 hover:bg-primary-700 active:bg-primary-800
+                            text-white text-xs font-medium rounded-lg transition shadow-sm">
+                        Cari
+                    </button>
+                    @if($taskSearch !== '')
+                        <a href="{{ route('admin.sosmed.index', array_filter(['tab' => 'tasks', 'task_status' => $taskStatus, 'task_date' => $taskDateFilter])) }}"
+                            class="shrink-0 inline-flex items-center justify-center h-9 px-3 text-xs font-medium text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition">
+                            Reset
+                        </a>
+                    @endif
+                </form>
+
                 {{-- Filter Tanggal --}}
                 <form action="{{ route('admin.sosmed.index') }}" method="GET" class="w-full sm:w-auto">
                     <input type="hidden" name="tab" value="tasks">
+                    @if($taskStatus)
+                        <input type="hidden" name="task_status" value="{{ $taskStatus }}">
+                    @endif
+                    @if($taskSearch !== '')
+                        <input type="hidden" name="task_search" value="{{ $taskSearch }}">
+                    @endif
                     <input type="date" name="task_date" value="{{ $taskDateFilter }}"
                         class="w-full sm:w-auto h-9 px-3 text-xs bg-white border border-gray-300 rounded-lg shadow-sm
                                                                                                                                                                                                                                                                            focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500
