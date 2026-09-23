@@ -1,66 +1,125 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+<div align="center">
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+<img src="resources/images/logo_banner.jpg" alt="Task — HR Monitor" width="480"/>
 
-## About Laravel
+# Task — Sistem Monitoring HR & Tugas
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+**Website internal untuk memantau tugas harian, presensi, dan konten sosial media antar divisi.**
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+</div>
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+---
 
-## Learning Laravel
+## 📌 Tentang Proyek
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+**Task** adalah aplikasi web sistem monitoring SDM (HR) yang dibangun untuk kebutuhan operasional kantor. Aplikasi ini menjadi satu tempat bagi setiap karyawan — dari staff pelaksana hingga HR dan Admin — untuk mencatat, mengerjakan, memverifikasi, dan menyetujui pekerjaan harian secara terstruktur dan transparan.
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+Alur kerja utamanya:
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+1. **Tugas dibuat** — oleh Admin/HR Staff, atau otomatis (tugas rutin/harian), atau dari pengajuan mandiri.
+2. **Kerja & bukti** — pelaksana mengerjakan tugas, menandai selesai, dan mengunggah bukti (foto lampiran atau link konten).
+3. **Verifikasi berjenjang** — konten sosmed diverifikasi dua level: **PM/Asisten (Level 1)** lalu **HR Staff/Admin (Level 2/final)**.
+4. **Pantau & audit** — dashboard per role, statistik, riwayat, log aktivitas, dan laporan siap cetak PDF.
 
-## Laravel Sponsors
+## ✨ Fitur Utama
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+### 🗂️ Manajemen Tugas Multi-Role
+- Dashboard khusus untuk setiap role: **Admin, HR Staff, Asisten HR, PM, Sosmed, Programmer, CS, OB, DG, dan Member**.
+- Kategori tugas: **Harian/Rutin** (default), **Ditugaskan** (assigned), **Mandiri** (self), dan **Semua Tugas** dalam satu tabel gabungan.
+- Bukti penyelesaian fleksibel: foto lampiran (wajib/opsional per tugas) atau catatan.
+- Filter tanggal, pencarian, dan status per halaman tugas.
 
-### Premium Partners
+### 📱 Manajemen Sosial Media
+- Kelola akun sosmed (nama, platform, brand, link profil, kredensial, 2FA) lengkap dengan pengajuan akun baru yang harus di-ACC Admin/HR.
+- Master data **Brand** dengan upload logo (otomatis dikonversi ke WebP).
+- Alur tugas sosmed: `Pending → Submit Bukti (link konten) → Verifikasi PM/Asisten → Approval Final HR/Staff → Disetujui / Ditolak (revisi)`.
+- Pantau progress tim sosmed per pelaksana (oversight PM), statistik harian, dan kartu filter interaktif.
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[WebReinvent](https://webreinvent.com/)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Jump24](https://jump24.co.uk)**
-- **[Redberry](https://redberry.international/laravel/)**
-- **[Active Logic](https://activelogic.com)**
-- **[byte5](https://byte5.de)**
-- **[OP.GG](https://op.gg)**
+### ⏰ Presensi & Aktivitas
+- Pencatatan presensi harian termasuk sesi istirahat.
+- **Activity Log** (audit trail) untuk aksi penting dan **Approval Log** khusus alur verifikasi sosmed.
+- Notifikasi in-app untuk tugas baru, verifikasi, persetujuan, dan penolakan.
 
-## Contributing
+### 🛠️ Administratif
+- Pengaturan aplikasi oleh Admin: nama aplikasi, logo sidebar, dan logo banner login (custom upload).
+- Cetak laporan ke **PDF** langsung dari halaman tugas.
+- Hapus data tugas lama (per minggu/bulan/tahun) untuk merapikan arsip.
+- Tampilan **responsif** — tabel di desktop, kartu di mobile.
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+## 🧰 Teknologi
 
-## Code of Conduct
+| Kategori | Teknologi |
+|---|---|
+| Backend | [PHP 8.2+](https://www.php.net/) · [Laravel 12](https://laravel.com/) |
+| Frontend | [Blade](https://laravel.com/docs/blade) · [Tailwind CSS](https://tailwindcss.com/) · [Alpine.js](https://alpinejs.dev/) · [Flowbite](https://flowbite.com/) |
+| Build Tool | [Vite](https://vitejs.dev/) (laravel-vite-plugin) |
+| Database | MySQL / SQLite (Eloquent ORM) |
+| Font | [Inter (Fontsource)](https://fontsource.org/fonts/inter) |
+| Testing & QA | [PHPUnit](https://phpunit.de/) · [Laravel Pint](https://laravel.com/docs/pint) · [Laravel Sail](https://laravel.com/docs/sail) |
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+## 🚀 Cara Menjalankan
 
-## Security Vulnerabilities
+### Prasyarat
+- PHP >= 8.2 (dengan ekstensi `pdo_mysql`/`pdo_sqlite`)
+- Composer & Node.js >= 20
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+### Instalasi
 
-## License
+```bash
+# 1. Clone dan install dependencies
+git clone <repo-url> hr-monitor-project
+cd hr-monitor-project
+composer install
+npm install
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+# 2. Konfigurasi environment
+cp .env.example .env
+php artisan key:generate
+# sesuaikan DB_CONNECTION dan kredensial database di .env
+
+# 3. Migrasi & seed database
+php artisan migrate --seed
+
+# 4. Link storage (untuk upload logo/bukti)
+php artisan storage:link
+
+# 5. Jalankan
+php artisan serve
+npm run dev
+```
+
+Aplikasi tersedia di `http://127.0.0.1:8000`.
+
+> Scheduler digunakan untuk pembuatan tugas harian otomatis — jalankan `php artisan schedule:work` saat development, atau daftarkan cron saat production.
+
+## 📁 Struktur Singkat
+
+```
+app/
+├── Http/Controllers/
+│   ├── Admin/        # Panel admin (akun, brand, sosmed, settings, logs)
+│   ├── Assistant/    # Asisten HR (verifikasi Level 1)
+│   ├── Staff/        # HR Staff (approval Level 2, manajemen)
+│   ├── PM/           # Project Manager (verifikasi & oversight)
+│   ├── Sosmed/       # Tim sosmed (submit bukti konten)
+│   └── Cs|Ob|DG|VG|Programmer|Member/  # Role divisi lain
+├── Models/           # Task, TaskAssignment, SosmedAccount, SosmedTask, Brand, Presensi, ActivityLog, ...
+└── Services/         # TaskService, SettingService, logika verifikasi & notifikasi
+resources/views/      # Blade per role + komponen bersama (tabel tugas, modal, badge)
+routes/web.php        # Seluruh route per role
+```
+
+## 👥 Role & Hak Akses
+
+| Role | Tanggung Jawab |
+|---|---|
+| **Admin** | Penuh: kelola akun & brand sosmed, ACC pengajuan akun, approval final semua tugas, pengaturan aplikasi |
+| **HR Staff** | Approval final (Level 2), verifikasi langsung, manajemen tugas & akun sosmed |
+| **Asisten HR** | Verifikasi Level 1 untuk akun yang didelegasikan Staff/Admin |
+| **PM** | Verifikasi Level 1, pantau progress tim sosmed di bawah pengawasannya |
+| **Sosmed** | Submit bukti konten harian per akun yang di-assign |
+| **Programmer / CS / OB / DG / VG / Member** | Mengerjakan & melapor tugas divisi masing-masing |
+
+## 📄 Lisensi
+
+Proyek internal — semua hak cipta milik perusahaan.
