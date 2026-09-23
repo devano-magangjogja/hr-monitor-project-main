@@ -21,9 +21,14 @@ class SosmedController extends Controller
         // Seluruh Akun Sosmed di Sistem Pemantauan Sosmed
         $accountSearch = $request->query('account_search');
         $searchType = $request->query('search_type', 'all');
+        $brand = $request->query('brand');
         $accountsQuery = SosmedAccount::inSosmed()
             ->with(['pmUser', 'staffUsers', 'assistantUser', 'supervisorStaff', 'creator'])
             ->orderBy('platform');
+
+        if ($brand) {
+            $accountsQuery->where('brand', $brand);
+        }
 
         if ($accountSearch) {
             $term = trim($accountSearch);
@@ -31,6 +36,8 @@ class SosmedController extends Controller
                 if ($searchType === 'account') {
                     $q->where('name', 'like', '%' . $term . '%')
                       ->orWhere('username', 'like', '%' . $term . '%');
+                } elseif ($searchType === 'brand') {
+                    $q->where('brand', 'like', '%' . $term . '%');
                 } elseif ($searchType === 'manager') {
                     $q->whereHas('staffUsers', fn($sq) => $sq->where('users.name', 'like', '%' . $term . '%'));
                 } elseif ($searchType === 'pm') {
@@ -40,9 +47,10 @@ class SosmedController extends Controller
                 } elseif ($searchType === 'staff') {
                     $q->whereHas('supervisorStaff', fn($sq) => $sq->where('users.name', 'like', '%' . $term . '%'));
                 } else {
-                    // 'all': Cari di nama akun, username, pengelola/eksekutor, PM, asisten, maupun staff pengawas
+                    // 'all': Cari di nama akun, username, brand, pengelola/eksekutor, PM, asisten, maupun staff pengawas
                     $q->where('name', 'like', '%' . $term . '%')
                       ->orWhere('username', 'like', '%' . $term . '%')
+                      ->orWhere('brand', 'like', '%' . $term . '%')
                       ->orWhereHas('staffUsers', fn($sq) => $sq->where('users.name', 'like', '%' . $term . '%'))
                       ->orWhereHas('pmUser', fn($pq) => $pq->where('users.name', 'like', '%' . $term . '%'))
                       ->orWhereHas('assistantUser', fn($aq) => $aq->where('users.name', 'like', '%' . $term . '%'))
@@ -151,12 +159,10 @@ class SosmedController extends Controller
             ->get();
         $staffs = $executors; // compatibility
 
-        // Tugas Sosmed yang menunggu verifikasi langsung Admin (tugas yang dikerjakan Staff atau menunggu verifikasi pengawas/admin)
+        // Admin memiliki wewenang untuk meng-acc semua tugas sosmed tanpa terkecuali
+        // Menampilkan seluruh tugas yang menunggu verifikasi (baik selesai dikerjakan staff maupun telah diverifikasi PM)
         $staffPendingTasks = SosmedTask::with(['account.supervisorStaff', 'account.pmUser', 'account.assistantUser', 'assignedUser', 'assignedBy'])
-            ->where(function ($q) {
-                $q->where('status', 'done_by_staff')
-                    ->whereHas('account', fn($acc) => $acc->whereNull('pm_id')->whereNull('assistant_id')->whereNull('supervisor_staff_id'));
-            })
+            ->whereIn('status', ['done_by_staff', 'verified_by_pm'])
             ->orderBy('updated_at', 'desc')
             ->get();
 
@@ -172,10 +178,19 @@ class SosmedController extends Controller
             'completed'         => $tasksStats['approved_hr'],
         ];
 
+        // Daftar brand yang ada di sistem sosmed
+        $brands = SosmedAccount::inSosmed()
+            ->whereNotNull('brand')
+            ->where('brand', '!=', '')
+            ->distinct()
+            ->pluck('brand')
+            ->sort()
+            ->values();
+
         // Akun yang sudah disetujui (approved) untuk penugasan sosmed beserta info pengelola saat ini
         $availableAccounts = SosmedAccount::where('verification_status', 'approved')
             ->with(['staffUsers:id,name'])
-            ->select('id', 'name', 'platform', 'link', 'is_in_sosmed')
+            ->select('id', 'name', 'brand', 'platform', 'link', 'is_in_sosmed')
             ->orderBy('platform')
             ->orderBy('name')
             ->get()
@@ -183,6 +198,7 @@ class SosmedController extends Controller
                 return [
                     'id' => $acc->id,
                     'name' => $acc->name,
+                    'brand' => $acc->brand,
                     'platform' => $acc->platform,
                     'link' => $acc->link,
                     'is_in_sosmed' => (bool)$acc->is_in_sosmed,
@@ -197,6 +213,8 @@ class SosmedController extends Controller
             'availableAccounts',
             'accountSearch',
             'searchType',
+            'brand',
+            'brands',
             'tasks',
             'staffPendingTasks',
             'taskDateFilter',
@@ -216,6 +234,7 @@ class SosmedController extends Controller
     {
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:200'],
+            'brand' => ['nullable', 'string', 'max:100'],
             'platform' => ['required', 'string', 'max:50'],
             'link' => ['nullable', 'url', 'max:500'],
             'pm_id' => ['nullable', 'exists:users,id'],
@@ -248,7 +267,7 @@ class SosmedController extends Controller
             ]);
         }
 
-        $this->logActivity('sosmed.created', 'Sosmed', "Menambahkan akun sosial media '{$validated['name']}' ({$validated['platform']})", $account);
+        $this->logActivity('sosmed.created', 'Sosmed', "Menambahkan akun sosial media '{$validated['name']}' ({$validated['platform']})" . (!empty($validated['brand']) ? " [Brand: {$validated['brand']}]" : ''), $account);
 
         return redirect()->route('admin.sosmed.index', ['tab' => 'accounts'])
             ->with('success', 'Akun sosial media baru berhasil ditambahkan.');
@@ -258,6 +277,7 @@ class SosmedController extends Controller
     {
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:200'],
+            'brand' => ['nullable', 'string', 'max:100'],
             'platform' => ['required', 'string', 'max:50'],
             'link' => ['nullable', 'url', 'max:500'],
             'pm_id' => ['nullable', 'exists:users,id'],
@@ -671,8 +691,7 @@ class SosmedController extends Controller
 
             $this->logActivity('sosmed.verified', 'Sosmed', "Administrator menyetujui tugas sosmed '{$task->title}' milik {$task->assignedUser?->name}", $task);
 
-            return redirect()->route('admin.sosmed.index', ['tab' => 'staff_approvals'])
-                ->with('success', 'Tugas sosmed berhasil disetujui oleh Administrator.');
+            return redirect()->back()->with('success', 'Tugas sosmed berhasil disetujui (ACC) oleh Administrator.');
         } else {
             $task->update([
                 'status'         => 'rejected',
@@ -694,8 +713,7 @@ class SosmedController extends Controller
 
             $this->logActivity('sosmed.verified', 'Sosmed', "Administrator menolak tugas sosmed '{$task->title}' milik {$task->assignedUser?->name}", $task);
 
-            return redirect()->route('admin.sosmed.index', ['tab' => 'staff_approvals'])
-                ->with('success', 'Tugas ditolak dan dikembalikan untuk revisi.');
+            return redirect()->back()->with('success', 'Tugas ditolak dan dikembalikan untuk revisi.');
         }
     }
 }

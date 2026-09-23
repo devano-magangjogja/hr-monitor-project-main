@@ -55,9 +55,9 @@
         </div>
         <div
             class="bg-white rounded-xl border {{ $stats['need_admin_verify'] > 0 ? 'border-purple-400 bg-purple-50/30 ring-2 ring-purple-400/30' : 'border-gray-200' }} p-4 shadow-sm">
-            <p class="text-xs font-medium text-purple-700 mb-1">Verif Tugas Staff</p>
+            <p class="text-xs font-medium text-purple-700 mb-1">Verifikasi Tugas (ACC)</p>
             <p class="text-2xl font-bold text-purple-600">{{ $stats['need_admin_verify'] }}</p>
-            <p class="text-[11px] text-purple-600 mt-0.5">menunggu verif Admin</p>
+            <p class="text-[11px] text-purple-600 mt-0.5">menunggu ACC Admin</p>
         </div>
         <div class="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
             <p class="text-xs font-medium text-gray-500 mb-1">Verif Level 2 (HR)</p>
@@ -94,7 +94,7 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                         d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
-                Verifikasi Tugas Staff
+                Verifikasi Tugas Sosmed
                 @if($stats['need_admin_verify'] > 0)
                     <span class="ml-1 px-1.5 py-0.5 text-[10px] font-bold rounded-full bg-purple-600 text-white">
                         {{ $stats['need_admin_verify'] }}
@@ -134,29 +134,38 @@
 
                         {{-- Kanan: Form Pencarian + Tombol Aksi --}}
                         <div class="flex items-center gap-2 shrink-0 flex-wrap">
-                            <form action="{{ route('admin.sosmed.index') }}" method="GET" class="flex items-center gap-2">
+                            <form action="{{ route('admin.sosmed.index') }}" method="GET" class="flex items-center gap-2 flex-wrap sm:flex-nowrap">
                                 <input type="hidden" name="tab" value="accounts">
+                                <select name="brand"
+                                    class="h-9 px-2.5 text-xs bg-white border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 text-gray-700 transition cursor-pointer"
+                                    onchange="this.form.submit()">
+                                    <option value="">Semua Brand</option>
+                                    @foreach($brands as $b)
+                                        <option value="{{ $b }}" {{ ($brand ?? '') === $b ? 'selected' : '' }}>{{ $b }}</option>
+                                    @endforeach
+                                </select>
                                 <select name="search_type"
                                     class="h-9 px-2.5 text-xs bg-white border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 text-gray-700 transition cursor-pointer"
                                     onchange="if(this.form.account_search.value) this.form.submit()">
                                     <option value="all" {{ ($searchType ?? 'all') === 'all' ? 'selected' : '' }}>Semua Kriteria</option>
+                                    <option value="brand" {{ ($searchType ?? 'all') === 'brand' ? 'selected' : '' }}>Brand</option>
+                                    <option value="account" {{ ($searchType ?? 'all') === 'account' ? 'selected' : '' }}>Nama Akun</option>
                                     <option value="manager" {{ ($searchType ?? 'all') === 'manager' ? 'selected' : '' }}>Pengelola Akun</option>
                                     <option value="pm" {{ ($searchType ?? 'all') === 'pm' ? 'selected' : '' }}>Supervisor PM</option>
                                     <option value="assistant" {{ ($searchType ?? 'all') === 'assistant' ? 'selected' : '' }}>Asisten Pengawas</option>
                                     <option value="staff" {{ ($searchType ?? 'all') === 'staff' ? 'selected' : '' }}>Staff Pengawas</option>
-                                    <option value="account" {{ ($searchType ?? 'all') === 'account' ? 'selected' : '' }}>Nama Akun</option>
                                 </select>
                                 <div class="relative flex items-center">
                                     <input type="text" name="account_search" value="{{ $accountSearch ?? '' }}"
-                                        placeholder="Cari akun, pengelola, PM, asisten..."
-                                        class="h-9 pl-3 pr-8 text-xs bg-white border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 text-gray-700 transition w-52">
+                                        placeholder="Cari akun, brand, pengelola..."
+                                        class="h-9 pl-3 pr-8 text-xs bg-white border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 text-gray-700 transition w-44 sm:w-52">
                                     <button type="submit" class="absolute right-2 text-gray-400 hover:text-primary-600 transition" title="Cari">
                                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                                         </svg>
                                     </button>
                                 </div>
-                                @if($accountSearch || ($searchType ?? 'all') !== 'all')
+                                @if($accountSearch || ($searchType ?? 'all') !== 'all' || $brand)
                                     <a href="{{ route('admin.sosmed.index', ['tab' => 'accounts']) }}"
                                         class="inline-flex items-center justify-center h-9 px-2.5 text-xs font-medium text-gray-500 hover:text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition shrink-0"
                                         title="Reset pencarian & filter">
@@ -250,9 +259,20 @@
                                         <tr class="hover:bg-gray-50/80 transition align-middle">
                                             {{-- Nama Akun --}}
                                             <td class="px-4 py-3.5 min-w-[180px]">
-                                                <span class="font-semibold text-gray-800 block break-words" title="{{ $acc->name }}">
-                                                    {{ $acc->name }}
-                                                </span>
+                                                <div class="flex items-center gap-1.5 flex-wrap">
+                                                    <span class="font-semibold text-gray-800 break-words" title="{{ $acc->name }}">
+                                                        {{ $acc->name }}
+                                                    </span>
+                                                    @if($acc->brand)
+                                                        <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-semibold bg-indigo-50 text-indigo-700 border border-indigo-200"
+                                                            title="Brand: {{ $acc->brand }}">
+                                                            <svg class="w-2.5 h-2.5 text-indigo-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/>
+                                                            </svg>
+                                                            {{ $acc->brand }}
+                                                        </span>
+                                                    @endif
+                                                </div>
                                                 @if($acc->notes)
                                                     <p class="text-xs text-gray-400 mt-0.5 truncate max-w-full block" title="{{ $acc->notes }}">
                                                         {{ $acc->notes }}

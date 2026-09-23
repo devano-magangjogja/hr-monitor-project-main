@@ -395,16 +395,24 @@ TAB: PENDING ACCOUNTS
                 </div>
 
                 {{-- Filter group --}}
-                <div class="flex items-center gap-2 shrink-0">
+                <div class="flex flex-wrap items-center gap-2 shrink-0">
                     <select name="platform" onchange="this.form.submit()"
-                        class="h-10 w-full sm:w-40 px-3 text-sm bg-gray-50 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:bg-white focus:outline-none transition">
+                        class="h-10 w-full sm:w-36 px-3 text-sm bg-gray-50 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:bg-white focus:outline-none transition">
                         <option value="">Semua Platform</option>
                         @foreach($platformList as $p)
                             <option value="{{ $p }}" {{ ($platform ?? '') === $p ? 'selected' : '' }}>{{ $p }}</option>
                         @endforeach
                     </select>
 
-                    @if($search || $platform || $status)
+                    <select name="brand" onchange="this.form.submit()"
+                        class="h-10 w-full sm:w-36 px-3 text-sm bg-gray-50 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:bg-white focus:outline-none transition">
+                        <option value="">Semua Brand</option>
+                        @foreach($brands as $b)
+                            <option value="{{ $b }}" {{ ($brand ?? '') === $b ? 'selected' : '' }}>{{ $b }}</option>
+                        @endforeach
+                    </select>
+
+                    @if($search || $platform || $brand || $status)
                         <a href="{{ route($accountPrefix . '.accounts.index') }}"
                             class="flex items-center justify-center h-10 w-10 text-gray-500 hover:text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition shrink-0"
                             title="Reset Filter">
@@ -458,8 +466,19 @@ TAB: PENDING ACCOUNTS
 
                                     {{-- Nama Akun (truncate jika panjang) --}}
                                     <td class="px-4 py-3.5">
-                                        <div class="font-semibold text-gray-900 truncate" title="{{ $acc->name }}">
-                                            {{ $acc->name }}
+                                        <div class="flex items-center gap-1.5 flex-wrap">
+                                            <span class="font-semibold text-gray-900 truncate" title="{{ $acc->name }}">
+                                                {{ $acc->name }}
+                                            </span>
+                                            @if($acc->brand)
+                                                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-semibold bg-indigo-50 text-indigo-700 border border-indigo-200"
+                                                    title="Brand: {{ $acc->brand }}">
+                                                    <svg class="w-3 h-3 text-indigo-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/>
+                                                    </svg>
+                                                    {{ $acc->brand }}
+                                                </span>
+                                            @endif
                                         </div>
                                         @if($acc->notes)
                                             <div class="text-xs text-gray-400 truncate mt-0.5" title="{{ $acc->notes }}">
@@ -615,6 +634,7 @@ TAB: PENDING ACCOUNTS
                                             <button type="button" onclick="openAccountDetail({{ json_encode([
                             'platform' => $acc->platform,
                             'name' => $acc->name,
+                            'brand' => $acc->brand ?? '',
                             'link' => $acc->link ?? '',
                             'email' => $acc->email ?? '',
                             'password' => $acc->password ?? '',
@@ -635,6 +655,7 @@ TAB: PENDING ACCOUNTS
                                             <button type="button" onclick="openEditAccountModal({{ json_encode([
                             'id' => $acc->id,
                             'name' => $acc->name,
+                            'brand' => $acc->brand ?? '',
                             'platform' => $acc->platform,
                             'link' => $acc->link ?? '',
                             'email' => $acc->email ?? '',
@@ -735,6 +756,13 @@ TAB: PENDING ACCOUNTS
                 </div>
 
                 <div>
+                    <label class="block text-xs font-semibold text-gray-700 mb-1.5">Brand / Kategori Brand</label>
+                    <input type="text" name="brand" list="brand-datalist" placeholder="Contoh: Republikweb"
+                        class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 focus:outline-none">
+                    <p class="text-[11px] text-gray-400 mt-1">Label pengelompokan brand sebagai penanda akun.</p>
+                </div>
+
+                <div>
                     <label class="block text-xs font-semibold text-gray-700 mb-1.5">Link Akun (URL Profil)</label>
                     <input type="text" name="link" placeholder="https://instagram.com/republikweb_net"
                         class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 focus:outline-none">
@@ -832,6 +860,13 @@ TAB: PENDING ACCOUNTS
                             class="text-red-500">*</span></label>
                     <input type="text" name="name" id="edit-acc-name" required
                         class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 focus:outline-none">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-gray-700 mb-1.5">Brand / Kategori Brand</label>
+                    <input type="text" name="brand" id="edit-acc-brand" list="brand-datalist" placeholder="Contoh: Republikweb"
+                        class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 focus:outline-none">
+                    <p class="text-[11px] text-gray-400 mt-1">Label pengelompokan brand sebagai penanda akun.</p>
                 </div>
 
                 <div>
@@ -936,6 +971,10 @@ TAB: PENDING ACCOUNTS
                     <p id="detail-platform" class="font-semibold text-gray-800"></p>
                 </div>
                 <div>
+                    <p class="text-xs text-gray-400">Brand</p>
+                    <p id="detail-brand" class="font-semibold text-indigo-600"></p>
+                </div>
+                <div class="sm:col-span-2">
                     <p class="text-xs text-gray-400">Nama Akun</p>
                     <p id="detail-name" class="font-semibold text-gray-800"></p>
                 </div>
@@ -975,6 +1014,12 @@ TAB: PENDING ACCOUNTS
         </div>
     </div>
 
+    <datalist id="brand-datalist">
+        @foreach($brands as $b)
+            <option value="{{ $b }}">
+        @endforeach
+    </datalist>
+
     {{-- ── JAVASCRIPT MODAL HANDLERS ───────────────────────── --}}
     <script>
         const accountPrefix = @json($accountPrefix);
@@ -1002,6 +1047,7 @@ TAB: PENDING ACCOUNTS
         function openAccountDetail(data) {
             const fields = {
                 platform: data.platform,
+                brand: data.brand || '-',
                 name: data.name,
                 link: data.link || '-',
                 email: data.email || '-',
@@ -1049,6 +1095,7 @@ TAB: PENDING ACCOUNTS
             form.action = `/${accountPrefix}/accounts/${data.id}`;
 
             document.getElementById('edit-acc-name').value = data.name || '';
+            document.getElementById('edit-acc-brand').value = data.brand || '';
             const standardPlatforms = Array.from(document.getElementById('edit-acc-platform').options).map(option => option.value);
             const isCustomPlatform = data.platform && !standardPlatforms.includes(data.platform);
             document.getElementById('edit-acc-platform').value = isCustomPlatform ? 'Lainnya' : (data.platform || '');

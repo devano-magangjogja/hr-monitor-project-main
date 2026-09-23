@@ -17,6 +17,7 @@ class AccountController extends Controller
         $tab = $request->query('tab', 'accounts');
         $search = $request->query('search');
         $platform = $request->query('platform');
+        $brand = $request->query('brand');
         $status = $request->query('status'); // 'assigned', 'unassigned'
 
         $accountsQuery = SosmedAccount::with(['pmUser', 'staffUsers', 'assistantUser', 'creator'])
@@ -27,6 +28,8 @@ class AccountController extends Controller
         if ($search) {
             $accountsQuery->where(function ($q) use ($search) {
                 $q->where('name', 'like', '%' . $search . '%')
+                    ->orWhere('username', 'like', '%' . $search . '%')
+                    ->orWhere('brand', 'like', '%' . $search . '%')
                     ->orWhere('platform', 'like', '%' . $search . '%')
                     ->orWhere('email', 'like', '%' . $search . '%');
             });
@@ -34,6 +37,10 @@ class AccountController extends Controller
 
         if ($platform) {
             $accountsQuery->where('platform', $platform);
+        }
+
+        if ($brand) {
+            $accountsQuery->where('brand', $brand);
         }
 
         if ($status === 'assigned') {
@@ -50,6 +57,8 @@ class AccountController extends Controller
         if ($search) {
             $pendingQuery->where(function ($q) use ($search) {
                 $q->where('name', 'like', '%' . $search . '%')
+                    ->orWhere('username', 'like', '%' . $search . '%')
+                    ->orWhere('brand', 'like', '%' . $search . '%')
                     ->orWhere('platform', 'like', '%' . $search . '%')
                     ->orWhere('email', 'like', '%' . $search . '%')
                     ->orWhereHas('creator', function ($c) use ($search) {
@@ -62,10 +71,14 @@ class AccountController extends Controller
             $pendingQuery->where('platform', $platform);
         }
 
+        if ($brand) {
+            $pendingQuery->where('brand', $brand);
+        }
+
         $pendingAccounts = $pendingQuery
             ->latest()
             ->paginate(15, ['*'], 'pending_page')
-            ->appends($request->only(['tab', 'search', 'platform']));
+            ->appends($request->only(['tab', 'search', 'platform', 'brand']));
 
         $stats = [
             'total' => SosmedAccount::where('verification_status', 'approved')->count(),
@@ -75,11 +88,20 @@ class AccountController extends Controller
 
         $platformList = ['Instagram', 'TikTok', 'YouTube', 'Facebook', 'Twitter/X', 'LinkedIn', 'Threads', 'Website', 'Lainnya'];
 
+        $brands = SosmedAccount::whereNotNull('brand')
+            ->where('brand', '!=', '')
+            ->distinct()
+            ->pluck('brand')
+            ->sort()
+            ->values();
+
         return view('admin.accounts.index', compact(
             'accounts',
             'stats',
             'search',
             'platform',
+            'brand',
+            'brands',
             'status',
             'platformList',
             'pendingAccounts',
@@ -91,6 +113,7 @@ class AccountController extends Controller
     {
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:200'],
+            'brand' => ['nullable', 'string', 'max:100'],
             'platform' => ['required', 'string', 'max:50'],
             'custom_platform' => ['required_if:platform,Lainnya', 'nullable', 'string', 'max:50'],
             'link' => ['nullable', 'string', 'max:500'],
@@ -104,6 +127,7 @@ class AccountController extends Controller
 
         $data = [
             'name' => $validated['name'],
+            'brand' => $validated['brand'] ?? null,
             'platform' => $validated['platform'] === 'Lainnya' ? $validated['custom_platform'] : $validated['platform'],
             'link' => $validated['link'] ?? null,
             'email' => $validated['email'] ?? null,
@@ -122,7 +146,7 @@ class AccountController extends Controller
         $this->logActivity(
             'account.created',
             'Manajemen Akun',
-            "Menambahkan akun '{$account->name}' ({$account->platform})",
+            "Menambahkan akun '{$account->name}' ({$account->platform})" . ($account->brand ? " [Brand: {$account->brand}]" : ''),
             $account
         );
 
@@ -134,6 +158,7 @@ class AccountController extends Controller
     {
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:200'],
+            'brand' => ['nullable', 'string', 'max:100'],
             'platform' => ['required', 'string', 'max:50'],
             'custom_platform' => ['required_if:platform,Lainnya', 'nullable', 'string', 'max:50'],
             'link' => ['nullable', 'string', 'max:500'],
@@ -147,6 +172,7 @@ class AccountController extends Controller
 
         $data = [
             'name' => $validated['name'],
+            'brand' => $validated['brand'] ?? null,
             'platform' => $validated['platform'] === 'Lainnya' ? $validated['custom_platform'] : $validated['platform'],
             'link' => $validated['link'] ?? null,
             'email' => $validated['email'] ?? null,

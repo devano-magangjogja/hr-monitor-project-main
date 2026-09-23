@@ -11,6 +11,7 @@ class SosmedAccount extends Model
     protected $fillable = [
         'name',
         'username',
+        'brand',
         'platform',
         'link',
         'email',
