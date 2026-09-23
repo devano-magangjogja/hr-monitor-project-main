@@ -37,9 +37,11 @@ class TaskController extends Controller
             'title' => ['required', 'string', 'max:200'],
             'description' => ['nullable', 'string'],
             'kantor' => ['nullable', 'string', 'in:Kantor 1,Kantor 2,Kantor 3,Kantor 4,Kantor 5,Kantor 6,Kantor 7,Kantor 8,Kantor 9,Kantor 10'],
+            'proof_requirement' => ['nullable', 'string', 'in:required,optional,none'],
             'user_ids' => ['required', 'array', 'min:1'],
             'user_ids.*' => ['integer', 'exists:users,id'],
         ]);
+        $validated['proof_requirement'] = $validated['proof_requirement'] ?? 'none';
 
         try {
             $task = $this->taskService->createAssignedTask($validated);
@@ -57,9 +59,11 @@ class TaskController extends Controller
             'title' => ['required', 'string', 'max:200'],
             'description' => ['nullable', 'string'],
             'kantor' => ['nullable', 'string', 'in:Kantor 1,Kantor 2,Kantor 3,Kantor 4,Kantor 5,Kantor 6,Kantor 7,Kantor 8,Kantor 9,Kantor 10'],
+            'proof_requirement' => ['nullable', 'string', 'in:required,optional,none'],
             'user_ids' => ['required', 'array', 'min:1'],
             'user_ids.*' => ['integer', 'exists:users,id'],
         ]);
+        $validated['proof_requirement'] = $validated['proof_requirement'] ?? 'none';
 
         try {
             $this->taskService->updateTask($task, $validated);
@@ -176,8 +180,8 @@ class TaskController extends Controller
                 $rows->push((object)[
                     'account'        => $acc,
                     'task'           => $task,
-                    'executor_name'  => $acc->staffUser?->name ?? '—',
-                    'executor_role'  => $acc->staffUser?->role_label ?? '',
+                    'executor_name'  => $acc->staffUsers->pluck('name')->join(', ') ?: ($acc->staffUser?->name ?? '—'),
+                    'executor_role'  => $acc->staffUsers->pluck('role_label')->filter()->join(', ') ?: ($acc->staffUser?->role_label ?? ''),
                     'task_date'      => $forDate,
                     'status'         => $task?->status ?? 'no_task',
                     'status_label'   => $task ? $task->status_label : 'Belum Ada Tugas',
@@ -192,12 +196,12 @@ class TaskController extends Controller
         switch ($role->name) {
             case 'hr_staff':
                 // 1. Akun yang di-assign langsung ke hr_staff sebagai eksekutor
-                $executorAccounts = SosmedAccount::with(['staffUser', 'pmUser'])
-                    ->whereIn('staff_id', $roleUserIds)->get();
+                $executorAccounts = SosmedAccount::with(['staffUsers', 'pmUser'])
+                    ->whereHas('staffUsers', fn($q) => $q->whereIn('users.id', $roleUserIds))->get();
                 $sosmedExecRows = $buildSosmedRows($executorAccounts, $date);
 
                 // 2. Semua tugas yang sudah lolos PM dan butuh final approval HR
-                $finalApprovalTasks = SosmedTask::with(['account.staffUser', 'assignedUser'])
+                $finalApprovalTasks = SosmedTask::with(['account.staffUsers', 'assignedUser'])
                     ->where('status', 'verified_by_pm')
                     ->whereDate('task_date', $date)
                     ->get()
@@ -219,19 +223,19 @@ class TaskController extends Controller
 
             case 'hr_assistant':
                 // Semua tugas sosmed di akun yang diawasi asisten ini (butuh verifikasi asisten)
-                $assistantAccounts = SosmedAccount::with(['staffUser', 'pmUser'])
+                $assistantAccounts = SosmedAccount::with(['staffUsers', 'pmUser'])
                     ->whereIn('assistant_id', $roleUserIds)->get();
                 $sosmedPending = $buildSosmedRows($assistantAccounts, $date);
                 break;
 
             case 'pm':
                 // Akun yang dikelola PM sebagai eksekutor mandiri
-                $pmExecAccounts = SosmedAccount::with(['staffUser', 'pmUser'])
-                    ->whereIn('staff_id', $roleUserIds)->get();
+                $pmExecAccounts = SosmedAccount::with(['staffUsers', 'pmUser'])
+                    ->whereHas('staffUsers', fn($q) => $q->whereIn('users.id', $roleUserIds))->get();
                 $pmExecRows = $buildSosmedRows($pmExecAccounts, $date);
 
                 // Akun yang diawasi PM (butuh verifikasi PM)
-                $pmVerifTasks = SosmedTask::with(['account.staffUser', 'assignedUser'])
+                $pmVerifTasks = SosmedTask::with(['account.staffUsers', 'assignedUser'])
                     ->whereHas('account', fn($q) => $q->whereIn('pm_id', $roleUserIds))
                     ->where('status', 'done_by_staff')
                     ->whereDate('task_date', $date)
@@ -254,8 +258,8 @@ class TaskController extends Controller
             case 'sosmed':
             case 'digital_marketing':
                 // Akun yang dikelola oleh user role ini
-                $execAccounts = SosmedAccount::with(['staffUser', 'pmUser'])
-                    ->whereIn('staff_id', $roleUserIds)->get();
+                $execAccounts = SosmedAccount::with(['staffUsers', 'pmUser'])
+                    ->whereHas('staffUsers', fn($q) => $q->whereIn('users.id', $roleUserIds))->get();
                 $sosmedPending = $buildSosmedRows($execAccounts, $date);
                 break;
 

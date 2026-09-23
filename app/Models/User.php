@@ -201,4 +201,10 @@ class User extends Authenticatable
     {
         return $this->base_type === 'member';
     }
+
+    public function sosmedAccounts()
+    {
+        return $this->belongsToMany(SosmedAccount::class, 'sosmed_account_users', 'user_id', 'sosmed_account_id')
+            ->withPivot('assigned_by', 'assigned_at');
+    }
 }

@@ -28,12 +28,14 @@ class TaskController extends Controller
     public function assignStore(Request $request)
     {
         $validated = $request->validate([
-            'title'       => ['required', 'string', 'max:200'],
-            'description' => ['nullable', 'string'],
-            'kantor'      => ['nullable', 'string', 'in:Kantor 1,Kantor 2,Kantor 3,Kantor 4,Kantor 5,Kantor 6,Kantor 7,Kantor 8,Kantor 9,Kantor 10'],
-            'user_ids'    => ['required', 'array', 'min:1'],
-            'user_ids.*'  => ['integer', 'exists:users,id'],
+            'title'             => ['required', 'string', 'max:200'],
+            'description'       => ['nullable', 'string'],
+            'kantor'            => ['nullable', 'string', 'in:Kantor 1,Kantor 2,Kantor 3,Kantor 4,Kantor 5,Kantor 6,Kantor 7,Kantor 8,Kantor 9,Kantor 10'],
+            'proof_requirement' => ['nullable', 'string', 'in:required,optional,none'],
+            'user_ids'          => ['required', 'array', 'min:1'],
+            'user_ids.*'        => ['integer', 'exists:users,id'],
         ]);
+        $validated['proof_requirement'] = $validated['proof_requirement'] ?? 'none';
 
         try {
             $task = $this->taskService->createAssignedTask($validated);
@@ -50,12 +52,14 @@ class TaskController extends Controller
     public function assignUpdate(Request $request, Task $task)
     {
         $validated = $request->validate([
-            'title'       => ['required', 'string', 'max:200'],
-            'description' => ['nullable', 'string'],
-            'kantor'      => ['nullable', 'string', 'in:Kantor 1,Kantor 2,Kantor 3,Kantor 4,Kantor 5,Kantor 6,Kantor 7,Kantor 8,Kantor 9,Kantor 10'],
-            'user_ids'    => ['required', 'array', 'min:1'],
-            'user_ids.*'  => ['integer', 'exists:users,id'],
+            'title'             => ['required', 'string', 'max:200'],
+            'description'       => ['nullable', 'string'],
+            'kantor'            => ['nullable', 'string', 'in:Kantor 1,Kantor 2,Kantor 3,Kantor 4,Kantor 5,Kantor 6,Kantor 7,Kantor 8,Kantor 9,Kantor 10'],
+            'proof_requirement' => ['nullable', 'string', 'in:required,optional,none'],
+            'user_ids'          => ['required', 'array', 'min:1'],
+            'user_ids.*'        => ['integer', 'exists:users,id'],
         ]);
+        $validated['proof_requirement'] = $validated['proof_requirement'] ?? 'none';
 
         try {
             $this->taskService->updateTask($task, $validated);
@@ -138,18 +142,20 @@ class TaskController extends Controller
     public function complete(Request $request, Task $task)
     {
         $request->validate([
-            'note' => ['nullable', 'string', 'max:500'],
+            'note'       => ['nullable', 'string', 'max:500'],
+            'attachment' => ['nullable', 'file', 'image', 'mimes:jpeg,png,jpg,webp', 'max:5120'],
         ]);
         
         try {
-            $this->taskService->completeTask($task, $request->note);
+            $this->taskService->completeTask($task, $request->note, $request->file('attachment'));
             
             $this->logActivity('task.completed', 'Tugas', "Menyelesaikan tugas '{$task->title}'", $task);
             
             return redirect()->route('staff.tasks.index')
                 ->with('task_completed', 'Terima kasih sudah menyelesaikan tugas ini dengan baik. Tetap semangat!');
         } catch (ValidationException $e) {
-            return back()->with('error', $e->errors()['task'][0] ?? 'Gagal menyelesaikan tugas.');
+            $errorMsg = $e->errors()['task'][0] ?? ($e->errors()['attachment'][0] ?? 'Gagal menyelesaikan tugas.');
+            return back()->with('error', $errorMsg);
         }
     }
     public function history(Request $request)
@@ -170,16 +176,18 @@ class TaskController extends Controller
     public function dailyComplete(Request $request, Task $task)
     {
         $request->validate([
-            'note' => ['nullable', 'string', 'max:500'],
+            'note'       => ['nullable', 'string', 'max:500'],
+            'attachment' => ['nullable', 'file', 'image', 'mimes:jpeg,png,jpg,webp', 'max:5120'],
         ]);
 
         try {
-            $this->taskService->completeTask($task, $request->note);
+            $this->taskService->completeTask($task, $request->note, $request->file('attachment'));
             $this->logActivity('task.completed', 'Tugas', "Menyelesaikan tugas '{$task->title}'", $task);
             return redirect()->route('staff.tasks.daily')
                 ->with('task_completed', 'Terima kasih sudah menyelesaikan tugas ini dengan baik. Tetap semangat!');
         } catch (ValidationException $e) {
-            return back()->with('error', $e->errors()['task'][0] ?? 'Gagal menyelesaikan tugas.');
+            $errorMsg = $e->errors()['task'][0] ?? ($e->errors()['attachment'][0] ?? 'Gagal menyelesaikan tugas.');
+            return back()->with('error', $errorMsg);
         }
     }
 
@@ -193,15 +201,17 @@ class TaskController extends Controller
     public function assignedComplete(Request $request, Task $task)
     {
         $request->validate([
-            'note' => ['nullable', 'string', 'max:500'],
+            'note'       => ['nullable', 'string', 'max:500'],
+            'attachment' => ['nullable', 'file', 'image', 'mimes:jpeg,png,jpg,webp', 'max:5120'],
         ]);
 
         try {
-            $this->taskService->completeTask($task, $request->note);
+            $this->taskService->completeTask($task, $request->note, $request->file('attachment'));
             return redirect()->route('staff.tasks.assigned')
                 ->with('task_completed', 'Terima kasih sudah menyelesaikan tugas ini dengan baik. Tetap semangat!');
         } catch (ValidationException $e) {
-            return back()->with('error', $e->errors()['task'][0] ?? 'Gagal menyelesaikan tugas.');
+            $errorMsg = $e->errors()['task'][0] ?? ($e->errors()['attachment'][0] ?? 'Gagal menyelesaikan tugas.');
+            return back()->with('error', $errorMsg);
         }
     }
             
@@ -215,15 +225,17 @@ class TaskController extends Controller
     public function allComplete(Request $request, Task $task)
     {
         $request->validate([
-            'note' => ['nullable', 'string', 'max:500'],
+            'note'       => ['nullable', 'string', 'max:500'],
+            'attachment' => ['nullable', 'file', 'image', 'mimes:jpeg,png,jpg,webp', 'max:5120'],
         ]);
 
         try {
-            $this->taskService->completeTask($task, $request->note);
+            $this->taskService->completeTask($task, $request->note, $request->file('attachment'));
             return redirect()->route('staff.tasks.all')
                 ->with('task_completed', 'Terima kasih sudah menyelesaikan tugas ini dengan baik. Tetap semangat!');
         } catch (ValidationException $e) {
-            return back()->with('error', $e->errors()['task'][0] ?? 'Gagal menyelesaikan tugas.');
+            $errorMsg = $e->errors()['task'][0] ?? ($e->errors()['attachment'][0] ?? 'Gagal menyelesaikan tugas.');
+            return back()->with('error', $errorMsg);
         }
     }
 

@@ -196,7 +196,7 @@
                 </svg>
             </button>
         </div>
-        <form action="{{ route('staff.users.store') }}" method="POST" class="px-6 py-5 space-y-4">
+        <form action="{{ route('staff.users.store') }}" method="POST" class="px-6 pt-1 py-5 space-y-4">
             @csrf
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">Nama Lengkap</label>

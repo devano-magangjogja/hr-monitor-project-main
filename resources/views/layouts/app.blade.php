@@ -7,9 +7,14 @@
     <title>@yield('title', $appName ?? 'Republikweb.net') — {{ $appName ?? 'Republikweb.net' }}</title>
     
     {{-- Favicon/Tab Icon --}}
-    <link rel="icon" type="image/jpeg" href="{{ asset('images/logo_square.jpg') }}">
-    <link rel="shortcut icon" type="image/jpeg" href="{{ asset('images/logo_square.jpg') }}">
-    <link rel="apple-touch-icon" href="{{ asset('images/logo_square.jpg') }}">
+    @php
+        $faviconUrl = (!empty($appLogo) && \Illuminate\Support\Facades\Storage::disk('public')->exists($appLogo))
+            ? asset('storage/' . $appLogo)
+            : asset('images/logo_square.jpg');
+    @endphp
+    <link rel="icon" type="image/jpeg" href="{{ $faviconUrl }}">
+    <link rel="shortcut icon" type="image/jpeg" href="{{ $faviconUrl }}">
+    <link rel="apple-touch-icon" href="{{ $faviconUrl }}">
     
     {{-- Print Styles --}}
     <style>
@@ -63,9 +68,11 @@
         <div class="flex items-center justify-between px-3 sm:px-6 py-3 sm:py-4 border-b border-white/10 flex-shrink-0 gap-2 h-16 sm:h-[72px]">
             <div class="flex items-center gap-2 sm:gap-3 min-w-0">
                 @php
-                    $useStorageLogo = false; // Disable custom logo for now
+                    $sidebarLogoUrl = (!empty($appLogo) && \Illuminate\Support\Facades\Storage::disk('public')->exists($appLogo))
+                        ? asset('storage/' . $appLogo)
+                        : asset('images/logo_square.jpg');
                 @endphp
-                <img src="{{ asset('images/logo_square.jpg') }}" alt="{{ $appName }}" onerror="this.style.display='none'"
+                <img src="{{ $sidebarLogoUrl }}" alt="{{ $appName }}" onerror="this.style.display='none'"
                      class="w-9 h-9 sm:w-10 sm:h-10 object-contain flex-shrink-0 rounded-md">
                 <span class="text-white font-bold text-lg sm:text-xl tracking-tight truncate">
                     {{ $appName }}
@@ -135,7 +142,7 @@
         {{-- Print Header (Logo & Company Name - Visible Only When Printing) --}}
         <div class="hidden print:block print:mb-6 print:pb-4 print:border-b-2 print:border-gray-400">
             <div class="flex items-center gap-4 print:gap-4 print:mb-3">
-                <img src="{{ asset('images/logo_square.jpg') }}" alt="{{ $appName }}" 
+                <img src="{{ $sidebarLogoUrl ?? asset('images/logo_square.jpg') }}" alt="{{ $appName }}" 
                      class="print:w-12 print:h-12 object-contain rounded-md">
                 <div class="print:flex-1">
                     <h1 class="print:text-xl print:font-bold print:text-gray-800 print:m-0">{{ strtoupper($appName) }}</h1>

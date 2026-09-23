@@ -4,9 +4,12 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Http\Traits\LogsActivity;
+use App\Models\Brand;
 use App\Models\SosmedAccount;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Validation\Rule;
 
 class AccountController extends Controller
 {
@@ -17,9 +20,10 @@ class AccountController extends Controller
         $tab = $request->query('tab', 'accounts');
         $search = $request->query('search');
         $platform = $request->query('platform');
+        $brand = $request->query('brand');
         $status = $request->query('status'); // 'assigned', 'unassigned'
 
-        $accountsQuery = SosmedAccount::with(['pmUser', 'staffUser', 'assistantUser', 'creator'])
+        $accountsQuery = SosmedAccount::with(['pmUser', 'staffUsers', 'assistantUser', 'creator'])
             ->where('verification_status', 'approved')   // hanya tampilkan yang sudah disetujui
             ->orderBy('platform')
             ->orderBy('name');
@@ -27,6 +31,8 @@ class AccountController extends Controller
         if ($search) {
             $accountsQuery->where(function ($q) use ($search) {
                 $q->where('name', 'like', '%' . $search . '%')
+                    ->orWhere('username', 'like', '%' . $search . '%')
+                    ->orWhere('brand', 'like', '%' . $search . '%')
                     ->orWhere('platform', 'like', '%' . $search . '%')
                     ->orWhere('email', 'like', '%' . $search . '%');
             });
@@ -36,10 +42,14 @@ class AccountController extends Controller
             $accountsQuery->where('platform', $platform);
         }
 
+        if ($brand) {
+            $accountsQuery->where('brand', $brand);
+        }
+
         if ($status === 'assigned') {
-            $accountsQuery->whereNotNull('staff_id');
+            $accountsQuery->whereHas('staffUsers');
         } elseif ($status === 'unassigned') {
-            $accountsQuery->whereNull('staff_id');
+            $accountsQuery->whereDoesntHave('staffUsers');
         }
 
         $accounts = $accountsQuery->paginate(15)->appends($request->query());
@@ -50,6 +60,8 @@ class AccountController extends Controller
         if ($search) {
             $pendingQuery->where(function ($q) use ($search) {
                 $q->where('name', 'like', '%' . $search . '%')
+                    ->orWhere('username', 'like', '%' . $search . '%')
+                    ->orWhere('brand', 'like', '%' . $search . '%')
                     ->orWhere('platform', 'like', '%' . $search . '%')
                     ->orWhere('email', 'like', '%' . $search . '%')
                     ->orWhereHas('creator', function ($c) use ($search) {
@@ -62,24 +74,53 @@ class AccountController extends Controller
             $pendingQuery->where('platform', $platform);
         }
 
+        if ($brand) {
+            $pendingQuery->where('brand', $brand);
+        }
+
         $pendingAccounts = $pendingQuery
             ->latest()
             ->paginate(15, ['*'], 'pending_page')
-            ->appends($request->only(['tab', 'search', 'platform']));
+            ->appends($request->only(['tab', 'search', 'platform', 'brand']));
 
         $stats = [
             'total' => SosmedAccount::where('verification_status', 'approved')->count(),
-            'assigned' => SosmedAccount::where('verification_status', 'approved')->whereNotNull('staff_id')->count(),
-            'unassigned' => SosmedAccount::where('verification_status', 'approved')->whereNull('staff_id')->count(),
+            'assigned' => SosmedAccount::where('verification_status', 'approved')->whereHas('staffUsers')->count(),
+            'unassigned' => SosmedAccount::where('verification_status', 'approved')->whereDoesntHave('staffUsers')->count(),
         ];
 
         $platformList = ['Instagram', 'TikTok', 'YouTube', 'Facebook', 'Twitter/X', 'LinkedIn', 'Threads', 'Website', 'Lainnya'];
+
+        $brands = Brand::orderBy('name')->pluck('name');
+
+        $brandsList = null;
+        if ($tab === 'brands') {
+            $brandsQuery = Brand::query()
+                ->with(['accounts' => function ($q) {
+                    $q->where('verification_status', 'approved')
+                        ->with('staffUsers')
+                        ->orderBy('platform')
+                        ->orderBy('name');
+                }])
+                ->orderBy('name');
+
+            if ($search) {
+                $brandsQuery->where('name', 'like', '%' . $search . '%');
+            }
+
+            $brandsList = $brandsQuery
+                ->paginate(10, ['*'], 'brands_page')
+                ->appends($request->only(['tab', 'search']));
+        }
 
         return view('admin.accounts.index', compact(
             'accounts',
             'stats',
             'search',
             'platform',
+            'brand',
+            'brands',
+            'brandsList',
             'status',
             'platformList',
             'pendingAccounts',
@@ -87,10 +128,72 @@ class AccountController extends Controller
         ));
     }
 
+    public function storeBrand(Request $request)
+    {
+        $validated = $request->validate([
+            'name' => ['required', 'string', 'max:100', 'unique:brands,name'],
+            'logo' => ['nullable', 'file', 'image', 'mimes:jpeg,png,jpg,webp', 'max:2048'],
+        ]);
+
+        $data = ['name' => $validated['name']];
+
+        if ($request->hasFile('logo')) {
+            $data['logo_path'] = store_image_as_webp($request->file('logo'), 'brand-logos');
+        }
+
+        $brand = Brand::create($data);
+
+        $this->logActivity(
+            'brand.created',
+            'Manajemen Akun',
+            "Menambahkan brand '{$brand->name}'",
+            $brand
+        );
+
+        return redirect()->route($this->accountRoute('index'), ['tab' => 'brands'])
+            ->with('success', "Brand '{$brand->name}' berhasil ditambahkan.");
+    }
+
+    public function updateBrand(Request $request, Brand $brand)
+    {
+        $validated = $request->validate([
+            'name' => ['required', 'string', 'max:100', Rule::unique('brands', 'name')->ignore($brand->id)],
+            'logo' => ['nullable', 'file', 'image', 'mimes:jpeg,png,jpg,webp', 'max:2048'],
+        ]);
+
+        $oldName = $brand->name;
+        $data = ['name' => $validated['name']];
+
+        if ($request->hasFile('logo')) {
+            if ($brand->logo_path) {
+                Storage::disk('public')->delete($brand->logo_path);
+            }
+            $data['logo_path'] = store_image_as_webp($request->file('logo'), 'brand-logos');
+        }
+
+        $brand->update($data);
+
+        // Jaga relasi berbasis nama: sinkronkan akun yang memakai nama brand lama
+        if ($oldName !== $brand->name) {
+            SosmedAccount::where('brand', $oldName)->update(['brand' => $brand->name]);
+        }
+
+        $this->logActivity(
+            'brand.updated',
+            'Manajemen Akun',
+            "Memperbarui brand '{$oldName}'" . ($oldName !== $brand->name ? " menjadi '{$brand->name}'" : ''),
+            $brand
+        );
+
+        return redirect()->route($this->accountRoute('index'), ['tab' => 'brands'])
+            ->with('success', "Brand '{$brand->name}' berhasil diperbarui.");
+    }
+
     public function store(Request $request)
     {
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:200'],
+            'brand' => ['nullable', 'string', 'max:100'],
             'platform' => ['required', 'string', 'max:50'],
             'custom_platform' => ['required_if:platform,Lainnya', 'nullable', 'string', 'max:50'],
             'link' => ['nullable', 'string', 'max:500'],
@@ -104,6 +207,7 @@ class AccountController extends Controller
 
         $data = [
             'name' => $validated['name'],
+            'brand' => $validated['brand'] ?? null,
             'platform' => $validated['platform'] === 'Lainnya' ? $validated['custom_platform'] : $validated['platform'],
             'link' => $validated['link'] ?? null,
             'email' => $validated['email'] ?? null,
@@ -119,10 +223,14 @@ class AccountController extends Controller
 
         $account = SosmedAccount::create($data);
 
+        if (!empty($data['brand'])) {
+            Brand::firstOrCreate(['name' => $data['brand']]);
+        }
+
         $this->logActivity(
             'account.created',
             'Manajemen Akun',
-            "Menambahkan akun '{$account->name}' ({$account->platform})",
+            "Menambahkan akun '{$account->name}' ({$account->platform})" . ($account->brand ? " [Brand: {$account->brand}]" : ''),
             $account
         );
 
@@ -134,6 +242,7 @@ class AccountController extends Controller
     {
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:200'],
+            'brand' => ['nullable', 'string', 'max:100'],
             'platform' => ['required', 'string', 'max:50'],
             'custom_platform' => ['required_if:platform,Lainnya', 'nullable', 'string', 'max:50'],
             'link' => ['nullable', 'string', 'max:500'],
@@ -147,6 +256,7 @@ class AccountController extends Controller
 
         $data = [
             'name' => $validated['name'],
+            'brand' => $validated['brand'] ?? null,
             'platform' => $validated['platform'] === 'Lainnya' ? $validated['custom_platform'] : $validated['platform'],
             'link' => $validated['link'] ?? null,
             'email' => $validated['email'] ?? null,
@@ -162,6 +272,10 @@ class AccountController extends Controller
         }
 
         $account->update($data);
+
+        if (!empty($data['brand'])) {
+            Brand::firstOrCreate(['name' => $data['brand']]);
+        }
 
         $this->logActivity(
             'account.updated',

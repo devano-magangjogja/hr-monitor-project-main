@@ -17,6 +17,7 @@ class Presensi extends Model
     protected $fillable = [
         'pemagang_id',
         'tanggal',
+        'session',
         'shift',
         'kantor',
         'waktu_masuk',
@@ -24,6 +25,11 @@ class Presensi extends Model
         'notes',
         'created_by',
     ];
+
+    public function isBreakReturn(): bool
+    {
+        return $this->session === 'break_return';
+    }
 
     public function pemagang(): BelongsTo
     {
@@ -39,4 +45,5 @@ class Presensi extends Model
     {
         return $this->belongsTo(User::class, 'created_by');
     }
+
 }

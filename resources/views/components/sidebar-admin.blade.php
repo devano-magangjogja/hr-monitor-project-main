@@ -41,17 +41,14 @@
     $taskActive = request()->routeIs('admin.tasks.*');
 @endphp
 <div x-data="{ open: {{ $taskActive ? 'true' : 'false' }} }">
-    <button @click="open = !open" class="w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-all
+    <button @click="open = !open"
+        class="w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-all
                    {{ $taskActive ? 'bg-white/10 text-white' : 'text-slate-400 hover:bg-white/5 hover:text-white' }}">
         <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                 d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
         </svg>
         <span class="flex-1 text-left">Manajemen Tugas</span>
-        <svg class="w-4 h-4 transition-transform" :class="open ? 'rotate-180' : ''" fill="none" stroke="currentColor"
-            viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-        </svg>
     </button>
 
     <div x-show="open" x-transition class="mt-1 ml-4 pl-4 border-l border-white/10 space-y-1">
@@ -69,14 +66,15 @@
             $allRoles = \App\Models\Role::where('name', '!=', 'admin')->orderBy('id')->get();
         @endphp
 
-        @foreach($allRoles as $r)
+        @foreach ($allRoles as $r)
             @php
-                $isCurrentRole = request()->routeIs('admin.tasks.by-role') && optional(request()->route('role'))->name === $r->name;
+                $isCurrentRole =
+                    request()->routeIs('admin.tasks.by-role') && optional(request()->route('role'))->name === $r->name;
             @endphp
             <a href="{{ route('admin.tasks.by-role', $r->name) }}"
                 class="flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-all
                                                                                       {{ $isCurrentRole ? 'text-white bg-white/10 font-medium' : 'text-slate-400 hover:text-white hover:bg-white/5' }}">
-                @if($r->base_type === 'staff')
+                @if ($r->base_type === 'staff')
                     <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
@@ -129,8 +127,8 @@
 <a href="{{ route('admin.accounts.index') }}"
     class="flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-all
           {{ request()->routeIs('admin.accounts.*') ? 'bg-white/10 text-white' : 'text-slate-400 hover:bg-white/5 hover:text-white' }}">
-    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-person-add shrink-0"
-        viewBox="0 0 16 16">
+    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+        class="bi bi-person-add shrink-0" viewBox="0 0 16 16">
         <path
             d="M12.5 16a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7m.5-5v1h1a.5.5 0 0 1 0 1h-1v1a.5.5 0 0 1-1 0v-1h-1a.5.5 0 0 1 0-1h1v-1a.5.5 0 0 1 1 0m-2-6a3 3 0 1 1-6 0 3 3 0 0 1 6 0M8 7a2 2 0 1 0 0-4 2 2 0 0 0 0 4" />
         <path
@@ -146,7 +144,7 @@
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
             d="M8 12H8.01M12 12H12.01M16 12H16.01M21.0039 12C21.0039 16.9706 16.9745 21 12.0039 21C9.9675 21 3.00463 21 3.00463 21C3.00463 21 4.56382 17.2561 3.93982 16.0008C3.34076 14.7956 3.00391 13.4372 3.00391 12C3.00391 7.02944 7.03334 3 12.0039 3C16.9745 3 21.0039 7.02944 21.0039 12Z" />
     </svg>
-    Sosmed
+    Manajemen Sosmed
 </a>
 
 
@@ -193,16 +191,31 @@
     <p class="px-4 text-[11px] font-semibold text-slate-500 uppercase tracking-widest">Presensi Pemagang</p>
 </div>
 
-{{-- Presensi --}}
-<a href="{{ route('admin.presensi.index') }}"
-    class="flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-all
-          {{ request()->routeIs('admin.presensi.index') ? 'bg-white/10 text-white' : 'text-slate-400 hover:bg-white/5 hover:text-white' }}">
-    <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-            d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
-    </svg>
-    Presensi
-</a>
+{{-- Presensi (collapsible) --}}
+@php($presensiActive = request()->routeIs('admin.presensi.*') && !request()->routeIs('admin.presensi.laporan'))
+<div x-data="{ open: {{ $presensiActive ? 'true' : 'false' }} }">
+    <button @click="open = !open"
+        class="w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-all
+          {{ $presensiActive ? 'bg-white/10 text-white' : 'text-slate-400 hover:bg-white/5 hover:text-white' }}">
+        <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+        </svg>
+        <span class="flex-1 text-left">Presensi</span>
+        <svg class="w-4 h-4 transition-transform" :class="open ? 'rotate-180' : ''" fill="none"
+            stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+        </svg>
+    </button>
+    <div x-show="open" x-transition class="mt-1 ml-4 pl-4 border-l border-white/10 space-y-1">
+        <a href="{{ route('admin.presensi.index') }}"
+            class="block rounded-lg px-3 py-2 text-sm {{ request()->routeIs('admin.presensi.index') ? 'bg-white/10 text-white' : 'text-slate-400 hover:bg-white/5 hover:text-white' }}">Presensi
+            Masuk</a>
+        <a href="{{ route('admin.presensi.istirahat') }}"
+            class="block rounded-lg px-3 py-2 text-sm {{ request()->routeIs('admin.presensi.istirahat*') ? 'bg-white/10 text-white' : 'text-slate-400 hover:bg-white/5 hover:text-white' }}">Presensi
+            Istirahat</a>
+    </div>
+</div>
 
 {{-- Laporan Presensi --}}
 <a href="{{ route('admin.presensi.laporan') }}"

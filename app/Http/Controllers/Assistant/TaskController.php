@@ -29,11 +29,12 @@ class TaskController extends Controller
     public function routineComplete(Request $request, Task $task)
     {
         $request->validate([
-            'note' => ['nullable', 'string', 'max:500'],
+            'note'       => ['nullable', 'string', 'max:500'],
+            'attachment' => ['nullable', 'file', 'image', 'mimes:jpeg,png,jpg,webp', 'max:5120'],
         ]);
 
         try {
-            $this->taskService->completeTask($task, $request->note);
+            $this->taskService->completeTask($task, $request->note, $request->file('attachment'));
             
             $this->logActivity(
                 'task.completed',
@@ -45,7 +46,8 @@ class TaskController extends Controller
             return redirect()->route('assistant.tasks.routine')
                 ->with('task_completed', 'Terima kasih sudah menyelesaikan tugas ini dengan baik. Tetap semangat!');
         } catch (ValidationException $e) {
-            return back()->with('error', $e->errors()['task'][0] ?? 'Gagal menyelesaikan tugas.');
+            $errorMsg = $e->errors()['task'][0] ?? ($e->errors()['attachment'][0] ?? 'Gagal menyelesaikan tugas.');
+            return back()->with('error', $errorMsg);
         }
     }
 
@@ -60,16 +62,18 @@ class TaskController extends Controller
     public function assignedComplete(Request $request, Task $task)
     {
         $request->validate([
-            'note' => ['nullable', 'string', 'max:500'],
+            'note'       => ['nullable', 'string', 'max:500'],
+            'attachment' => ['nullable', 'file', 'image', 'mimes:jpeg,png,jpg,webp', 'max:5120'],
         ]);
 
         try {
-            $this->taskService->completeTask($task, $request->note);
+            $this->taskService->completeTask($task, $request->note, $request->file('attachment'));
             $this->logActivity('task.completed', 'Tugas', "Menyelesaikan tugas '{$task->title}'", $task);
             return redirect()->route('assistant.tasks.assigned')
                 ->with('task_completed', 'Terima kasih sudah menyelesaikan tugas ini dengan baik. Tetap semangat!');
         } catch (ValidationException $e) {
-            return back()->with('error', $e->errors()['task'][0] ?? 'Gagal menyelesaikan tugas.');
+            $errorMsg = $e->errors()['task'][0] ?? ($e->errors()['attachment'][0] ?? 'Gagal menyelesaikan tugas.');
+            return back()->with('error', $errorMsg);
         }
     }
 
@@ -132,16 +136,18 @@ class TaskController extends Controller
     public function complete(Request $request, Task $task)
     {
         $request->validate([
-            'note' => ['nullable', 'string', 'max:500'],
+            'note'       => ['nullable', 'string', 'max:500'],
+            'attachment' => ['nullable', 'file', 'image', 'mimes:jpeg,png,jpg,webp', 'max:5120'],
         ]);
 
         try {
-            $this->taskService->completeTask($task, $request->note);
+            $this->taskService->completeTask($task, $request->note, $request->file('attachment'));
             $this->logActivity('task.completed', 'Tugas', "Menyelesaikan tugas '{$task->title}'", $task);
             return redirect()->route('assistant.tasks.index')
                 ->with('task_completed', 'Terima kasih sudah menyelesaikan tugas ini dengan baik. Tetap semangat!');
         } catch (ValidationException $e) {
-            return back()->with('error', $e->errors()['task'][0] ?? 'Gagal menyelesaikan tugas.');
+            $errorMsg = $e->errors()['task'][0] ?? ($e->errors()['attachment'][0] ?? 'Gagal menyelesaikan tugas.');
+            return back()->with('error', $errorMsg);
         }
     }
 
@@ -155,16 +161,18 @@ class TaskController extends Controller
     public function allComplete(Request $request, Task $task)
     {
         $request->validate([
-            'note' => ['nullable', 'string', 'max:500'],
+            'note'       => ['nullable', 'string', 'max:500'],
+            'attachment' => ['nullable', 'file', 'image', 'mimes:jpeg,png,jpg,webp', 'max:5120'],
         ]);
 
         try {
-            $this->taskService->completeTask($task, $request->note);
+            $this->taskService->completeTask($task, $request->note, $request->file('attachment'));
             $this->logActivity('task.completed', 'Tugas', "Menyelesaikan tugas '{$task->title}'", $task);
             return redirect()->route('assistant.tasks.all')
                 ->with('task_completed', 'Terima kasih sudah menyelesaikan tugas ini dengan baik. Tetap semangat!');
         } catch (ValidationException $e) {
-            return back()->with('error', $e->errors()['task'][0] ?? 'Gagal menyelesaikan tugas.');
+            $errorMsg = $e->errors()['task'][0] ?? ($e->errors()['attachment'][0] ?? 'Gagal menyelesaikan tugas.');
+            return back()->with('error', $errorMsg);
         }
     }
 

@@ -14,6 +14,7 @@ class TaskAssignment extends Model
         'is_completed',
         'completed_at',
         'note',
+        'attachment',
     ];
 
     protected function casts(): array
@@ -21,7 +22,13 @@ class TaskAssignment extends Model
         return [
             'completed_at' => 'datetime',
             'is_completed' => 'string',
+            'attachment'   => 'string',
         ];
+    }
+
+    public function getAttachmentUrlAttribute(): ?string
+    {
+        return $this->attachment ? asset('storage/' . $this->attachment) : null;
     }
 
     // ── Helper Status ────────────────────────────────────

@@ -25,9 +25,23 @@ class SosmedController extends Controller
         // Tugas yang perlu diverifikasi: status done_by_staff HANYA dari akun yang wewenangnya diberikan ke asisten ini
         $pendingVerification = SosmedTask::with(['account.staffUser', 'account.pmUser', 'assignedUser', 'assignedBy'])
             ->whereIn('sosmed_account_id', $assignedAccountIds)
-            ->where('status', 'done_by_staff')
+            ->where('status', 'done_by_staff');
+
+        $verifySearch = trim((string) $request->query('verify_search', ''));
+        if ($verifySearch !== '') {
+            $pendingVerification->where(function ($q) use ($verifySearch) {
+                $q->where('title', 'like', '%' . $verifySearch . '%')
+                  ->orWhereHas('account', fn($a) => $a->where('name', 'like', '%' . $verifySearch . '%')
+                      ->orWhere('platform', 'like', '%' . $verifySearch . '%')
+                      ->orWhere('brand', 'like', '%' . $verifySearch . '%'))
+                  ->orWhereHas('assignedUser', fn($u) => $u->where('name', 'like', '%' . $verifySearch . '%'));
+            });
+        }
+
+        $pendingVerification = $pendingVerification
             ->orderBy('updated_at', 'desc')
-            ->paginate(15);
+            ->paginate(15)
+            ->appends($request->all());
 
         // Riwayat yang pernah di-approve oleh asisten ini
         $approvalHistory = SosmedApprovalLog::with(['task.account', 'user'])
@@ -36,15 +50,16 @@ class SosmedController extends Controller
             ->take(50)
             ->get();
 
-        // Akun yang Dikelola oleh HR Assistant sebagai eksekutor (staff_id = asisten ini)
+        // Akun yang Dikelola oleh HR Assistant sebagai eksekutor (staffUsers includes asisten ini)
         $myAccounts = \App\Models\SosmedAccount::with(['creator', 'pmUser'])
-            ->where('staff_id', $currentUserId)
+            ->whereHas('staffUsers', fn($q) => $q->where('users.id', $currentUserId))
             ->orderBy('platform')
             ->get();
         $myAccountIds = $myAccounts->pluck('id');
 
         $todayTasks = SosmedTask::with(['verifiedBy', 'hrVerifiedBy'])
             ->whereIn('sosmed_account_id', $myAccountIds)
+            ->where('assigned_to', $currentUserId)
             ->whereDate('task_date', now()->toDateString())
             ->get()
             ->keyBy('sosmed_account_id');
@@ -134,7 +149,7 @@ class SosmedController extends Controller
      */
     public function submitAccountTask(Request $request, \App\Models\SosmedAccount $account)
     {
-        if ($account->staff_id !== Auth::id()) {
+        if (! $account->staffUsers()->where('users.id', Auth::id())->exists()) {
             abort(403, 'Akses ditolak. Anda bukan eksekutor akun ini.');
         }
 

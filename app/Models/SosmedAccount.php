@@ -11,6 +11,7 @@ class SosmedAccount extends Model
     protected $fillable = [
         'name',
         'username',
+        'brand',
         'platform',
         'link',
         'email',
@@ -21,8 +22,6 @@ class SosmedAccount extends Model
         'pm_id',
         'assistant_id',
         'supervisor_staff_id',
-        'staff_id',
-        'assigned_to', // fallback compatibility
         'created_by',
         'notes',
         'is_in_sosmed',
@@ -61,14 +60,23 @@ class SosmedAccount extends Model
         return $this->supervisorStaff();
     }
 
-    public function staffUser()
+    public function staffUsers()
     {
-        return $this->belongsTo(User::class, 'staff_id');
+        return $this->belongsToMany(User::class, 'sosmed_account_users', 'sosmed_account_id', 'user_id')
+            ->withPivot('assigned_by', 'assigned_at');
     }
 
-    public function assignedUser()
+    /**
+     * Backward-compatibility accessor for singular staffUser
+     */
+    public function getStaffUserAttribute(): ?User
     {
-        return $this->staffUser();
+        return $this->staffUsers->first();
+    }
+
+    public function getAssignedUserAttribute(): ?User
+    {
+        return $this->staffUser;
     }
 
     public function creator()
@@ -111,12 +119,14 @@ class SosmedAccount extends Model
 
     public function isUnassigned(): bool
     {
-        return is_null($this->pm_id) && is_null($this->staff_id);
+        return is_null($this->pm_id) && $this->isStaffUnassigned();
     }
 
     public function isStaffUnassigned(): bool
     {
-        return is_null($this->staff_id);
+        return $this->relationLoaded('staffUsers')
+            ? $this->staffUsers->isEmpty()
+            : !$this->staffUsers()->exists();
     }
 
     public function isPmUnassigned(): bool
@@ -124,9 +134,16 @@ class SosmedAccount extends Model
         return is_null($this->pm_id);
     }
 
+    public function getManagersCountAttribute(): int
+    {
+        return $this->relationLoaded('staffUsers')
+            ? $this->staffUsers->count()
+            : $this->staffUsers()->count();
+    }
+
     public function scopeUnassigned($query)
     {
-        return $query->whereNull('staff_id');
+        return $query->whereDoesntHave('staffUsers');
     }
 
     public function scopeInSosmed($query)

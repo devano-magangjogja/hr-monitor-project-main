@@ -143,13 +143,19 @@
                                 'type'        => $task->type,
                                 'date'        => $task->task_date->translatedFormat('d M Y'),
                                 'source'      => $task->creator?->name ?? 'Sistem',
-                                'status'      => 'multiple',
-                                'note'        => null,
-                                'assignees'   => $task->assignedUsers->map(fn($u) => [
-                                    'name'   => $u->name,
-                                    'role'   => $u->role_label,
-                                    'status' => $task->assignments->firstWhere('user_id', $u->id)?->is_completed ?? 'pending',
-                                ]),
+                                'status'            => 'multiple',
+                                'note'              => null,
+                                'proof_requirement' => $task->proof_requirement ?? 'none',
+                                'assignees'         => $task->assignedUsers->map(function($u) use ($task) {
+                                    $a = $task->assignments->firstWhere('user_id', $u->id);
+                                    return [
+                                        'name'       => $u->name,
+                                        'role'       => $u->role_label,
+                                        'status'     => $a?->is_completed ?? 'pending',
+                                        'note'       => $a?->note ?? '',
+                                        'attachment' => $a?->attachment ? asset('storage/' . $a->attachment) : null,
+                                    ];
+                                }),
                             ]) }}"
                             class="p-1 sm:p-1.5 text-gray-400 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition"
                             title="Lihat Detail">

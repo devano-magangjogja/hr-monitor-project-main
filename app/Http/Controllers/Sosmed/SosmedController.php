@@ -17,15 +17,16 @@ class SosmedController extends Controller
 
         // Akun yang didelegasikan ke user ini oleh PM
         $accounts = SosmedAccount::with(['pmUser', 'creator'])
-            ->where('staff_id', $currentUserId)
+            ->whereHas('staffUsers', fn($q) => $q->where('users.id', $currentUserId))
             ->orderBy('platform')
             ->paginate(5);
 
         $accountIds = $accounts->pluck('id');
 
-        // Tugas hari ini per akun
+        // Tugas hari ini per akun untuk user ini
         $todayTasks = SosmedTask::with(['verifiedBy', 'hrVerifiedBy'])
             ->whereIn('sosmed_account_id', $accountIds)
+            ->where('assigned_to', $currentUserId)
             ->whereDate('task_date', now()->toDateString())
             ->get()
             ->keyBy('sosmed_account_id');
@@ -51,7 +52,7 @@ class SosmedController extends Controller
      */
     public function submitAccountTask(Request $request, SosmedAccount $account)
     {
-        if ($account->staff_id !== Auth::id()) {
+        if (!$account->staffUsers()->where('users.id', Auth::id())->exists()) {
             abort(403, 'Akses ditolak. Anda bukan penanggung jawab akun ini.');
         }
 
@@ -70,6 +71,7 @@ class SosmedController extends Controller
         // Cari atau buat tugas hari ini
         $task = SosmedTask::firstOrNew([
             'sosmed_account_id' => $account->id,
+            'assigned_to'       => Auth::id(),
             'task_date'         => now()->toDateString(),
         ]);
 

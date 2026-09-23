@@ -1,4 +1,4 @@
-﻿@extends('layouts.app')
+@extends('layouts.app')
 
 @section('title', 'Tugas Harian')
 @section('page-title', 'Tugas Harian')
@@ -37,6 +37,8 @@
                             'date' => $task->task_date->translatedFormat('d M Y'),
                             'source' => 'Sistem (Rutin)',
                             'status' => $status,
+                            'proof_requirement' => $task->proof_requirement ?? 'none',
+                            'attachment' => $assignment?->attachment ? asset('storage/' . $assignment->attachment) : null,
                             'note' => $assignment?->note ?? '',
                             'assignees' => [],
                         ]) }}">

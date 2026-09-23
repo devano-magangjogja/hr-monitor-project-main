@@ -14,6 +14,7 @@ class Task extends Model
         'task_date',
         'type',
         'kantor',
+        'proof_requirement',
         'created_by',
         'default_task_id',
     ];
@@ -21,8 +22,9 @@ class Task extends Model
     protected function casts(): array
     {
         return [
-            'task_date' => 'date',
-            'type'      => 'string',
+            'task_date'         => 'date',
+            'type'              => 'string',
+            'proof_requirement' => 'string',
         ];
     }
 

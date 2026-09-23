@@ -17,7 +17,9 @@ class DefaultTask extends Model
         'description',
         'target_role',
         'is_active',
+        'proof_requirement',
         'created_by',
+        'assigned_user_ids'
     ];
 
     protected function casts(): array
@@ -25,6 +27,8 @@ class DefaultTask extends Model
         return [
             'is_active'   => 'boolean',
             'target_role' => 'string',
+            'proof_requirement' => 'string',
+            'assigned_user_ids' => 'array',
         ];
     }
 

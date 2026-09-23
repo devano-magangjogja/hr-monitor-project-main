@@ -16,9 +16,9 @@ class SosmedController extends Controller
         $tab = $request->query('tab', 'tasks');
         $currentUserId = Auth::id();
 
-        // 1. KEAMANAN AKSES: SOSMED HANYA MELIHAT AKUN MILIKNYA (staff_id = Auth::id())
+        // 1. KEAMANAN AKSES: SOSMED HANYA MELIHAT AKUN MILIKNYA (staffUsers includes Auth::id())
         $accounts = SosmedAccount::with(['pmUser', 'creator'])
-            ->where('staff_id', $currentUserId)
+            ->whereHas('staffUsers', fn($q) => $q->where('users.id', $currentUserId))
             ->orderBy('platform')
             ->get();
 

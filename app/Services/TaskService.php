@@ -68,12 +68,13 @@ class TaskService
         $this->validateAssignees($data['user_ids']);
 
         $task = $this->taskRepository->create([
-            'title'       => $data['title'],
-            'description' => $data['description'] ?? null,
-            'task_date'   => Carbon::today(),
-            'type'        => 'assigned',
-            'kantor'      => $data['kantor'] ?? null,
-            'created_by'  => Auth::id(),
+            'title'             => $data['title'],
+            'description'       => $data['description'] ?? null,
+            'task_date'         => Carbon::today(),
+            'type'              => 'assigned',
+            'kantor'            => $data['kantor'] ?? null,
+            'proof_requirement' => $data['proof_requirement'] ?? 'none',
+            'created_by'        => Auth::id(),
         ]);
 
         $this->attachAssigneesAndNotify($task, $data['user_ids']);
@@ -82,23 +83,24 @@ class TaskService
     }
     public function updateTask(Task $task, array $data): bool
     {
+        $updateData = [
+            'title'             => $data['title'],
+            'description'       => $data['description'] ?? null,
+            'kantor'            => $data['kantor'] ?? null,
+        ];
+        if (isset($data['proof_requirement'])) {
+            $updateData['proof_requirement'] = $data['proof_requirement'];
+        }
+
         if ($this->taskRepository->hasAnyCompleted($task->id)) {
             // Jika ada penerima yang sudah menyelesaikan tugas, perbarui informasi tugas (termasuk kantor)
             // tanpa menghapus atau mereset assignment yang sudah selesai
-            return $this->taskRepository->update($task, [
-                'title'       => $data['title'],
-                'description' => $data['description'] ?? null,
-                'kantor'      => $data['kantor'] ?? null,
-            ]);
+            return $this->taskRepository->update($task, $updateData);
         }
 
         $this->validateAssignees($data['user_ids']);
 
-        $updated = $this->taskRepository->update($task, [
-            'title'       => $data['title'],
-            'description' => $data['description'] ?? null,
-            'kantor'      => $data['kantor'] ?? null,
-        ]);
+        $updated = $this->taskRepository->update($task, $updateData);
 
         $this->taskRepository->deleteAssignments($task->id);
         $this->attachAssigneesAndNotify($task, $data['user_ids']);
@@ -174,7 +176,7 @@ class TaskService
         return $this->taskRepository->getSelfTasksToday($userId);
     }
 
-    public function completeTask(Task $task, ?string $note): bool
+    public function completeTask(Task $task, ?string $note, $attachmentFile = null): bool
     {
         $assignment = $this->taskRepository->findAssignment($task->id, Auth::id());
     
@@ -196,7 +198,22 @@ class TaskService
                 'task' => 'Tugas ini sudah ditandai selesai.',
             ]);
         }
-        return $this->taskRepository->completeAssignment($assignment, $note);
+
+        // Validasi kebutuhan foto bukti
+        $proofReq = $task->proof_requirement ?? 'none';
+        if ($proofReq === 'required' && ! $attachmentFile && ! $assignment->attachment) {
+            throw ValidationException::withMessages([
+                'attachment' => 'Tugas ini wajib melampirkan foto bukti penyelesaian.',
+            ]);
+        }
+
+        $attachmentPath = null;
+        if ($attachmentFile) {
+            // Simpan sebagai WebP agar hemat storage di hosting
+            $attachmentPath = store_image_as_webp($attachmentFile, 'task-proofs');
+        }
+
+        return $this->taskRepository->completeAssignment($assignment, $note, $attachmentPath);
     }
 
     public function markAllPendingAsNotDone(): int
@@ -239,9 +256,9 @@ class TaskService
 
         $items = collect();
 
-        // A. Akun di mana user ini menjadi penanggung jawab langsung (staff_id)
+        // A. Akun di mana user ini menjadi penanggung jawab langsung (staffUsers)
         $accounts = SosmedAccount::with(['pmUser', 'creator'])
-            ->where('staff_id', $userId)
+            ->whereHas('staffUsers', fn($q) => $q->where('users.id', $userId))
             ->orderBy('platform')
             ->get();
 
@@ -249,6 +266,7 @@ class TaskService
             // 1. Tugas masa lalu yang BELUM disetujui final (status != 'approved_hr')
             $unapprovedTasks = SosmedTask::with(['verifiedBy', 'hrVerifiedBy'])
                 ->where('sosmed_account_id', $account->id)
+                ->where('assigned_to', $userId)
                 ->whereDate('task_date', '<', $today)
                 ->where('status', '!=', 'approved_hr')
                 ->orderByDesc('task_date')
@@ -258,9 +276,10 @@ class TaskService
                 $items->push($this->formatSosmedTaskItem($pt, $account, $userId, true));
             }
 
-            // 2. Tugas hari ini untuk akun tersebut
+            // 2. Tugas hari ini untuk akun tersebut bagi user ini
             $todayTask = SosmedTask::with(['verifiedBy', 'hrVerifiedBy'])
                 ->where('sosmed_account_id', $account->id)
+                ->where('assigned_to', $userId)
                 ->whereDate('task_date', $today)
                 ->first();
 
@@ -275,8 +294,7 @@ class TaskService
         // B. Jika user adalah PM, ambil juga tugas verifikasi konten staff yang menunggu verifikasi PM
         if ($user->role === 'pm') {
             $supervisedAccountIds = SosmedAccount::where('pm_id', $userId)
-                ->where('staff_id', '!=', $userId)
-                ->whereNotNull('staff_id')
+                ->whereHas('staffUsers', fn($q) => $q->where('users.id', '!=', $userId))
                 ->pluck('id');
 
             if ($supervisedAccountIds->isNotEmpty()) {
@@ -338,11 +356,16 @@ class TaskService
                 'is_completed' => $task->status,
                 'completed_at' => $task->status === 'approved_hr' ? ($task->hr_verified_at ?? $task->updated_at) : null,
                 'note'         => $task->description ?? '',
+                'attachment'   => null,
             ]
         ]));
 
         $user = User::find($userId);
-        $actionRoute = ($user && $user->role === 'pm') ? route('pm.sosmed.index') : route('sosmed.sosmed.index');
+        $actionRoute = $user?->role === 'pm'
+            ? route('pm.sosmed.index')
+            : (($user?->role === 'hr_assistant' || $user?->isHrAssistant())
+                ? route('assistant.sosmed.index')
+                : route('sosmed.sosmed.index'));
 
         $item->is_sosmed = true;
         $item->sosmed_status = $task->status;
@@ -379,11 +402,16 @@ class TaskService
                 'is_completed' => 'pending',
                 'completed_at' => null,
                 'note'         => '',
+                'attachment'   => null,
             ]
         ]));
 
         $user = User::find($userId);
-        $actionRoute = ($user && $user->role === 'pm') ? route('pm.sosmed.index') : route('sosmed.sosmed.index');
+        $actionRoute = $user?->role === 'pm'
+            ? route('pm.sosmed.index')
+            : (($user?->role === 'hr_assistant' || $user?->isHrAssistant())
+                ? route('assistant.sosmed.index')
+                : route('sosmed.sosmed.index'));
 
         $item->is_sosmed = true;
         $item->sosmed_status = 'pending';
@@ -422,6 +450,7 @@ class TaskService
                 'is_completed' => 'done_by_staff',
                 'completed_at' => null,
                 'note'         => $tv->description ?? '',
+                'attachment'   => null,
             ]
         ]));
 
@@ -462,6 +491,7 @@ class TaskService
                 'is_completed' => 'done_by_staff',
                 'completed_at' => null,
                 'note'         => $tv->description ?? '',
+                'attachment'   => null,
             ]
         ]));
 

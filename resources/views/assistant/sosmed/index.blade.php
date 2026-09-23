@@ -119,8 +119,22 @@
                             Menampilkan tugas sosmed dari akun yang wewenang pengawasannya didelegasikan kepada Anda oleh Staff/Admin.
                         </p>
                     </div>
-                    <div class="shrink-0 rounded-lg border border-orange-200 bg-orange-50 px-3 py-1.5 text-xs font-medium text-orange-700">
-                        Hari Ini: <span class="font-bold">{{ now()->translatedFormat('d M Y') }}</span>
+                    <div class="flex flex-wrap items-center gap-2 shrink-0">
+                        <form method="GET" action="{{ route('assistant.sosmed.index') }}" class="flex items-center gap-2">
+                            <input type="hidden" name="tab" value="pending">
+                            <input type="text" name="verify_search" value="{{ request()->query('verify_search', '') }}"
+                                placeholder="Cari judul tugas, akun, atau petugas..."
+                                class="w-48 sm:w-64 h-9 px-3 text-xs bg-white border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-orange-500/30 focus:border-orange-500 text-gray-700 transition">
+                            <button type="submit"
+                                class="h-9 px-3 bg-orange-500 hover:bg-orange-600 text-white text-xs font-semibold rounded-lg transition shrink-0">Cari</button>
+                            @if(request()->query('verify_search'))
+                                <a href="{{ route('assistant.sosmed.index', ['tab' => 'pending']) }}"
+                                    class="text-xs text-orange-600 hover:underline whitespace-nowrap">Reset</a>
+                            @endif
+                        </form>
+                        <div class="rounded-lg border border-orange-200 bg-orange-50 px-3 py-1.5 text-xs font-medium text-orange-700">
+                            Hari Ini: <span class="font-bold">{{ now()->translatedFormat('d M Y') }}</span>
+                        </div>
                     </div>
                 </div>
 

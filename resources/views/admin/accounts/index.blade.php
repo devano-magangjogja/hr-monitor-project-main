@@ -67,19 +67,44 @@
 </div>
 
 {{-- ── TABS ────────────────────────────────────────────────────── --}}
-<div class="flex items-center gap-2 border-b border-gray-200 mb-6">
-    <a href="{{ route($accountPrefix . '.accounts.index', ['tab' => 'accounts']) }}"
-        class="px-4 py-3 text-sm font-semibold border-b-2 {{ $tab === 'accounts' ? 'border-primary-600 text-primary-600' : 'border-transparent text-gray-500 hover:text-gray-700' }}">
-        Daftar Akun Terverifikasi
-    </a>
-    <a href="{{ route($accountPrefix . '.accounts.index', ['tab' => 'pending']) }}"
-        class="px-4 py-3 text-sm font-semibold border-b-2 {{ $tab === 'pending' ? 'border-amber-500 text-amber-600' : 'border-transparent text-gray-500 hover:text-gray-700' }}">
-        Pengajuan Akun Baru
-        @if($pendingAccounts->total() > 0)
-            <span
-                class="ml-1 px-1.5 py-0.5 rounded-full text-[10px] bg-amber-100 text-amber-700">{{ $pendingAccounts->total() }}</span>
-        @endif
-    </a>
+<div class="flex flex-col-reverse md:flex-row md:items-center gap-3 md:gap-2 border-b border-gray-200 mb-6">
+    <div class="flex items-center gap-1 sm:gap-2 overflow-x-auto -mx-1 px-1">
+        <a href="{{ route($accountPrefix . '.accounts.index', ['tab' => 'accounts']) }}"
+            class="px-3 sm:px-4 py-3 text-sm font-semibold border-b-2 whitespace-nowrap {{ $tab === 'accounts' ? 'border-primary-600 text-primary-600' : 'border-transparent text-gray-500 hover:text-gray-700' }}">
+            Daftar Akun Terverifikasi
+        </a>
+        <a href="{{ route($accountPrefix . '.accounts.index', ['tab' => 'brands']) }}"
+            class="px-3 sm:px-4 py-3 text-sm font-semibold border-b-2 whitespace-nowrap {{ ($tab ?? '') === 'brands' ? 'border-indigo-600 text-indigo-600' : 'border-transparent text-gray-500 hover:text-gray-700' }}">
+            Daftar Brand
+        </a>
+        <a href="{{ route($accountPrefix . '.accounts.index', ['tab' => 'pending']) }}"
+            class="px-3 sm:px-4 py-3 text-sm font-semibold border-b-2 whitespace-nowrap {{ $tab === 'pending' ? 'border-amber-500 text-amber-600' : 'border-transparent text-gray-500 hover:text-gray-700' }}">
+            Pengajuan Akun Baru
+            @if($pendingAccounts->total() > 0)
+                <span
+                    class="ml-1 px-1.5 py-0.5 rounded-full text-[10px] bg-amber-100 text-amber-700">{{ $pendingAccounts->total() }}</span>
+            @endif
+        </a>
+    </div>
+
+    {{-- Tombol aksi — di mobile tampil di atas tab (lebar penuh), di desktop sejajar navigasi tab --}}
+    <div class="flex items-center gap-2 md:ml-auto md:pb-2">
+        <button onclick="openCreateBrandModal()"
+            class="flex-1 md:flex-initial inline-flex items-center justify-center gap-2 h-10 px-4 bg-white border border-indigo-300 text-indigo-700 hover:bg-indigo-50 text-sm font-semibold rounded-lg shadow-sm transition">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+            </svg>
+            Tambah Brand
+        </button>
+        <button onclick="openCreateAccountModal()"
+            class="flex-1 md:flex-initial inline-flex items-center justify-center gap-2 h-10 px-4 bg-primary-600 hover:bg-primary-700 text-white text-sm font-semibold rounded-lg shadow-sm transition">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+            </svg>
+            Tambah Akun
+        </button>
+    </div>
 </div>
 
 {{-- ═══════════════════════════════════════════════════════════════
@@ -347,30 +372,124 @@ TAB: PENDING ACCOUNTS
         </div>
     </div>
 
-    <script>
-        const accountPrefix = @json($accountPrefix);
-
-        function openApproveAccountModal(id, name, recovery, phone, twoFactor) {
-            document.getElementById('form-approve-account').action = `/${accountPrefix}/accounts/${id}/verify`;
-            document.getElementById('approve-account-name').textContent = name;
-            document.getElementById('approve-recovery').value = recovery || '';
-            document.getElementById('approve-phone').value = phone || '';
-            document.getElementById('approve-2fa').checked = Boolean(twoFactor);
-            document.getElementById('modal-approve-account').classList.remove('hidden');
-        }
-
-        function openRejectAccountModal(id) {
-            document.getElementById('form-reject-account').action = `/${accountPrefix}/accounts/${id}/verify`;
-            document.getElementById('modal-reject-account').classList.remove('hidden');
-            document.querySelector('#form-reject-account textarea').focus();
-        }
-
-        function closeAccountDecisionModals() {
-            document.getElementById('modal-approve-account').classList.add('hidden');
-            document.getElementById('modal-reject-account').classList.add('hidden');
-        }
-    </script>
+    {{-- Fungsi approve/reject dilayani oleh script modal bersama di bawah (dirender di semua tab) --}}
 @else
+
+    @if(($tab ?? 'accounts') === 'brands')
+        {{-- ═══════════════════════════════════════════════════════════
+        TAB: DAFTAR BRAND
+        ═══════════════════════════════════════════════════════════ --}}
+        <div class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+            <div class="px-4 sm:px-6 py-4 border-b border-gray-100 bg-indigo-50/40">
+                <h2 class="text-base font-bold text-gray-800">Daftar Brand</h2>
+                <p class="text-xs text-gray-500 mt-0.5">Klik sebuah brand untuk melihat akun-akun di dalamnya. Beberapa brand
+                    dapat dibuka bersamaan.</p>
+            </div>
+
+            {{-- Filter nama brand --}}
+            <div class="px-4 sm:px-6 py-3 border-b border-gray-100 bg-white">
+                <form action="{{ route($accountPrefix . '.accounts.index') }}" method="GET"
+                    class="flex flex-col sm:flex-row sm:items-center gap-3">
+                    <input type="hidden" name="tab" value="brands">
+
+                    <div class="relative flex-1 min-w-[220px]">
+                        <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-gray-400">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                            </svg>
+                        </span>
+                        <input type="text" name="search" value="{{ $search ?? '' }}"
+                            placeholder="Cari nama brand..."
+                            class="w-full h-10 pl-9 pr-3 text-sm bg-gray-50 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:bg-white focus:outline-none transition">
+                    </div>
+
+                    <div class="flex items-center gap-2 shrink-0">
+                        <button type="submit"
+                            class="h-10 px-4 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold rounded-lg transition shrink-0">
+                            Cari
+                        </button>
+
+                        @if($search ?? null)
+                            <a href="{{ route($accountPrefix . '.accounts.index', ['tab' => 'brands']) }}"
+                                class="flex items-center justify-center h-10 w-10 text-gray-500 hover:text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition shrink-0"
+                                title="Reset Filter">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                            </a>
+                        @endif
+                    </div>
+                </form>
+            </div>
+
+            {{-- Area brand: muncul scroll bila banyak tabel dibuka --}}
+            <div class="max-h-[600px] overflow-y-auto divide-y divide-gray-100">
+                @forelse($brandsList as $i => $br)
+                    <div>
+                        <div class="flex items-center gap-1 px-4 sm:px-6 hover:bg-gray-50 transition">
+                            <button type="button" onclick="toggleBrandDetail({{ $i }})"
+                                class="flex-1 min-w-0 flex items-center justify-between gap-3 py-3.5 text-left">
+                                <span class="flex items-center gap-2 min-w-0">
+                                    @if($br->logo_path)
+                                        <img src="{{ asset('storage/' . $br->logo_path) }}" alt="Logo {{ $br->name }}"
+                                            class="w-7 h-7 shrink-0 rounded-md border border-gray-200 bg-white object-contain p-0.5">
+                                    @else
+                                        <svg class="w-4 h-4 text-indigo-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+                                        </svg>
+                                    @endif
+                                    <span class="font-semibold text-gray-800 truncate">{{ $br->name }}</span>
+                                    <span
+                                        class="shrink-0 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-indigo-50 text-indigo-700 border border-indigo-200">{{ $br->accounts->count() }}
+                                        akun</span>
+                                </span>
+                                <svg id="brand-chevron-{{ $i }}" class="w-4 h-4 text-gray-400 transition-transform shrink-0"
+                                    fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                                </svg>
+                            </button>
+                            <button type="button" onclick="openEditBrandModal({{ json_encode([
+                                'id' => $br->id,
+                                'name' => $br->name,
+                                'logo_url' => $br->logo_path ? asset('storage/' . $br->logo_path) : null,
+                            ]) }})"
+                                class="p-2 shrink-0 text-gray-400 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition"
+                                title="Edit Brand">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                </svg>
+                            </button>
+                        </div>
+                        <div id="brand-detail-{{ $i }}" class="hidden px-4 sm:px-6 pb-5">
+                            <div class="overflow-x-auto rounded-lg border border-gray-100">
+                                @include('admin.accounts._table', ['rows' => $br->accounts])
+                            </div>
+                        </div>
+                    </div>
+                @empty
+                    <div class="px-6 py-12 text-center text-gray-400">
+                        @if($search ?? null)
+                            <p class="font-medium text-gray-600">Brand tidak ditemukan</p>
+                            <p class="text-xs text-gray-400 mt-1">Tidak ada brand yang cocok dengan "{{ $search }}".</p>
+                        @else
+                            <p class="font-medium text-gray-600">Belum ada brand</p>
+                            <p class="text-xs text-gray-400 mt-1">Klik tombol "Tambah Brand" di atas untuk menambahkan brand.</p>
+                        @endif
+                    </div>
+                @endforelse
+            </div>
+
+            @if($brandsList && $brandsList->hasPages())
+                <div class="px-5 py-4 border-t border-gray-100 bg-gray-50/50">
+                    {{ $brandsList->links() }}
+                </div>
+            @endif
+        </div>
+    @else
 
     {{-- ═══════════════════════════════════════════════════════════
     TAB: DAFTAR AKUN TERVERIFIKASI
@@ -395,16 +514,24 @@ TAB: PENDING ACCOUNTS
                 </div>
 
                 {{-- Filter group --}}
-                <div class="flex items-center gap-2 shrink-0">
+                <div class="flex flex-wrap items-center gap-2 shrink-0">
                     <select name="platform" onchange="this.form.submit()"
-                        class="h-10 w-full sm:w-40 px-3 text-sm bg-gray-50 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:bg-white focus:outline-none transition">
+                        class="h-10 w-full sm:w-36 px-3 text-sm bg-gray-50 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:bg-white focus:outline-none transition">
                         <option value="">Semua Platform</option>
                         @foreach($platformList as $p)
                             <option value="{{ $p }}" {{ ($platform ?? '') === $p ? 'selected' : '' }}>{{ $p }}</option>
                         @endforeach
                     </select>
 
-                    @if($search || $platform || $status)
+                    <select name="brand" onchange="this.form.submit()"
+                        class="h-10 w-full sm:w-36 px-3 text-sm bg-gray-50 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:bg-white focus:outline-none transition">
+                        <option value="">Semua Brand</option>
+                        @foreach($brands as $b)
+                            <option value="{{ $b }}" {{ ($brand ?? '') === $b ? 'selected' : '' }}>{{ $b }}</option>
+                        @endforeach
+                    </select>
+
+                    @if($search || $platform || $brand || $status)
                         <a href="{{ route($accountPrefix . '.accounts.index') }}"
                             class="flex items-center justify-center h-10 w-10 text-gray-500 hover:text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition shrink-0"
                             title="Reset Filter">
@@ -416,264 +543,21 @@ TAB: PENDING ACCOUNTS
                     @endif
                 </div>
             </form>
-
-            <button onclick="openCreateAccountModal()"
-                class="inline-flex items-center justify-center gap-2 h-10 px-4 bg-primary-600 hover:bg-primary-700 text-white text-sm font-semibold rounded-lg shadow-sm transition shrink-0 w-full lg:w-auto">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-                </svg>
-                Tambah Akun Baru
-            </button>
         </div>
     </div>
 
     {{-- ── TABLE ACCOUNTS ──────────────────────────────────── --}}
     <div class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+        {{-- Legenda warna status --}}
+        <div class="px-4 sm:px-6 py-2.5 border-b border-gray-100 flex flex-wrap items-center gap-4 text-[11px] text-gray-500">
+            <span class="font-semibold text-gray-600">Status akun:</span>
+            <span class="inline-flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
+                Belum ada di Sosmed</span>
+            <span class="inline-flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-red-500"></span> Sudah
+                ada di Sosmed</span>
+        </div>
         <div class="overflow-x-auto">
-            <table class="w-full text-sm text-left table-fixed">
-                <thead>
-                    <tr
-                        class="bg-gray-50 border-b border-gray-200 text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                        <th class="px-4 py-3.5 w-[12%]">Platform</th>
-                        <th class="px-4 py-3.5 w-[16%]">Nama Akun</th>
-                        <th class="px-4 py-3.5 w-[10%]">Link</th>
-                        <th class="px-4 py-3.5 w-[18%]">Email</th>
-                        <th class="px-4 py-3.5 w-[14%]">Password</th>
-                        <th class="px-4 py-3.5 w-[6%] text-center">2FA</th>
-                        <th class="px-4 py-3.5 w-[16%]">Status</th>
-                        <th class="px-4 py-3.5 w-[8%] text-center">Aksi</th>
-                    </tr>
-                </thead>
-                <tbody class="divide-y divide-gray-100 bg-white">
-                    @forelse($accounts as $acc)
-                                <tr class="hover:bg-gray-50/80 transition-colors">
-                                    {{-- Platform --}}
-                                    <td class="px-4 py-3.5">
-                                        <span
-                                            class="inline-flex max-w-full truncate items-center px-2 py-1 rounded-md text-xs font-medium border {{ $acc->platform_color }}"
-                                            title="{{ $acc->platform }}">
-                                            {{ $acc->platform }}
-                                        </span>
-                                    </td>
-
-                                    {{-- Nama Akun (truncate jika panjang) --}}
-                                    <td class="px-4 py-3.5">
-                                        <div class="font-semibold text-gray-900 truncate" title="{{ $acc->name }}">
-                                            {{ $acc->name }}
-                                        </div>
-                                        @if($acc->notes)
-                                            <div class="text-xs text-gray-400 truncate mt-0.5" title="{{ $acc->notes }}">
-                                                {{ $acc->notes }}
-                                            </div>
-                                        @endif
-                                    </td>
-
-                                    {{-- Link --}}
-                                    <td class="px-4 py-3.5">
-                                        @if($acc->link)
-                                            <a href="{{ $acc->link }}" target="_blank" rel="noopener noreferrer"
-                                                class="inline-flex items-center gap-1 text-xs font-medium text-primary-600 hover:text-primary-800 hover:underline"
-                                                title="{{ $acc->link }}">
-                                                <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                        d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                                                </svg>
-                                                <span>Buka</span>
-                                            </a>
-                                        @else
-                                            <span class="text-xs text-gray-400 italic">—</span>
-                                        @endif
-                                    </td>
-
-                                    {{-- Email (truncate jika panjang) --}}
-                                    <td class="px-4 py-3.5">
-                                        @if($acc->email)
-                                            <div class="flex items-center gap-1 min-w-0" x-data="{ copied: false }">
-                                                <span
-                                                    class="text-xs font-mono text-gray-700 bg-gray-50 border border-gray-200 px-2 py-1 rounded truncate min-w-0"
-                                                    title="{{ $acc->email }}">
-                                                    {{ $acc->email }}
-                                                </span>
-                                                <button type="button"
-                                                    @click="navigator.clipboard.writeText(@js($acc->email)); copied = true; setTimeout(() => copied = false, 2000)"
-                                                    class="p-1 text-gray-400 hover:text-gray-600 rounded transition shrink-0"
-                                                    :title="copied ? 'Tersalin!' : 'Salin Email'">
-                                                    <svg x-show="!copied" class="w-3.5 h-3.5" fill="none" stroke="currentColor"
-                                                        viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                            d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                                                    </svg>
-                                                    <svg x-show="copied" x-cloak class="w-3.5 h-3.5 text-emerald-600" fill="none"
-                                                        stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                            d="M5 13l4 4L19 7" />
-                                                    </svg>
-                                                </button>
-                                            </div>
-                                        @else
-                                            <span class="text-xs text-gray-400 italic">—</span>
-                                        @endif
-                                    </td>
-
-                                    {{-- Password --}}
-                                    <td class="px-4 py-3.5">
-                                        @if($acc->password)
-                                            <div class="flex items-center gap-1 min-w-0" x-data="{ show: false, copied: false }">
-                                                <div
-                                                    class="bg-gray-50 border border-gray-200 px-2 py-1 rounded min-w-0 flex-1 overflow-hidden">
-                                                    <span x-show="!show"
-                                                        class="font-mono text-xs text-gray-400 tracking-widest select-none">••••••••</span>
-                                                    <span x-show="show" x-cloak
-                                                        class="font-mono text-xs text-gray-900 font-semibold truncate block"
-                                                        title="{{ $acc->password }}">{{ $acc->password }}</span>
-                                                </div>
-                                                <button type="button" @click="show = !show"
-                                                    class="p-1 text-gray-400 hover:text-gray-700 hover:bg-gray-100 rounded transition shrink-0"
-                                                    :title="show ? 'Sembunyikan' : 'Lihat'">
-                                                    <svg x-show="!show" class="w-4 h-4" fill="none" stroke="currentColor"
-                                                        viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                            d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                            d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                                                    </svg>
-                                                    <svg x-show="show" x-cloak class="w-4 h-4 text-primary-600" fill="none"
-                                                        stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                            d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l18 18" />
-                                                    </svg>
-                                                </button>
-                                                <button type="button"
-                                                    @click="navigator.clipboard.writeText(@js($acc->password)); copied = true; setTimeout(() => copied = false, 2000)"
-                                                    class="p-1 text-gray-400 hover:text-gray-700 hover:bg-gray-100 rounded transition shrink-0"
-                                                    :title="copied ? 'Tersalin!' : 'Salin'">
-                                                    <svg x-show="!copied" class="w-3.5 h-3.5" fill="none" stroke="currentColor"
-                                                        viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                            d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                                                    </svg>
-                                                    <svg x-show="copied" x-cloak class="w-3.5 h-3.5 text-emerald-600" fill="none"
-                                                        stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                            d="M5 13l4 4L19 7" />
-                                                    </svg>
-                                                </button>
-                                            </div>
-                                        @else
-                                            <span class="text-xs text-gray-400 italic">—</span>
-                                        @endif
-                                    </td>
-
-                                    {{-- 2FA --}}
-                                    <td
-                                        class="px-4 py-3.5 text-center text-xs font-semibold {{ $acc->two_factor_enabled ? 'text-emerald-600' : 'text-gray-400' }}">
-                                        {{ $acc->two_factor_enabled ? 'Ya' : 'Tidak' }}
-                                    </td>
-
-                                    {{-- Status --}}
-                                    <td class="px-4 py-3.5">
-                                        @if(($acc->verification_status ?? 'approved') === 'pending')
-                                            <form method="POST" action="{{ route($accountPrefix . '.accounts.verify', $acc) }}"
-                                                class="mb-1">
-                                                @csrf @method('PATCH')
-                                                <input type="hidden" name="verification_status" value="approved">
-                                                <button
-                                                    class="px-2 py-1 text-[11px] font-semibold rounded bg-emerald-600 text-white">Verifikasi</button>
-                                            </form>
-                                        @endif
-                                        @if($acc->is_in_sosmed)
-                                            @if($acc->staffUser)
-                                                <div class="inline-flex max-w-full items-center gap-1.5 px-2 py-1 rounded-full text-xs font-medium bg-blue-50 text-blue-700 border border-blue-200"
-                                                    title="Dikelola: {{ $acc->staffUser->name }}">
-                                                    <span class="w-1.5 h-1.5 rounded-full bg-blue-500 shrink-0"></span>
-                                                    <span class="truncate">{{ $acc->staffUser->name }}</span>
-                                                </div>
-                                            @else
-                                                <div
-                                                    class="inline-flex max-w-full items-center gap-1.5 px-2 py-1 rounded-full text-xs font-medium bg-amber-50 text-amber-700 border border-amber-200">
-                                                    <span class="w-1.5 h-1.5 rounded-full bg-amber-500 shrink-0"></span>
-                                                    <span class="truncate">Belum ada pengelola</span>
-                                                </div>
-                                            @endif
-                                        @else
-                                            <div
-                                                class="inline-flex max-w-full items-center gap-1.5 px-2 py-1 rounded-full text-xs font-medium bg-emerald-50 text-emerald-700 border border-emerald-200">
-                                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0"></span>
-                                                <span class="truncate">Belum di Sosmed</span>
-                                            </div>
-                                        @endif
-                                    </td>
-
-                                    {{-- Aksi --}}
-                                    <td class="px-4 py-3.5 text-center">
-                                        <div class="flex items-center justify-center gap-0.5">
-                                            <button type="button" onclick="openAccountDetail({{ json_encode([
-                            'platform' => $acc->platform,
-                            'name' => $acc->name,
-                            'link' => $acc->link ?? '',
-                            'email' => $acc->email ?? '',
-                            'password' => $acc->password ?? '',
-                            'email_recovery' => $acc->email_recovery ?? '',
-                            'phone' => $acc->phone ?? '',
-                            'two_factor' => $acc->two_factor_enabled ? 'Ya' : 'Tidak',
-                            'notes' => $acc->notes ?? '',
-                            'status' => $acc->is_in_sosmed ? 'Dikelola' : 'Belum ditambahkan ke Sosmed',
-                        ]) }})" class="p-1.5 text-gray-400 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition"
-                                                title="Lihat detail akun">
-                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-width="2"
-                                                        d="M2.458 12C3.732 7.943 7.523 5 12 5c4.477 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7z" />
-                                                    <path stroke-linecap="round" stroke-width="2"
-                                                        d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0z" />
-                                                </svg>
-                                            </button>
-                                            <button type="button" onclick="openEditAccountModal({{ json_encode([
-                            'id' => $acc->id,
-                            'name' => $acc->name,
-                            'platform' => $acc->platform,
-                            'link' => $acc->link ?? '',
-                            'email' => $acc->email ?? '',
-                            'email_recovery' => $acc->email_recovery ?? '',
-                            'phone' => $acc->phone ?? '',
-                            'two_factor_enabled' => (bool) $acc->two_factor_enabled,
-                            'notes' => $acc->notes ?? '',
-                        ]) }})" class="p-1.5 text-gray-400 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition"
-                                                title="Edit Akun">
-                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                        d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                                                </svg>
-                                            </button>
-                                            <button type="button"
-                                                onclick="openDeleteAccountModal({{ $acc->id }}, '{{ addslashes($acc->name) }}', '{{ addslashes($acc->platform) }}')"
-                                                class="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition"
-                                                title="Hapus Akun">
-                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                                </svg>
-                                            </button>
-                                        </div>
-                                    </td>
-                                </tr>
-                    @empty
-                        <tr>
-                            <td colspan="8" class="px-6 py-12 text-center text-gray-400">
-                                <div class="flex flex-col items-center justify-center">
-                                    <svg class="w-12 h-12 text-gray-300 mb-3" fill="none" stroke="currentColor"
-                                        viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-                                            d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-                                    </svg>
-                                    <p class="font-medium text-gray-600">Belum ada data akun sosial media</p>
-                                    <p class="text-xs text-gray-400 mt-1">Klik tombol "Tambah Akun Baru" di atas untuk
-                                        menambahkan akun.</p>
-                                </div>
-                            </td>
-                        </tr>
-                    @endforelse
-                </tbody>
-            </table>
+            @include('admin.accounts._table', ['rows' => $accounts])
         </div>
 
         {{-- Pagination --}}
@@ -683,6 +567,10 @@ TAB: PENDING ACCOUNTS
             </div>
         @endif
     </div>
+    @endif
+@endif
+
+{{-- ═══ MODAL & SCRIPT BERSAMA — dirender di semua tab ═══ --}}
 
     {{-- ── MODAL CREATE ACCOUNT ────────────────────────────── --}}
     <div id="modal-create-account" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4">
@@ -692,7 +580,7 @@ TAB: PENDING ACCOUNTS
             class="relative bg-white rounded-2xl shadow-2xl w-full max-w-lg z-10 max-h-[90vh] flex flex-col overflow-hidden">
             <div class="flex items-center justify-between px-6 py-4 border-b border-gray-200">
                 <div>
-                    <h3 class="text-base font-bold text-gray-800">Tambah Akun Baru</h3>
+                    <h3 class="text-base font-bold text-gray-800">Tambah Akun</h3>
                     <p class="text-xs text-gray-400 mt-0.5">Tambahkan akun media sosial dan informasi kredensialnya</p>
                 </div>
                 <button type="button" onclick="document.getElementById('modal-create-account').classList.add('hidden')"
@@ -727,6 +615,14 @@ TAB: PENDING ACCOUNTS
                             class="text-red-500">*</span></label>
                     <input type="text" name="name" required placeholder="Contoh: @republikweb_net"
                         class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 focus:outline-none">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-gray-700 mb-1.5">Brand</label>
+                    @include('admin.accounts._brand_select', [
+                        'inputId' => 'create-acc-brand',
+                        'resetEvent' => 'reset-create-brand',
+                    ])
                 </div>
 
                 <div>
@@ -827,6 +723,14 @@ TAB: PENDING ACCOUNTS
                             class="text-red-500">*</span></label>
                     <input type="text" name="name" id="edit-acc-name" required
                         class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 focus:outline-none">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-gray-700 mb-1.5">Brand</label>
+                    @include('admin.accounts._brand_select', [
+                        'inputId' => 'edit-acc-brand',
+                        'setEvent' => 'set-edit-brand',
+                    ])
                 </div>
 
                 <div>
@@ -931,6 +835,10 @@ TAB: PENDING ACCOUNTS
                     <p id="detail-platform" class="font-semibold text-gray-800"></p>
                 </div>
                 <div>
+                    <p class="text-xs text-gray-400">Brand</p>
+                    <p id="detail-brand" class="font-semibold text-indigo-600"></p>
+                </div>
+                <div class="sm:col-span-2">
                     <p class="text-xs text-gray-400">Nama Akun</p>
                     <p id="detail-name" class="font-semibold text-gray-800"></p>
                 </div>
@@ -970,9 +878,136 @@ TAB: PENDING ACCOUNTS
         </div>
     </div>
 
+    {{-- ── MODAL CREATE BRAND ─────────────────────────────── --}}
+    <div id="modal-create-brand" class="hidden fixed inset-0 z-[70] flex items-center justify-center p-4">
+        <div class="absolute inset-0 bg-black/50 backdrop-blur-sm"
+            onclick="document.getElementById('modal-create-brand').classList.add('hidden')"></div>
+        <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-md z-10 overflow-hidden">
+            <div class="flex items-center justify-between px-6 py-4 border-b border-gray-200">
+                <div>
+                    <h3 class="text-base font-bold text-gray-800">Tambah Brand</h3>
+                    <p class="text-xs text-gray-400 mt-0.5">Daftarkan brand baru sebagai pengelompokan akun</p>
+                </div>
+                <button type="button" onclick="document.getElementById('modal-create-brand').classList.add('hidden')"
+                    class="text-gray-400 hover:text-gray-600 transition">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+            <form method="POST" action="{{ route($accountPrefix . '.accounts.brands.store') }}"
+                enctype="multipart/form-data" class="p-6 pt-1 space-y-4">
+                @csrf
+                <div>
+                    <label class="block text-xs font-semibold text-gray-700 mb-1.5">Nama Brand <span
+                            class="text-red-500">*</span></label>
+                    <input type="text" name="name" required maxlength="100" placeholder="Contoh: Republikweb"
+                        class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 focus:outline-none">
+                    <p class="text-[11px] text-gray-400 mt-1">Brand dapat didaftarkan meskipun belum memiliki akun.</p>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-gray-700 mb-1.5">Logo / Icon Brand</label>
+                    <div class="flex items-center gap-3">
+                        <img id="brand-logo-preview" alt="Preview logo brand"
+                            class="hidden w-14 h-14 shrink-0 rounded-lg border border-gray-200 bg-white p-1 object-contain">
+                        <input type="file" name="logo" accept="image/png,image/jpeg,image/webp"
+                            onchange="previewBrandLogo(this)"
+                            class="block w-full text-xs text-gray-600 cursor-pointer file:mr-3 file:rounded-lg file:border-0 file:bg-indigo-50 file:px-3 file:py-2 file:text-xs file:font-semibold file:text-indigo-700 hover:file:bg-indigo-100 file:cursor-pointer">
+                    </div>
+                    <p class="text-[11px] text-gray-400 mt-1">Opsional. JPG/PNG/WebP, maks 2 MB — otomatis disimpan
+                        sebagai WebP agar ringan.</p>
+                </div>
+                <div class="flex gap-3 pt-1">
+                    <button type="button" onclick="document.getElementById('modal-create-brand').classList.add('hidden')"
+                        class="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-sm text-gray-700 hover:bg-gray-50 transition">Batal</button>
+                    <button type="submit"
+                        class="flex-1 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-sm font-semibold shadow-sm transition">Simpan
+                        Brand</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    {{-- ── MODAL EDIT BRAND ───────────────────────────────── --}}
+    <div id="modal-edit-brand" class="hidden fixed inset-0 z-[70] flex items-center justify-center p-4">
+        <div class="absolute inset-0 bg-black/50 backdrop-blur-sm"
+            onclick="document.getElementById('modal-edit-brand').classList.add('hidden')"></div>
+        <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-md z-10 overflow-hidden">
+            <div class="flex items-center justify-between px-6 py-4 border-b border-gray-200">
+                <div>
+                    <h3 class="text-base font-bold text-gray-800">Edit Brand</h3>
+                    <p class="text-xs text-gray-400 mt-0.5">Perbarui nama brand atau ganti logo/icon</p>
+                </div>
+                <button type="button" onclick="document.getElementById('modal-edit-brand').classList.add('hidden')"
+                    class="text-gray-400 hover:text-gray-600 transition">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+            <form id="form-edit-brand" method="POST" action="" enctype="multipart/form-data" class="p-6 pt-1 space-y-4">
+                @csrf @method('PATCH')
+                <div>
+                    <label class="block text-xs font-semibold text-gray-700 mb-1.5">Nama Brand <span
+                            class="text-red-500">*</span></label>
+                    <input type="text" id="edit-brand-name" name="name" required maxlength="100"
+                        class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 focus:outline-none">
+                    <p class="text-[11px] text-gray-400 mt-1">Mengubah nama akan otomatis menyesuaikan akun-akun yang
+                        memakai brand ini.</p>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-gray-700 mb-1.5">Logo / Icon Brand</label>
+                    <div class="flex items-center gap-3">
+                        <img id="edit-brand-logo-preview" alt="Logo brand"
+                            class="hidden w-14 h-14 shrink-0 rounded-lg border border-gray-200 bg-white p-1 object-contain">
+                        <input type="file" id="edit-brand-logo-input" name="logo" accept="image/png,image/jpeg,image/webp"
+                            onchange="previewEditBrandLogo(this)"
+                            class="block w-full text-xs text-gray-600 cursor-pointer file:mr-3 file:rounded-lg file:border-0 file:bg-indigo-50 file:px-3 file:py-2 file:text-xs file:font-semibold file:text-indigo-700 hover:file:bg-indigo-100 file:cursor-pointer">
+                    </div>
+                    <p class="text-[11px] text-gray-400 mt-1">Opsional. Kosongkan untuk mempertahankan logo saat ini.
+                        JPG/PNG/WebP, maks 2 MB — otomatis disimpan sebagai WebP.</p>
+                </div>
+                <div class="flex gap-3 pt-1">
+                    <button type="button" onclick="document.getElementById('modal-edit-brand').classList.add('hidden')"
+                        class="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-sm text-gray-700 hover:bg-gray-50 transition">Batal</button>
+                    <button type="submit"
+                        class="flex-1 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-sm font-semibold shadow-sm transition">Simpan
+                        Perubahan</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     {{-- ── JAVASCRIPT MODAL HANDLERS ───────────────────────── --}}
     <script>
         const accountPrefix = @json($accountPrefix);
+
+        function brandSelect(config) {
+            return {
+                open: false,
+                query: '',
+                appliedQuery: '',
+                selected: '',
+                brands: config.brands || [],
+                get filtered() {
+                    const q = this.query.trim().toLowerCase();
+                    if (!q) return this.brands;
+                    return this.brands.filter((b) => b.toLowerCase().includes(q));
+                },
+                applySearch() {
+                    this.appliedQuery = this.query;
+                },
+                select(name) {
+                    this.selected = name;
+                    this.open = false;
+                },
+                addBrand() {
+                    this.open = false;
+                    openCreateBrandModal();
+                },
+            };
+        }
+        window.brandSelect = brandSelect;
 
         function openApproveAccountModal(id, name, recovery, phone, twoFactor) {
             document.getElementById('form-approve-account').action = `/${accountPrefix}/accounts/${id}/verify`;
@@ -997,6 +1032,7 @@ TAB: PENDING ACCOUNTS
         function openAccountDetail(data) {
             const fields = {
                 platform: data.platform,
+                brand: data.brand || '-',
                 name: data.name,
                 link: data.link || '-',
                 email: data.email || '-',
@@ -1019,7 +1055,57 @@ TAB: PENDING ACCOUNTS
         }
 
         function openCreateAccountModal() {
+            window.dispatchEvent(new CustomEvent('reset-create-brand'));
             document.getElementById('modal-create-account').classList.remove('hidden');
+        }
+
+        function openCreateBrandModal() {
+            document.getElementById('modal-create-brand').classList.remove('hidden');
+        }
+
+        function previewBrandLogo(input) {
+            const img = document.getElementById('brand-logo-preview');
+            if (input.files && input.files[0]) {
+                img.src = URL.createObjectURL(input.files[0]);
+                img.classList.remove('hidden');
+            } else {
+                img.classList.add('hidden');
+                img.removeAttribute('src');
+            }
+        }
+
+        function openEditBrandModal(data) {
+            document.getElementById('form-edit-brand').action = `/${accountPrefix}/accounts/brands/${data.id}`;
+            document.getElementById('edit-brand-name').value = data.name || '';
+
+            const img = document.getElementById('edit-brand-logo-preview');
+            const input = document.getElementById('edit-brand-logo-input');
+            input.value = '';
+            if (data.logo_url) {
+                img.src = data.logo_url;
+                img.classList.remove('hidden');
+            } else {
+                img.classList.add('hidden');
+                img.removeAttribute('src');
+            }
+
+            document.getElementById('modal-edit-brand').classList.remove('hidden');
+        }
+
+        function previewEditBrandLogo(input) {
+            const img = document.getElementById('edit-brand-logo-preview');
+            if (input.files && input.files[0]) {
+                img.src = URL.createObjectURL(input.files[0]);
+                img.classList.remove('hidden');
+            }
+        }
+
+        function toggleBrandDetail(i) {
+            const detail = document.getElementById('brand-detail-' + i);
+            const chevron = document.getElementById('brand-chevron-' + i);
+            if (!detail) return;
+            detail.classList.toggle('hidden');
+            if (chevron) chevron.classList.toggle('rotate-180');
         }
 
         document.querySelector('#modal-create-account select[name="platform"]').addEventListener('change', function () {
@@ -1044,6 +1130,7 @@ TAB: PENDING ACCOUNTS
             form.action = `/${accountPrefix}/accounts/${data.id}`;
 
             document.getElementById('edit-acc-name').value = data.name || '';
+            window.dispatchEvent(new CustomEvent('set-edit-brand', { detail: data.brand || '' }));
             const standardPlatforms = Array.from(document.getElementById('edit-acc-platform').options).map(option => option.value);
             const isCustomPlatform = data.platform && !standardPlatforms.includes(data.platform);
             document.getElementById('edit-acc-platform').value = isCustomPlatform ? 'Lainnya' : (data.platform || '');
@@ -1066,8 +1153,6 @@ TAB: PENDING ACCOUNTS
             document.getElementById('modal-delete-account').classList.remove('hidden');
         }
     </script>
-
-@endif
 
 {{-- ═══════════════════════════════════════════════════════════════
 TAB: AKUN YANG DITOLAK

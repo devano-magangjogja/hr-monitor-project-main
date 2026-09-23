@@ -17,6 +17,7 @@ use App\Http\Controllers\Staff\TaskController as StaffTaskController;
 use App\Http\Controllers\Staff\UserController as StaffUserController;
 use App\Http\Controllers\Staff\NotificationController as StaffNotificationController;
 use App\Http\Controllers\Staff\PresensiController as StaffPresensiController;
+use App\Http\Controllers\Staff\ActivityLogController as StaffActivityLogController;
 use App\Http\Controllers\Cs\DashboardController as CsDashboard;
 use App\Http\Controllers\Cs\TaskController as CsTaskController;
 use App\Http\Controllers\Ob\DashboardController as ObDashboard;
@@ -46,6 +47,7 @@ use App\Http\Controllers\Sosmed\SosmedController as SosmedSosmedController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\PemagangController;
+use App\Http\Controllers\PresensiIstirahatController;
 
 // ── Auth (All Roles) ────────────────────────────────────────────────────────
 Route::get('/', fn() => redirect()->route('login'));
@@ -109,6 +111,10 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin'])->grou
     Route::delete('/presensi/{presensi}', [AdminPresensiController::class, 'destroy'])->name('presensi.destroy');
     Route::get('/presensi/laporan', [AdminPresensiController::class, 'laporan'])->name('presensi.laporan');
     Route::post('/presensi/laporan/bulk-delete', [AdminPresensiController::class, 'bulkDeleteAttendance'])->name('presensi.bulk-delete');
+    Route::get('/presensi/istirahat', [PresensiIstirahatController::class, 'index'])->name('presensi.istirahat');
+    Route::post('/presensi/istirahat/bulk', [PresensiIstirahatController::class, 'bulkStore'])->name('presensi.istirahat.bulk');
+    Route::post('/presensi/istirahat/late', [PresensiIstirahatController::class, 'storeLate'])->name('presensi.istirahat.late');
+    Route::post('/presensi/istirahat/correct-late', [PresensiIstirahatController::class, 'correctLate'])->name('presensi.istirahat.correct-late');
 
     // Log Activity (Admin Monitoring)
     Route::get('/activity-log', [ActivityLogController::class, 'index'])->name('activity-log.index');
@@ -126,6 +132,8 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin'])->grou
     Route::resource('accounts', AdminAccountController::class)
         ->only(['index', 'store', 'update', 'destroy']);
     Route::patch('/accounts/{account}/verify', [AdminAccountController::class, 'verify'])->name('accounts.verify');
+    Route::post('/accounts/brands', [AdminAccountController::class, 'storeBrand'])->name('accounts.brands.store');
+    Route::patch('/accounts/brands/{brand}', [AdminAccountController::class, 'updateBrand'])->name('accounts.brands.update');
 
     // Monitoring & Penugasan Sosmed
     Route::get('/sosmed', [AdminSosmedController::class, 'index'])->name('sosmed.index');
@@ -176,6 +184,10 @@ Route::prefix('staff')->name('staff.')->middleware(['auth', 'role:hr_staff'])->g
     Route::patch('/presensi/{presensi}', [StaffPresensiController::class, 'update'])->name('presensi.update');
     Route::delete('/presensi/{presensi}', [StaffPresensiController::class, 'destroy'])->name('presensi.destroy');
     Route::get('/presensi/laporan', [StaffPresensiController::class, 'laporan'])->name('presensi.laporan');
+    Route::get('/presensi/istirahat', [PresensiIstirahatController::class, 'index'])->name('presensi.istirahat');
+    Route::post('/presensi/istirahat/bulk', [PresensiIstirahatController::class, 'bulkStore'])->name('presensi.istirahat.bulk');
+    Route::post('/presensi/istirahat/late', [PresensiIstirahatController::class, 'storeLate'])->name('presensi.istirahat.late');
+    Route::post('/presensi/istirahat/correct-late', [PresensiIstirahatController::class, 'correctLate'])->name('presensi.istirahat.correct-late');
 
     // Kelola Pemagang
     Route::get('/pemagang', [PemagangController::class, 'index'])->name('pemagang.index');
@@ -188,6 +200,8 @@ Route::prefix('staff')->name('staff.')->middleware(['auth', 'role:hr_staff'])->g
     Route::resource('accounts', AdminAccountController::class)
         ->only(['index', 'store', 'update', 'destroy']);
     Route::patch('/accounts/{account}/verify', [AdminAccountController::class, 'verify'])->name('accounts.verify');
+    Route::post('/accounts/brands', [AdminAccountController::class, 'storeBrand'])->name('accounts.brands.store');
+    Route::patch('/accounts/brands/{brand}', [AdminAccountController::class, 'updateBrand'])->name('accounts.brands.update');
     Route::get('/sosmed', [StaffSosmedController::class, 'index'])->name('sosmed.index');
     Route::post('/sosmed/assign', [StaffSosmedController::class, 'assignTask'])->name('sosmed.assign');
     Route::post('/sosmed/accounts/{account}/submit', [StaffSosmedController::class, 'submitAccountTask'])->name('sosmed.accounts.submit');
@@ -195,6 +209,10 @@ Route::prefix('staff')->name('staff.')->middleware(['auth', 'role:hr_staff'])->g
     Route::post('/sosmed/accounts/{account}/unassign', [StaffSosmedController::class, 'unassignAccount'])->name('sosmed.accounts.unassign');
     Route::delete('/sosmed/accounts/{account}', [StaffSosmedController::class, 'destroyAccount'])->name('sosmed.accounts.destroy');
     Route::patch('/sosmed/tasks/{task}/verify', [StaffSosmedController::class, 'verifyTask'])->name('sosmed.tasks.verify');
+
+    // Log Activity (Staff Monitoring: Manajemen Akun & Sosmed)
+    Route::get('/activity-log', [StaffActivityLogController::class, 'index'])->name('activity-log.index');
+    Route::delete('/activity-log/{activityLog}', [StaffActivityLogController::class, 'destroy'])->name('activity-log.destroy');
 });
 
 // ── CS (Customer Service) ────────────────────────────────────────────────────
@@ -250,6 +268,10 @@ Route::prefix('assistant')->name('assistant.')->middleware(['auth', 'role:hr_ass
     Route::patch('/presensi/{presensi}', [AssistantPresensiController::class, 'update'])->name('presensi.update');
     Route::delete('/presensi/{presensi}', [AssistantPresensiController::class, 'destroy'])->name('presensi.destroy');
     Route::get('/presensi/laporan', [AssistantPresensiController::class, 'laporan'])->name('presensi.laporan');
+    Route::get('/presensi/istirahat', [PresensiIstirahatController::class, 'index'])->name('presensi.istirahat');
+    Route::post('/presensi/istirahat/bulk', [PresensiIstirahatController::class, 'bulkStore'])->name('presensi.istirahat.bulk');
+    Route::post('/presensi/istirahat/late', [PresensiIstirahatController::class, 'storeLate'])->name('presensi.istirahat.late');
+    Route::post('/presensi/istirahat/correct-late', [PresensiIstirahatController::class, 'correctLate'])->name('presensi.istirahat.correct-late');
 
     // Tambah Pemagang
     Route::post('/pemagang', [PemagangController::class, 'store'])->name('pemagang.store');

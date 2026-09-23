@@ -323,12 +323,26 @@
         ─────────────────────────────────────────────────────────────── --}}
         @if($tab === 'oversight')
         <div class="p-4 sm:p-5">
-            <div class="mb-4">
-                <h3 class="text-sm font-semibold text-gray-800">Progress Tim Sosmed Saya</h3>
-                <p class="text-xs text-gray-500 mt-0.5">
-                    Pantau progress pengerjaan akun sosmed oleh user Sosmed yang berada di bawah pengawasan Anda.
-                    Ditetapkan oleh HR Staff.
-                </p>
+            <div class="mb-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                <div>
+                    <h3 class="text-sm font-semibold text-gray-800">Progress Tim Sosmed Saya</h3>
+                    <p class="text-xs text-gray-500 mt-0.5">
+                        Pantau progress pengerjaan akun sosmed oleh user Sosmed yang berada di bawah pengawasan Anda.
+                        Ditetapkan oleh HR Staff.
+                    </p>
+                </div>
+                <form method="GET" action="{{ route('pm.sosmed.index') }}" class="flex items-center gap-2 w-full sm:w-auto">
+                    <input type="hidden" name="tab" value="oversight">
+                    <input type="text" name="verify_search" value="{{ request()->query('verify_search', '') }}"
+                        placeholder="Cari judul tugas, akun, atau petugas..."
+                        class="w-full sm:w-64 h-9 px-3 text-xs bg-white border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 text-gray-700 transition">
+                    <button type="submit"
+                        class="h-9 px-3 bg-primary-600 hover:bg-primary-700 text-white text-xs font-semibold rounded-lg transition shrink-0">Cari</button>
+                    @if(request()->query('verify_search'))
+                        <a href="{{ route('pm.sosmed.index', ['tab' => 'oversight']) }}"
+                            class="text-xs text-primary-600 hover:underline whitespace-nowrap">Reset</a>
+                    @endif
+                </form>
             </div>
 
             @if($oversightData->isEmpty())
