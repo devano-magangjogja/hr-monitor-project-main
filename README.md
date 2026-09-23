@@ -4,7 +4,7 @@
 
 # Task — Sistem Monitoring HR & Tugas
 
-**Website internal untuk memantau tugas harian, presensi, dan konten sosial media antar divisi.**
+**Website internal Seven Inc untuk memantau tugas harian, presensi, dan konten sosial media antar divisi.**
 
 </div>
 
