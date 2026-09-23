@@ -12,8 +12,9 @@ class SettingService
 {
     public function __construct(
         protected AppSettingRepository $settingRepo,
-        protected WaGroupRepository    $waGroupRepo,
-    ) {}
+        protected WaGroupRepository $waGroupRepo,
+    ) {
+    }
 
     // ── App Settings ─────────────────────────────────────
 
@@ -34,7 +35,10 @@ class SettingService
             if ($oldLogo && Storage::disk('public')->exists($oldLogo)) {
                 Storage::disk('public')->delete($oldLogo);
             }
-            $path = $logoFile->store('app', 'public');
+
+            // Nama file unik + timestamp
+            $filename = 'logo_' . time() . '_' . uniqid() . '.' . $logoFile->getClientOriginalExtension();
+            $path = $logoFile->storeAs('app', $filename, 'public');
             $this->settingRepo->set('app_logo', $path);
         }
 
@@ -52,7 +56,9 @@ class SettingService
             if ($oldBanner && Storage::disk('public')->exists($oldBanner)) {
                 Storage::disk('public')->delete($oldBanner);
             }
-            $path = $logoBannerFile->store('app', 'public');
+
+            $filename = 'banner_' . time() . '_' . uniqid() . '.' . $logoBannerFile->getClientOriginalExtension();
+            $path = $logoBannerFile->storeAs('app', $filename, 'public');
             $this->settingRepo->set('app_logo_banner', $path);
         }
 
@@ -86,7 +92,7 @@ class SettingService
     {
         return $this->waGroupRepo->create([
             'label' => $data['label'],
-            'url'   => $data['url'],
+            'url' => $data['url'],
         ]);
     }
 
@@ -94,7 +100,7 @@ class SettingService
     {
         return $this->waGroupRepo->update($group, [
             'label' => $data['label'],
-            'url'   => $data['url'],
+            'url' => $data['url'],
         ]);
     }
 

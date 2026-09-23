@@ -31,14 +31,14 @@
         <table class="w-full text-sm table-fixed">
             <thead>
                 <tr class="bg-gray-50 border-b border-gray-200">
-                    <th class="text-left px-6 py-3.5 font-semibold text-gray-600 w-[20%]">Judul</th>
-                    <th class="text-left px-6 py-3.5 font-semibold text-gray-600 w-[26%]">Deskripsi</th>
-                    <th class="text-left px-6 py-3.5 font-semibold text-gray-600 w-[13%]">Target Role</th>
-                    <th class="text-left px-6 py-3.5 font-semibold text-gray-600 w-[16%]">User Terpilih</th>
-                    <th class="text-left px-6 py-3.5 font-semibold text-gray-600 w-[11%]">Foto Bukti</th>
-                    <th class="text-left px-6 py-3.5 font-semibold text-gray-600 w-[8%]">Status</th>
-                    <th class="text-left px-6 py-3.5 font-semibold text-gray-600 w-[10%]">Dibuat Oleh</th>
-                    <th class="text-right px-6 py-3.5 font-semibold text-gray-600 w-[6%]">Aksi</th>
+                    <th class="text-left px-4 py-3.5 font-semibold text-gray-600 w-[19%]">Judul</th>
+                    <th class="text-left px-4 py-3.5 font-semibold text-gray-600 w-[20%]">Deskripsi</th>
+                    <th class="text-center px-4 py-3.5 font-semibold text-gray-600 w-[12%]">Target Role</th>
+                    <th class="text-left px-4 py-3.5 font-semibold text-gray-600 w-[13%]">User Terpilih</th>
+                    <th class="text-center px-4 py-3.5 font-semibold text-gray-600 w-[12%]">Foto Bukti</th>
+                    <th class="text-center px-4 py-3.5 font-semibold text-gray-600 w-[8%]">Status</th>
+                    <th class="text-left px-4 py-3.5 font-semibold text-gray-600 w-[8%]">Dibuat</th>
+                    <th class="text-center px-4 py-3.5 font-semibold text-gray-600 w-[8%]">Aksi</th>
                 </tr>
             </thead>
             <tbody class="divide-y divide-gray-100">
@@ -46,14 +46,14 @@
                     <tr class="hover:bg-gray-50 transition">
 
                         {{-- Judul --}}
-                        <td class="px-6 py-4">
+                        <td class="px-4 py-3.5">
                             <div class="truncate font-medium text-gray-800" title="{{ $task->title }}">
                                 {{ $task->title }}
                             </div>
                         </td>
 
                         {{-- Deskripsi --}}
-                        <td class="px-6 py-4">
+                        <td class="px-4 py-3.5">
                             <div class="truncate text-gray-500" title="{{ $task->description ?? '-' }}">
                                 @if ($task->description)
                                     {!! linkify(e($task->description)) !!}
@@ -64,7 +64,7 @@
                         </td>
 
                         {{-- Target Role --}}
-                        <td class="px-6 py-4">
+                        <td class="px-4 py-3.5 text-center">
                             @php $targetRoleModel = $roles->firstWhere('name', $task->target_role); @endphp
                             <span
                                 class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold {{ $targetRoleModel?->badge_class ?? 'bg-gray-100 text-gray-700' }}">
@@ -73,7 +73,7 @@
                         </td>
 
                         {{-- User Terpilih --}}
-                        <td class="px-6 py-4">
+                        <td class="px-4 py-3.5">
                             @if (empty($task->assigned_user_ids))
                                 <span class="text-sm font-medium text-gray-600">Semua Terpilih</span>
                             @else
@@ -90,15 +90,27 @@
                         </td>
 
                         {{-- Foto Bukti --}}
-                        <td class="px-6 py-4">
+                        <td class="px-4 py-3.5 text-center">
                             @if ($task->proof_requirement === 'required')
-                                <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-rose-50 text-rose-700 border border-rose-200">
-                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                                <span
+                                    class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-rose-50 text-rose-700 border border-rose-200 whitespace-nowrap">
+                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+                                    </svg>
                                     Wajib
                                 </span>
                             @elseif ($task->proof_requirement === 'optional')
-                                <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-blue-50 text-blue-700 border border-blue-200">
-                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                                <span
+                                    class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-blue-50 text-blue-700 border border-blue-200 whitespace-nowrap">
+                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+                                    </svg>
                                     Opsional
                                 </span>
                             @else
@@ -107,26 +119,27 @@
                         </td>
 
                         {{-- Status --}}
-                        <td class="px-6 py-4">
+                        <td class="px-4 py-3.5 text-center">
                             <span
-                                class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium
-                                {{ $task->is_active ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700' }}">
+                                class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium whitespace-nowrap
+                            {{ $task->is_active ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700' }}">
                                 {{ $task->is_active ? 'Aktif' : 'Nonaktif' }}
                             </span>
                         </td>
 
                         {{-- Dibuat Oleh --}}
-                        <td class="px-6 py-4">
+                        <td class="px-4 py-3.5">
                             <div class="truncate text-gray-500" title="{{ $task->creator?->name ?? '-' }}">
                                 {{ $task->creator?->name ?? '-' }}
                             </div>
                         </td>
 
                         {{-- Aksi --}}
-                        <td class="px-6 py-4">
-                            <div class="flex items-center justify-end gap-1.5">
+                        <td class="px-4 py-3.5">
+                            <div class="flex items-center justify-center gap-1">
                                 {{-- Tombol Detail --}}
-                                <button type="button" onclick="openDefaultTaskDetailModal(this)" data-title="{{ e($task->title) }}"
+                                <button type="button" onclick="openDefaultTaskDetailModal(this)"
+                                    data-title="{{ e($task->title) }}"
                                     data-description="{{ e($task->description ?? '') }}"
                                     data-role="{{ e($roles->firstWhere('name', $task->target_role)?->label ?? strtoupper($task->target_role)) }}"
                                     data-status="{{ $task->is_active ? 'Aktif' : 'Nonaktif' }}"
@@ -173,7 +186,7 @@
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="7" class="px-6 py-12 text-center text-gray-400 text-sm">
+                        <td colspan="8" class="px-6 py-12 text-center text-gray-400 text-sm">
                             Belum ada default task. Tambahkan default task pertama.
                         </td>
                     </tr>
@@ -199,8 +212,8 @@
                     </div>
                     <div class="flex items-center gap-1 shrink-0">
                         {{-- Tombol Detail --}}
-                        <button type="button" onclick="openDefaultTaskDetailModal(this)" data-title="{{ e($task->title) }}"
-                            data-description="{{ e($task->description ?? '') }}"
+                        <button type="button" onclick="openDefaultTaskDetailModal(this)"
+                            data-title="{{ e($task->title) }}" data-description="{{ e($task->description ?? '') }}"
                             data-role="{{ e($roles->firstWhere('name', $task->target_role)?->label ?? strtoupper($task->target_role)) }}"
                             data-status="{{ $task->is_active ? 'Aktif' : 'Nonaktif' }}"
                             data-proof-requirement="{{ $task->proof_requirement ?? 'none' }}"
@@ -255,11 +268,13 @@
                         {{ $task->is_active ? 'Aktif' : 'Nonaktif' }}
                     </span>
                     @if ($task->proof_requirement === 'required')
-                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-rose-50 text-rose-700 border border-rose-200">
+                        <span
+                            class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-rose-50 text-rose-700 border border-rose-200">
                             Wajib Foto
                         </span>
                     @elseif ($task->proof_requirement === 'optional')
-                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium bg-blue-50 text-blue-700 border border-blue-200">
+                        <span
+                            class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium bg-blue-50 text-blue-700 border border-blue-200">
                             Foto Opsional
                         </span>
                     @endif
@@ -384,21 +399,24 @@
                 </select>
             </div>
             <div>
-                <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-1.5">Ketentuan Lampiran Foto Bukti</label>
+                <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-1.5">Ketentuan Lampiran Foto
+                    Bukti</label>
                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
-                    <label class="flex items-center gap-2 p-2.5 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50 transition has-[:checked]:border-primary-500 has-[:checked]:bg-primary-50/40">
-                        <input type="radio" name="proof_requirement" value="none" checked
-                            class="text-primary-600 focus:ring-primary-500">
+                    <label
+                        class="flex items-center justify-center p-2.5 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50 transition has-[:checked]:border-primary-500 has-[:checked]:bg-primary-50/40">
+                        <input type="radio" name="proof_requirement" value="none" checked class="sr-only">
                         <span class="text-xs sm:text-sm text-gray-700">Tanpa Foto</span>
                     </label>
-                    <label class="flex items-center gap-2 p-2.5 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50 transition has-[:checked]:border-primary-500 has-[:checked]:bg-primary-50/40">
-                        <input type="radio" name="proof_requirement" value="optional"
-                            class="text-primary-600 focus:ring-primary-500">
+
+                    <label
+                        class="flex items-center justify-center p-2.5 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50 transition has-[:checked]:border-primary-500 has-[:checked]:bg-primary-50/40">
+                        <input type="radio" name="proof_requirement" value="optional" class="sr-only">
                         <span class="text-xs sm:text-sm text-gray-700">Foto Opsional</span>
                     </label>
-                    <label class="flex items-center gap-2 p-2.5 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50 transition has-[:checked]:border-rose-400 has-[:checked]:bg-rose-50/40">
-                        <input type="radio" name="proof_requirement" value="required"
-                            class="text-rose-600 focus:ring-rose-500">
+
+                    <label
+                        class="flex items-center justify-center p-2.5 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50 transition has-[:checked]:border-rose-400 has-[:checked]:bg-rose-50/40">
+                        <input type="radio" name="proof_requirement" value="required" class="sr-only">
                         <span class="text-xs sm:text-sm font-medium text-rose-700">Wajib Foto Bukti</span>
                     </label>
                 </div>
@@ -498,19 +516,23 @@
                 </select>
             </div>
             <div>
-                <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-1.5">Ketentuan Lampiran Foto Bukti</label>
+                <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-1.5">Ketentuan Lampiran Foto
+                    Bukti</label>
                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
-                    <label class="flex items-center gap-2 p-2.5 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50 transition has-[:checked]:border-primary-500 has-[:checked]:bg-primary-50/40">
+                    <label
+                        class="flex items-center gap-2 p-2.5 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50 transition has-[:checked]:border-primary-500 has-[:checked]:bg-primary-50/40">
                         <input type="radio" name="proof_requirement" value="none" id="edit-proof-none"
                             class="text-primary-600 focus:ring-primary-500">
                         <span class="text-xs sm:text-sm text-gray-700">Tanpa Foto</span>
                     </label>
-                    <label class="flex items-center gap-2 p-2.5 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50 transition has-[:checked]:border-primary-500 has-[:checked]:bg-primary-50/40">
+                    <label
+                        class="flex items-center gap-2 p-2.5 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50 transition has-[:checked]:border-primary-500 has-[:checked]:bg-primary-50/40">
                         <input type="radio" name="proof_requirement" value="optional" id="edit-proof-optional"
                             class="text-primary-600 focus:ring-primary-500">
                         <span class="text-xs sm:text-sm text-gray-700">Foto Opsional</span>
                     </label>
-                    <label class="flex items-center gap-2 p-2.5 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50 transition has-[:checked]:border-rose-400 has-[:checked]:bg-rose-50/40">
+                    <label
+                        class="flex items-center gap-2 p-2.5 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50 transition has-[:checked]:border-rose-400 has-[:checked]:bg-rose-50/40">
                         <input type="radio" name="proof_requirement" value="required" id="edit-proof-required"
                             class="text-rose-600 focus:ring-rose-500">
                         <span class="text-xs sm:text-sm font-medium text-rose-700">Wajib Foto Bukti</span>
@@ -622,11 +644,14 @@
 
             const proofEl = document.getElementById('detail-default-proof');
             if (proof === 'required') {
-                proofEl.innerHTML = '<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-rose-50 text-rose-700 border border-rose-200">Wajib Foto Bukti</span>';
+                proofEl.innerHTML =
+                    '<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-rose-50 text-rose-700 border border-rose-200">Wajib Foto Bukti</span>';
             } else if (proof === 'optional') {
-                proofEl.innerHTML = '<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-blue-50 text-blue-700 border border-blue-200">Foto Opsional</span>';
+                proofEl.innerHTML =
+                    '<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-blue-50 text-blue-700 border border-blue-200">Foto Opsional</span>';
             } else {
-                proofEl.innerHTML = '<span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-600 border border-gray-200">Tanpa Foto Bukti</span>';
+                proofEl.innerHTML =
+                    '<span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-600 border border-gray-200">Tanpa Foto Bukti</span>';
             }
 
             document.getElementById('detail-default-users').textContent = users;
@@ -894,7 +919,8 @@
             document.getElementById('edit-is-active').value = isActive;
 
             const proofRequirement = button.dataset.proofRequirement || 'none';
-            const proofRadio = document.querySelector(`input[name="proof_requirement"][value="${proofRequirement}"][id^="edit-proof"]`);
+            const proofRadio = document.querySelector(
+                `input[name="proof_requirement"][value="${proofRequirement}"][id^="edit-proof"]`);
             if (proofRadio) proofRadio.checked = true;
 
             document.getElementById('form-edit').action = `/admin/default-tasks/${id}`;
