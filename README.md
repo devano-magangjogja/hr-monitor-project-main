@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="resources/images/logo_banner.jpg" alt="Task — HR Monitor" width="480"/>
+<img src="public/images/logo_banner.jpg" alt="Task — HR Monitor" width="480"/>
 
 # Task — Sistem Monitoring HR & Tugas
 
