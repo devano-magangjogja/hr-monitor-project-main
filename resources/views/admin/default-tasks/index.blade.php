@@ -11,18 +11,45 @@
 @section('content')
 
     {{-- Header + Tombol Tambah --}}
-    <div class="flex items-center justify-between mb-6">
+    <div class="flex flex-wrap items-center justify-between gap-3 mb-6">
         <p class="text-sm text-gray-500">
             Total <span class="font-semibold text-gray-700">{{ $defaultTasks->count() }}</span> default task
+            @if($search !== '')
+                <span class="text-xs text-primary-600 font-medium ml-1">hasil pencarian "{{ $search }}"</span>
+            @endif
         </p>
-        <button onclick="document.getElementById('modal-create').classList.remove('hidden')"
-            class="flex items-center gap-2 px-4 py-2 bg-primary-600 hover:bg-primary-700
+        <div class="flex items-center gap-2 flex-wrap">
+            {{-- Search --}}
+            <form method="GET" action="{{ route('admin.default-tasks.index') }}" class="flex items-center gap-1.5">
+                <div class="relative">
+                    <span class="absolute inset-y-0 left-0 flex items-center pl-2.5 pointer-events-none text-gray-400">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                        </svg>
+                    </span>
+                    <input type="search" name="search" value="{{ $search }}"
+                        placeholder="Cari judul, role, atau user..."
+                        class="w-48 lg:w-60 pl-8 pr-2.5 py-1.5 text-xs bg-white border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 text-gray-700 transition">
+                </div>
+                <button type="submit"
+                    class="px-3 py-1.5 text-xs font-semibold bg-primary-600 hover:bg-primary-700 text-white rounded-lg transition">
+                    Cari
+                </button>
+                @if($search !== '')
+                    <a href="{{ route('admin.default-tasks.index') }}"
+                        class="text-xs text-gray-500 hover:text-red-600 font-medium whitespace-nowrap">Reset</a>
+                @endif
+            </form>
+            <button onclick="document.getElementById('modal-create').classList.remove('hidden')"
+                class="flex items-center gap-2 px-4 py-2 bg-primary-600 hover:bg-primary-700
                        text-white text-sm font-medium rounded-lg transition">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-            </svg>
-            Tambah Default Task
-        </button>
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                </svg>
+                Tambah Default Task
+            </button>
+        </div>
     </div>
 
     {{-- Tabel --}}
@@ -187,7 +214,11 @@
                 @empty
                     <tr>
                         <td colspan="8" class="px-6 py-12 text-center text-gray-400 text-sm">
-                            Belum ada default task. Tambahkan default task pertama.
+                            @if($search !== '')
+                                Tidak ada default task yang cocok dengan "{{ $search }}".
+                            @else
+                                Belum ada default task. Tambahkan default task pertama.
+                            @endif
                         </td>
                     </tr>
                 @endforelse
@@ -307,7 +338,13 @@
             </div>
         @empty
             <div class="bg-white rounded-xl border border-gray-200 px-6 py-12 text-center">
-                <p class="text-sm text-gray-400">Belum ada default task. Tambahkan default task pertama.</p>
+                <p class="text-sm text-gray-400">
+                    @if($search !== '')
+                        Tidak ada default task yang cocok dengan "{{ $search }}".
+                    @else
+                        Belum ada default task. Tambahkan default task pertama.
+                    @endif
+                </p>
             </div>
         @endforelse
     </div>

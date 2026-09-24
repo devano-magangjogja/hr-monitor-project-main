@@ -463,7 +463,7 @@ class TaskRepository
      * Ambil semua tugas yang masuk ke role tertentu (cs, ob, programmer, vg, dg, pm, dst.)
      * dengan pola yang sama seperti getAllTasksForAssistant.
      */
-    public function getAllTasksForRole(string $role, int $perPage = 20, ?string $date = null)
+    public function getAllTasksForRole(string $role, int $perPage = 20, ?string $date = null, ?string $search = null)
     {
         $filterDate = $date ?? Carbon::today()->toDateString();
         /** @var Builder $query */
@@ -507,6 +507,15 @@ class TaskRepository
                                 });
                          });
                   });
+            })
+            ->when($search, function ($q) use ($search) {
+                $q->where(function ($w) use ($search) {
+                    $w->where('title', 'like', "%{$search}%")
+                        ->orWhere('description', 'like', "%{$search}%")
+                        ->orWhereHas('assignedUsers', function ($u) use ($search) {
+                            $u->where('name', 'like', "%{$search}%");
+                        });
+                });
             })
             ->orderByDesc('task_date')
             ->orderByDesc('created_at')

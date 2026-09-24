@@ -1,4 +1,7 @@
 @extends('layouts.app')
+@php
+    $brandLogos = \App\Models\Brand::whereNotNull('logo_path')->pluck('logo_path', 'name');
+@endphp
 @section('title', 'Manajemen Sosmed & Approval')
 @section('page-title', 'Manajemen Sosmed & Approval')
 @section('page-subtitle', 'Delegasi akun sosmed ke PM/Staff & final approval (Level 2)')
@@ -244,9 +247,17 @@
                                         <tr class="hover:bg-gray-50/80 transition align-middle">
                                             {{-- Nama Akun --}}
                                             <td class="px-4 py-3.5 min-w-[180px]">
-                                                <span class="font-semibold text-gray-800 block break-words" title="{{ $acc->name }}">
-                                                    {{ $acc->name }}
-                                                </span>
+                                                <div class="flex items-center gap-1.5 min-w-0">
+                                                    <span class="font-semibold text-gray-800 truncate min-w-0" title="{{ $acc->name }}">
+                                                        {{ $acc->name }}
+                                                    </span>
+                                                    <x-brand-badge :acc="$acc" :logos="$brandLogos" />
+                                                </div>
+                                                @if($acc->notes)
+                                                    <p class="text-xs text-gray-400 mt-0.5 truncate max-w-full block" title="{{ $acc->notes }}">
+                                                        {{ $acc->notes }}
+                                                    </p>
+                                                @endif
                                             </td>
 
                                             {{-- Platform --}}
@@ -478,7 +489,10 @@
                             <div class="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
                                 <div class="flex items-start justify-between gap-3 mb-3">
                                     <div class="min-w-0">
-                                        <p class="font-semibold text-gray-800 truncate">{{ $acc->name }}</p>
+                                        <div class="flex items-center gap-1.5 min-w-0">
+                                            <p class="font-semibold text-gray-800 truncate min-w-0">{{ $acc->name }}</p>
+                                            <x-brand-badge :acc="$acc" :logos="$brandLogos" />
+                                        </div>
                                         <span class="inline-flex items-center gap-1 mt-1 px-2 py-0.5 rounded-md text-xs font-medium border {{ $acc->platform_color }}">
                                             {{ $acc->platform_icon }} {{ $acc->platform }}
                                         </span>
@@ -905,7 +919,10 @@
                             @endphp
                             <tr class="hover:bg-gray-50/80 transition align-middle">
                                 <td class="px-4 py-3.5">
-                                    <p class="font-semibold text-gray-800 truncate">{{ $acc->name }}</p>
+                                    <div class="flex items-center gap-1.5 min-w-0">
+                                        <p class="font-semibold text-gray-800 truncate min-w-0">{{ $acc->name }}</p>
+                                        <x-brand-badge :acc="$acc" :logos="$brandLogos" />
+                                    </div>
                                     @if($acc->link)
                                         <a href="{{ $acc->link }}" target="_blank"
                                             class="inline-flex items-center gap-1 text-xs text-primary-600 hover:underline mt-0.5">
@@ -991,7 +1008,10 @@
                     <div class="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
                         <div class="flex items-start justify-between gap-3 mb-3">
                             <div class="min-w-0 flex-1">
-                                <p class="font-semibold text-gray-800 text-sm truncate">{{ $acc->name }}</p>
+                                <div class="flex items-center gap-1.5 min-w-0">
+                                    <p class="font-semibold text-gray-800 text-sm truncate min-w-0">{{ $acc->name }}</p>
+                                    <x-brand-badge :acc="$acc" :logos="$brandLogos" />
+                                </div>
                                 <span
                                     class="inline-flex items-center gap-1 mt-1 px-2 py-0.5 rounded-md text-[10px] font-medium border whitespace-nowrap {{ $acc->platform_color }}">
                                     {{ $acc->platform_icon }} {{ $acc->platform }}

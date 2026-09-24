@@ -152,6 +152,8 @@ class TaskController extends Controller
     public function roleTasks(Request $request, \App\Models\Role $role)
     {
         $date = $request->query('date', Carbon::today()->toDateString());
+        $tab = in_array($request->query('tab'), ['tasks', 'sosmed'], true) ? $request->query('tab') : 'tasks';
+        $search = trim((string) $request->query('search', ''));
 
         // Pastikan tugas default harian sudah ter-generate untuk tanggal yang dipantau
         if ($date === Carbon::today()->toDateString()) {
@@ -159,7 +161,7 @@ class TaskController extends Controller
                 app(\App\Services\DefaultTaskService::class)->generateDailyTasks();
             } catch (\Throwable) {}
         }
-        $tasks = $this->taskService->getAllTasksForRole($role->name, 20, $date);
+        $tasks = $this->taskService->getAllTasksForRole($role->name, 20, $date, $search !== '' ? $search : null);
 
         // ── Tugas Sosmed: gunakan SosmedAccount sebagai sumber utama ────────
         $roleUserIds = User::where('role', $role->name)->where('is_active', true)->pluck('id');
@@ -268,7 +270,27 @@ class TaskController extends Controller
                 break;
         }
 
-        return view('admin.tasks.role-tasks', compact('tasks', 'role', 'date', 'sosmedPending'));
+        // Pencarian pada tabel Monitoring Sosmed (nama akun, platform, brand, pelaksana, status)
+        if ($search !== '') {
+            $needle = mb_strtolower($search);
+            $sosmedPending = $sosmedPending->filter(function ($row) use ($needle) {
+                $haystacks = [
+                    $row->account?->name,
+                    $row->account?->platform,
+                    $row->account?->brand,
+                    $row->executor_name,
+                    $row->status_label,
+                ];
+                foreach ($haystacks as $v) {
+                    if ($v !== null && str_contains(mb_strtolower((string) $v), $needle)) {
+                        return true;
+                    }
+                }
+                return false;
+            })->values();
+        }
+
+        return view('admin.tasks.role-tasks', compact('tasks', 'role', 'date', 'sosmedPending', 'tab', 'search'));
     }
 
     // ── Force Destroy (Admin hapus task siapapun) ────────

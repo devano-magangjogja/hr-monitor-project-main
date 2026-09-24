@@ -275,26 +275,11 @@
                                         <tr class="hover:bg-gray-50/80 transition align-middle">
                                             {{-- Nama Akun --}}
                                             <td class="px-4 py-3.5 min-w-[180px]">
-                                                <div class="flex items-center gap-1.5 flex-wrap">
-                                                    <span class="font-semibold text-gray-800 break-words" title="{{ $acc->name }}">
+                                                <div class="flex items-center gap-1.5 min-w-0">
+                                                    <span class="font-semibold text-gray-800 truncate min-w-0" title="{{ $acc->name }}">
                                                         {{ $acc->name }}
                                                     </span>
-                                                    @if($acc->brand)
-                                                        @if(($brandLogos[$acc->brand] ?? null))
-                                                            <img src="{{ asset('storage/' . $brandLogos[$acc->brand]) }}"
-                                                                alt="Brand: {{ $acc->brand }}"
-                                                                title="Brand: {{ $acc->brand }}"
-                                                                class="w-5 h-5 shrink-0 rounded object-contain bg-white border border-gray-200 p-px">
-                                                        @else
-                                                            <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-semibold bg-indigo-50 text-indigo-700 border border-indigo-200"
-                                                                title="Brand: {{ $acc->brand }}">
-                                                                <svg class="w-2.5 h-2.5 text-indigo-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/>
-                                                                </svg>
-                                                                {{ $acc->brand }}
-                                                            </span>
-                                                        @endif
-                                                    @endif
+                                                    <x-brand-badge :acc="$acc" :logos="$brandLogos" />
                                                 </div>
                                                 @if($acc->notes)
                                                     <p class="text-xs text-gray-400 mt-0.5 truncate max-w-full block" title="{{ $acc->notes }}">
@@ -519,9 +504,12 @@
                                 {{-- Header: Nama + Platform + Aksi --}}
                                 <div class="flex items-start justify-between gap-2 mb-3">
                                     <div class="min-w-0">
-                                        <p class="font-semibold text-gray-800 text-sm truncate" title="{{ $acc->name }}">
-                                            {{ $acc->name }}
-                                        </p>
+                                        <div class="flex items-center gap-1.5 min-w-0">
+                                            <p class="font-semibold text-gray-800 text-sm truncate min-w-0" title="{{ $acc->name }}">
+                                                {{ $acc->name }}
+                                            </p>
+                                            <x-brand-badge :acc="$acc" :logos="$brandLogos" />
+                                        </div>
                                         <span class="inline-flex items-center gap-1 mt-1 px-2 py-0.5 rounded-md text-xs font-medium border {{ $acc->platform_color }}">
                                             {{ $acc->platform_icon }} {{ $acc->platform }}
                                         </span>

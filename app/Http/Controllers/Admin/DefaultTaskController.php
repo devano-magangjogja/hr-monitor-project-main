@@ -17,7 +17,7 @@ class DefaultTaskController extends Controller
     ) {
     }
 
-    public function index()
+    public function index(Request $request)
     {
         $defaultTasks = $this->defaultTaskService->getAll();
         $roles = \App\Models\Role::where('name', '!=', 'admin')->orderBy('id')->get();
@@ -30,7 +30,26 @@ class DefaultTaskController extends Controller
             ->groupBy(fn($u) => $u->roleModel?->name ?? 'unknown');
         $usersById = $usersByRole->flatten()->keyBy('id');
 
-        return view('admin.default-tasks.index', compact('defaultTasks', 'roles', 'usersByRole', 'usersById'));
+        // Pencarian: judul, deskripsi, target role, atau nama user terpilih
+        $search = trim((string) $request->query('search', ''));
+        if ($search !== '') {
+            $needle = mb_strtolower($search);
+            $defaultTasks = $defaultTasks->filter(function ($task) use ($needle, $roles, $usersById) {
+                $roleLabel = $roles->firstWhere('name', $task->target_role)?->label ?? $task->target_role;
+                $haystacks = [$task->title, $task->description, $roleLabel];
+                foreach ((array) ($task->assigned_user_ids ?? []) as $uid) {
+                    $haystacks[] = $usersById->get($uid)?->name;
+                }
+                foreach ($haystacks as $v) {
+                    if ($v !== null && str_contains(mb_strtolower((string) $v), $needle)) {
+                        return true;
+                    }
+                }
+                return false;
+            })->values();
+        }
+
+        return view('admin.default-tasks.index', compact('defaultTasks', 'roles', 'usersByRole', 'usersById', 'search'));
     }
 
     public function store(Request $request)

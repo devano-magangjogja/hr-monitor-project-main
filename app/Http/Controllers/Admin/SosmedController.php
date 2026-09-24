@@ -624,14 +624,25 @@ class SosmedController extends Controller
 
             $targetUser = User::find($userId);
             $userName = $targetUser ? $targetUser->name : "User #{$userId}";
+
+            // Lepas otomatis dari daftar kelola sosmed jika sudah tidak ada yang mengelola sama sekali
+            $removed = !$account->staffUsers()->exists()
+                && !$account->pm_id && !$account->assistant_id && !$account->supervisor_staff_id;
+            if ($removed) {
+                $account->update(['is_in_sosmed' => false]);
+            }
+
             $this->logActivity('sosmed.unassigned', 'Sosmed', "Melepas akses user '{$userName}' dari akun '{$name}' ({$platform})", $account);
 
             return redirect()->route('admin.sosmed.index', ['tab' => 'accounts'])
-                ->with('success', "Akses user '{$userName}' untuk akun '{$name}' berhasil dilepas.");
+                ->with('success', $removed
+                    ? "Akses user '{$userName}' dilepas. Akun '{$name}' ikut hilang dari daftar kelola sosmed karena sudah tidak ada yang mengelola."
+                    : "Akses user '{$userName}' untuk akun '{$name}' berhasil dilepas.");
         }
 
         $account->staffUsers()->detach();
         $account->update([
+            'is_in_sosmed'        => false,
             'pm_id'               => null,
             'assistant_id'        => null,
             'supervisor_staff_id' => null,
@@ -644,7 +655,7 @@ class SosmedController extends Controller
         $this->logActivity('sosmed.unassigned', 'Sosmed', "Melepas seluruh penugasan akun '{$name}' ({$platform})", $account);
 
         return redirect()->route('admin.sosmed.index', ['tab' => 'accounts'])
-            ->with('success', "Seluruh penugasan akun '{$name}' berhasil dilepas. Akun tetap berada di daftar kelola sosmed dengan status belum ditugaskan.");
+            ->with('success', "Seluruh penugasan akun '{$name}' berhasil dilepas. Akun dihapus dari daftar kelola sosmed karena sudah tidak ada yang mengelola.");
     }
 
     public function destroyAccount(SosmedAccount $account)

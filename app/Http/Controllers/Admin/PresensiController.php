@@ -74,13 +74,39 @@ class PresensiController extends Controller
             ->withQueryString()
             ->fragment('tabel-hadir');
 
-        // 2. Tabel Tidak Hadir - 5 data per halaman
+        // 2. Tabel Tidak Hadir - 15 data per halaman
         $presensiTidakHadir = (clone $baseQuery)
             ->where('keterangan', 'Tidak Hadir')
             ->orderBy('id', 'desc')
             ->paginate(15, ['*'], 'page_tidak_hadir')
             ->withQueryString()
             ->fragment('tabel-tidak-hadir');
+
+        // Tab aktif: hadir | belum | tidak_hadir
+        $tab = in_array($request->input('tab'), ['hadir', 'belum', 'tidak_hadir'], true)
+            ? $request->input('tab') : 'hadir';
+
+        // 3. Tab Belum Dipresensi - pemagang aktif tanpa catatan presensi pada tanggal (ops: kantor) ini
+        $belumKantor = $request->input('kantor');
+        $pemagangBelum = Pemagang::whereDoesntHave('presensis', function ($q) use ($tanggal, $belumKantor) {
+            $q->where('tanggal', $tanggal);
+            if ($belumKantor) {
+                $q->where('kantor', $belumKantor);
+            }
+        })
+            ->when($request->filled('divisi'), fn($q) => $q->where('divisi', $request->input('divisi')))
+            ->when($request->filled('search'), function ($q) use ($request) {
+                $s = $request->input('search');
+                $q->where(function ($w) use ($s) {
+                    $w->where('nama_lengkap', 'like', "%{$s}%")
+                        ->orWhere('no_hp', 'like', "%{$s}%")
+                        ->orWhere('kampus', 'like', "%{$s}%");
+                });
+            })
+            ->orderBy('nama_lengkap', 'asc')
+            ->paginate(15, ['*'], 'page_belum')
+            ->withQueryString()
+            ->fragment('tabel-belum');
 
         // Statistik Ringkasan untuk TANGGAL YANG DIPILIH
         $statsQuery = Presensi::where('tanggal', $tanggal)->where('session', 'entry');
@@ -96,6 +122,7 @@ class PresensiController extends Controller
             'terlambat' => (clone $statsQuery)->where('keterangan', 'Terlambat')->count(),
             'tidak_hadir' => (clone $statsQuery)->where('keterangan', 'Tidak Hadir')->count(),
             'total_hadir' => (clone $statsQuery)->whereIn('keterangan', ['Lebih Awal', 'Tepat Waktu', 'Terlambat'])->count(),
+            'belum_presensi' => Pemagang::whereDoesntHave('presensis', fn($q) => $q->where('tanggal', $tanggal))->count(),
         ];
 
         // List pemagang untuk dropdown modal — hanya yang BELUM tercatat presensinya pada tanggal ini
@@ -128,6 +155,8 @@ class PresensiController extends Controller
         return view('admin.presensi.presensi', compact(
             'presensiHadir',
             'presensiTidakHadir',
+            'pemagangBelum',
+            'tab',
             'stats',
             'pemagangs',
             'divisiList',
