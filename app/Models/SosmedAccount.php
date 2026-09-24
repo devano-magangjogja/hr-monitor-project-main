@@ -67,6 +67,73 @@ class SosmedAccount extends Model
     }
 
     /**
+     * Peta userId => daftar akun yang ia kelola (sebagai eksekutor/PM/asisten/staff pengawas).
+     * Dipakai untuk info kecil di dropdown penugasan.
+     *
+     * @return array<int, array<int, array{id:int,name:string,platform:string}>>
+     */
+    public static function managedCountsMap(): array
+    {
+        $accounts = static::query()
+            ->select('id', 'name', 'platform', 'pm_id', 'assistant_id', 'supervisor_staff_id')
+            ->with(['staffUsers' => fn($q) => $q->select('users.id', 'sosmed_account_users.sosmed_account_id')])
+            ->get();
+
+        $map = [];
+        foreach ($accounts as $a) {
+            $item = ['id' => $a->id, 'name' => $a->name, 'platform' => $a->platform];
+            $userIds = array_filter([$a->pm_id, $a->assistant_id, $a->supervisor_staff_id]);
+            foreach ($a->staffUsers as $u) {
+                $userIds[] = $u->id;
+            }
+            foreach (array_unique($userIds) as $uid) {
+                $map[(int) $uid][$a->id] = $item;
+            }
+        }
+        return array_map(fn($rows) => array_values($rows), $map);
+    }
+
+    /**
+     * Daftar lengkap akun yang dikelola satu user, beserta peran(nya) di tiap akun.
+     *
+     * @return \Illuminate\Contracts\Pagination\LengthAwarePaginator<int, array{account:SosmedAccount, roles:array<int,string>}>
+     */
+    public static function managedByUser(int $userId, ?string $search = null, int $perPage = 10)
+    {
+        $accounts = static::query()
+            ->with(['pmUser:id,name', 'assistantUser:id,name', 'supervisorStaff:id,name', 'creator:id,name'])
+            ->where(function ($q) use ($userId) {
+                $q->where('pm_id', $userId)
+                  ->orWhere('assistant_id', $userId)
+                  ->orWhere('supervisor_staff_id', $userId)
+                  ->orWhereHas('staffUsers', fn($u) => $u->where('users.id', $userId));
+            })
+            ->when($search !== null && $search !== '', function ($q) use ($search) {
+                $q->where(function ($qq) use ($search) {
+                    $qq->where('name', 'like', "%{$search}%")
+                       ->orWhere('username', 'like', "%{$search}%")
+                       ->orWhere('platform', 'like', "%{$search}%")
+                       ->orWhere('brand', 'like', "%{$search}%");
+                });
+            })
+            ->orderBy('platform')
+            ->orderBy('name')
+            ->paginate($perPage)
+            ->withQueryString();
+
+        $accounts->setCollection($accounts->getCollection()->map(function ($a) use ($userId) {
+            $roles = [];
+            if ($a->pm_id == $userId) $roles[] = 'PM';
+            if ($a->assistant_id == $userId) $roles[] = 'Asisten';
+            if ($a->supervisor_staff_id == $userId) $roles[] = 'Staff Pengawas';
+            if ($a->staffUsers->contains('id', $userId)) $roles[] = 'Eksekutor';
+            return ['account' => $a, 'roles' => $roles];
+        }));
+
+        return $accounts;
+    }
+
+    /**
      * Backward-compatibility accessor for singular staffUser
      */
     public function getStaffUserAttribute(): ?User
