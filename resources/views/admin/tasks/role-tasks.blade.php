@@ -10,26 +10,99 @@
 
 @section('content')
 
+@php
+    $sosmedRoles = ['hr_staff', 'hr_assistant', 'pm', 'sosmed', 'digital_marketing'];
+    $hasSosmedMonitoring = in_array($role->name, $sosmedRoles);
+    $activeTab = $hasSosmedMonitoring ? $tab : 'tasks';
+    $tabUrl = fn ($t) => route('admin.tasks.by-role', array_filter([
+        'role' => $role->name,
+        'date' => $date,
+        'search' => request('search'),
+        'tab' => $t,
+    ]));
+@endphp
+
 <div class="flex flex-wrap items-center justify-between gap-3 mb-6">
     <p class="text-sm text-gray-500">
-        Total: <span class="font-semibold text-gray-700">{{ $tasks->total() }}</span> tugas
+        Total: <span class="font-semibold text-gray-700">{{ $activeTab === 'sosmed' ? $sosmedPending->count() : $tasks->total() }}</span>
+        {{ $activeTab === 'sosmed' ? 'monitoring sosmed' : 'tugas' }}
         @if($date === now()->toDateString())
             <span class="text-xs text-primary-600 font-medium ml-1">(hari ini)</span>
         @else
             <span class="text-xs text-amber-600 font-medium ml-1">— {{ \Carbon\Carbon::parse($date)->translatedFormat('d M Y') }}</span>
         @endif
     </p>
-    <form method="GET" action="" class="flex items-center gap-2">
-        <label class="text-xs text-gray-500">Filter tanggal:</label>
-        <input type="date" name="date" value="{{ $date }}"
-               class="h-8 px-3 text-xs bg-white border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 text-gray-700 transition"
-               onchange="this.form.submit()">
+    <div class="flex items-center gap-2 flex-wrap">
+        {{-- Search per tab --}}
+        <form method="GET" action="" class="flex items-center gap-1.5">
+            <input type="hidden" name="date" value="{{ $date }}">
+            <input type="hidden" name="tab" value="{{ $activeTab }}">
+            <div class="relative">
+                <span class="absolute inset-y-0 left-0 flex items-center pl-2.5 pointer-events-none text-gray-400">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                    </svg>
+                </span>
+                <input type="search" name="search" value="{{ request('search') }}"
+                    placeholder="{{ $activeTab === 'sosmed' ? 'Cari akun, pelaksana, status...' : 'Cari judul, deskripsi, penerima...' }}"
+                    class="w-48 lg:w-60 pl-8 pr-2.5 py-1.5 text-xs bg-white border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 text-gray-700 transition">
+            </div>
+            <button type="submit"
+                class="px-3 py-1.5 text-xs font-semibold bg-primary-600 hover:bg-primary-700 text-white rounded-lg transition">
+                Cari
+            </button>
+            @if(request('search'))
+                <a href="{{ route('admin.tasks.by-role', array_filter(['role' => $role->name, 'date' => $date, 'tab' => $activeTab])) }}"
+                    class="text-xs text-gray-500 hover:text-red-600 font-medium whitespace-nowrap">Reset</a>
+            @endif
+        </form>
+        <form method="GET" action="" class="flex items-center gap-2">
+            <input type="hidden" name="tab" value="{{ $activeTab }}">
+            <input type="hidden" name="search" value="{{ e(request('search')) }}">
+            <label class="text-xs text-gray-500">Filter tanggal:</label>
+            <input type="date" name="date" value="{{ $date }}"
+                   class="h-8 px-3 text-xs bg-white border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 text-gray-700 transition"
+                   onchange="this.form.submit()">
+        </form>
         @if($date !== now()->toDateString())
-            <a href="?date={{ now()->toDateString() }}" class="text-xs text-primary-600 hover:underline whitespace-nowrap">Hari ini</a>
+            <a href="{{ route('admin.tasks.by-role', array_filter(['role' => $role->name, 'date' => now()->toDateString(), 'search' => request('search'), 'tab' => $activeTab])) }}"
+               class="text-xs text-primary-600 hover:underline whitespace-nowrap">Hari ini</a>
         @endif
-    </form>
+    </div>
 </div>
 
+@if($hasSosmedMonitoring)
+    {{-- ── Tab Bar: Tugas Harian / Monitoring Sosmed ───────────── --}}
+    <div class="flex items-center gap-1 sm:gap-2 border-b border-gray-200 mb-5 overflow-x-auto overflow-y-hidden -mx-1 px-1">
+        <a href="{{ $tabUrl('tasks') }}"
+            class="inline-flex items-center gap-2 px-3 sm:px-4 py-2.5 text-xs sm:text-sm font-semibold whitespace-nowrap border-b-2 -mb-px transition
+                {{ $activeTab === 'tasks'
+                    ? 'border-primary-600 text-primary-700'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300' }}">
+            <span class="w-2 h-2 rounded-full bg-blue-500 flex-shrink-0"></span>
+            Tugas Harian
+            <span
+                class="px-1.5 py-0.5 rounded-full text-[10px] font-bold {{ $activeTab === 'tasks' ? 'bg-primary-100 text-primary-700' : 'bg-gray-100 text-gray-500' }}">
+                {{ $tasks->total() }}
+            </span>
+        </a>
+        <a href="{{ $tabUrl('sosmed') }}"
+            class="inline-flex items-center gap-2 px-3 sm:px-4 py-2.5 text-xs sm:text-sm font-semibold whitespace-nowrap border-b-2 -mb-px transition
+                {{ $activeTab === 'sosmed'
+                    ? 'border-primary-600 text-primary-700'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300' }}">
+            <span class="w-2 h-2 rounded-full bg-amber-500 flex-shrink-0"></span>
+            Monitoring Sosmed
+            <span
+                class="px-1.5 py-0.5 rounded-full text-[10px] font-bold {{ $activeTab === 'sosmed' ? 'bg-primary-100 text-primary-700' : 'bg-gray-100 text-gray-500' }}">
+                {{ $sosmedPending->count() }}
+            </span>
+        </a>
+    </div>
+@endif
+
+@if($activeTab === 'tasks')
 <div class="bg-white rounded-xl border border-gray-200 overflow-hidden">
     <div class="overflow-x-auto">
     <table class="w-full text-xs sm:text-sm min-w-[800px]">
@@ -223,14 +296,11 @@
         <div>{{ $tasks->appends(request()->query())->links() }}</div>
     </div>
 @endif
+@endif
 
-{{-- ── SECTION: MONITORING TUGAS SOSMED ────────────────────────────── --}}
-@php
-    $sosmedRoles = ['hr_staff', 'hr_assistant', 'pm', 'sosmed', 'digital_marketing'];
-    $hasSosmedMonitoring = in_array($role->name, $sosmedRoles);
-@endphp
-@if($hasSosmedMonitoring)
-<div class="mt-8">
+{{-- ── TAB: MONITORING TUGAS SOSMED ───────────────────────────────── --}}
+@if($hasSosmedMonitoring && $activeTab === 'sosmed')
+<div>
     <div class="flex items-center gap-3 mb-3">
         <h3 class="text-sm font-semibold text-gray-800">Monitoring Tugas Sosmed</h3>
         @if(isset($sosmedPending) && $sosmedPending->isNotEmpty())

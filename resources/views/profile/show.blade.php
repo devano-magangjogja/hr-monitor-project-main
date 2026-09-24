@@ -71,7 +71,7 @@
                 <div class="text-right">
                     <p class="text-xs text-gray-400">Bergabung sejak</p>
                     <p class="text-xs sm:text-sm font-medium text-gray-700 mt-0.5">
-                        {{ $user->created_at->locale('id')->translatedFormat('d M Y') }}
+                        {{ $user->created_at ? $user->created_at->locale('id')->translatedFormat('d M Y') : '—' }}
                     </p>
                 </div>
 

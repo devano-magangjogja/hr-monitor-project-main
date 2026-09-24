@@ -118,7 +118,7 @@
                         {{ Auth::user()->name }}
                     </a>
                     <p class="text-[11px] sm:text-xs text-slate-400 truncate">
-                        {{ Auth::user()->role_label }}
+                        {{ Auth::user()->role === 'admin' ? 'Admin' : Auth::user()->role_label }}
                     </p>
                 </div>
                 <form method="POST" action="{{ route('logout') }}">
