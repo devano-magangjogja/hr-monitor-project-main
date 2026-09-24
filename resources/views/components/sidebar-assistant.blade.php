@@ -13,7 +13,7 @@
 @php
     $taskActive = request()->routeIs('assistant.tasks.*');
 @endphp
-<div x-data="{ open: {{ $taskActive ? 'true' : 'false' }} }">
+<div @click.outside="if (sidebarCollapsed) open = false" x-data="{ open: {{ $taskActive ? 'true' : 'false' }} }">
     <button @click="open = !open" class="w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-all
                    {{ $taskActive ? 'bg-white/10 text-white' : 'text-slate-400 hover:bg-white/5 hover:text-white' }}">
         <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -27,7 +27,7 @@
         </svg>
     </button>
 
-    <div x-show="open" x-transition class="mt-1 ml-4 pl-4 border-l border-white/10 space-y-1">
+    <div x-cloak x-show="open" x-transition class="mt-1 ml-4 pl-4 border-l border-white/10 space-y-1">
 
         {{-- Semua Tugas --}}
         <a href="{{ route('assistant.tasks.all') }}"
@@ -142,7 +142,7 @@
 
 {{-- Presensi (collapsible) --}}
 @php($presensiActive = request()->routeIs('assistant.presensi.*') && !request()->routeIs('assistant.presensi.laporan'))
-<div x-data="{ open: {{ $presensiActive ? 'true' : 'false' }} }">
+<div @click.outside="if (sidebarCollapsed) open = false" x-data="{ open: {{ $presensiActive ? 'true' : 'false' }} }">
 <button @click="open = !open" class="w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-all
           {{ $presensiActive ? 'bg-white/10 text-white' : 'text-slate-400 hover:bg-white/5 hover:text-white' }}">
     <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -152,7 +152,7 @@
     <span class="flex-1 text-left">Presensi</span>
     <svg class="w-4 h-4 transition-transform" :class="open ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
 </button>
-<div x-show="open" x-transition class="mt-1 ml-4 pl-4 border-l border-white/10 space-y-1">
+<div x-cloak x-show="open" x-transition class="mt-1 ml-4 pl-4 border-l border-white/10 space-y-1">
     <a href="{{ route('assistant.presensi.index') }}" class="block rounded-lg px-3 py-2 text-sm {{ request()->routeIs('assistant.presensi.index') ? 'bg-white/10 text-white' : 'text-slate-400 hover:bg-white/5 hover:text-white' }}">Presensi Masuk</a>
     <a href="{{ route('assistant.presensi.istirahat') }}" class="block rounded-lg px-3 py-2 text-sm {{ request()->routeIs('assistant.presensi.istirahat*') ? 'bg-white/10 text-white' : 'text-slate-400 hover:bg-white/5 hover:text-white' }}">Presensi Istirahat</a>
 </div>

@@ -1,4 +1,7 @@
 @extends('layouts.app')
+@php
+    $brandLogos = \App\Models\Brand::whereNotNull('logo_path')->pluck('logo_path', 'name');
+@endphp
 @section('title', 'Tugas & Akun Sosmed Saya')
 @section('page-title', 'Tugas & Akun Sosmed Saya')
 @section('page-subtitle', 'Kelola akun yang kamu pegang dan selesaikan tugas harian untuk hari ini')
@@ -110,8 +113,10 @@
 
                                 {{-- Nama Akun --}}
                                 <td class="px-4 py-3.5 min-w-0">
-                                    <p class="font-semibold text-gray-800 truncate block" title="{{ $acc->name }}">{{ $acc->name }}
-                                    </p>
+                                    <div class="flex items-center gap-1.5 min-w-0">
+                                        <p class="font-semibold text-gray-800 truncate min-w-0" title="{{ $acc->name }}">{{ $acc->name }}</p>
+                                        <x-brand-badge :acc="$acc" :logos="$brandLogos" />
+                                    </div>
                                     @if($isRejected && $todayTask?->rejection_note)
                                         <p
                                             class="text-xs text-rose-600 mt-1 bg-rose-50 px-2 py-1 rounded border border-rose-200 leading-snug">
@@ -215,7 +220,8 @@
                         <div class="flex items-start justify-between gap-3 mb-3">
                             <div class="min-w-0 flex-1">
                                 <div class="flex items-center gap-2">
-                                    <p class="font-semibold text-gray-800 text-sm truncate">{{ $acc->name }}</p>
+                                    <p class="font-semibold text-gray-800 text-sm truncate min-w-0">{{ $acc->name }}</p>
+                                    <x-brand-badge :acc="$acc" :logos="$brandLogos" />
                                     <span
                                         class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-medium border whitespace-nowrap {{ $acc->platform_color }}">
                                         {{ $acc->platform_icon }} {{ $acc->platform }}

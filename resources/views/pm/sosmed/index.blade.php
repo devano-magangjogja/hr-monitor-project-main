@@ -1,4 +1,7 @@
 @extends('layouts.app')
+@php
+    $brandLogos = \App\Models\Brand::whereNotNull('logo_path')->pluck('logo_path', 'name');
+@endphp
 @section('title', 'Manajemen Sosmed')
 @section('page-title', 'Manajemen Sosmed')
 @section('page-subtitle', 'Kelola akun tanggung jawab Anda & verifikasi hasil tim sosmed')
@@ -157,7 +160,10 @@
 
                                     {{-- Nama Akun --}}
                                     <td class="px-4 py-3.5 min-w-0">
-                                        <p class="truncate font-semibold text-gray-800 block" title="{{ $acc->name }}">{{ $acc->name }}</p>
+                                        <div class="flex items-center gap-1.5 min-w-0">
+                                            <p class="truncate font-semibold text-gray-800 min-w-0" title="{{ $acc->name }}">{{ $acc->name }}</p>
+                                            <x-brand-badge :acc="$acc" :logos="$brandLogos" />
+                                        </div>
                                         @if($isRejected && $todayTask?->rejection_note)
                                             <p class="mt-1 rounded border border-rose-200 bg-rose-50 px-2 py-1 text-xs leading-snug text-rose-600">
                                                 ↩ "{{ $todayTask->rejection_note }}"
@@ -252,7 +258,10 @@
                             <div class="flex items-start justify-between gap-3 mb-3">
                                 <div class="min-w-0 flex-1">
                                     <div class="flex items-center gap-2">
-                                        <p class="font-semibold text-gray-800 text-sm truncate">{{ $acc->name }}</p>
+                                        <div class="flex items-center gap-1.5 min-w-0">
+                                            <p class="font-semibold text-gray-800 text-sm truncate min-w-0">{{ $acc->name }}</p>
+                                            <x-brand-badge :acc="$acc" :logos="$brandLogos" />
+                                        </div>
                                         <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-medium border whitespace-nowrap {{ $acc->platform_color }}">
                                             {{ $acc->platform_icon }} {{ $acc->platform }}
                                         </span>
@@ -416,7 +425,10 @@
                                                 @endphp
                                                 <tr class="hover:bg-gray-50/60 transition align-middle">
                                                     <td class="px-4 py-3">
-                                                        <p class="font-semibold text-gray-800 truncate text-sm">{{ $acc->name }}</p>
+                                                        <div class="flex items-center gap-1.5 min-w-0">
+                                                            <p class="font-semibold text-gray-800 truncate text-sm min-w-0">{{ $acc->name }}</p>
+                                                            <x-brand-badge :acc="$acc" :logos="$brandLogos" />
+                                                        </div>
                                                     </td>
                                                     <td class="px-4 py-3">
                                                         <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-xs font-medium border {{ $acc->platform_color }}">
@@ -489,7 +501,10 @@
                                         @endphp
                                         <div class="px-4 py-3 flex items-center justify-between gap-3">
                                             <div class="min-w-0">
-                                                <p class="font-semibold text-gray-800 text-sm truncate">{{ $acc->name }}</p>
+                                                <div class="flex items-center gap-1.5 min-w-0">
+                                            <p class="font-semibold text-gray-800 text-sm truncate min-w-0">{{ $acc->name }}</p>
+                                            <x-brand-badge :acc="$acc" :logos="$brandLogos" />
+                                        </div>
                                                 <span class="inline-flex items-center gap-1 mt-0.5 px-2 py-0.5 rounded-md text-xs font-medium border {{ $acc->platform_color }}">
                                                     {{ $acc->platform_icon }} {{ $acc->platform }}
                                                 </span>

@@ -14,7 +14,7 @@
 
 {{-- Tugas Hari Ini (collapsible) --}}
 @php $taskActive = request()->routeIs('cs.tasks.*'); @endphp
-<div x-data="{ open: {{ $taskActive ? 'true' : 'false' }} }">
+<div @click.outside="if (sidebarCollapsed) open = false" x-data="{ open: {{ $taskActive ? 'true' : 'false' }} }">
     <button @click="open = !open"
             class="w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-all
                    {{ $taskActive ? 'bg-white/10 text-white' : 'text-slate-400 hover:bg-white/5 hover:text-white' }}">
@@ -28,7 +28,7 @@
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
         </svg>
     </button>
-    <div x-show="open" x-transition class="mt-1 ml-4 pl-4 border-l border-white/10 space-y-1">
+    <div x-cloak x-show="open" x-transition class="mt-1 ml-4 pl-4 border-l border-white/10 space-y-1">
         <a href="{{ route('cs.tasks.all') }}"
            class="flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-all
                   {{ request()->routeIs('cs.tasks.all') ? 'text-white bg-white/10' : 'text-slate-400 hover:text-white hover:bg-white/5' }}">
