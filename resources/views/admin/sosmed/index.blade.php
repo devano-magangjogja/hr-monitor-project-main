@@ -897,100 +897,111 @@
             <div class="hidden md:block overflow-x-auto rounded-lg border border-gray-100">
                 <table class="w-full table-fixed text-sm">
                     <colgroup>
-                        <col class="w-1/4"> {{-- Judul Tugas --}}
-                        <col class="w-36"> {{-- Akun --}}
-                        <col class="w-40"> {{-- PJ PM --}}
-                        <col class="w-36"> {{-- Pelaksana --}}
-                        <col class="w-40"> {{-- Verif PM --}}
-                        <col class="w-40"> {{-- Final HR --}}
-                        <col class="w-32"> {{-- Status --}}
+                        <col class="w-[20%]"> {{-- Judul Tugas --}}
+                        <col class="w-[12%]"> {{-- Akun --}}
+                        <col class="w-[10%]"> {{-- PJ PM --}}
+                        <col class="w-[10%]"> {{-- Pelaksana --}}
+                        <col class="w-[12%]"> {{-- Verif PM --}}
+                        <col class="w-[14%]"> {{-- Final HR --}}
+                        <col class="w-[14%]"> {{-- Status --}}
+                        <col class="w-[8%]">  {{-- Aksi --}}
                     </colgroup>
                     <thead>
                         <tr class="bg-gray-50 border-b border-gray-200 text-xs font-semibold text-gray-500 tracking-wide">
-                            <th class="px-4 py-3 text-left">Judul Tugas</th>
-                            <th class="px-4 py-3 text-left">Akun</th>
-                            <th class="px-4 py-3 text-left">PJ PM</th>
-                            <th class="px-4 py-3 text-left">Pelaksana</th>
-                            <th class="px-4 py-3 text-left">Verif PM</th>
-                            <th class="px-4 py-3 text-left">Final HR</th>
-                            <th class="px-4 py-3 text-left">Status</th>
+                            <th class="px-2.5 py-3 text-left">Judul Tugas</th>
+                            <th class="px-2.5 py-3 text-left">Akun</th>
+                            <th class="px-2.5 py-3 text-left">PJ PM</th>
+                            <th class="px-2.5 py-3 text-left">Pelaksana</th>
+                            <th class="px-2.5 py-3 text-left">Verif PM</th>
+                            <th class="px-2.5 py-3 text-left">Final HR</th>
+                            <th class="px-2.5 py-3 text-left">Status</th>
+                            <th class="px-2.5 py-3 text-center">Aksi</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-100">
                         @forelse($tasks as $t)
                             <tr class="hover:bg-gray-50/80 transition align-middle">
-                                <td class="px-4 py-3.5 min-w-0">
+                                <td class="px-2.5 py-2.5 min-w-0">
                                     <p class="font-semibold text-gray-800 truncate" title="{{ $t->title }}">{{ $t->title }}</p>
-                                    @if($t->description)
-                                        <p class="text-xs text-gray-400 mt-0.5 truncate max-w-full" title="{{ $t->description }}">
-                                            {{ $t->description }}
-                                        </p>
-                                    @endif
-                                    <div class="flex items-center gap-2 mt-1">
-                                        <span
-                                            class="px-1.5 py-0.5 text-[10px] rounded font-medium {{ $t->type === 'daily' ? 'bg-gray-100 text-gray-600' : 'bg-purple-50 text-purple-700' }}">
+                                    <div class="flex items-center gap-1.5 mt-0.5 min-w-0">
+                                        <span class="shrink-0 px-1.5 py-0.5 text-[10px] rounded font-medium {{ $t->type === 'daily' ? 'bg-gray-100 text-gray-600' : 'bg-purple-50 text-purple-700' }}">
                                             {{ $t->type === 'daily' ? 'Harian' : 'Custom' }}
                                         </span>
-                                        @if($t->hasLinks())
-                                            <button type="button"
-                                                onclick="openLinksPopup({{ json_encode($t->link_upload) }}, '{{ addslashes($t->title) }}')"
-                                                class="inline-flex items-center gap-0.5 text-xs text-primary-600 hover:underline">
-                                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                        d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
-                                                </svg>
-                                                {{ $t->link_count }} Bukti
-                                            </button>
-                                        @endif
+                                        <span class="text-[10px] text-gray-400 shrink-0">{{ $t->task_date->translatedFormat('d M Y') }}</span>
                                     </div>
                                 </td>
-                                <td class="px-4 py-3.5 text-xs">
-                                    <p class="font-medium text-gray-800 truncate">{{ $t->account?->name ?? '—' }}</p>
-                                    <p class="text-gray-400 mt-0.5">{{ $t->account?->platform }}</p>
+                                <td class="px-2.5 py-2.5 text-xs min-w-0">
+                                    <p class="font-medium text-gray-800 truncate" title="{{ $t->account?->name ?? '—' }}">{{ $t->account?->name ?? '—' }}</p>
+                                    <p class="text-gray-400 truncate">{{ $t->account?->platform }}</p>
                                 </td>
-                                <td class="px-4 py-3.5 text-xs whitespace-nowrap">
+                                <td class="px-2.5 py-2.5 text-xs min-w-0">
                                     @if($t->account?->pmUser)
-                                        <span class="font-medium text-gray-800">{{ $t->account->pmUser->name }}</span>
+                                        <span class="font-medium text-gray-800 truncate block" title="{{ $t->account->pmUser->name }}">{{ $t->account->pmUser->name }}</span>
                                     @else
                                         <span class="text-gray-300">—</span>
                                     @endif
                                 </td>
-                                <td class="px-4 py-3.5 text-xs whitespace-nowrap">
+                                <td class="px-2.5 py-2.5 text-xs min-w-0">
                                     @if($t->assignedUser)
-                                        <span class="font-medium text-gray-800">{{ $t->assignedUser->name }}</span>
+                                        <span class="font-medium text-gray-800 truncate block" title="{{ $t->assignedUser->name }}">{{ $t->assignedUser->name }}</span>
                                     @else
                                         <span class="text-gray-300">—</span>
                                     @endif
                                 </td>
-                                <td class="px-4 py-3.5 text-xs whitespace-nowrap">
+                                <td class="px-2.5 py-2.5 text-xs min-w-0">
                                     @if($t->verifiedBy)
-                                        <span class="text-blue-700 font-semibold block">{{ $t->verifiedBy->name }}</span>
-                                        <p class="text-[10px] text-gray-400 mt-0.5">{{ $t->verified_at?->translatedFormat('d M, H:i') }}
-                                        </p>
+                                        <span class="text-blue-700 font-semibold truncate block" title="{{ $t->verifiedBy->name }}">{{ $t->verifiedBy->name }}</span>
+                                        <p class="text-[10px] text-gray-400 mt-0.5">{{ $t->verified_at?->translatedFormat('d M, H:i') }}</p>
                                     @else
                                         <span class="text-gray-300">—</span>
                                     @endif
                                 </td>
-                                <td class="px-4 py-3.5 text-xs whitespace-nowrap">
+                                <td class="px-2.5 py-2.5 text-xs min-w-0">
                                     @if($t->hrVerifiedBy)
-                                        <span class="text-emerald-700 font-semibold block">{{ $t->hrVerifiedBy->name }}</span>
-                                        <p class="text-[10px] text-gray-400 mt-0.5">
-                                            {{ $t->hr_verified_at?->translatedFormat('d M, H:i') }}
-                                        </p>
+                                        <span class="text-emerald-700 font-semibold truncate block" title="{{ $t->hrVerifiedBy->name }}">{{ $t->hrVerifiedBy->name }}</span>
+                                        <p class="text-[10px] text-gray-400 mt-0.5">{{ $t->hr_verified_at?->translatedFormat('d M, H:i') }}</p>
                                     @else
                                         <span class="text-gray-300">—</span>
                                     @endif
                                 </td>
-                                <td class="px-4 py-3.5 whitespace-nowrap">
+                                <td class="px-2.5 py-2.5 min-w-0">
                                     <span
-                                        class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium {{ $t->status_badge_class }}">
-                                        {{ $t->status_label }}
+                                        class="inline-flex items-center justify-center px-2 py-0.5 rounded-full text-[11px] font-medium max-w-full {{ $t->status_badge_class }}">
+                                        <span class="truncate">{{ $t->status_label }}</span>
                                     </span>
+                                </td>
+                                <td class="px-2.5 py-2.5 text-center">
+                                    @php
+                                        $taskDetail = [
+                                            'title'       => $t->title,
+                                            'desc'        => $t->description,
+                                            'type'        => $t->type === 'daily' ? 'Harian' : 'Custom',
+                                            'date'        => $t->task_date->translatedFormat('d M Y'),
+                                            'account'     => $t->account?->name,
+                                            'platform'    => $t->account?->platform,
+                                            'pmPic'       => $t->account?->pmUser?->name,
+                                            'executor'    => $t->assignedUser?->name,
+                                            'pmVerified'  => $t->verifiedBy?->name,
+                                            'pmAt'        => $t->verified_at?->translatedFormat('d M Y, H:i'),
+                                            'hrVerified'  => $t->hrVerifiedBy?->name,
+                                            'hrAt'        => $t->hr_verified_at?->translatedFormat('d M Y, H:i'),
+                                            'status'      => $t->status_label,
+                                            'badgeClass'  => $t->status_badge_class,
+                                            'links'       => $t->link_upload ?? [],
+                                        ];
+                                    @endphp
+                                    <button type="button"
+                                        data-detail="{{ json_encode($taskDetail) }}"
+                                        onclick="openTaskDetail(JSON.parse(this.getAttribute('data-detail')))"
+                                        class="inline-flex items-center justify-center px-2 py-1 text-[11px] font-medium text-primary-700 bg-primary-50 hover:bg-gray-100 border border-primary-100 rounded-lg transition"
+                                        title="Lihat detail tugas">
+                                        Detail
+                                    </button>
                                 </td>
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="7" class="px-4 py-8 text-center text-sm text-gray-400">Belum ada aktivitas tugas.</td>
+                                <td colspan="8" class="px-4 py-8 text-center text-sm text-gray-400">Belum ada aktivitas tugas.</td>
                             </tr>
                         @endforelse
                     </tbody>
@@ -1787,6 +1798,38 @@
         </div>
     </div>
 
+    {{-- ── MODAL: DETAIL TUGAS (Monitoring) ─────────────────────────── --}}
+    <div id="modal-task-detail" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div class="absolute inset-0 bg-black/50 backdrop-blur-sm"
+            onclick="document.getElementById('modal-task-detail').classList.add('hidden')"></div>
+        <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-lg z-10 max-h-[85vh] flex flex-col">
+            <div class="flex items-center justify-between px-6 py-4 border-b border-gray-200 shrink-0">
+                <h3 class="text-base font-bold text-gray-800">Detail Tugas</h3>
+                <button onclick="document.getElementById('modal-task-detail').classList.add('hidden')"
+                    class="text-gray-400 hover:text-gray-600">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+            <div class="p-6 space-y-4 overflow-y-auto">
+                <div>
+                    <p id="td-title" class="text-sm font-bold text-gray-800 break-words"></p>
+                    <p id="td-desc" class="text-xs text-gray-500 mt-1 break-words"></p>
+                    <div class="flex items-center gap-2 mt-2">
+                        <span id="td-badge" class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium"></span>
+                        <span id="td-type" class="px-1.5 py-0.5 text-[10px] rounded font-medium bg-gray-100 text-gray-600"></span>
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-4 text-xs" id="td-grid"></div>
+                <div id="td-links-wrap" class="hidden">
+                    <p class="text-[11px] font-semibold text-gray-400 uppercase tracking-wider mb-1.5">Link Bukti Konten</p>
+                    <div id="td-links" class="space-y-1.5 max-h-40 overflow-y-auto"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     {{-- ── MODAL VERIFIKASI TUGAS STAFF (ADMIN LANGSUNG) ────────────── --}}
     <div id="modal-verify" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4"
         x-data="{ action: 'verify' }" @open-verify.window="action = 'verify'">
@@ -2284,6 +2327,66 @@
                 });
             }
             document.getElementById('modal-links').classList.remove('hidden');
+        }
+
+        function openTaskDetail(d) {
+            const esc = (v) => (v === null || v === undefined || v === '') ? '—' : v;
+            document.getElementById('td-title').textContent = d.title || '';
+            const desc = document.getElementById('td-desc');
+            desc.textContent = d.desc || '';
+            desc.classList.toggle('hidden', !d.desc);
+            const badge = document.getElementById('td-badge');
+            badge.textContent = d.status || '';
+            badge.className = 'inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium ' + (d.badgeClass || 'bg-gray-100 text-gray-600');
+            document.getElementById('td-type').textContent = d.type || '';
+
+            const grid = document.getElementById('td-grid');
+            grid.innerHTML = '';
+            const rows = [
+                ['Tanggal', d.date],
+                ['Akun', d.account ? d.account + (d.platform ? ' (' + d.platform + ')' : '') : null],
+                ['PJ PM', d.pmPic],
+                ['Pelaksana', d.executor],
+                ['Verifikasi PM', d.pmVerified ? d.pmVerified + (d.pmAt ? ' • ' + d.pmAt : '') : null],
+                ['Final HR', d.hrVerified ? d.hrVerified + (d.hrAt ? ' • ' + d.hrAt : '') : null],
+            ];
+            rows.forEach(([label, val]) => {
+                const cell = document.createElement('div');
+                cell.className = 'min-w-0';
+                const l = document.createElement('p');
+                l.className = 'text-[10px] font-semibold text-gray-400 uppercase tracking-wider';
+                l.textContent = label;
+                const v = document.createElement('p');
+                v.className = 'text-xs text-gray-700 font-medium break-words';
+                v.textContent = esc(val);
+                cell.appendChild(l);
+                cell.appendChild(v);
+                grid.appendChild(cell);
+            });
+
+            const wrap = document.getElementById('td-links-wrap');
+            const box = document.getElementById('td-links');
+            box.innerHTML = '';
+            const links = Array.isArray(d.links) ? d.links : [];
+            wrap.classList.toggle('hidden', links.length === 0);
+            links.forEach((url, i) => {
+                const a = document.createElement('a');
+                a.href = url;
+                a.target = '_blank';
+                a.rel = 'noopener noreferrer';
+                a.className = 'flex items-center gap-2 p-2.5 rounded-lg border border-gray-100 hover:border-primary-300 hover:bg-primary-50/50 transition';
+                const n = document.createElement('span');
+                n.className = 'flex-shrink-0 w-5 h-5 rounded-full bg-primary-100 text-primary-700 text-[10px] font-bold flex items-center justify-center';
+                n.textContent = i + 1;
+                const s = document.createElement('span');
+                s.className = 'text-xs text-primary-700 break-all leading-relaxed';
+                s.textContent = url;
+                a.appendChild(n);
+                a.appendChild(s);
+                box.appendChild(a);
+            });
+
+            document.getElementById('modal-task-detail').classList.remove('hidden');
         }
 
         function openVerifyModal(taskId, title) {

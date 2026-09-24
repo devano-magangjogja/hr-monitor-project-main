@@ -40,7 +40,7 @@
 @php
     $taskActive = request()->routeIs('admin.tasks.*');
 @endphp
-<div @click.outside="if (sidebarCollapsed) open = false" x-data="{ open: {{ $taskActive ? 'true' : 'false' }} }">
+<div @click.outside="if (sidebarCollapsed) open = false" x-data="{ open: ({{ $taskActive ? 'true' : 'false' }}) && localStorage.getItem('sidebar-collapsed') !== '1' }">
     <button @click="open = !open"
         class="w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-all
                    {{ $taskActive ? 'bg-white/10 text-white' : 'text-slate-400 hover:bg-white/5 hover:text-white' }}">
@@ -193,7 +193,7 @@
 
 {{-- Presensi (collapsible) --}}
 @php($presensiActive = request()->routeIs('admin.presensi.*') && !request()->routeIs('admin.presensi.laporan'))
-<div @click.outside="if (sidebarCollapsed) open = false" x-data="{ open: {{ $presensiActive ? 'true' : 'false' }} }">
+<div @click.outside="if (sidebarCollapsed) open = false" x-data="{ open: ({{ $presensiActive ? 'true' : 'false' }}) && localStorage.getItem('sidebar-collapsed') !== '1' }">
     <button @click="open = !open"
         class="w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-all
           {{ $presensiActive ? 'bg-white/10 text-white' : 'text-slate-400 hover:bg-white/5 hover:text-white' }}">

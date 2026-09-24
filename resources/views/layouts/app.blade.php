@@ -147,6 +147,10 @@
                 display: none;
             }
         }
+
+        /* Badge role Programmer — kelas Tailwind cyan belum ada di bundle build */
+        .bg-cyan-50 { background-color: #ecfeff; }
+        .text-cyan-700 { color: #0e7490; }
     </style>
     
     @vite(['resources/css/app.css', 'resources/js/app.js'])
@@ -160,7 +164,17 @@
          toggleSidebarCollapsed() {
              this.sidebarCollapsed = !this.sidebarCollapsed;
              localStorage.setItem('sidebar-collapsed', this.sidebarCollapsed ? '1' : '0');
-             this.$nextTick(() => this.positionFlyout());
+             this.$nextTick(() => { this.hideFlyouts(); this.positionFlyout(); });
+         },
+         hideFlyouts() {
+             if (!this.sidebarCollapsed) return;
+             const asideEl = this.$el.querySelector('aside.app-sidebar');
+             if (!asideEl) return;
+             asideEl.querySelectorAll('nav div[x-show]').forEach(d => {
+                 const w = d.closest('div[x-data]');
+                 const st = w && w._x_dataStack && w._x_dataStack[0];
+                 if (st && 'open' in st) { st.open = false; } else { d.style.display = 'none'; }
+             });
          },
          positionFlyout() {
              if (!this.sidebarCollapsed) return;
@@ -174,7 +188,7 @@
                  (btn.getBoundingClientRect().top - asideEl.getBoundingClientRect().top) + 'px');
          }
      }"
-     x-init="$nextTick(() => positionFlyout()); window.addEventListener('alpine:initialized', () => $nextTick(() => positionFlyout())); window.addEventListener('pageshow', () => $nextTick(() => positionFlyout()))">
+     x-init="$nextTick(() => { hideFlyouts(); positionFlyout(); }); window.addEventListener('alpine:initialized', () => $nextTick(() => { hideFlyouts(); positionFlyout(); })); window.addEventListener('pageshow', () => $nextTick(() => { hideFlyouts(); positionFlyout(); }))">
 
     {{-- ── OVERLAY mobile (tap to close) ──────────────── --}}
     <div x-show="sidebarOpen"
