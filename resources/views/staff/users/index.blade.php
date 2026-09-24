@@ -107,9 +107,15 @@
                         <td class="px-6 py-4">
                             @php
                                 $roleConfig = match($user->role) {
-                                    'pm'           => ['label' => 'PM',           'class' => 'bg-blue-50 text-blue-700'],
-                                    'sosmed'       => ['label' => 'Sosmed',       'class' => 'bg-pink-50 text-pink-700'],
-                                    default        => ['label' => 'HR Assistant', 'class' => 'bg-purple-50 text-purple-700'],
+                                    'pm'                => ['label' => 'PM',                'class' => 'bg-blue-50 text-blue-700'],
+                                    'sosmed'            => ['label' => 'Sosmed',            'class' => 'bg-pink-50 text-pink-700'],
+                                    'cs'                => ['label' => 'CS',                'class' => 'bg-teal-50 text-teal-700'],
+                                    'ob'                => ['label' => 'OB',                'class' => 'bg-orange-50 text-orange-700'],
+                                    'programmer'        => ['label' => 'Programmer',        'class' => 'bg-cyan-50 text-cyan-700'],
+                                    'dg'                => ['label' => 'DG',                'class' => 'bg-rose-50 text-rose-700'],
+                                    'vg'                => ['label' => 'VG',                'class' => 'bg-amber-50 text-amber-700'],
+                                    'digital_marketing' => ['label' => 'Digital Marketing', 'class' => 'bg-gray-100 text-gray-700'],
+                                    default             => ['label' => 'HR Assistant',      'class' => 'bg-purple-50 text-purple-700'],
                                 };
                             @endphp
                             <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium {{ $roleConfig['class'] }}">
@@ -219,6 +225,12 @@
                     <option value="hr_assistant" {{ old('role') === 'hr_assistant' ? 'selected' : '' }}>HR Assistant</option>
                     <option value="pm"           {{ old('role') === 'pm'           ? 'selected' : '' }}>PM</option>
                     <option value="sosmed"       {{ old('role') === 'sosmed'       ? 'selected' : '' }}>Sosmed</option>
+                    <option value="cs"           {{ old('role') === 'cs'           ? 'selected' : '' }}>CS (Customer Service)</option>
+                    <option value="ob"           {{ old('role') === 'ob'           ? 'selected' : '' }}>OB (Office Boy)</option>
+                    <option value="programmer"   {{ old('role') === 'programmer'   ? 'selected' : '' }}>Programmer</option>
+                    <option value="dg"           {{ old('role') === 'dg'           ? 'selected' : '' }}>DG (Design Graphics)</option>
+                    <option value="vg"           {{ old('role') === 'vg'           ? 'selected' : '' }}>VG (Videografer)</option>
+                    <option value="digital_marketing" {{ old('role') === 'digital_marketing' ? 'selected' : '' }}>Digital Marketing</option>
                 </select>
             </div>
             <div x-data="{ show: false }">

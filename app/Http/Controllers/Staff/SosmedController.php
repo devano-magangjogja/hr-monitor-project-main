@@ -97,15 +97,37 @@ class SosmedController extends Controller
             ->appends($request->all());
 
         // All tasks for monitoring
+        $taskSearch = trim((string) $request->query('task_search', ''));
         $allTasks = SosmedTask::with(['account', 'assignedUser', 'assignedBy', 'verifiedBy', 'hrVerifiedBy'])
+            ->when($taskSearch !== '', function ($q) use ($taskSearch) {
+                $q->where(function ($qq) use ($taskSearch) {
+                    $qq->where('title', 'like', '%' . $taskSearch . '%')
+                      ->orWhereHas('account', fn($a) => $a->where('name', 'like', '%' . $taskSearch . '%')
+                          ->orWhere('platform', 'like', '%' . $taskSearch . '%')
+                          ->orWhere('brand', 'like', '%' . $taskSearch . '%'))
+                      ->orWhereHas('assignedUser', fn($u) => $u->where('name', 'like', '%' . $taskSearch . '%'))
+                      ->orWhereHas('verifiedBy', fn($u) => $u->where('name', 'like', '%' . $taskSearch . '%'));
+                });
+            })
             ->orderBy('task_date', 'desc')
-            ->paginate(15);
+            ->paginate(15)
+            ->appends($request->all());
 
         // Akun Mandiri yang Dikelola oleh Staff yang sedang login
+        $myAccountSearch = trim((string) $request->query('my_account_search', ''));
         $myAccounts = SosmedAccount::with(['creator'])
             ->whereHas('staffUsers', fn($q) => $q->where('users.id', Auth::id()))
+            ->when($myAccountSearch !== '', function ($q) use ($myAccountSearch) {
+                $q->where(function ($qq) use ($myAccountSearch) {
+                    $qq->where('name', 'like', '%' . $myAccountSearch . '%')
+                      ->orWhere('username', 'like', '%' . $myAccountSearch . '%')
+                      ->orWhere('platform', 'like', '%' . $myAccountSearch . '%')
+                      ->orWhere('brand', 'like', '%' . $myAccountSearch . '%');
+                });
+            })
             ->orderBy('platform')
-            ->paginate(15);
+            ->paginate(15)
+            ->appends($request->all());
         $myAccountIds = $myAccounts->pluck('id');
 
         $todayTasks = SosmedTask::with(['verifiedBy', 'hrVerifiedBy'])
@@ -193,6 +215,8 @@ class SosmedController extends Controller
             'searchType',
             'availableAccounts',
             'myAccounts',
+            'taskSearch',
+            'myAccountSearch',
             'todayTasks',
             'needHrApproval',
             'allTasks',

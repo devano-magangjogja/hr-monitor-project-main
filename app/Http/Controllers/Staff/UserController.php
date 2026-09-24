@@ -19,14 +19,23 @@ class UserController extends Controller
     ) {}
 
     /** Role yang boleh dikelola oleh Staff */
-    protected array $allowedRoles = ['hr_assistant', 'pm', 'sosmed'];
+    protected array $allowedRoles = [
+        'hr_assistant', 'pm', 'sosmed',
+        'cs', 'ob', 'programmer', 'dg', 'vg', 'digital_marketing',
+    ];
 
     protected function roleLabel(string $role): string
     {
         return match ($role) {
-            'pm'           => 'PM',
-            'sosmed'       => 'Sosmed',
-            default        => 'HR Assistant',
+            'pm'                => 'PM',
+            'sosmed'            => 'Sosmed',
+            'cs'                => 'CS (Customer Service)',
+            'ob'                => 'OB (Office Boy)',
+            'programmer'        => 'Programmer',
+            'dg'                => 'DG (Design Graphics)',
+            'vg'                => 'VG (Videografer)',
+            'digital_marketing' => 'Digital Marketing',
+            default             => 'HR Assistant',
         };
     }
 

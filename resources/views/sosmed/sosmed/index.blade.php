@@ -63,27 +63,54 @@
             </div>
         </div>
 
+        {{-- ── Search akun ── --}}
+        <div class="px-4 sm:px-6 py-3 border-b border-gray-100 bg-white">
+            <form action="{{ route('sosmed.sosmed.index') }}" method="GET" class="relative w-full sm:w-80">
+                <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                              d="M21 21l-4.35-4.35M17 11a6 6 0 11-12 0 6 6 0 0112 0z"/>
+                    </svg>
+                </span>
+                <input type="text" name="account_search" value="{{ $accountSearch ?? '' }}"
+                       placeholder="Cari nama akun, platform, atau brand..."
+                       class="w-full pl-9 pr-9 py-2 border border-gray-300 rounded-lg text-sm
+                              focus:outline-none focus:ring-2 focus:ring-primary-500
+                              focus:border-primary-500 transition">
+                @if(($accountSearch ?? '') !== '')
+                    <a href="{{ route('sosmed.sosmed.index') }}"
+                       class="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-gray-600"
+                       title="Hapus pencarian">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                  d="M6 18L18 6M6 6l12 12"/>
+                        </svg>
+                    </a>
+                @endif
+            </form>
+        </div>
+
         <div class="p-4 sm:p-6">
             {{-- ── Desktop Table (md+) ────────────────────────────────────────── --}}
             <div class="hidden md:block overflow-x-auto rounded-lg border border-gray-100">
                 <table class="w-full table-fixed text-sm">
                     <colgroup>
-                        <col class="w-12">     {{-- Ceklis --}}
-                        <col class="w-[30%]">  {{-- Nama Akun --}}
-                        <col class="w-32">     {{-- Platform --}}
-                        <col class="w-32">     {{-- Link Profil --}}
-                        <col class="w-[25%]">  {{-- Bukti Konten --}}
-                        <col class="w-36">     {{-- Status / Aksi --}}
+                        <col class="w-10">     {{-- Ceklis --}}
+                        <col class="w-[24%]">  {{-- Nama Akun --}}
+                        <col class="w-28">     {{-- Platform --}}
+                        <col class="w-24">     {{-- Link Profil --}}
+                        <col class="w-[20%]">  {{-- Bukti Konten --}}
+                        <col class="w-32">     {{-- Status / Aksi --}}
                     </colgroup>
                     <thead>
                         <tr
                             class="bg-gray-50 border-b border-gray-200 text-xs font-semibold text-gray-500 uppercase tracking-wide">
                             <th class="px-3 py-3 text-center">✓</th>
-                            <th class="px-4 py-3 text-left">Nama Akun</th>
-                            <th class="px-4 py-3 text-left">Platform</th>
-                            <th class="px-4 py-3 text-left">Link Profil</th>
-                            <th class="px-4 py-3 text-left">Bukti Konten</th>
-                            <th class="px-4 py-3 text-center">Status / Aksi</th>
+                            <th class="px-2.5 py-3 text-left">Nama Akun</th>
+                            <th class="px-2.5 py-3 text-left">Platform</th>
+                            <th class="px-2.5 py-3 text-left">Link Profil</th>
+                            <th class="px-2.5 py-3 text-left">Bukti Konten</th>
+                            <th class="px-2.5 py-3 text-center">Status / Aksi</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-100">
@@ -112,7 +139,7 @@
                                 </td>
 
                                 {{-- Nama Akun --}}
-                                <td class="px-4 py-3.5 min-w-0">
+                                <td class="px-2.5 py-3 min-w-0">
                                     <div class="flex items-center gap-1.5 min-w-0">
                                         <p class="font-semibold text-gray-800 truncate min-w-0" title="{{ $acc->name }}">{{ $acc->name }}</p>
                                         <x-brand-badge :acc="$acc" :logos="$brandLogos" />
@@ -126,7 +153,7 @@
                                 </td>
 
                                 {{-- Platform --}}
-                                <td class="px-4 py-3.5 whitespace-nowrap">
+                                <td class="px-2.5 py-3 whitespace-nowrap">
                                     <span
                                         class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-medium border {{ $acc->platform_color }}">
                                         {{ $acc->platform_icon }} {{ $acc->platform }}
@@ -134,7 +161,7 @@
                                 </td>
 
                                 {{-- Link Profil --}}
-                                <td class="px-4 py-3.5 whitespace-nowrap">
+                                <td class="px-2.5 py-3 whitespace-nowrap">
                                     @if($acc->link)
                                         <a href="{{ $acc->link }}" target="_blank"
                                             class="inline-flex items-center gap-1 text-xs text-primary-600 hover:underline font-medium">
@@ -143,7 +170,7 @@
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                     d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
                                             </svg>
-                                            Buka Profil
+                                            <span class="truncate" title="{{ $acc->link }}">Buka</span>
                                         </a>
                                     @else
                                         <span class="text-xs text-gray-300">—</span>
@@ -151,7 +178,7 @@
                                 </td>
 
                                 {{-- Bukti Konten --}}
-                                <td class="px-4 py-3.5 text-xs min-w-0">
+                                <td class="px-2.5 py-3 text-xs min-w-0">
                                     @if($todayTask && $todayTask->hasLinks())
                                         <button type="button"
                                             onclick="openLinksPopup({{ json_encode($todayTask->link_upload) }}, '{{ addslashes($acc->name) }}')"
@@ -174,10 +201,10 @@
                                 </td>
 
                                 {{-- Status / Aksi --}}
-                                <td class="px-4 py-3.5 text-center whitespace-nowrap">
+                                <td class="px-2.5 py-3 text-center">
                                     @if($isSubmitted)
                                         <span
-                                            class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold leading-snug {{ $todayTask->status_badge_class }}">
+                                            class="inline-flex items-center justify-center px-2 py-1 rounded-full text-xs font-semibold leading-snug {{ $todayTask->status_badge_class }}">
                                             {{ $todayTask->status_label }}
                                         </span>
                                     @else
@@ -193,6 +220,9 @@
                             <tr>
                                 <td colspan="6" class="px-4 py-12 text-center text-sm text-gray-400">
                                     Belum ada akun sosial media yang di-assign kepada Anda oleh PM / HR Staff.
+                                    @if(($accountSearch ?? '') !== '')
+                                        <a href="{{ route('sosmed.sosmed.index') }}" class="block mt-2 text-primary-600 hover:underline">Reset pencarian</a>
+                                    @endif
                                 </td>
                             </tr>
                         @endforelse
@@ -290,6 +320,9 @@
                 @empty
                     <div class="py-8 text-center text-sm text-gray-400">
                         Belum ada akun sosial media yang di-assign kepada Anda oleh PM / HR Staff.
+                        @if(($accountSearch ?? '') !== '')
+                            <a href="{{ route('sosmed.sosmed.index') }}" class="block mt-2 text-primary-600 hover:underline">Reset pencarian</a>
+                        @endif
                     </div>
                 @endforelse
 

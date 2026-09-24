@@ -748,6 +748,30 @@
     @if($tab === 'tasks')
         <div class="p-4 sm:p-5">
 
+            {{-- Search tugas --}}
+            <div class="flex items-center gap-2 mb-4">
+                <form action="{{ route('staff.sosmed.index') }}" method="GET" class="flex items-center gap-1.5">
+                    <input type="hidden" name="tab" value="tasks">
+                    <div class="relative flex items-center">
+                        <input type="text" name="task_search" value="{{ $taskSearch ?? '' }}"
+                            placeholder="Cari judul tugas, akun, atau pelaksana..."
+                            class="h-9 pl-3 pr-8 text-xs bg-white border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 text-gray-700 transition w-56 sm:w-72">
+                        <button type="submit" class="absolute right-2 text-gray-400 hover:text-primary-600 transition" title="Cari">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                            </svg>
+                        </button>
+                    </div>
+                    @if(($taskSearch ?? '') !== '')
+                        <a href="{{ route('staff.sosmed.index', ['tab' => 'tasks']) }}"
+                            class="inline-flex items-center justify-center h-9 px-2.5 text-xs font-medium text-gray-500 hover:text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition shrink-0"
+                            title="Reset pencarian">
+                            Reset
+                        </a>
+                    @endif
+                </form>
+            </div>
+
             {{-- Desktop table (md+) --}}
             <div class="hidden md:block overflow-x-auto rounded-lg border border-gray-100">
                 <table class="w-full text-sm table-fixed">
@@ -813,7 +837,12 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="6" class="px-4 py-8 text-center text-sm text-gray-400">Belum ada tugas tercatat.</td>
+                                <td colspan="6" class="px-4 py-8 text-center text-sm text-gray-400">
+                                    Belum ada tugas tercatat.
+                                    @if(($taskSearch ?? '') !== '')
+                                        <a href="{{ route('staff.sosmed.index', ['tab' => 'tasks']) }}" class="block mt-2 text-primary-600 hover:underline">Reset pencarian</a>
+                                    @endif
+                                </td>
                             </tr>
                         @endforelse
                     </tbody>
@@ -868,7 +897,12 @@
                         </div>
                     </div>
                 @empty
-                    <div class="py-8 text-center text-sm text-gray-400">Belum ada tugas tercatat.</div>
+                    <div class="py-8 text-center text-sm text-gray-400">
+                        Belum ada tugas tercatat.
+                        @if(($taskSearch ?? '') !== '')
+                            <a href="{{ route('staff.sosmed.index', ['tab' => 'tasks']) }}" class="block mt-2 text-primary-600 hover:underline">Reset pencarian</a>
+                        @endif
+                    </div>
                 @endforelse
         </div>
         </div>
@@ -888,6 +922,30 @@
                     class="text-xs bg-indigo-50 border border-indigo-200 text-indigo-700 px-3 py-1.5 rounded-lg font-medium shrink-0">
                     Hari Ini: <span class="font-bold">{{ now()->translatedFormat('d M Y') }}</span>
                 </div>
+            </div>
+
+            {{-- Search akun saya --}}
+            <div class="flex items-center gap-2 mb-4">
+                <form action="{{ route('staff.sosmed.index') }}" method="GET" class="flex items-center gap-1.5">
+                    <input type="hidden" name="tab" value="my_accounts">
+                    <div class="relative flex items-center">
+                        <input type="text" name="my_account_search" value="{{ $myAccountSearch ?? '' }}"
+                            placeholder="Cari nama akun, platform, atau brand..."
+                            class="h-9 pl-3 pr-8 text-xs bg-white border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 text-gray-700 transition w-56 sm:w-72">
+                        <button type="submit" class="absolute right-2 text-gray-400 hover:text-primary-600 transition" title="Cari">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                            </svg>
+                        </button>
+                    </div>
+                    @if(($myAccountSearch ?? '') !== '')
+                        <a href="{{ route('staff.sosmed.index', ['tab' => 'my_accounts']) }}"
+                            class="inline-flex items-center justify-center h-9 px-2.5 text-xs font-medium text-gray-500 hover:text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition shrink-0"
+                            title="Reset pencarian">
+                            Reset
+                        </a>
+                    @endif
+                </form>
             </div>
 
             {{-- Desktop Table --}}
@@ -989,11 +1047,21 @@
                             <tr>
                                 <td colspan="5" class="px-4 py-10 text-center text-sm text-gray-400">
                                     Admin belum menetapkan akun sosmed kepada Anda.
+                                    @if(($myAccountSearch ?? '') !== '')
+                                        <a href="{{ route('staff.sosmed.index', ['tab' => 'my_accounts']) }}" class="block mt-2 text-primary-600 hover:underline">Reset pencarian</a>
+                                    @endif
                                 </td>
                             </tr>
                         @endforelse
                     </tbody>
                 </table>
+
+                {{-- Pagination Links (desktop) --}}
+                @if($myAccounts->hasPages())
+                    <div class="mt-4 px-4 py-3 border-t border-gray-200">
+                        {{ $myAccounts->appends(['tab' => 'my_accounts'])->links() }}
+                    </div>
+                @endif
             </div>
 
             {{-- Mobile Cards --}}
@@ -1053,13 +1121,18 @@
                         @endif
                     </div>
                 @empty
-                    <div class="py-8 text-center text-sm text-gray-400">Admin belum menetapkan akun sosmed kepada Anda.</div>
+                    <div class="py-8 text-center text-sm text-gray-400">
+                        Admin belum menetapkan akun sosmed kepada Anda.
+                        @if(($myAccountSearch ?? '') !== '')
+                            <a href="{{ route('staff.sosmed.index', ['tab' => 'my_accounts']) }}" class="block mt-2 text-primary-600 hover:underline">Reset pencarian</a>
+                        @endif
+                    </div>
                 @endforelse
 
                 {{-- Pagination Links --}}
-                @if($accounts->hasPages())
+                @if($myAccounts->hasPages())
                     <div class="mt-4">
-                        {{ $accounts->links() }}
+                        {{ $myAccounts->appends(['tab' => 'my_accounts'])->links() }}
                     </div>
                 @endif
             </div>

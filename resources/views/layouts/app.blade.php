@@ -147,6 +147,10 @@
                 display: none;
             }
         }
+
+        /* Badge role Programmer — kelas Tailwind cyan belum ada di bundle build */
+        .bg-cyan-50 { background-color: #ecfeff; }
+        .text-cyan-700 { color: #0e7490; }
     </style>
     
     @vite(['resources/css/app.css', 'resources/js/app.js'])

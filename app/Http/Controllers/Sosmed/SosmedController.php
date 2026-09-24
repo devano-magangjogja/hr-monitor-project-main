@@ -15,11 +15,22 @@ class SosmedController extends Controller
     {
         $currentUserId = Auth::id();
 
+        $accountSearch = trim((string) $request->query('account_search', ''));
+
         // Akun yang didelegasikan ke user ini oleh PM
         $accounts = SosmedAccount::with(['pmUser', 'creator'])
             ->whereHas('staffUsers', fn($q) => $q->where('users.id', $currentUserId))
+            ->when($accountSearch !== '', function ($q) use ($accountSearch) {
+                $q->where(function ($qq) use ($accountSearch) {
+                    $qq->where('name', 'like', "%{$accountSearch}%")
+                       ->orWhere('username', 'like', "%{$accountSearch}%")
+                       ->orWhere('platform', 'like', "%{$accountSearch}%")
+                       ->orWhere('brand', 'like', "%{$accountSearch}%");
+                });
+            })
             ->orderBy('platform')
-            ->paginate(5);
+            ->paginate(5)
+            ->appends($request->all());
 
         $accountIds = $accounts->pluck('id');
 
@@ -43,7 +54,7 @@ class SosmedController extends Controller
             'approved_final' => $todayTasks->where('status', 'approved_hr')->count(),
         ];
 
-        return view('sosmed.sosmed.index', compact('accounts', 'todayTasks', 'stats'));
+        return view('sosmed.sosmed.index', compact('accounts', 'todayTasks', 'stats', 'accountSearch'));
     }
 
     /**
