@@ -176,6 +176,9 @@ class SosmedController extends Controller
             ->get();
         $staffs = $executors;
 
+        // Peta userId => akun yang dikelolanya (untuk info di dropdown penugasan)
+        $managedMap = SosmedAccount::managedCountsMap();
+
         $stats = [
             'total_accounts'   => $accounts->count(),
             'my_accounts'      => $myAccounts->total(),
@@ -210,6 +213,7 @@ class SosmedController extends Controller
 
         return view('staff.sosmed.index', compact(
             'tab',
+            'managedMap',
             'accounts',
             'accountSearch',
             'searchType',
@@ -747,5 +751,23 @@ class SosmedController extends Controller
             return redirect()->route('staff.sosmed.index', ['tab' => 'approvals'])
                 ->with('success', 'Tugas ditolak dan dikembalikan untuk perbaikan.');
         }
+    }
+
+    /**
+     * Halaman daftar lengkap akun sosmed yang dikelola satu user (dibuka via "Lihat Detail").
+     */
+    public function userAccounts(Request $request, User $user)
+    {
+        $accountSearch = trim((string) $request->query('account_search'));
+        $rows = SosmedAccount::managedByUser($user->id, $accountSearch !== '' ? $accountSearch : null);
+        $brandLogos = \App\Models\Brand::whereNotNull('logo_path')->pluck('logo_path', 'name');
+
+        return view('sosmed.user-accounts', [
+            'targetUser'   => $user,
+            'rows'         => $rows,
+            'accountSearch' => $accountSearch,
+            'brandLogos'   => $brandLogos,
+            'sidebar'      => 'components.sidebar-staff',
+        ]);
     }
 }

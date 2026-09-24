@@ -1409,10 +1409,11 @@
                     <label class="block text-xs font-semibold text-gray-700 mb-1.5">
                         Eksekutor Akun (Dikelola Oleh) <span class="text-gray-400 font-normal">(Opsional)</span>
                     </label>
+                    <div id="assign-task-staff-managed" class="hidden mb-1"></div>
                     <select name="staff_id" id="assign-task-staff"
                         x-model="selectedStaffId"
                         :disabled="!selectedId"
-                        @change="syncSupervisorState($el, 'assign-task-pm', 'assign-task-pm-hint', 'assign-task-ast')"
+                        @change="syncSupervisorState($el, 'assign-task-pm', 'assign-task-pm-hint', 'assign-task-ast'); renderManagedInfo($el)"
                         class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 focus:outline-none
                             disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed">
                         <option value="" data-role="">-- Belum Ditugaskan / Pilih Nanti --</option>
@@ -1433,8 +1434,10 @@
                     <label class="block text-xs font-semibold text-gray-700 mb-1.5">
                         Supervisor PM <span class="text-gray-400 font-normal">(Opsional)</span>
                     </label>
+                    <div id="assign-task-pm-managed" class="hidden mb-1"></div>
                     <select name="pm_id" id="assign-task-pm"
                         :disabled="!selectedId"
+                        onchange="renderManagedInfo(this)"
                         class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 focus:outline-none
                             disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed">
                         <option value="">-- Tanpa Supervisor / Langsung ke HR --</option>
@@ -1452,8 +1455,10 @@
                     <label class="block text-xs font-semibold text-gray-700 mb-1.5">
                         Asisten Pengawas <span class="text-gray-400 font-normal">(Opsional)</span>
                     </label>
+                    <div id="assign-task-ast-managed" class="hidden mb-1"></div>
                     <select name="assistant_id" id="assign-task-ast"
                         :disabled="!selectedId"
+                        onchange="renderManagedInfo(this)"
                         class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 focus:outline-none
                             disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed">
                         <option value="">-- Tanpa Asisten --</option>
@@ -1468,8 +1473,10 @@
                     <label class="block text-xs font-semibold text-gray-700 mb-1.5">
                         Staff Pengawas <span class="text-gray-400 font-normal">(Opsional)</span>
                     </label>
+                    <div id="assign-task-sup-managed" class="hidden mb-1"></div>
                     <select name="supervisor_staff_id" id="assign-task-sup"
                         :disabled="!selectedId"
+                        onchange="renderManagedInfo(this)"
                         class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 focus:outline-none
                             disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed">
                         <option value="">-- Tanpa Staff Pengawas --</option>
@@ -2123,6 +2130,56 @@
         function filterSelectOptions(query, selectId) { }
         function resetSearchFilter(inputId, selectId) { }
 
+        const MANAGED_MAP = @js($managedMap ?? []);
+        const MANAGER_URL = '{{ route('admin.sosmed.user-accounts', ['user' => '__ID__']) }}';
+
+        function renderManagedInfo(sel) {
+            const box = document.getElementById(sel.id + '-managed');
+            if (!box) return;
+            box.textContent = '';
+            const list = (sel.value && MANAGED_MAP[sel.value]) ? MANAGED_MAP[sel.value] : [];
+            box.classList.toggle('hidden', list.length === 0);
+            if (!list.length) return;
+
+            const wrap = document.createElement('div');
+            wrap.className = 'p-2.5 bg-gray-50 rounded-lg border border-gray-200';
+
+            const label = document.createElement('p');
+            label.className = 'text-[11px] text-gray-500 font-medium mb-1';
+            label.textContent = 'Sedang mengelola: ';
+            const link = document.createElement('a');
+            link.href = MANAGER_URL.replace('__ID__', sel.value);
+            link.target = '_blank';
+            link.rel = 'noopener noreferrer';
+            link.className = 'ml-1 text-primary-600 hover:underline font-semibold';
+            link.textContent = 'Lihat Detail';
+            label.appendChild(link);
+            wrap.appendChild(label);
+
+            const chips = document.createElement('div');
+            chips.className = 'flex flex-wrap gap-1';
+            list.slice(0, 2).forEach(a => {
+                const chip = document.createElement('span');
+                chip.className = 'inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] bg-white text-gray-700 border border-gray-200';
+                const nm = document.createElement('span');
+                nm.textContent = a.name;
+                const pt = document.createElement('span');
+                pt.className = 'text-[10px] text-gray-400 font-semibold';
+                pt.textContent = '(' + a.platform + ')';
+                chip.appendChild(nm);
+                chip.appendChild(pt);
+                chips.appendChild(chip);
+            });
+            if (list.length > 2) {
+                const more = document.createElement('span');
+                more.className = 'inline-flex items-center px-2 py-0.5 rounded text-[11px] bg-white text-gray-500 border border-gray-200';
+                more.textContent = '+' + (list.length - 2) + ' lagi';
+                chips.appendChild(more);
+            }
+            wrap.appendChild(chips);
+            box.appendChild(wrap);
+        }
+
         function syncSupervisorState(staffSelect, pmSelectId, hintId, astSelectId) {
             if (!staffSelect) return;
             const pmSelect = document.getElementById(pmSelectId);
@@ -2414,6 +2471,10 @@
             if (supSel) supSel.value = '';
             const hint = document.getElementById('assign-task-pm-hint');
             if (hint) hint.textContent = 'PM yang berwenang meninjau & approve tugas.';
+            ['assign-task-staff', 'assign-task-pm', 'assign-task-ast', 'assign-task-sup'].forEach(id => {
+                const box = document.getElementById(id + '-managed');
+                if (box) { box.textContent = ''; box.classList.add('hidden'); }
+            });
             document.getElementById('modal-assign-task').classList.remove('hidden');
         }
 
@@ -2480,6 +2541,7 @@
                         const sel = document.getElementById('assign-task-staff');
                         if (sel) {
                             syncSupervisorState(sel, 'assign-task-pm', 'assign-task-pm-hint', 'assign-task-ast');
+                            renderManagedInfo(sel);
                         }
                     });
                 }

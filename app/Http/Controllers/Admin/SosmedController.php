@@ -191,6 +191,9 @@ class SosmedController extends Controller
             ->get();
         $staffs = $executors; // compatibility
 
+        // Peta userId => akun yang dikelolanya (untuk info di dropdown penugasan)
+        $managedMap = SosmedAccount::managedCountsMap();
+
         // Admin memiliki wewenang untuk meng-acc semua tugas sosmed tanpa terkecuali
         // Menampilkan seluruh tugas yang menunggu verifikasi (baik selesai dikerjakan staff maupun telah diverifikasi PM)
         $verifySearch = trim((string) $request->query('verify_search', ''));
@@ -256,6 +259,7 @@ class SosmedController extends Controller
 
         return view('admin.sosmed.index', compact(
             'tab',
+            'managedMap',
             'accounts',
             'availableAccounts',
             'accountSearch',
@@ -778,5 +782,23 @@ class SosmedController extends Controller
 
             return redirect()->back()->with('success', 'Tugas ditolak dan dikembalikan untuk revisi.');
         }
+    }
+
+    /**
+     * Halaman daftar lengkap akun sosmed yang dikelola satu user (dibuka via "Lihat Detail").
+     */
+    public function userAccounts(Request $request, User $user)
+    {
+        $accountSearch = trim((string) $request->query('account_search'));
+        $rows = SosmedAccount::managedByUser($user->id, $accountSearch !== '' ? $accountSearch : null);
+        $brandLogos = Brand::whereNotNull('logo_path')->pluck('logo_path', 'name');
+
+        return view('sosmed.user-accounts', [
+            'targetUser'   => $user,
+            'rows'         => $rows,
+            'accountSearch' => $accountSearch,
+            'brandLogos'   => $brandLogos,
+            'sidebar'      => 'components.sidebar-admin',
+        ]);
     }
 }

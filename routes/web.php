@@ -146,6 +146,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin'])->grou
     Route::delete('/sosmed/tasks/purge', [AdminSosmedController::class, 'purgeTasks'])->name('sosmed.tasks.purge');
     Route::delete('/sosmed/logs/purge', [AdminSosmedController::class, 'purgeLogs'])->name('sosmed.logs.purge');
     Route::patch('/sosmed/tasks/{task}/verify', [AdminSosmedController::class, 'verifyTask'])->name('sosmed.tasks.verify');
+    Route::get('/sosmed/pengguna/{user}', [AdminSosmedController::class, 'userAccounts'])->whereNumber('user')->name('sosmed.user-accounts');
 });
 
 // ── HR Staff ────────────────────────────────────────────────────────────────
@@ -209,6 +210,7 @@ Route::prefix('staff')->name('staff.')->middleware(['auth', 'role:hr_staff'])->g
     Route::post('/sosmed/accounts/{account}/unassign', [StaffSosmedController::class, 'unassignAccount'])->name('sosmed.accounts.unassign');
     Route::delete('/sosmed/accounts/{account}', [StaffSosmedController::class, 'destroyAccount'])->name('sosmed.accounts.destroy');
     Route::patch('/sosmed/tasks/{task}/verify', [StaffSosmedController::class, 'verifyTask'])->name('sosmed.tasks.verify');
+    Route::get('/sosmed/pengguna/{user}', [StaffSosmedController::class, 'userAccounts'])->whereNumber('user')->name('sosmed.user-accounts');
 
     // Log Activity (Staff Monitoring: Manajemen Akun & Sosmed)
     Route::get('/activity-log', [StaffActivityLogController::class, 'index'])->name('activity-log.index');
