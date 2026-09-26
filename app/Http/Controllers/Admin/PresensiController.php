@@ -86,14 +86,12 @@ class PresensiController extends Controller
         $tab = in_array($request->input('tab'), ['hadir', 'belum', 'tidak_hadir'], true)
             ? $request->input('tab') : 'hadir';
 
-        // 3. Tab Belum Dipresensi - pemagang aktif tanpa catatan presensi pada tanggal (ops: kantor) ini
-        $belumKantor = $request->input('kantor');
-        $pemagangBelum = Pemagang::whereDoesntHave('presensis', function ($q) use ($tanggal, $belumKantor) {
+        // 3. Tab Belum Dipresensi - pemagang aktif tanpa catatan presensi pada tanggal ini.
+        // Sengaja tidak ikut difilter kantor: satu pemagang hanya punya satu catatan entry per hari,
+        // jadi yang sudah dipresensi di kantor lain tidak boleh muncul lagi sebagai "belum".
+        $pemagangBelum = Pemagang::whereDoesntHave('presensis', function ($q) use ($tanggal) {
             $q->where('tanggal', $tanggal)
                 ->where('session', 'entry');
-            if ($belumKantor) {
-                $q->where('kantor', $belumKantor);
-            }
         })
             ->when($request->filled('divisi'), fn($q) => $q->where('divisi', $request->input('divisi')))
             ->when($request->filled('search'), function ($q) use ($request) {

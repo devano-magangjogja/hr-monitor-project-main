@@ -99,14 +99,12 @@ class PresensiController extends Controller
         $tab = in_array($request->input('tab'), ['hadir', 'belum', 'tidak_hadir'], true)
             ? $request->input('tab') : 'hadir';
 
-        // 3. Tab Belum Dipresensi - pemagang tanpa catatan presensi pada tanggal (di kantor terpilih) ini
-        $belumKantor = $selectedKantor;
-        $pemagangBelum = Pemagang::whereDoesntHave('presensis', function ($q) use ($tanggal, $belumKantor) {
+        // 3. Tab Belum Dipresensi - pemagang tanpa catatan presensi pada tanggal ini.
+        // Sengaja tidak dibatasi ke kantor terpilih: satu pemagang hanya punya satu catatan entry per hari,
+        // jadi yang sudah dipresensi di kantor lain tidak boleh muncul lagi sebagai "belum".
+        $pemagangBelum = Pemagang::whereDoesntHave('presensis', function ($q) use ($tanggal) {
             $q->where('tanggal', $tanggal)
                 ->where('session', 'entry');
-            if ($belumKantor) {
-                $q->where('kantor', $belumKantor);
-            }
         })
             ->when($request->filled('divisi'), fn($q) => $q->where('divisi', $request->input('divisi')))
             ->when($request->filled('search'), function ($q) use ($request) {
@@ -139,12 +137,9 @@ class PresensiController extends Controller
             'terlambat' => (clone $statsQuery)->where('keterangan', 'Terlambat')->count(),
             'tidak_hadir' => (clone $statsQuery)->where('keterangan', 'Tidak Hadir')->count(),
             'total_hadir' => (clone $statsQuery)->whereIn('keterangan', ['Lebih Awal', 'Tepat Waktu', 'Terlambat'])->count(),
-            'belum_presensi' => Pemagang::whereDoesntHave('presensis', function ($q) use ($tanggal, $selectedKantor) {
+            'belum_presensi' => Pemagang::whereDoesntHave('presensis', function ($q) use ($tanggal) {
                 $q->where('tanggal', $tanggal)
                     ->where('session', 'entry');
-                if ($selectedKantor) {
-                    $q->where('kantor', $selectedKantor);
-                }
             })->count(),
         ];
 
