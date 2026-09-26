@@ -208,6 +208,31 @@ class SosmedAccount extends Model
             : $this->staffUsers()->count();
     }
 
+    /**
+     * Daftar pemegang akun (user unik + perannya): PM, Asisten, Staff Pengawas, Eksekutor.
+     *
+     * @return array<int, array{name:string, roles:array<int,string>}>
+     */
+    public function holders(): array
+    {
+        $map = collect();
+        $add = function (?User $u, string $role) use (&$map) {
+            if (!$u) {
+                return;
+            }
+            $entry = $map->get($u->id, ['name' => $u->name, 'roles' => []]);
+            $entry['roles'][] = $role;
+            $map->put($u->id, $entry);
+        };
+        $add($this->pmUser, 'PM');
+        $add($this->assistantUser, 'Asisten');
+        $add($this->supervisorStaff, 'Staff Pengawas');
+        foreach ($this->staffUsers as $u) {
+            $add($u, 'Eksekutor');
+        }
+        return $map->values()->all();
+    }
+
     public function scopeUnassigned($query)
     {
         return $query->whereDoesntHave('staffUsers');

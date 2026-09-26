@@ -9,15 +9,17 @@
             <th class="px-4 py-3.5 w-[15%]">Nama Akun</th>
             <th class="px-4 py-3.5 w-[11%]">Brand</th>
             <th class="px-4 py-3.5 w-[7%]">Link</th>
-            <th class="px-4 py-3.5 w-[16%]">Email</th>
+            <th class="px-4 py-3.5 w-[13%]">Email</th>
             <th class="px-4 py-3.5 w-[13%]">Password</th>
             <th class="px-4 py-3.5 w-[5%] text-center">2FA</th>
-            <th class="px-4 py-3.5 w-[6%] text-center" title="Hijau: belum ada di Sosmed · Merah: sudah ada di Sosmed">Di Sosmed</th>
+            <th class="px-2 py-3.5 w-[8%] text-center" title="Jumlah user yang memegang akun ini">Pemegang</th>
+            <th class="px-2 py-3.5 w-[6%] text-center" title="Hijau: belum ada di Sosmed · Merah: sudah ada di Sosmed">Sosmed</th>
             <th class="px-4 py-3.5 w-[8%] text-center">Aksi</th>
         </tr>
     </thead>
     <tbody class="divide-y divide-gray-100 bg-white">
         @forelse($rows as $acc)
+            @php($pemegangLabels = array_map(fn($h) => $h['name'] . ' (' . implode(', ', $h['roles']) . ')', $acc->holders()))
             <tr class="hover:bg-gray-50/80 transition-colors">
                 {{-- Platform --}}
                 <td class="px-4 py-3.5">
@@ -145,6 +147,14 @@
                     {{ $acc->two_factor_enabled ? 'Ya' : 'Tidak' }}
                 </td>
 
+                {{-- Jumlah Pemegang --}}
+                <td class="px-4 py-3.5 text-center">
+                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold {{ count($pemegangLabels) > 0 ? 'bg-blue-50 text-blue-700 border border-blue-200' : 'bg-gray-100 text-gray-400' }}"
+                        title="{{ $pemegangLabels ? implode(', ', $pemegangLabels) : 'Belum ada pemegang akun' }}">
+                        {{ count($pemegangLabels) }}
+                    </span>
+                </td>
+
                 {{-- Di Sosmed (indikator warna) --}}
                 <td class="px-4 py-3.5 text-center">
                     <span class="inline-block w-3 h-3 rounded-full {{ $acc->is_in_sosmed ? 'bg-red-500' : 'bg-emerald-500' }}"
@@ -166,6 +176,7 @@
                             'two_factor' => $acc->two_factor_enabled ? 'Ya' : 'Tidak',
                             'notes' => $acc->notes ?? '',
                             'status' => $acc->is_in_sosmed ? 'Sudah ada di Sosmed' : 'Belum ada di Sosmed',
+                            'pemegang' => $pemegangLabels,
                         ]) }})" class="p-1.5 text-gray-400 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition"
                             title="Lihat detail akun">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -181,6 +192,7 @@
                             'platform' => $acc->platform,
                             'link' => $acc->link ?? '',
                             'email' => $acc->email ?? '',
+                            'password' => $acc->password ?? '',
                             'email_recovery' => $acc->email_recovery ?? '',
                             'phone' => $acc->phone ?? '',
                             'two_factor_enabled' => (bool) $acc->two_factor_enabled,
@@ -206,7 +218,7 @@
             </tr>
         @empty
             <tr>
-                <td colspan="9" class="px-6 py-12 text-center text-gray-400">
+                <td colspan="10" class="px-6 py-12 text-center text-gray-400">
                     <div class="flex flex-col items-center justify-center">
                         <svg class="w-12 h-12 text-gray-300 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
@@ -225,6 +237,7 @@
 {{-- Mobile (kartu per akun) --}}
 <div class="md:hidden divide-y divide-gray-100 bg-white">
     @forelse($rows as $acc)
+        @php($pemegangLabels = array_map(fn($h) => $h['name'] . ' (' . implode(', ', $h['roles']) . ')', $acc->holders()))
         <div class="p-3.5">
             <div class="flex items-start justify-between gap-2">
                 <div class="min-w-0 flex-1">
@@ -264,6 +277,7 @@
                         'two_factor' => $acc->two_factor_enabled ? 'Ya' : 'Tidak',
                         'notes' => $acc->notes ?? '',
                         'status' => $acc->is_in_sosmed ? 'Sudah ada di Sosmed' : 'Belum ada di Sosmed',
+                        'pemegang' => $pemegangLabels,
                     ]) }})" class="p-1.5 text-gray-400 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition"
                         title="Lihat detail akun">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -279,6 +293,7 @@
                         'platform' => $acc->platform,
                         'link' => $acc->link ?? '',
                         'email' => $acc->email ?? '',
+                        'password' => $acc->password ?? '',
                         'email_recovery' => $acc->email_recovery ?? '',
                         'phone' => $acc->phone ?? '',
                         'two_factor_enabled' => (bool) $acc->two_factor_enabled,
@@ -363,6 +378,9 @@
                         <span class="font-semibold {{ $acc->two_factor_enabled ? 'text-emerald-600' : 'text-gray-500' }}">
                             {{ $acc->two_factor_enabled ? 'Ya' : 'Tidak' }}
                         </span>
+                    </span>
+                    <span class="text-gray-400" title="{{ $pemegangLabels ? implode(', ', $pemegangLabels) : 'Belum ada pemegang akun' }}">Pemegang:
+                        <span class="font-semibold text-gray-700">{{ count($pemegangLabels) }}</span>
                     </span>
                     @if($acc->link)
                         <a href="{{ $acc->link }}" target="_blank" rel="noopener noreferrer"

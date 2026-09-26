@@ -134,6 +134,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin'])->grou
     Route::patch('/accounts/{account}/verify', [AdminAccountController::class, 'verify'])->name('accounts.verify');
     Route::post('/accounts/brands', [AdminAccountController::class, 'storeBrand'])->name('accounts.brands.store');
     Route::patch('/accounts/brands/{brand}', [AdminAccountController::class, 'updateBrand'])->name('accounts.brands.update');
+    Route::delete('/accounts/brands/{brand}', [AdminAccountController::class, 'destroyBrand'])->name('accounts.brands.destroy');
 
     // Monitoring & Penugasan Sosmed
     Route::get('/sosmed', [AdminSosmedController::class, 'index'])->name('sosmed.index');
@@ -203,6 +204,7 @@ Route::prefix('staff')->name('staff.')->middleware(['auth', 'role:hr_staff'])->g
     Route::patch('/accounts/{account}/verify', [AdminAccountController::class, 'verify'])->name('accounts.verify');
     Route::post('/accounts/brands', [AdminAccountController::class, 'storeBrand'])->name('accounts.brands.store');
     Route::patch('/accounts/brands/{brand}', [AdminAccountController::class, 'updateBrand'])->name('accounts.brands.update');
+    Route::delete('/accounts/brands/{brand}', [AdminAccountController::class, 'destroyBrand'])->name('accounts.brands.destroy');
     Route::get('/sosmed', [StaffSosmedController::class, 'index'])->name('sosmed.index');
     Route::post('/sosmed/assign', [StaffSosmedController::class, 'assignTask'])->name('sosmed.assign');
     Route::post('/sosmed/accounts/{account}/submit', [StaffSosmedController::class, 'submitAccountTask'])->name('sosmed.accounts.submit');

@@ -496,7 +496,7 @@
 
             {{-- Filter --}}
             <div class="px-5 sm:px-6 py-3 border-b border-gray-100 bg-white">
-                <form method="GET" action="{{ route('admin.presensi.laporan') }}" {{-- ganti ke staff.presensi.laporan untuk Staff --}}
+                <form method="GET" action="{{ route('staff.presensi.laporan') }}"
                     class="flex flex-wrap items-center gap-3">
                     <input type="hidden" name="tab" value="presensi_masuk">
 
@@ -527,7 +527,7 @@
                     </button>
 
                     @if (request()->hasAny(['tanggal_masuk', 'search']))
-                        <a href="{{ route('admin.presensi.laporan', ['tab' => 'presensi_masuk']) }}"
+                        <a href="{{ route('staff.presensi.laporan', ['tab' => 'presensi_masuk']) }}"
                             {{-- ganti route untuk Staff --}}
                             class="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition"
                             title="Reset">
@@ -641,7 +641,7 @@
 
             {{-- Filter --}}
             <div class="px-5 sm:px-6 py-3 border-b border-gray-100 bg-white">
-                <form method="GET" action="{{ route('admin.presensi.laporan') }}" {{-- ganti ke staff untuk Staff --}}
+                <form method="GET" action="{{ route('staff.presensi.laporan') }}"
                     class="flex flex-wrap items-center gap-3">
                     <input type="hidden" name="tab" value="presensi_istirahat">
 
@@ -670,7 +670,7 @@
                     </button>
 
                     @if (request()->hasAny(['tanggal_istirahat', 'search']))
-                        <a href="{{ route('admin.presensi.laporan', ['tab' => 'presensi_istirahat']) }}"
+                        <a href="{{ route('staff.presensi.laporan', ['tab' => 'presensi_istirahat']) }}"
                             class="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition"
                             title="Reset">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

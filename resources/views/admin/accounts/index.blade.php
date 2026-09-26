@@ -483,6 +483,19 @@ TAB: PENDING ACCOUNTS
                                             d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                                     </svg>
                                 </button>
+                                <button type="button"
+                                    onclick="openDeleteBrandModal({{ json_encode([
+                                        'id' => $br->id,
+                                        'name' => $br->name,
+                                        'count' => $br->accounts->count(),
+                                    ]) }})"
+                                    class="p-2 shrink-0 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition"
+                                    title="Hapus Brand">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                    </svg>
+                                </button>
                             </div>
                             <div id="brand-detail-{{ $i }}" class="hidden px-4 sm:px-6 pb-5">
                                 <div class="overflow-x-auto rounded-lg border border-gray-100">
@@ -905,6 +918,12 @@ TAB: PENDING ACCOUNTS
                     <p id="detail-status" class="text-gray-800"></p>
                 </div>
                 <div class="sm:col-span-2">
+                    <p class="text-xs text-gray-400">Pemegang Akun
+                        <span id="detail-pemegang-count" class="hidden ml-1 inline-flex items-center justify-center px-1.5 py-0.5 rounded-full text-[10px] font-semibold bg-gray-100 text-gray-600 align-middle"></span>
+                    </p>
+                    <div id="detail-pemegang" class="text-sm max-h-40 overflow-y-auto pr-1"></div>
+                </div>
+                <div class="sm:col-span-2">
                     <p class="text-xs text-gray-400">Catatan</p>
                     <p id="detail-notes" class="whitespace-pre-wrap text-gray-800"></p>
                 </div>
@@ -1013,6 +1032,47 @@ TAB: PENDING ACCOUNTS
         </div>
     </div>
 
+    {{-- ── MODAL KONFIRMASI HAPUS BRAND ────────────────────── --}}
+    <div id="modal-delete-brand" class="hidden fixed inset-0 z-[70] flex items-center justify-center p-4">
+        <div class="absolute inset-0 bg-black/50 backdrop-blur-sm"
+            onclick="document.getElementById('modal-delete-brand').classList.add('hidden')"></div>
+        <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-md z-10 overflow-hidden">
+            <div class="px-6 py-6">
+                <div class="flex items-start gap-3">
+                    <div class="w-10 h-10 shrink-0 rounded-full bg-red-100 flex items-center justify-center">
+                        <svg class="w-5 h-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+                        </svg>
+                    </div>
+                    <div class="min-w-0">
+                        <h3 class="text-base font-bold text-gray-800">Hapus Brand?</h3>
+                        <p class="text-sm text-gray-600 mt-1">
+                            Brand "<span id="delete-brand-name" class="font-semibold"></span>" akan dihapus permanen.
+                        </p>
+                        <div class="mt-2.5 p-2.5 bg-red-50 border border-red-200 rounded-lg">
+                            <p class="text-xs text-red-700 leading-relaxed">
+                                <span class="font-bold">Peringatan:</span>
+                                <span id="delete-brand-count" class="font-bold"></span> akun yang memakai brand ini
+                                <span class="font-bold">ikut terhapus</span> dan tidak bisa dikembalikan.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="flex gap-3 px-6 pb-6">
+                <button type="button" onclick="document.getElementById('modal-delete-brand').classList.add('hidden')"
+                    class="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-sm text-gray-700 hover:bg-gray-50 transition">Batal</button>
+                <form id="form-delete-brand" method="POST" action="" class="flex-1">
+                    @csrf @method('DELETE')
+                    <button type="submit"
+                        class="w-full px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg text-sm font-semibold shadow-sm transition">Ya,
+                        Hapus Semuanya</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
     {{-- ── JAVASCRIPT MODAL HANDLERS ───────────────────────── --}}
     <script>
         const accountPrefix = @json($accountPrefix);
@@ -1082,7 +1142,30 @@ TAB: PENDING ACCOUNTS
                 const element = document.getElementById(`detail-${key}`);
                 if (element) element.textContent = value;
             });
+            renderPemegangList(data.pemegang);
             document.getElementById('modal-account-detail').classList.remove('hidden');
+        }
+
+        function renderPemegangList(list) {
+            const box = document.getElementById('detail-pemegang');
+            const count = document.getElementById('detail-pemegang-count');
+            box.textContent = '';
+            if (!list || !list.length) {
+                count.classList.add('hidden');
+                const kosong = document.createElement('p');
+                kosong.className = 'text-gray-400 italic text-xs';
+                kosong.textContent = 'Belum ada pemegang akun';
+                box.appendChild(kosong);
+                return;
+            }
+            count.textContent = list.length;
+            count.classList.remove('hidden');
+            list.forEach((label) => {
+                const p = document.createElement('p');
+                p.className = 'text-gray-800';
+                p.textContent = label;
+                box.appendChild(p);
+            });
         }
 
         function closeAccountDetail() {
@@ -1107,6 +1190,13 @@ TAB: PENDING ACCOUNTS
                 img.classList.add('hidden');
                 img.removeAttribute('src');
             }
+        }
+
+        function openDeleteBrandModal(data) {
+            document.getElementById('form-delete-brand').action = `/${accountPrefix}/accounts/brands/${data.id}`;
+            document.getElementById('delete-brand-name').textContent = data.name || '';
+            document.getElementById('delete-brand-count').textContent = data.count || 0;
+            document.getElementById('modal-delete-brand').classList.remove('hidden');
         }
 
         function openEditBrandModal(data) {
@@ -1179,7 +1269,7 @@ TAB: PENDING ACCOUNTS
             document.getElementById('edit-acc-recovery').value = data.email_recovery || '';
             document.getElementById('edit-acc-phone').value = data.phone || '';
             document.getElementById('edit-acc-2fa').checked = Boolean(data.two_factor_enabled);
-            document.getElementById('edit-acc-password').value = '';
+            document.getElementById('edit-acc-password').value = data.password || '';
             document.getElementById('edit-acc-notes').value = data.notes || '';
 
             document.getElementById('modal-edit-account').classList.remove('hidden');

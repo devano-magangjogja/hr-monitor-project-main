@@ -764,24 +764,8 @@
             {{-- Top Bar Filter & Action Buttons --}}
             <div class="mb-4 flex flex-col sm:flex-row items-stretch sm:items-center sm:justify-end gap-2.5 sm:gap-3">
 
-                @if($taskStatus)
-                    <span
-                        class="inline-flex items-center gap-1.5 px-2.5 h-9 rounded-lg text-[11px] font-semibold bg-indigo-100 text-indigo-700 sm:mr-auto w-fit">
-                        Filter status:
-                        {{ match ($taskStatus) {
-                            'pending' => 'Belum Dikerjakan',
-                            'done_by_staff' => 'Menunggu Verifikasi PM/Asisten',
-                            'verified_by_pm' => 'Menunggu HR Staff',
-                            'approved_hr' => 'Disetujui Final',
-                            'rejected' => 'Ditolak',
-                        } }}
-                        <a href="{{ route('admin.sosmed.index', array_filter(['tab' => 'tasks', 'task_date' => $taskDateFilter, 'task_search' => $taskSearch])) }}"
-                            class="hover:underline" title="Hapus filter">&times;</a>
-                    </span>
-                @endif
-
-                {{-- Pencarian Tugas --}}
-                <form action="{{ route('admin.sosmed.index') }}" method="GET" class="flex items-center gap-2 w-full sm:w-auto">
+                {{-- Pencarian Tugas (pojok kiri) --}}
+                <form action="{{ route('admin.sosmed.index') }}" method="GET" class="flex items-center gap-2 w-full sm:w-auto sm:mr-auto">
                     <input type="hidden" name="tab" value="tasks">
                     @if($taskStatus)
                         <input type="hidden" name="task_status" value="{{ $taskStatus }}">
@@ -813,6 +797,22 @@
                     @endif
                 </form>
 
+                @if($taskStatus)
+                    <span
+                        class="inline-flex items-center gap-1.5 px-2.5 h-9 rounded-lg text-[11px] font-semibold bg-indigo-100 text-indigo-700 w-fit">
+                        Filter status:
+                        {{ match ($taskStatus) {
+                            'pending' => 'Belum Dikerjakan',
+                            'done_by_staff' => 'Menunggu Verifikasi PM/Asisten',
+                            'verified_by_pm' => 'Menunggu HR Staff',
+                            'approved_hr' => 'Disetujui Final',
+                            'rejected' => 'Ditolak',
+                        } }}
+                        <a href="{{ route('admin.sosmed.index', array_filter(['tab' => 'tasks', 'task_date' => $taskDateFilter, 'task_search' => $taskSearch])) }}"
+                            class="hover:underline" title="Hapus filter">&times;</a>
+                    </span>
+                @endif
+
                 {{-- Filter Tanggal --}}
                 <form action="{{ route('admin.sosmed.index') }}" method="GET" class="w-full sm:w-auto">
                     <input type="hidden" name="tab" value="tasks">
@@ -832,7 +832,7 @@
                 {{-- Action Buttons (Grid di Mobile, Inline di Tablet/Desktop) --}}
                 <div class="grid grid-cols-2 sm:flex sm:items-center gap-2">
                     {{-- Cetak PDF --}}
-                    <button onclick="window.print()"
+                    <button type="button" onclick="printTableOnly('tasksPrintArea', 'Monitoring Seluruh Tugas Sosmed')"
                         class="w-full sm:w-auto inline-flex items-center justify-center gap-2 h-9 px-3 sm:px-3.5 bg-primary-600 hover:bg-primary-700 active:bg-primary-800
                                                                                                                                                                                                                                                                            text-white text-xs font-medium rounded-lg transition shadow-sm">
                         <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -894,7 +894,7 @@
             </div>
 
             {{-- Desktop Table (md+) --}}
-            <div class="hidden md:block overflow-x-auto rounded-lg border border-gray-100">
+            <div id="tasksPrintArea" class="hidden md:block overflow-x-auto rounded-lg border border-gray-100">
                 <table class="w-full table-fixed text-sm">
                     <colgroup>
                         <col class="w-[20%]"> {{-- Judul Tugas --}}

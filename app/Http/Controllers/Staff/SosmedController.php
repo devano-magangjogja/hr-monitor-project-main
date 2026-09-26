@@ -96,17 +96,34 @@ class SosmedController extends Controller
             ->paginate(10)
             ->appends($request->all());
 
-        // All tasks for monitoring
+        // All tasks for monitoring — filter & tata letak disamakan dengan Admin
+        $taskDateFilter = $request->query('task_date');
+        if (!$taskDateFilter) {
+            $taskDateFilter = now()->toDateString(); // default: tanggal hari ini
+        }
+
+        $taskStatus = $request->query('task_status');
+        if (!in_array($taskStatus, ['pending', 'done_by_staff', 'verified_by_pm', 'approved_hr', 'rejected'], true)) {
+            $taskStatus = null;
+        }
+
         $taskSearch = trim((string) $request->query('task_search', ''));
+
         $allTasks = SosmedTask::with(['account', 'assignedUser', 'assignedBy', 'verifiedBy', 'hrVerifiedBy'])
+            ->when($taskDateFilter, function ($q) use ($taskDateFilter) {
+                $q->whereDate('task_date', $taskDateFilter);
+            })
+            ->when($taskStatus, function ($q) use ($taskStatus) {
+                $q->where('status', $taskStatus);
+            })
             ->when($taskSearch !== '', function ($q) use ($taskSearch) {
                 $q->where(function ($qq) use ($taskSearch) {
                     $qq->where('title', 'like', '%' . $taskSearch . '%')
+                      ->orWhere('description', 'like', '%' . $taskSearch . '%')
                       ->orWhereHas('account', fn($a) => $a->where('name', 'like', '%' . $taskSearch . '%')
                           ->orWhere('platform', 'like', '%' . $taskSearch . '%')
                           ->orWhere('brand', 'like', '%' . $taskSearch . '%'))
-                      ->orWhereHas('assignedUser', fn($u) => $u->where('name', 'like', '%' . $taskSearch . '%'))
-                      ->orWhereHas('verifiedBy', fn($u) => $u->where('name', 'like', '%' . $taskSearch . '%'));
+                      ->orWhereHas('assignedUser', fn($u) => $u->where('name', 'like', '%' . $taskSearch . '%'));
                 });
             })
             ->orderBy('task_date', 'desc')
@@ -220,6 +237,8 @@ class SosmedController extends Controller
             'availableAccounts',
             'myAccounts',
             'taskSearch',
+            'taskStatus',
+            'taskDateFilter',
             'myAccountSearch',
             'todayTasks',
             'needHrApproval',

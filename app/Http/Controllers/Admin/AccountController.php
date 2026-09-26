@@ -8,6 +8,7 @@ use App\Models\Brand;
 use App\Models\SosmedAccount;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 
@@ -23,8 +24,9 @@ class AccountController extends Controller
         $brand = $request->query('brand');
         $status = $request->query('status'); // 'assigned', 'unassigned'
 
-        $accountsQuery = SosmedAccount::with(['pmUser', 'staffUsers', 'assistantUser', 'creator'])
+        $accountsQuery = SosmedAccount::with(['pmUser', 'staffUsers', 'assistantUser', 'supervisorStaff', 'creator'])
             ->where('verification_status', 'approved')   // hanya tampilkan yang sudah disetujui
+            ->orderBy('created_at', 'desc')              // akun baru tampil paling atas
             ->orderBy('platform')
             ->orderBy('name');
 
@@ -89,7 +91,7 @@ class AccountController extends Controller
             'unassigned' => SosmedAccount::where('verification_status', 'approved')->whereDoesntHave('staffUsers')->count(),
         ];
 
-        $platformList = ['Instagram', 'TikTok', 'YouTube', 'Facebook', 'Twitter/X', 'LinkedIn', 'Threads', 'Website', 'Lainnya'];
+        $platformList = ['Instagram', 'TikTok', 'YouTube', 'Facebook', 'Twitter/X', 'LinkedIn', 'Threads', 'Pinterest', 'Snack Video', 'Email', 'Website', 'Lainnya'];
 
         $brands = Brand::orderBy('name')->pluck('name');
 
@@ -98,7 +100,7 @@ class AccountController extends Controller
             $brandsQuery = Brand::query()
                 ->with(['accounts' => function ($q) {
                     $q->where('verification_status', 'approved')
-                        ->with('staffUsers')
+                        ->with(['pmUser', 'assistantUser', 'supervisorStaff', 'staffUsers'])
                         ->orderBy('platform')
                         ->orderBy('name');
                 }])
@@ -150,7 +152,7 @@ class AccountController extends Controller
             $brand
         );
 
-        return redirect()->route($this->accountRoute('index'), ['tab' => 'brands'])
+        return redirect()->back()
             ->with('success', "Brand '{$brand->name}' berhasil ditambahkan.");
     }
 
@@ -185,8 +187,34 @@ class AccountController extends Controller
             $brand
         );
 
-        return redirect()->route($this->accountRoute('index'), ['tab' => 'brands'])
+        return redirect()->back()
             ->with('success', "Brand '{$brand->name}' berhasil diperbarui.");
+    }
+
+    public function destroyBrand(Brand $brand)
+    {
+        $name = $brand->name;
+        $accounts = SosmedAccount::where('brand', $name)->get();
+        $count = $accounts->count();
+
+        DB::transaction(function () use ($brand, $accounts) {
+            foreach ($accounts as $account) {
+                $account->delete();
+            }
+            if ($brand->logo_path) {
+                Storage::disk('public')->delete($brand->logo_path);
+            }
+            $brand->delete();
+        });
+
+        $this->logActivity(
+            'brand.deleted',
+            'Manajemen Akun',
+            "Menghapus brand '{$name}' beserta {$count} akun di dalamnya"
+        );
+
+        return redirect()->back()
+            ->with('success', "Brand '{$name}' beserta {$count} akun berhasil dihapus.");
     }
 
     public function store(Request $request)
@@ -234,7 +262,7 @@ class AccountController extends Controller
             $account
         );
 
-        return redirect()->route($this->accountRoute('index'))
+        return redirect()->back()
             ->with('success', "Akun '{$account->name}' ({$account->platform}) berhasil ditambahkan.");
     }
 
@@ -284,7 +312,7 @@ class AccountController extends Controller
             $account
         );
 
-        return redirect()->route($this->accountRoute('index'))
+        return redirect()->back()
             ->with('success', "Akun '{$account->name}' berhasil diperbarui.");
     }
 
@@ -300,7 +328,7 @@ class AccountController extends Controller
             "Menghapus akun '{$name}' ({$platform})"
         );
 
-        return redirect()->route($this->accountRoute('index'))
+        return redirect()->back()
             ->with('success', "Akun '{$name}' ({$platform}) berhasil dihapus.");
     }
 
@@ -400,10 +428,5 @@ class AccountController extends Controller
         ]);
 
         return redirect()->back()->with('success', 'Pengajuan akun berhasil dikirim untuk verifikasi admin.');
-    }
-
-    private function accountRoute(string $action): string
-    {
-        return (Auth::user()?->isAdmin() ? 'admin' : 'staff') . '.accounts.' . $action;
     }
 }
