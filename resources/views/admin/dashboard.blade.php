@@ -142,97 +142,14 @@
     </div>
 
     {{-- ── Progress Per User ───────────────────────────────── --}}
-    <x-responsive-card :padding="'p-0'">
-        <div class="px-3 sm:px-6 py-3 sm:py-4 border-b border-gray-200">
-            <h2 class="text-xs sm:text-sm font-semibold text-gray-700">Progres Tim Hari Ini</h2>
-        </div>
-        <x-responsive-table-wrapper>
-            <thead>
-                <tr class="bg-gray-50 border-b border-gray-200">
-                    <th class="text-center px-3 sm:px-6 py-2.5 sm:py-3.5 font-semibold text-gray-600 text-xs sm:text-sm w-[28%] max-w-xs">
-                        Nama
-                    </th>
-                    <th class="text-center px-3 sm:px-6 py-2.5 sm:py-3.5 font-semibold text-gray-600 text-xs sm:text-sm w-28 sm:w-36 whitespace-nowrap">
-                        Role
-                    </th>
-                    <th class="text-center px-3 sm:px-6 py-2.5 sm:py-3.5 font-semibold text-gray-600 text-xs sm:text-sm w-16 sm:w-24 whitespace-nowrap">
-                        Selesai
-                    </th>
-                    <th class="text-center px-3 sm:px-6 py-2.5 sm:py-3.5 font-semibold text-gray-600 text-xs sm:text-sm w-16 sm:w-24 whitespace-nowrap">
-                        Total
-                    </th>
-                    <th class="text-center px-3 sm:px-6 py-2.5 sm:py-3.5 font-semibold text-gray-600 text-xs sm:text-sm">
-                        Progress
-                    </th>
-                    <th class="text-center px-3 sm:px-6 py-2.5 sm:py-3.5 font-semibold text-gray-600 text-xs sm:text-sm w-14 sm:w-20">
-                        Aksi
-                    </th>
-                </tr>
-            </thead>
-            <tbody class="divide-y divide-gray-100">
-                @forelse($perUser as $user)
-                    @php
-                        $pct = $user->total_tasks > 0
-                            ? round(($user->completed_tasks / $user->total_tasks) * 100)
-                            : 0;
-                        $barColor = $pct === 100
-                            ? 'bg-green-500'
-                            : ($pct >= 50 ? 'bg-primary-500' : 'bg-yellow-500');
-                    @endphp
-                    <tr class="hover:bg-gray-50 transition">
-                        <!-- Nama -->
-                        <td class="px-3 sm:px-6 py-3 sm:py-4">
-                            <div class="flex items-center justify-center gap-2 sm:gap-3 min-w-0">
-                                <span class="text-xs sm:text-sm font-medium text-gray-800 truncate max-w-[10rem]">{{ $user->name }}</span>
-                            </div>
-                        </td>
-                        <!-- Role -->
-                        <td class="px-3 sm:px-6 py-3 sm:py-4 text-center">
-                            <span class="inline-flex whitespace-nowrap px-1.5 sm:px-2.5 py-0.5 sm:py-1 rounded-full text-xs font-medium {{ $user->role_badge_class }}">
-                                {{ $user->role_label }}
-                            </span>
-                        </td>
-                        <!-- Selesai -->
-                        <td class="px-3 sm:px-6 py-3 sm:py-4 text-center">
-                            <span class="text-xs sm:text-sm font-semibold text-green-600">{{ $user->completed_tasks }}</span>
-                        </td>
-                        <!-- Total -->
-                        <td class="px-3 sm:px-6 py-3 sm:py-4 text-center">
-                            <span class="text-xs sm:text-sm text-gray-600">{{ $user->total_tasks }}</span>
-                        </td>
-                        <!-- Progress -->
-                        <td class="px-3 sm:px-6 py-3 sm:py-4">
-                            <div class="flex items-center justify-center gap-2 sm:gap-3">
-                                <div class="flex-1 h-1.5 sm:h-2 bg-gray-100 rounded-full overflow-hidden min-w-[50px] max-w-[150px]">
-                                    <div class="{{ $barColor }} h-full rounded-full transition-all duration-300"
-                                         style="width: {{ $pct }}%"></div>
-                                </div>
-                                <span class="text-xs font-medium text-gray-600 w-8 text-right">{{ $pct }}%</span>
-                            </div>
-                        </td>
-                        <!-- Aksi -->
-                        <td class="px-3 sm:px-6 py-3 sm:py-4 text-center">
-                            <a href="{{ route('admin.dashboard.team-progress-detail', $user->id) }}"
-                               class="p-1.5 inline-flex text-gray-400 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition"
-                               title="Lihat Detail Tugas">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                          d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                          d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
-                                </svg>
-                            </a>
-                        </td>
-                    </tr>
-                @empty
-                    <tr>
-                        <td colspan="6" class="px-3 sm:px-6 py-8 sm:py-12 text-center text-gray-400 text-xs sm:text-sm">
-                            Belum ada data pengguna.
-                        </td>
-                    </tr>
-                @endforelse
-            </tbody>
-        </x-responsive-table-wrapper>
-    </x-responsive-card>
+    <x-team-progress
+        :rows="$perUser"
+        :unfinished="$progressUnfinished"
+        :search="$progressSearch"
+        :status="$progressStatus"
+        :action-route="route('admin.dashboard')"
+        :reminder-route="route('admin.dashboard.reminder')"
+        detail-route="admin.dashboard.team-progress-detail"
+    />
 
 @endsection

@@ -19,6 +19,7 @@ class CustomNotification extends Notification
         protected string $audienceLabel = '',
         protected string $batchId = '',
         protected int $recipientCount = 1,
+        protected ?int $pendingCount = null,
     ) {}
 
     public function via(object $notifiable): array
@@ -39,6 +40,7 @@ class CustomNotification extends Notification
             'audience_label'   => $this->audienceLabel,
             'batch_id'         => $this->batchId,
             'recipient_count'  => $this->recipientCount,
+            'pending_count'    => $this->pendingCount,
         ];
     }
 }

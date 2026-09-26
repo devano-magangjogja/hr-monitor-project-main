@@ -619,6 +619,66 @@ class TaskService
         return $this->taskRepository->getDailyStatsPerUser();
     }
 
+    /**
+     * Ringkasan progres tim (belum/sudah hari ini + total all-time) untuk
+     * seluruh user non-admin, atau hanya role di bawah staff bila $staffScope true.
+     */
+    public function getTeamProgressOverview(bool $staffScope = false): Collection
+    {
+        $excludeRoles = $staffScope ? ['admin', 'hr_staff'] : ['admin'];
+
+        return $this->taskRepository->getTeamProgressOverview($excludeRoles);
+    }
+
+    /**
+     * Saring baris progres tim berdasarkan pencarian nama dan status hari ini.
+     *
+     * @param  string  $status  '', 'belum' (masih ada tugas hari ini), 'sudah' (semua tugas hari ini beres)
+     */
+    public function filterTeamProgress(\Illuminate\Support\Collection $rows, string $search, string $status): \Illuminate\Support\Collection
+    {
+        if ($search !== '') {
+            $rows = $rows->filter(function ($user) use ($search) {
+                return stripos($user->name, $search) !== false
+                    || stripos($user->role_label, $search) !== false;
+            });
+        }
+
+        if ($status === 'belum') {
+            $rows = $rows->filter(fn($user) => $user->belum_hari_ini > 0);
+        } elseif ($status === 'sudah') {
+            $rows = $rows->filter(fn($user) => $user->tugas_hari_ini > 0 && $user->belum_hari_ini === 0);
+        }
+
+        return $rows->values();
+    }
+
+    /**
+     * Paginasi baris progres tim agar tabel tidak memanjang.
+     */
+    public function paginateTeamProgress(
+        \Illuminate\Support\Collection $rows,
+        int $page,
+        int $perPage = 10,
+        ?string $path = null,
+        array $query = []
+    ): \Illuminate\Contracts\Pagination\LengthAwarePaginator {
+        $total = $rows->count();
+        $lastPage = max(1, (int) ceil($total / $perPage));
+        $page = min(max(1, $page), $lastPage);
+
+        return new \Illuminate\Pagination\LengthAwarePaginator(
+            $rows->forPage($page, $perPage)->values(),
+            $total,
+            $perPage,
+            $page,
+            [
+                'path'  => $path ?? '',
+                'query' => $query,
+            ]
+        );
+    }
+
     public function getUserScore(int $userId, string $period): int
     {
         return $this->taskRepository->getUserScore($userId, $period);

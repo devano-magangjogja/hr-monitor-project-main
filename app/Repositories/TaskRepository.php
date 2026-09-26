@@ -4,10 +4,12 @@ namespace App\Repositories;
 
 use App\Models\Task;
 use App\Models\TaskAssignment;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 
 class TaskRepository
 {
@@ -636,6 +638,98 @@ class TaskRepository
             ->orderBy('role')
             ->orderBy('name')
             ->get();
+    }
+
+    /**
+     * Ringkasan progres tim: belum/sudah dikerjakan (khusus tugas yang diberikan
+     * HARI INI, mencakup tugas reguler/rutin/presensi/mandiri + tugas sosmed
+     * termasuk akun binaan yang belum menyetor hari ini) dan total tugas all-time.
+     *
+     * @param  string[]  $excludeRoles  Role yang tidak ditampilkan (mis. ['admin'] / ['admin','hr_staff'])
+     */
+    public function getTeamProgressOverview(array $excludeRoles = ['admin']): Collection
+    {
+        $today = Carbon::today()->toDateString();
+
+        $users = User::query()
+            ->where('is_active', 1)
+            ->whereNotIn('role', $excludeRoles)
+            ->orderBy('role')
+            ->orderBy('name')
+            ->get();
+
+        if ($users->isEmpty()) {
+            return $users;
+        }
+
+        $ids = $users->pluck('id')->all();
+
+        // Tugas reguler (default/rutin/presensi/mandiri/assigned) yang task_date-nya hari ini
+        $regToday = DB::table('task_assignments')
+            ->join('tasks', 'tasks.id', '=', 'task_assignments.task_id')
+            ->whereIn('task_assignments.user_id', $ids)
+            ->whereDate('tasks.task_date', $today)
+            ->selectRaw("task_assignments.user_id,
+                SUM(task_assignments.is_completed = 'completed') AS done,
+                SUM(task_assignments.is_completed <> 'completed') AS undone")
+            ->groupBy('task_assignments.user_id')
+            ->get()
+            ->keyBy('user_id');
+
+        $regAllTime = DB::table('task_assignments')
+            ->whereIn('user_id', $ids)
+            ->selectRaw('user_id, COUNT(*) AS total')
+            ->groupBy('user_id')
+            ->pluck('total', 'user_id');
+
+        // Tugas sosmed hari ini milik user (penugasan langsung)
+        $sosToday = DB::table('sosmed_tasks')
+            ->whereIn('assigned_to', $ids)
+            ->whereDate('task_date', $today)
+            ->selectRaw("assigned_to AS user_id,
+                SUM(status = 'approved_hr') AS done,
+                SUM(status <> 'approved_hr') AS undone")
+            ->groupBy('assigned_to')
+            ->get()
+            ->keyBy('user_id');
+
+        $sosAllTime = DB::table('sosmed_tasks')
+            ->whereIn('assigned_to', $ids)
+            ->selectRaw('assigned_to AS user_id, COUNT(*) AS total')
+            ->groupBy('assigned_to')
+            ->pluck('total', 'user_id');
+
+        // Akun yang ia pegang vs akun yang sudah ada tugasnya hari ini → selisihnya = pending virtual
+        $managedAccounts = DB::table('sosmed_account_users')
+            ->whereIn('user_id', $ids)
+            ->selectRaw('user_id, COUNT(DISTINCT sosmed_account_id) AS cnt')
+            ->groupBy('user_id')
+            ->pluck('cnt', 'user_id');
+
+        $managedWithTodayTask = DB::table('sosmed_tasks')
+            ->whereIn('assigned_to', $ids)
+            ->whereDate('task_date', $today)
+            ->selectRaw('assigned_to AS user_id, COUNT(DISTINCT sosmed_account_id) AS cnt')
+            ->groupBy('assigned_to')
+            ->pluck('cnt', 'user_id');
+
+        foreach ($users as $user) {
+            $id = $user->id;
+
+            $sudah = (int) ($regToday[$id]->done ?? 0) + (int) ($sosToday[$id]->done ?? 0);
+            $belum = (int) ($regToday[$id]->undone ?? 0) + (int) ($sosToday[$id]->undone ?? 0);
+            $belum += max(0, (int) ($managedAccounts[$id] ?? 0) - (int) ($managedWithTodayTask[$id] ?? 0));
+
+            $user->belum_hari_ini = $belum;
+            $user->sudah_hari_ini = $sudah;
+            $user->tugas_hari_ini = $belum + $sudah;
+            $user->total_all_time = (int) ($regAllTime[$id] ?? 0) + (int) ($sosAllTime[$id] ?? 0);
+            $user->persen_hari_ini  = $user->tugas_hari_ini > 0
+                ? (int) round($sudah / $user->tugas_hari_ini * 100)
+                : 0;
+        }
+
+        return $users;
     }
 
     public function getUserScore(int $userId, string $period): int

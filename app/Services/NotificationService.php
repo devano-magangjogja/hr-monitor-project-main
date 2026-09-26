@@ -7,6 +7,7 @@ use App\Models\User;
 use App\Notifications\CustomNotification;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Str;
 
 class NotificationService
 {
@@ -40,6 +41,45 @@ class NotificationService
             'pm'           => 'Semua PM (Project Manager)',
             default        => 'Pengguna tertentu',
         };
+    }
+
+    /**
+     * Kirim pengingat tugas harian ke daftar user (satu batch agar riwayat tidak pecah).
+     *
+     * @param  Collection  $users        Penerima yang sudah tervalidasi role-nya
+     * @param  array        $belumByUser  [userId => jumlah tugas hari ini yang belum selesai]
+     */
+    public static function sendTaskReminders(Collection $users, User $sender, array $belumByUser = []): int
+    {
+        if ($users->isEmpty()) {
+            return 0;
+        }
+
+        $batchId = (string) Str::uuid();
+        $total   = $users->count();
+
+        foreach ($users as $user) {
+            $belum = (int) ($belumByUser[$user->id] ?? 0);
+
+            $message = $belum > 0
+                ? "Kamu masih punya {$belum} tugas hari ini yang belum selesai. Yuk diselesaikan dan dilaporkan lewat aplikasi."
+                : 'Jangan lupa menyelesaikan dan melaporkan tugas harianmu di aplikasi, ya.';
+
+            $user->notify(new CustomNotification(
+                'Pengingat Tugas Hari Ini',
+                $message,
+                $sender->name,
+                $sender->id,
+                $sender->role_label,
+                'specific',
+                'Pengingat tugas',
+                $batchId,
+                $total,
+                $belum
+            ));
+        }
+
+        return $total;
     }
 
     /**
@@ -112,6 +152,22 @@ class NotificationService
                 $first->group_size = $items->count();
                 $first->recipients = $recipients;
                 $first->recipient = $recipients->first();
+
+                $messages = $items->map(fn (Notification $n) => $n->data['message'] ?? '')->unique();
+                $first->recipient_details = $items
+                    ->map(function (Notification $n) use ($users) {
+                        $recipient = $users->get($n->notifiable_id);
+                        $pending = $n->data['pending_count'] ?? null;
+
+                        return $pending === null ? null : [
+                            'name'    => $recipient?->name ?? 'Pengguna dihapus',
+                            'pending' => (int) $pending,
+                        ];
+                    })
+                    ->filter()
+                    ->sortByDesc('pending')
+                    ->values();
+                $first->message_varies = $messages->count() > 1 && $first->recipient_details->isNotEmpty();
 
                 return $first;
             })

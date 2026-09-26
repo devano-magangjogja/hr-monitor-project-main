@@ -153,15 +153,15 @@
     </div>
 
     <div class="overflow-x-auto">
-        <table class="w-full text-sm min-w-[560px]">
+        <table class="w-full text-sm table-fixed min-w-[560px]">
             <thead>
                 <tr class="bg-gray-50 border-b border-gray-200">
-                    <th class="text-left px-4 sm:px-6 py-3.5 font-semibold text-gray-600 w-44">Judul</th>
-                    <th class="text-left px-4 sm:px-6 py-3.5 font-semibold text-gray-600">Deskripsi</th>
-                    <th class="text-left px-4 sm:px-6 py-3.5 font-semibold text-gray-600 w-28">Sumber</th>
-                    <th class="text-left px-4 sm:px-6 py-3.5 font-semibold text-gray-600 w-36">Status</th>
-                    <th class="text-left px-4 sm:px-6 py-3.5 font-semibold text-gray-600 w-28">Catatan</th>
-                    <th class="text-right px-4 sm:px-6 py-3.5 font-semibold text-gray-600 w-16">Aksi</th>
+                    <th class="text-left px-4 sm:px-6 py-2.5 font-semibold text-gray-600 text-xs w-[24%]">Judul</th>
+                    <th class="text-left px-4 sm:px-6 py-2.5 font-semibold text-gray-600 text-xs w-[20%]">Deskripsi</th>
+                    <th class="text-left px-4 sm:px-6 py-2.5 font-semibold text-gray-600 text-xs w-[12%]">Sumber</th>
+                    <th class="text-left px-4 sm:px-6 py-2.5 font-semibold text-gray-600 text-xs w-[18%]">Status</th>
+                    <th class="text-left px-4 sm:px-6 py-2.5 font-semibold text-gray-600 text-xs w-[18%]">Catatan</th>
+                    <th class="text-right px-4 sm:px-6 py-2.5 font-semibold text-gray-600 text-xs w-[8%]">Aksi</th>
                 </tr>
             </thead>
             <tbody class="divide-y divide-gray-100">
@@ -182,16 +182,16 @@
                     ]) }}">
 
                         {{-- Judul --}}
-                        <td class="px-4 sm:px-6 py-4 w-44">
-                            <div class="truncate max-w-[160px] font-medium text-gray-800"
+                        <td class="px-4 sm:px-6 py-2.5 sm:py-3 align-middle w-[24%]">
+                            <div class="truncate text-sm font-medium text-gray-800"
                                  title="{{ $task->title }}">
                                 {{ $task->title }}
                             </div>
                         </td>
 
                         {{-- Deskripsi --}}
-                        <td class="px-4 sm:px-6 py-4">
-                            <div class="truncate max-w-[180px] text-gray-500"
+                        <td class="px-4 sm:px-6 py-2.5 sm:py-3 align-middle w-[20%]">
+                            <div class="truncate text-sm text-gray-500"
                                  title="{{ $task->description ?? '-' }}">
                                 @if($task->description)
                                     {!! linkify(e($task->description)) !!}
@@ -202,17 +202,17 @@
                         </td>
 
                         {{-- Sumber --}}
-                        <td class="px-4 sm:px-6 py-4 w-28">
+                        <td class="px-4 sm:px-6 py-2.5 sm:py-3 align-middle whitespace-nowrap w-[12%]">
                             @if($task->type === 'default')
-                                <span class="inline-flex px-2.5 py-1 rounded-full text-xs font-medium bg-purple-50 text-purple-700">
+                                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-purple-50 text-purple-700">
                                     Rutin
                                 </span>
                             @elseif($task->type === 'self')
-                                <span class="inline-flex px-2.5 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-600">
+                                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600">
                                     Mandiri
                                 </span>
                             @else
-                                <span class="inline-flex px-2.5 py-1 rounded-full text-xs font-medium bg-blue-50 text-blue-700"
+                                <span class="inline-flex max-w-full truncate items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-50 text-blue-700"
                                       title="{{ $task->creator?->name ?? 'Atasan' }}">
                                     {{ Str::limit($task->creator?->name ?? 'Atasan', 10) }}
                                 </span>
@@ -220,14 +220,14 @@
                         </td>
 
                         {{-- Status --}}
-                        <td class="px-4 sm:px-6 py-4 w-36">
+                        <td class="px-4 sm:px-6 py-2.5 sm:py-3 align-middle whitespace-nowrap w-[18%]">
                             <x-task-status-badge :status="$status" :completedAt="$assignment?->completed_at" />
                         </td>
 
                         {{-- Catatan --}}
-                        <td class="px-4 sm:px-6 py-4 w-28">
+                        <td class="px-4 sm:px-6 py-2.5 sm:py-3 align-middle w-[18%]">
                             @if($assignment?->note)
-                                <div class="truncate max-w-[100px] text-xs text-gray-500 italic"
+                                <div class="truncate text-xs text-gray-500 italic"
                                      title="{{ $assignment->note }}">
                                     {{ $assignment->note }}
                                 </div>
@@ -237,7 +237,7 @@
                         </td>
 
                         {{-- Aksi --}}
-                        <td class="px-4 sm:px-6 py-4 w-16 text-right">
+                        <td class="px-4 sm:px-6 py-2.5 sm:py-3 align-middle w-[8%] text-right">
                             <button onclick="openDetailModal(JSON.parse(this.closest('tr').dataset.task))"
                                 class="p-1.5 text-gray-400 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition"
                                 title="Lihat Detail">

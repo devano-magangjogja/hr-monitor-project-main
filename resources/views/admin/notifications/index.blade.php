@@ -147,8 +147,25 @@
                                                 {{ $data['title'] ?? '-' }}
                                             </p>
                                             <p class="text-xs text-gray-500 mt-0.5 line-clamp-2">
-                                                {{ $data['message'] ?? '' }}
+                                                {{ $item->message_varies
+                                                    ? 'Pesan pengingat disesuaikan dengan jumlah tugas masing-masing penerima:'
+                                                    : ($data['message'] ?? '') }}
                                             </p>
+                                            @if($item->message_varies && $item->recipient_details->isNotEmpty())
+                                                <div class="flex flex-wrap items-center gap-1 mt-1.5">
+                                                    @foreach($item->recipient_details->take(6) as $detail)
+                                                        <span
+                                                            class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-amber-50 text-amber-700 border border-amber-200">
+                                                            {{ Str::limit($detail['name'], 18) }} — {{ $detail['pending'] }} tugas
+                                                        </span>
+                                                    @endforeach
+                                                    @if($item->recipient_details->count() > 6)
+                                                        <span class="text-xs text-gray-400">
+                                                            +{{ $item->recipient_details->count() - 6 }} lainnya
+                                                        </span>
+                                                    @endif
+                                                </div>
+                                            @endif
                                         </div>
                                         <div class="text-right flex-shrink-0">
                                             <span class="text-xs text-gray-400">
