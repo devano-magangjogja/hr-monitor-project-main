@@ -1545,7 +1545,7 @@
                 </div>
                 <div>
                     <label class="block text-xs font-semibold text-gray-600 mb-1.5">Link URL Akun</label>
-                    <input type="url" name="link" placeholder="https://instagram.com/republikweb_net"
+                    <input type="text" name="link" placeholder="instagram.com/republikweb_net (tanpa https juga boleh)"
                         class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 focus:outline-none">
                 </div>
                 <div>

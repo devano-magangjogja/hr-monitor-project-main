@@ -59,7 +59,7 @@ class SosmedController extends Controller
         }
 
         $validated = $request->validate([
-            'link_upload' => ['required', 'url', 'max:500'],
+            'link_upload' => ['required', 'string', 'max:500'],
             'description' => ['nullable', 'string', 'max:500'],
         ]);
 
@@ -68,13 +68,16 @@ class SosmedController extends Controller
             'status'      => 'done_by_staff',
         ]);
 
+        // Ambil dari model agar link yang ikut tercatat di log sudah berbentuk URL absolut.
+        $proof = $task->first_link ?? $validated['link_upload'];
+
         SosmedApprovalLog::create([
             'sosmed_task_id' => $task->id,
             'user_id'        => Auth::id(),
             'user_name'      => Auth::user()->name,
             'role_name'      => 'Staff Sosmed',
             'action'         => 'submitted',
-            'notes'          => 'Tugas selesai dikerjakan. Bukti URL: ' . $validated['link_upload'],
+            'notes'          => 'Tugas selesai dikerjakan. Bukti URL: ' . $proof,
         ]);
 
         return redirect()->route('member.sosmed.index', ['tab' => 'tasks'])

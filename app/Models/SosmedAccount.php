@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Casts\NormalizedUrl;
 use Illuminate\Database\Eloquent\Model;
 
 class SosmedAccount extends Model
@@ -33,6 +34,7 @@ class SosmedAccount extends Model
     {
         return [
             'password' => 'encrypted',
+            'link' => NormalizedUrl::class,
             'is_in_sosmed' => 'boolean',
             'two_factor_enabled' => 'boolean',
         ];

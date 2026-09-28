@@ -151,6 +151,8 @@ class SosmedController extends Controller
             ->whereIn('sosmed_account_id', $myAccountIds)
             ->where('assigned_to', Auth::id())
             ->whereDate('task_date', now()->toDateString())
+            ->orderByRaw("FIELD(status, 'pending', 'rejected', 'done_by_staff', 'verified_by_pm', 'approved_hr')")
+            ->orderBy('updated_at', 'asc')
             ->get()
             ->keyBy('sosmed_account_id');
 
