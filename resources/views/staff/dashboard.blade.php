@@ -84,7 +84,7 @@
         </x-responsive-grid>
 
         {{-- ── Main Cards Grid ────────────────────────────── --}}
-        <x-responsive-grid :cols="'grid-cols-1 lg:grid-cols-2'" :gap="'gap-4 md:gap-6'" class="mt-6">
+        <x-responsive-grid :cols="'grid-cols-1'" :gap="'gap-4 md:gap-6'" class="mt-6">
 
             {{-- ── Tugas Hari Ini ──────────────────────────────── --}}
             <x-responsive-card class="flex flex-col h-full">
@@ -146,49 +146,19 @@
                     @endforelse
                 </div>
             </x-responsive-card>
-
-            {{-- ── Progres HR Assistant ────────────────────────── --}}
-            <x-responsive-card class="flex flex-col h-full">
-                <div class="px-5 py-4 pt-1 border-b border-gray-100">
-                    <h2 class="text-sm font-semibold text-gray-800">Progres HR Assistant</h2>
-                </div>
-                <div class="divide-y divide-gray-100 flex-1">
-                    @forelse($assistants as $assistant)
-                        @php
-                            $pct = $assistant->total_tasks > 0
-                                ? round(($assistant->completed_tasks / $assistant->total_tasks) * 100)
-                                : 0;
-                            $barColor = $pct === 100
-                                ? 'bg-green-500'
-                                : ($pct >= 50 ? 'bg-primary-500' : 'bg-yellow-500');
-                        @endphp
-                        <div class="px-5 py-4">
-                            <div class="flex items-center justify-between mb-2">
-                                <div class="flex items-center gap-2.5">
-                                    <div class="w-7 h-7 rounded-full bg-purple-100 flex items-center justify-center flex-shrink-0">
-                                        <span class="text-xs font-bold text-purple-600">
-                                            {{ strtoupper(substr($assistant->name, 0, 1)) }}
-                                        </span>
-                                    </div>
-                                    <span class="text-xs sm:text-sm font-medium text-gray-800">{{ $assistant->name }}</span>
-                                </div>
-                                <span class="text-xs font-medium text-gray-500 flex-shrink-0">
-                                    {{ $assistant->completed_tasks }}/{{ $assistant->total_tasks }} tugas
-                                </span>
-                            </div>
-                            <div class="h-2 bg-gray-100 rounded-full overflow-hidden">
-                                <div class="{{ $barColor }} h-2 rounded-full transition-all duration-300"
-                                     style="width: {{ $pct }}%"></div>
-                            </div>
-                            <p class="text-xs text-gray-400 mt-1.5 font-medium">{{ $pct }}% selesai</p>
-                        </div>
-                    @empty
-                        <div class="px-5 py-12 text-center text-gray-400 text-xs sm:text-sm flex flex-col items-center justify-center">
-                            <p>Tidak ada HR Assistant.</p>
-                        </div>
-                    @endforelse
-                </div>
-            </x-responsive-card>
         </x-responsive-grid>
+
+    {{-- ── Progres Tim Hari Ini (role di bawah staff) ───────────── --}}
+    <div class="mt-6">
+        <x-team-progress
+            :rows="$perUser"
+            :unfinished="$progressUnfinished"
+            :search="$progressSearch"
+            :status="$progressStatus"
+            :action-route="route('staff.dashboard')"
+            :reminder-route="route('staff.dashboard.reminder')"
+            detail-route="staff.productivity.detail"
+            empty-text="Belum ada bawahan yang bisa dipantau."
+        />
     </div>
 @endsection

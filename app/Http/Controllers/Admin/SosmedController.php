@@ -25,8 +25,7 @@ class SosmedController extends Controller
         $brand = $request->query('brand');
         $accFilter = $request->query('acc_filter');
         $accountsQuery = SosmedAccount::inSosmed()
-            ->with(['pmUser', 'staffUsers', 'assistantUser', 'supervisorStaff', 'creator'])
-            ->orderBy('created_at', 'desc');
+            ->with(['pmUser', 'staffUsers', 'assistantUser', 'supervisorStaff', 'creator']);
 
         if ($brand) {
             $accountsQuery->where('brand', $brand);
@@ -78,7 +77,16 @@ class SosmedController extends Controller
             $accFilter = null;
         }
 
-        $accounts = $accountsQuery->paginate(15)->appends($request->all());
+        // Urutkan berdasar aktivitas terakhir akun: waktu delegasi pengelola terbaru (pivot
+        // sosmed_account_users.assigned_at) atau waktu pembuatan akun. Menempelkan pengelola ke
+        // akun lama tidak mengubah timestamp akun, jadi created_at saja tidak cukup.
+        $lastAssignedSql = '(SELECT MAX(sau.assigned_at) FROM sosmed_account_users sau
+                             WHERE sau.sosmed_account_id = sosmed_accounts.id)';
+        $accounts = $accountsQuery
+            ->orderByRaw("GREATEST(COALESCE({$lastAssignedSql}, '1970-01-01'),
+                                   COALESCE(sosmed_accounts.created_at, sosmed_accounts.updated_at, '1970-01-01')) DESC")
+            ->orderBy('sosmed_accounts.id', 'desc')
+            ->paginate(15)->appends($request->all());
 
         // Filter date for tasks
         $taskDateFilter = $request->query('task_date');
@@ -292,7 +300,7 @@ class SosmedController extends Controller
             'name' => ['required', 'string', 'max:200'],
             'brand' => ['nullable', 'string', 'max:100'],
             'platform' => ['required', 'string', 'max:50'],
-            'link' => ['nullable', 'url', 'max:500'],
+            'link' => ['nullable', 'string', 'max:500'],
             'pm_id' => ['nullable', 'exists:users,id'],
             'assistant_id' => ['nullable', 'exists:users,id'],
             'supervisor_staff_id' => ['nullable', 'exists:users,id'],
@@ -335,7 +343,7 @@ class SosmedController extends Controller
             'name' => ['required', 'string', 'max:200'],
             'brand' => ['nullable', 'string', 'max:100'],
             'platform' => ['required', 'string', 'max:50'],
-            'link' => ['nullable', 'url', 'max:500'],
+            'link' => ['nullable', 'string', 'max:500'],
             'pm_id' => ['nullable', 'exists:users,id'],
             'assistant_id' => ['nullable', 'exists:users,id'],
             'supervisor_staff_id' => ['nullable', 'exists:users,id'],

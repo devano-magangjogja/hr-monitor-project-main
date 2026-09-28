@@ -35,10 +35,14 @@ class SosmedController extends Controller
         $accountIds = $accounts->pluck('id');
 
         // Tugas hari ini per akun untuk user ini
+        // Urutkan dari progres terendah agar keyBy() menyimpan baris paling maju saat satu akun
+        // punya beberapa baris di tanggal yang sama (baris lama belum dibersihkan / penugasan ganda).
         $todayTasks = SosmedTask::with(['verifiedBy', 'hrVerifiedBy'])
             ->whereIn('sosmed_account_id', $accountIds)
             ->where('assigned_to', $currentUserId)
             ->whereDate('task_date', now()->toDateString())
+            ->orderByRaw("FIELD(status, 'pending', 'rejected', 'done_by_staff', 'verified_by_pm', 'approved_hr')")
+            ->orderBy('updated_at', 'asc')
             ->get()
             ->keyBy('sosmed_account_id');
 

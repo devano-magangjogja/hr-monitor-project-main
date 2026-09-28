@@ -59,6 +59,7 @@ Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin'])->group(function () {
     Route::get('/dashboard', [AdminDashboard::class, 'index'])->name('dashboard');
     Route::get('/team-progress/{user}', [AdminDashboard::class, 'teamProgressDetail'])->name('dashboard.team-progress-detail');
+    Route::post('/dashboard/reminder', [AdminDashboard::class, 'sendReminder'])->name('dashboard.reminder');
     Route::resource('roles', RoleController::class)
         ->only(['index', 'store', 'update', 'destroy']);
     Route::resource('users', UserController::class)
@@ -134,6 +135,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin'])->grou
     Route::patch('/accounts/{account}/verify', [AdminAccountController::class, 'verify'])->name('accounts.verify');
     Route::post('/accounts/brands', [AdminAccountController::class, 'storeBrand'])->name('accounts.brands.store');
     Route::patch('/accounts/brands/{brand}', [AdminAccountController::class, 'updateBrand'])->name('accounts.brands.update');
+    Route::delete('/accounts/brands/{brand}', [AdminAccountController::class, 'destroyBrand'])->name('accounts.brands.destroy');
 
     // Monitoring & Penugasan Sosmed
     Route::get('/sosmed', [AdminSosmedController::class, 'index'])->name('sosmed.index');
@@ -152,6 +154,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin'])->grou
 // ── HR Staff ────────────────────────────────────────────────────────────────
 Route::prefix('staff')->name('staff.')->middleware(['auth', 'role:hr_staff'])->group(function () {
     Route::get('/dashboard', [StaffDashboard::class, 'index'])->name('dashboard');
+    Route::post('/dashboard/reminder', [StaffDashboard::class, 'sendReminder'])->name('dashboard.reminder');
     Route::resource('tasks', StaffTaskController::class)->only(['index', 'store', 'update', 'destroy']);
     Route::patch('/tasks/{task}/complete', [StaffTaskController::class, 'complete'])->name('tasks.complete');
     Route::get('/tasks/daily', [StaffTaskController::class, 'dailyIndex'])->name('tasks.daily');
@@ -203,6 +206,7 @@ Route::prefix('staff')->name('staff.')->middleware(['auth', 'role:hr_staff'])->g
     Route::patch('/accounts/{account}/verify', [AdminAccountController::class, 'verify'])->name('accounts.verify');
     Route::post('/accounts/brands', [AdminAccountController::class, 'storeBrand'])->name('accounts.brands.store');
     Route::patch('/accounts/brands/{brand}', [AdminAccountController::class, 'updateBrand'])->name('accounts.brands.update');
+    Route::delete('/accounts/brands/{brand}', [AdminAccountController::class, 'destroyBrand'])->name('accounts.brands.destroy');
     Route::get('/sosmed', [StaffSosmedController::class, 'index'])->name('sosmed.index');
     Route::post('/sosmed/assign', [StaffSosmedController::class, 'assignTask'])->name('sosmed.assign');
     Route::post('/sosmed/accounts/{account}/submit', [StaffSosmedController::class, 'submitAccountTask'])->name('sosmed.accounts.submit');

@@ -187,14 +187,14 @@
 
                 {{-- Tabel tugas per hari --}}
                 <div class="overflow-x-auto">
-                    <table class="w-full text-sm min-w-[560px]">
+                    <table class="w-full text-sm table-fixed min-w-[560px]">
                         <thead>
                             <tr class="border-b border-gray-100">
-                                <th class="text-left px-4 sm:px-6 py-3 font-semibold text-gray-500 text-xs w-44">Judul</th>
-                                <th class="text-left px-4 sm:px-6 py-3 font-semibold text-gray-500 text-xs">Deskripsi</th>
-                                <th class="text-left px-4 sm:px-6 py-3 font-semibold text-gray-500 text-xs w-28">Sumber</th>
-                                <th class="text-left px-4 sm:px-6 py-3 font-semibold text-gray-500 text-xs w-36">Status</th>
-                                <th class="text-left px-4 sm:px-6 py-3 font-semibold text-gray-500 text-xs w-28">Catatan</th>
+                                <th class="text-left px-4 sm:px-6 py-2.5 font-semibold text-gray-500 text-xs w-[25%]">Judul</th>
+                                <th class="text-left px-4 sm:px-6 py-2.5 font-semibold text-gray-500 text-xs w-[22%]">Deskripsi</th>
+                                <th class="text-left px-4 sm:px-6 py-2.5 font-semibold text-gray-500 text-xs w-[13%]">Sumber</th>
+                                <th class="text-left px-4 sm:px-6 py-2.5 font-semibold text-gray-500 text-xs w-[20%]">Status</th>
+                                <th class="text-left px-4 sm:px-6 py-2.5 font-semibold text-gray-500 text-xs w-[20%]">Catatan</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-gray-50">
@@ -204,14 +204,14 @@
                                     $status     = $assignment?->is_completed ?? 'pending';
                                 @endphp
                                 <tr class="hover:bg-gray-50 transition">
-                                    <td class="px-4 sm:px-6 py-3.5 w-44">
-                                        <div class="font-medium text-gray-800 truncate max-w-[160px]"
+                                    <td class="px-4 sm:px-6 py-2.5 sm:py-3 w-[25%]">
+                                        <div class="font-medium text-gray-800 truncate"
                                              title="{{ $task->title }}">
                                             {{ $task->title }}
                                         </div>
                                     </td>
-                                    <td class="px-4 sm:px-6 py-3.5">
-                                        <div class="text-gray-500 truncate max-w-[180px]"
+                                    <td class="px-4 sm:px-6 py-2.5 sm:py-3 w-[22%]">
+                                        <div class="text-gray-500 truncate"
                                              title="{{ $task->description ?? '-' }}">
                                             @if($task->description)
                                                 {!! linkify(e($task->description)) !!}
@@ -220,24 +220,24 @@
                                             @endif
                                         </div>
                                     </td>
-                                    <td class="px-4 sm:px-6 py-3.5 w-28">
+                                    <td class="px-4 sm:px-6 py-2.5 sm:py-3 whitespace-nowrap w-[13%]">
                                         @if($task->type === 'default')
                                             <span class="inline-flex px-2 py-0.5 rounded-full text-xs font-medium bg-purple-50 text-purple-700">Rutin</span>
                                         @elseif($task->type === 'self')
                                             <span class="inline-flex px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600">Mandiri</span>
                                         @else
-                                            <span class="inline-flex px-2 py-0.5 rounded-full text-xs font-medium bg-blue-50 text-blue-700"
+                                            <span class="inline-flex max-w-full truncate px-2 py-0.5 rounded-full text-xs font-medium bg-blue-50 text-blue-700"
                                                   title="{{ $task->creator?->name ?? 'Atasan' }}">
                                                 {{ Str::limit($task->creator?->name ?? 'Atasan', 10) }}
                                             </span>
                                         @endif
                                     </td>
-                                    <td class="px-4 sm:px-6 py-3.5 w-36">
+                                    <td class="px-4 sm:px-6 py-2.5 sm:py-3 whitespace-nowrap w-[20%]">
                                         <x-task-status-badge :status="$status" :completedAt="$assignment?->completed_at" />
                                     </td>
-                                    <td class="px-4 sm:px-6 py-3.5 w-28">
+                                    <td class="px-4 sm:px-6 py-2.5 sm:py-3 w-[20%]">
                                         @if($assignment?->note)
-                                            <div class="text-xs text-gray-500 italic truncate max-w-[100px]"
+                                            <div class="text-xs text-gray-500 italic truncate"
                                                  title="{{ $assignment->note }}">
                                                 {{ $assignment->note }}
                                             </div>

@@ -99,13 +99,12 @@ class PresensiController extends Controller
         $tab = in_array($request->input('tab'), ['hadir', 'belum', 'tidak_hadir'], true)
             ? $request->input('tab') : 'hadir';
 
-        // 3. Tab Belum Dipresensi - pemagang tanpa catatan presensi pada tanggal (di kantor terpilih) ini
-        $belumKantor = $selectedKantor;
-        $pemagangBelum = Pemagang::whereDoesntHave('presensis', function ($q) use ($tanggal, $belumKantor) {
-            $q->where('tanggal', $tanggal);
-            if ($belumKantor) {
-                $q->where('kantor', $belumKantor);
-            }
+        // 3. Tab Belum Dipresensi - pemagang tanpa catatan presensi pada tanggal ini.
+        // Sengaja tidak dibatasi ke kantor terpilih: satu pemagang hanya punya satu catatan entry per hari,
+        // jadi yang sudah dipresensi di kantor lain tidak boleh muncul lagi sebagai "belum".
+        $pemagangBelum = Pemagang::whereDoesntHave('presensis', function ($q) use ($tanggal) {
+            $q->where('tanggal', $tanggal)
+                ->where('session', 'entry');
         })
             ->when($request->filled('divisi'), fn($q) => $q->where('divisi', $request->input('divisi')))
             ->when($request->filled('search'), function ($q) use ($request) {
@@ -138,18 +137,17 @@ class PresensiController extends Controller
             'terlambat' => (clone $statsQuery)->where('keterangan', 'Terlambat')->count(),
             'tidak_hadir' => (clone $statsQuery)->where('keterangan', 'Tidak Hadir')->count(),
             'total_hadir' => (clone $statsQuery)->whereIn('keterangan', ['Lebih Awal', 'Tepat Waktu', 'Terlambat'])->count(),
-            'belum_presensi' => Pemagang::whereDoesntHave('presensis', function ($q) use ($tanggal, $selectedKantor) {
-                $q->where('tanggal', $tanggal);
-                if ($selectedKantor) {
-                    $q->where('kantor', $selectedKantor);
-                }
+            'belum_presensi' => Pemagang::whereDoesntHave('presensis', function ($q) use ($tanggal) {
+                $q->where('tanggal', $tanggal)
+                    ->where('session', 'entry');
             })->count(),
         ];
 
         // List pemagang untuk dropdown modal — hanya yang BELUM tercatat presensinya hari ini (di kantor mana pun)
         $pemagangQuery = Pemagang::query();
         $pemagangQuery->whereDoesntHave('presensis', function ($q) use ($tanggal) {
-            $q->where('tanggal', $tanggal);
+            $q->where('tanggal', $tanggal)
+                ->where('session', 'entry');
         });
         $pemagangs = $pemagangQuery->orderBy('nama_lengkap', 'asc')->get();
 
@@ -219,6 +217,7 @@ class PresensiController extends Controller
         // Validasi: Cegah pencatatan jika pemagang sudah tercatat di kantor lain hari ini
         $alreadyOtherOffice = Presensi::where('pemagang_id', $validated['pemagang_id'])
             ->where('tanggal', $today)
+            ->where('session', 'entry')
             ->where('kantor', '!=', $kantorTujuan)
             ->first();
 
@@ -292,6 +291,13 @@ class PresensiController extends Controller
 
         $tanggal = $presensi->tanggal;
         $namaPemagang = $presensi->pemagang?->nama_lengkap ?? 'Pemagang';
+        // Hapus juga catatan istirahat yang diturunkan dari entry ini agar tidak yatim
+        if ($presensi->session === 'entry') {
+            Presensi::where('pemagang_id', $presensi->pemagang_id)
+                ->where('tanggal', $tanggal)
+                ->where('session', 'break_return')
+                ->delete();
+        }
         $presensi->delete();
         $this->logActivity(
             'presensi.deleted',

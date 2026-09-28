@@ -31,9 +31,13 @@ class SosmedController extends Controller
 
         $myAccountIds = $myAccounts->pluck('id');
 
+        // Baris tugas yang dipakai untuk status akun mandiri PM: urutkan dari progres terendah supaya
+        // keyBy() menyisakan baris paling maju saat satu akun punya beberapa baris di tanggal sama.
         $todayTasks = SosmedTask::with(['verifiedBy', 'hrVerifiedBy'])
             ->whereIn('sosmed_account_id', $myAccountIds)
             ->whereDate('task_date', now()->toDateString())
+            ->orderByRaw("FIELD(status, 'pending', 'rejected', 'done_by_staff', 'verified_by_pm', 'approved_hr')")
+            ->orderBy('updated_at', 'asc')
             ->get()
             ->keyBy('sosmed_account_id');
 
@@ -102,7 +106,7 @@ class SosmedController extends Controller
 
         // ── Verifikasi Tugas Tim (Approval Level 1) ────────────────────────
         // Tugas dari akun yang diawasi yang berstatus 'done_by_staff' dan bukan milik PM sendiri
-        $pendingVerification = SosmedTask::with(['account.staffUser', 'assignedUser'])
+        $pendingVerification = SosmedTask::with(['account.staffUsers', 'assignedUser'])
             ->whereIn('sosmed_account_id', $supervisedAccountIds)
             ->where('assigned_to', '!=', $currentUserId)
             ->where('status', 'done_by_staff');
@@ -122,7 +126,7 @@ class SosmedController extends Controller
             ->orderBy('updated_at', 'desc')
             ->get();
 
-        $approvalHistory = SosmedTask::with(['account.staffUser', 'assignedUser', 'verifiedBy', 'hrVerifiedBy'])
+        $approvalHistory = SosmedTask::with(['account.staffUsers', 'assignedUser', 'verifiedBy', 'hrVerifiedBy'])
             ->whereIn('sosmed_account_id', $supervisedAccountIds)
             ->where('assigned_to', '!=', $currentUserId)
             ->whereIn('status', ['verified_by_pm', 'approved_hr', 'rejected'])
@@ -145,7 +149,7 @@ class SosmedController extends Controller
             'oversight_count'   => $allSupervisedAccounts->count(),
         ];
 
-        $approvalHistoryQuery = SosmedTask::with(['account.staffUser', 'assignedUser', 'verifiedBy', 'hrVerifiedBy'])
+        $approvalHistoryQuery = SosmedTask::with(['account.staffUsers', 'assignedUser', 'verifiedBy', 'hrVerifiedBy'])
             ->whereIn('sosmed_account_id', $supervisedAccountIds)
             ->where('assigned_to', '!=', $currentUserId)
             ->whereIn('status', ['verified_by_pm', 'approved_hr', 'rejected'])
@@ -175,7 +179,10 @@ class SosmedController extends Controller
      */
     public function submitAccountTask(Request $request, SosmedAccount $account)
     {
-        if ($account->staff_id !== Auth::id() && $account->pm_id !== Auth::id()) {
+        // PM boleh submit bukti untuk akun yang ia pegang sebagai eksekutor (pivot sosmed_account_users)
+        // atau akun yang ia pegang sebagai PM penanggung jawab.
+        $isExecutor = $account->staffUsers()->where('users.id', Auth::id())->exists();
+        if (!$isExecutor && (int) $account->pm_id !== (int) Auth::id()) {
             abort(403, 'Akses ditolak. Anda bukan eksekutor akun ini.');
         }
 
@@ -190,9 +197,11 @@ class SosmedController extends Controller
             return back()->withErrors(['links' => 'Minimal satu link bukti harus diisi.'])->withInput();
         }
 
+        // Tulis ke baris milik PM ini sendiri agar laporan eksekutor lain tidak tertimpa.
         $task = SosmedTask::firstOrNew([
             'sosmed_account_id' => $account->id,
             'task_date'         => now()->toDateString(),
+            'assigned_to'       => Auth::id(),
         ]);
 
         $task->fill([

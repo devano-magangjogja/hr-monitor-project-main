@@ -23,7 +23,7 @@ class SosmedController extends Controller
         $assignedAccountIds = \App\Models\SosmedAccount::where('assistant_id', $currentUserId)->pluck('id');
 
         // Tugas yang perlu diverifikasi: status done_by_staff HANYA dari akun yang wewenangnya diberikan ke asisten ini
-        $pendingVerification = SosmedTask::with(['account.staffUser', 'account.pmUser', 'assignedUser', 'assignedBy'])
+        $pendingVerification = SosmedTask::with(['account.staffUsers', 'account.pmUser', 'assignedUser', 'assignedBy'])
             ->whereIn('sosmed_account_id', $assignedAccountIds)
             ->where('status', 'done_by_staff');
 
@@ -57,10 +57,15 @@ class SosmedController extends Controller
             ->get();
         $myAccountIds = $myAccounts->pluck('id');
 
+        // Satu akun bisa punya beberapa baris tugas pada tanggal yang sama (satu baris per penugasan).
+        // Urutkan dari progres terendah supaya keyBy() menyisakan baris paling maju,
+        // yaitu baris yang sudah di-submit — bukan baris 'pending' yang dibuat belakangan.
         $todayTasks = SosmedTask::with(['verifiedBy', 'hrVerifiedBy'])
             ->whereIn('sosmed_account_id', $myAccountIds)
             ->where('assigned_to', $currentUserId)
             ->whereDate('task_date', now()->toDateString())
+            ->orderByRaw("FIELD(status, 'pending', 'rejected', 'done_by_staff', 'verified_by_pm', 'approved_hr')")
+            ->orderBy('updated_at', 'asc')
             ->get()
             ->keyBy('sosmed_account_id');
 
@@ -164,9 +169,12 @@ class SosmedController extends Controller
             return back()->withErrors(['links' => 'Minimal satu link bukti harus diisi.'])->withInput();
         }
 
+        // Baris yang dipakai adalah baris milik eksekutor ini sendiri (akun yang sama bisa punya
+        // beberapa baris harian untuk penanggung jawab berbeda).
         $task = SosmedTask::firstOrNew([
             'sosmed_account_id' => $account->id,
             'task_date'         => now()->toDateString(),
+            'assigned_to'       => Auth::id(),
         ]);
 
         $task->fill([

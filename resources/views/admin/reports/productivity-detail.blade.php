@@ -193,13 +193,13 @@
                     <table class="w-full text-sm table-fixed">
                         <thead>
                             <tr class="border-b border-gray-100 bg-gray-50/50">
-                                <th class="text-left px-4 py-3 font-semibold text-gray-500 text-xs w-[18%]">Judul</th>
-                                <th class="text-left px-4 py-3 font-semibold text-gray-500 text-xs w-[24%]">Deskripsi</th>
-                                <th class="text-left px-4 py-3 font-semibold text-gray-500 text-xs w-[12%]">Sumber</th>
-                                <th class="text-left px-4 py-3 font-semibold text-gray-500 text-xs w-[12%]">Kantor</th>
-                                <th class="text-left px-4 py-3 font-semibold text-gray-500 text-xs w-[16%]">Status</th>
-                                <th class="text-left px-4 py-3 font-semibold text-gray-500 text-xs w-[12%]">Catatan</th>
-                                <th class="text-center px-4 py-3 font-semibold text-gray-500 text-xs w-[6%]">Aksi</th>
+                                <th class="text-left px-4 py-2.5 font-semibold text-gray-500 text-xs w-[22%]">Judul</th>
+                                <th class="text-left px-4 py-2.5 font-semibold text-gray-500 text-xs w-[16%]">Deskripsi</th>
+                                <th class="text-left px-4 py-2.5 font-semibold text-gray-500 text-xs w-[11%]">Sumber</th>
+                                <th class="text-left px-4 py-2.5 font-semibold text-gray-500 text-xs w-[11%]">Kantor</th>
+                                <th class="text-left px-4 py-2.5 font-semibold text-gray-500 text-xs w-[18%]">Status</th>
+                                <th class="text-left px-4 py-2.5 font-semibold text-gray-500 text-xs w-[15%]">Catatan</th>
+                                <th class="text-center px-4 py-2.5 font-semibold text-gray-500 text-xs w-[7%]">Aksi</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-gray-50">
@@ -209,10 +209,10 @@
                                     $status     = $assignment?->is_completed ?? 'pending';
                                 @endphp
                                 <tr class="hover:bg-gray-50 transition">
-                                    <td class="px-4 py-3">
+                                    <td class="px-4 py-2.5">
                                         <div class="font-medium text-gray-800 truncate" title="{{ $task->title }}">{{ $task->title }}</div>
                                     </td>
-                                    <td class="px-4 py-3">
+                                    <td class="px-4 py-2.5">
                                         <div class="text-gray-500 truncate" title="{{ $task->description ?? '-' }}">
                                             @if($task->description)
                                                 {{ Str::limit(strip_tags($task->description), 50) }}
@@ -221,7 +221,7 @@
                                             @endif
                                         </div>
                                     </td>
-                                    <td class="px-4 py-3">
+                                    <td class="px-4 py-2.5 whitespace-nowrap">
                                         @if($task->type === 'default')
                                             <span class="inline-flex px-2 py-0.5 rounded-full text-xs font-medium bg-purple-50 text-purple-700">Rutin</span>
                                         @elseif($task->type === 'self')
@@ -233,19 +233,19 @@
                                             </span>
                                         @endif
                                     </td>
-                                    <td class="px-4 py-3">
+                                    <td class="px-4 py-2.5 whitespace-nowrap">
                                         @if($task->kantor)
-                                            <span class="inline-flex px-2 py-0.5 rounded-md text-xs font-medium bg-slate-50 text-slate-700 border border-slate-200 whitespace-nowrap">
+                                            <span class="inline-flex max-w-full truncate px-2 py-0.5 rounded-md text-xs font-medium bg-slate-50 text-slate-700 border border-slate-200" title="{{ $task->kantor }}">
                                                 {{ $task->kantor }}
                                             </span>
                                         @else
                                             <span class="text-xs text-gray-300">—</span>
                                         @endif
                                     </td>
-                                    <td class="px-4 py-3">
+                                    <td class="px-4 py-2.5 whitespace-nowrap">
                                         <x-task-status-badge :status="$status" :completedAt="$assignment?->completed_at" />
                                     </td>
-                                    <td class="px-4 py-3">
+                                    <td class="px-4 py-2.5">
                                         @if($assignment?->note)
                                             <div class="text-xs text-gray-500 italic truncate" title="{{ $assignment->note }}">
                                                 {{ Str::limit($assignment->note, 25) }}
@@ -254,7 +254,7 @@
                                             <span class="text-xs text-gray-300">—</span>
                                         @endif
                                     </td>
-                                    <td class="px-4 py-3 text-center">
+                                    <td class="px-4 py-2.5 text-center">
                                         <button type="button"
                                             class="task-detail-btn p-1.5 text-gray-400 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition"
                                             title="Lihat detail"

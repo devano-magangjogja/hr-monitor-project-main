@@ -1,5 +1,44 @@
 <?php
 
+if (! function_exists('normalize_url')) {
+    /**
+     * Lengkapi link yang ditulis tanpa skema (mis. "instagram.com/@itsodepth") supaya
+     * menjadi URL absolut. Tanpa ini href-nya dianggap relatif dan browser membuka
+     * halaman aplikasi (mis. /admin/instagram.com/@itsodepth).
+     *
+     * Nilai yang bukan URL (teks bebas, "-", "@username") dikembalikan apa adanya.
+     */
+    function normalize_url(?string $value): ?string
+    {
+        if ($value === null) {
+            return null;
+        }
+
+        $value = trim($value);
+        if ($value === '') {
+            return $value;
+        }
+
+        // Sudah punya skema (http, https, ftp, dsb.) atau skema non-http yang sah.
+        if (preg_match('#^[a-z][a-z0-9+.\-]*://#i', $value) || preg_match('#^(mailto|tel|sms|geo):#i', $value)) {
+            return $value;
+        }
+
+        // Teks bebas (mengandung spasi) bukan URL tunggal → jangan dirubah.
+        if (preg_match('/\s/', $value)) {
+            return $value;
+        }
+
+        // Wujud host[:port]/path?query — butuh titik sebelum garis miring pertama.
+        $hostLike = '~^[a-z0-9](?:[a-z0-9\-]*[a-z0-9])?(?:\.[a-z0-9](?:[a-z0-9\-]*[a-z0-9])?)+(?::\d+)?(?:[/?#][^\s]*)?$~i';
+        if (preg_match($hostLike, $value)) {
+            return 'https://' . $value;
+        }
+
+        return $value;
+    }
+}
+
 if (! function_exists('linkify')) {
     /**
      * Konversi URL dalam teks menjadi tag <a> yang bisa diklik.

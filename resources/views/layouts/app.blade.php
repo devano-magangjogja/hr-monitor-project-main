@@ -37,7 +37,28 @@
             .page-break {
                 page-break-after: always;
             }
+
+            /* ── Cetak tabel saja (helper printTableOnly) ──
+               Saat class print-table-only aktif, seluruh isi body disembunyikan
+               kecuali salinan tabel yang dibuat di #table-print-root. */
+            html.print-table-only body > *:not(#table-print-root) {
+                display: none !important;
+            }
+            html.print-table-only, html.print-table-only body {
+                height: auto !important;
+                overflow: visible !important;
+            }
+            html.print-table-only #table-print-root { display: block !important; }
+            #table-print-root .print-title { font-size: 15px; font-weight: 700; margin: 0 0 2px; color: #111827; }
+            #table-print-root .print-sub { font-size: 11px; color: #6b7280; margin: 0 0 12px; }
+            #table-print-root > div { display: block !important; overflow: visible !important; border: 0 !important; }
+            #table-print-root button { display: none !important; }
+            #table-print-root table { width: 100% !important; font-size: 10px !important; border-collapse: collapse; }
+            #table-print-root th, #table-print-root td { border: 1px solid #d1d5db !important; padding: 5px 6px !important; }
         }
+
+        /* Salinan cetak tidak boleh terlihat di layar */
+        #table-print-root { display: none; }
 
         /* Sembunyikan elemen Alpine sebelum Alpine siap (cegah flash submenu/flyout) */
         [x-cloak] { display: none !important; }
@@ -425,6 +446,40 @@
 
 {{-- Toast — di luar semua container overflow agar position:fixed tidak ter-clip --}}
 @include('components.toast')
+
+{{-- Helper cetak tabel saja: klon elemen target ke body agar hanya tabel yang tercetak --}}
+<script>
+    function printTableOnly(sourceId, titleText) {
+        var src = document.getElementById(sourceId);
+        if (!src) { window.print(); return; }
+        var old = document.getElementById('table-print-root');
+        if (old) old.remove();
+
+        var root = document.createElement('div');
+        root.id = 'table-print-root';
+        var h = document.createElement('p');
+        h.className = 'print-title';
+        h.textContent = titleText || 'Laporan';
+        var s = document.createElement('p');
+        s.className = 'print-sub';
+        s.textContent = 'Dicetak: ' + new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
+        var clone = src.cloneNode(true);
+        clone.removeAttribute('id');
+        root.appendChild(h);
+        root.appendChild(s);
+        root.appendChild(clone);
+        document.body.appendChild(root);
+        document.documentElement.classList.add('print-table-only');
+
+        var cleanup = function () {
+            document.documentElement.classList.remove('print-table-only');
+            root.remove();
+            window.removeEventListener('afterprint', cleanup);
+        };
+        window.addEventListener('afterprint', cleanup);
+        window.print();
+    }
+</script>
 
 @stack('scripts')
 </body>

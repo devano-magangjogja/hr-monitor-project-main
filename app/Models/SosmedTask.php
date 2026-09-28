@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Casts\NormalizedUrlList;
 use Illuminate\Database\Eloquent\Model;
 
 class SosmedTask extends Model
@@ -33,7 +34,7 @@ class SosmedTask extends Model
             'deadline'       => 'datetime',
             'verified_at'    => 'datetime',
             'hr_verified_at' => 'datetime',
-            'link_upload'    => 'array',   // JSON array of URL strings
+            'link_upload'    => NormalizedUrlList::class,   // JSON array of URL strings
         ];
     }
 

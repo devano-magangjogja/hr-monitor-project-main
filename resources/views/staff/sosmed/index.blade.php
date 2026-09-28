@@ -748,163 +748,250 @@
     @if($tab === 'tasks')
         <div class="p-4 sm:p-5">
 
-            {{-- Search tugas --}}
-            <div class="flex items-center gap-2 mb-4">
-                <form action="{{ route('staff.sosmed.index') }}" method="GET" class="flex items-center gap-1.5">
+            {{-- Top Bar Filter & Action Buttons --}}
+            <div class="mb-4 flex flex-col sm:flex-row items-stretch sm:items-center sm:justify-end gap-2.5 sm:gap-3">
+
+                {{-- Pencarian Tugas (pojok kiri) --}}
+                <form action="{{ route('staff.sosmed.index') }}" method="GET" class="flex items-center gap-2 w-full sm:w-auto sm:mr-auto">
                     <input type="hidden" name="tab" value="tasks">
-                    <div class="relative flex items-center">
-                        <input type="text" name="task_search" value="{{ $taskSearch ?? '' }}"
-                            placeholder="Cari judul tugas, akun, atau pelaksana..."
-                            class="h-9 pl-3 pr-8 text-xs bg-white border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 text-gray-700 transition w-56 sm:w-72">
-                        <button type="submit" class="absolute right-2 text-gray-400 hover:text-primary-600 transition" title="Cari">
-                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                            </svg>
-                        </button>
+                    @if($taskStatus)
+                        <input type="hidden" name="task_status" value="{{ $taskStatus }}">
+                    @endif
+                    @if($taskDateFilter)
+                        <input type="hidden" name="task_date" value="{{ $taskDateFilter }}">
+                    @endif
+                    <div class="relative flex-1 sm:flex-initial sm:w-64">
+                        <svg class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" fill="none"
+                            stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                        </svg>
+                        <input type="text" name="task_search" value="{{ $taskSearch }}"
+                            placeholder="Cari judul, akun, atau pelaksana..."
+                            class="w-full h-9 pl-9 pr-3 text-xs bg-white border border-gray-300 rounded-lg shadow-sm
+                                focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 text-gray-700 transition">
                     </div>
-                    @if(($taskSearch ?? '') !== '')
-                        <a href="{{ route('staff.sosmed.index', ['tab' => 'tasks']) }}"
-                            class="inline-flex items-center justify-center h-9 px-2.5 text-xs font-medium text-gray-500 hover:text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition shrink-0"
-                            title="Reset pencarian">
+                    <button type="submit"
+                        class="shrink-0 inline-flex items-center justify-center h-9 px-3.5 bg-primary-600 hover:bg-primary-700 active:bg-primary-800
+                            text-white text-xs font-medium rounded-lg transition shadow-sm">
+                        Cari
+                    </button>
+                    @if($taskSearch !== '')
+                        <a href="{{ route('staff.sosmed.index', array_filter(['tab' => 'tasks', 'task_status' => $taskStatus, 'task_date' => $taskDateFilter])) }}"
+                            class="shrink-0 inline-flex items-center justify-center h-9 px-3 text-xs font-medium text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition">
                             Reset
                         </a>
                     @endif
                 </form>
+
+                @if($taskStatus)
+                    <span
+                        class="inline-flex items-center gap-1.5 px-2.5 h-9 rounded-lg text-[11px] font-semibold bg-indigo-100 text-indigo-700 w-fit">
+                        Filter status:
+                        {{ match ($taskStatus) {
+                            'pending' => 'Belum Dikerjakan',
+                            'done_by_staff' => 'Menunggu Verifikasi PM/Asisten',
+                            'verified_by_pm' => 'Menunggu HR Staff',
+                            'approved_hr' => 'Disetujui Final',
+                            'rejected' => 'Ditolak',
+                        } }}
+                        <a href="{{ route('staff.sosmed.index', array_filter(['tab' => 'tasks', 'task_date' => $taskDateFilter, 'task_search' => $taskSearch])) }}"
+                            class="hover:underline" title="Hapus filter">&times;</a>
+                    </span>
+                @endif
+
+                {{-- Filter Tanggal --}}
+                <form action="{{ route('staff.sosmed.index') }}" method="GET" class="w-full sm:w-auto">
+                    <input type="hidden" name="tab" value="tasks">
+                    @if($taskStatus)
+                        <input type="hidden" name="task_status" value="{{ $taskStatus }}">
+                    @endif
+                    @if($taskSearch !== '')
+                        <input type="hidden" name="task_search" value="{{ $taskSearch }}">
+                    @endif
+                    <input type="date" name="task_date" value="{{ $taskDateFilter }}"
+                        class="w-full sm:w-auto h-9 px-3 text-xs bg-white border border-gray-300 rounded-lg shadow-sm
+                            focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 text-gray-700 transition"
+                        onchange="this.form.submit()">
+                </form>
+
+                {{-- Action Buttons --}}
+                <div class="sm:flex sm:items-center gap-2">
+                    {{-- Cetak PDF --}}
+                    <button type="button" onclick="printTableOnly('tasksPrintArea', 'Monitoring Tugas Sosmed')"
+                        class="w-full sm:w-auto inline-flex items-center justify-center gap-2 h-9 px-3.5 bg-primary-600 hover:bg-primary-700 active:bg-primary-800
+                            text-white text-xs font-medium rounded-lg transition shadow-sm">
+                        <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+                        </svg>
+                        <span>Cetak PDF</span>
+                    </button>
+                </div>
             </div>
 
-            {{-- Desktop table (md+) --}}
-            <div class="hidden md:block overflow-x-auto rounded-lg border border-gray-100">
-                <table class="w-full text-sm table-fixed">
+            {{-- Desktop Table (md+) --}}
+            <div id="tasksPrintArea" class="hidden md:block overflow-x-auto rounded-lg border border-gray-100">
+                <table class="w-full table-fixed text-sm">
                     <colgroup>
-                        <col class="w-1/3">
-                        <col class="w-36">
-                        <col class="w-36">
-                        <col class="w-32">
-                        <col class="w-32">
-                        <col class="w-36">
+                        <col class="w-[20%]"> {{-- Judul Tugas --}}
+                        <col class="w-[12%]"> {{-- Akun --}}
+                        <col class="w-[10%]"> {{-- PJ PM --}}
+                        <col class="w-[10%]"> {{-- Pelaksana --}}
+                        <col class="w-[12%]"> {{-- Verif PM --}}
+                        <col class="w-[14%]"> {{-- Final HR --}}
+                        <col class="w-[14%]"> {{-- Status --}}
+                        <col class="w-[8%]"> {{-- Aksi --}}
                     </colgroup>
                     <thead>
-                        <tr
-                            class="bg-gray-50 border-b border-gray-200 text-xs font-semibold text-gray-500 uppercase tracking-wide">
-                            <th class="px-4 py-3 text-left">Tugas</th>
-                            <th class="px-4 py-3 text-left">Akun Sosmed</th>
-                            <th class="px-4 py-3 text-left">Project Manager</th>
-                            <th class="px-4 py-3 text-left">PJ Sosmed</th>
-                            <th class="px-4 py-3 text-left">Verif PM</th>
-                            <th class="px-4 py-3 text-left">Status</th>
+                        <tr class="bg-gray-50 border-b border-gray-200 text-xs font-semibold text-gray-500 tracking-wide">
+                            <th class="px-2.5 py-3 text-left">Judul Tugas</th>
+                            <th class="px-2.5 py-3 text-left">Akun</th>
+                            <th class="px-2.5 py-3 text-left">PJ PM</th>
+                            <th class="px-2.5 py-3 text-left">Pelaksana</th>
+                            <th class="px-2.5 py-3 text-left">Verif PM</th>
+                            <th class="px-2.5 py-3 text-left">Final HR</th>
+                            <th class="px-2.5 py-3 text-left">Status</th>
+                            <th class="px-2.5 py-3 text-center">Aksi</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-100">
                         @forelse($allTasks as $t)
-                            <tr class="hover:bg-gray-50/80 transition align-top">
-                                <td class="px-4 py-3.5">
-                                    <p class="font-medium text-gray-800 truncate" title="{{ $t->title }}">{{ $t->title }}</p>
-                                    <p class="text-xs text-gray-400 mt-0.5">{{ $t->task_date->translatedFormat('d M Y') }}</p>
+                            <tr class="hover:bg-gray-50/80 transition align-middle">
+                                <td class="px-2.5 py-2.5 min-w-0">
+                                    <p class="font-semibold text-gray-800 truncate" title="{{ $t->title }}">{{ $t->title }}</p>
+                                    <div class="flex items-center gap-1.5 mt-0.5 min-w-0">
+                                        <span class="shrink-0 px-1.5 py-0.5 text-[10px] rounded font-medium {{ $t->type === 'daily' ? 'bg-gray-100 text-gray-600' : 'bg-purple-50 text-purple-700' }}">
+                                            {{ $t->type === 'daily' ? 'Harian' : 'Custom' }}
+                                        </span>
+                                        <span class="text-[10px] text-gray-400 shrink-0">{{ $t->task_date->translatedFormat('d M Y') }}</span>
+                                    </div>
                                 </td>
-                                <td class="px-4 py-3.5 text-xs">
-                                    <p class="font-medium text-gray-800 truncate">{{ $t->account?->name ?? '—' }}</p>
-                                    <p class="text-gray-400">{{ $t->account?->platform }}</p>
+                                <td class="px-2.5 py-2.5 text-xs min-w-0">
+                                    <p class="font-medium text-gray-800 truncate" title="{{ $t->account?->name ?? '—' }}">{{ $t->account?->name ?? '—' }}</p>
+                                    <p class="text-gray-400 truncate">{{ $t->account?->platform }}</p>
                                 </td>
-                                <td class="px-4 py-3.5 text-xs">
+                                <td class="px-2.5 py-2.5 text-xs min-w-0">
                                     @if($t->account?->pmUser)
-                                        <span
-                                            class="font-semibold text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded border border-indigo-100">{{ $t->account->pmUser->name }}</span>
+                                        <span class="font-medium text-gray-800 truncate block" title="{{ $t->account->pmUser->name }}">{{ $t->account->pmUser->name }}</span>
                                     @else
                                         <span class="text-gray-300">—</span>
                                     @endif
                                 </td>
-                                <td class="px-4 py-3.5 text-xs">
+                                <td class="px-2.5 py-2.5 text-xs min-w-0">
                                     @if($t->assignedUser)
-                                        <span
-                                            class="font-semibold text-gray-800 bg-gray-50 px-2 py-0.5 rounded border border-gray-200">{{ $t->assignedUser->name }}</span>
+                                        <span class="font-medium text-gray-800 truncate block" title="{{ $t->assignedUser->name }}">{{ $t->assignedUser->name }}</span>
                                     @else
                                         <span class="text-gray-300">—</span>
                                     @endif
                                 </td>
-                                <td class="px-4 py-3.5 text-xs">
+                                <td class="px-2.5 py-2.5 text-xs min-w-0">
                                     @if($t->verifiedBy)
-                                        <span class="text-blue-700 font-semibold block truncate">{{ $t->verifiedBy->name }}</span>
+                                        <span class="text-blue-700 font-semibold truncate block" title="{{ $t->verifiedBy->name }}">{{ $t->verifiedBy->name }}</span>
+                                        <p class="text-[10px] text-gray-400 mt-0.5">{{ $t->verified_at?->translatedFormat('d M, H:i') }}</p>
                                     @else
                                         <span class="text-gray-300">—</span>
                                     @endif
                                 </td>
-                                <td class="px-4 py-3.5">
+                                <td class="px-2.5 py-2.5 text-xs min-w-0">
+                                    @if($t->hrVerifiedBy)
+                                        <span class="text-emerald-700 font-semibold truncate block" title="{{ $t->hrVerifiedBy->name }}">{{ $t->hrVerifiedBy->name }}</span>
+                                        <p class="text-[10px] text-gray-400 mt-0.5">{{ $t->hr_verified_at?->translatedFormat('d M, H:i') }}</p>
+                                    @else
+                                        <span class="text-gray-300">—</span>
+                                    @endif
+                                </td>
+                                <td class="px-2.5 py-2.5 min-w-0">
                                     <span
-                                        class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium {{ $t->status_badge_class }}">
-                                        {{ $t->status_label }}
+                                        class="inline-flex items-center justify-center px-2 py-0.5 rounded-full text-[11px] font-medium max-w-full {{ $t->status_badge_class }}">
+                                        <span class="truncate">{{ $t->status_label }}</span>
                                     </span>
+                                </td>
+                                <td class="px-2.5 py-2.5 text-center">
+                                    @php
+                                        $taskDetail = [
+                                            'title'       => $t->title,
+                                            'desc'        => $t->description,
+                                            'type'        => $t->type === 'daily' ? 'Harian' : 'Custom',
+                                            'date'        => $t->task_date->translatedFormat('d M Y'),
+                                            'account'     => $t->account?->name,
+                                            'platform'    => $t->account?->platform,
+                                            'pmPic'       => $t->account?->pmUser?->name,
+                                            'executor'    => $t->assignedUser?->name,
+                                            'pmVerified'  => $t->verifiedBy?->name,
+                                            'pmAt'        => $t->verified_at?->translatedFormat('d M Y, H:i'),
+                                            'hrVerified'  => $t->hrVerifiedBy?->name,
+                                            'hrAt'        => $t->hr_verified_at?->translatedFormat('d M Y, H:i'),
+                                            'status'      => $t->status_label,
+                                            'badgeClass'  => $t->status_badge_class,
+                                            'links'       => $t->link_upload ?? [],
+                                        ];
+                                    @endphp
+                                    <button type="button"
+                                        data-detail="{{ json_encode($taskDetail) }}"
+                                        onclick="openTaskDetail(JSON.parse(this.getAttribute('data-detail')))"
+                                        class="inline-flex items-center justify-center px-2 py-1 text-[11px] font-medium text-primary-700 bg-primary-50 hover:bg-gray-100 border border-primary-100 rounded-lg transition"
+                                        title="Lihat detail tugas">
+                                        Detail
+                                    </button>
                                 </td>
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="6" class="px-4 py-8 text-center text-sm text-gray-400">
-                                    Belum ada tugas tercatat.
-                                    @if(($taskSearch ?? '') !== '')
-                                        <a href="{{ route('staff.sosmed.index', ['tab' => 'tasks']) }}" class="block mt-2 text-primary-600 hover:underline">Reset pencarian</a>
-                                    @endif
-                                </td>
+                                <td colspan="8" class="px-4 py-8 text-center text-sm text-gray-400">Belum ada aktivitas tugas.</td>
                             </tr>
                         @endforelse
                     </tbody>
                 </table>
-
-                {{-- Pagination Links --}}
-                @if($allTasks->hasPages())
-                    <div class="mt-4 px-4 py-3 border-t border-gray-200">
-                        {{ $allTasks->links() }}
-                    </div>
-                @endif
             </div>
 
-            {{-- Mobile cards (< md) --}} <div class="md:hidden space-y-3">
+            {{-- Mobile Cards (< md) --}} <div class="md:hidden space-y-3">
                 @forelse($allTasks as $t)
                     <div class="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
                         <div class="flex items-start justify-between gap-2 mb-2">
                             <div class="min-w-0">
-                                <p class="font-semibold text-gray-800 truncate text-sm">{{ $t->title }}</p>
-                                <p class="text-xs text-gray-400 mt-0.5">{{ $t->task_date->translatedFormat('d M Y') }}</p>
+                                <p class="font-semibold text-gray-800 text-sm truncate">{{ $t->title }}</p>
+                                <p class="text-xs text-gray-400 mt-0.5">{{ $t->account?->name }} ({{ $t->account?->platform }})</p>
                             </div>
                             <span
-                                class="flex-shrink-0 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium {{ $t->status_badge_class }}">
+                                class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium whitespace-nowrap {{ $t->status_badge_class }}">
                                 {{ $t->status_label }}
                             </span>
                         </div>
-                        <div class="grid grid-cols-2 gap-2 text-xs mt-2 border-t border-gray-100 pt-2.5">
-                            {{-- Baris 1: Kiri (Akun) --}}
+                        <div class="grid grid-cols-2 gap-2 text-xs border-t border-gray-100 pt-2.5 mt-2">
+                            {{-- Kiri (PJ PM) --}}
                             <div class="min-w-0">
-                                <p class="text-gray-400 mb-0.5">Akun</p>
-                                <p class="font-medium text-gray-700 truncate">{{ $t->account?->name ?? '—' }}</p>
-                                <p class="text-gray-400 truncate">{{ $t->account?->platform }}</p>
+                                <p class="text-gray-400 mb-0.5">PJ PM</p>
+                                <p class="font-medium text-gray-800 truncate">{{ $t->account?->pmUser?->name ?? '—' }}</p>
                             </div>
-
-                            {{-- Baris 1: Kanan (Pelaksana) --}}
+                            {{-- Kanan (Pelaksana) --}}
                             <div class="min-w-0 text-right">
                                 <p class="text-gray-400 mb-0.5">Pelaksana</p>
-                                <p class="font-medium text-gray-700 truncate">{{ $t->assignedUser?->name ?? '—' }}</p>
+                                <p class="font-medium text-gray-800 truncate">{{ $t->assignedUser?->name ?? '—' }}</p>
                             </div>
-
-                            {{-- Baris 2: Kiri (Project Manager) --}}
+                            {{-- Kiri (Verif PM) --}}
                             <div class="min-w-0">
-                                <p class="text-gray-400 mb-0.5">Project Manager</p>
-                                <p class="font-medium text-indigo-700 truncate">{{ $t->account?->pmUser?->name ?? '—' }}</p>
-                            </div>
-
-                            {{-- Baris 2: Kanan (Verif PM) --}}
-                            <div class="min-w-0 text-right">
                                 <p class="text-gray-400 mb-0.5">Verif PM</p>
                                 <p class="font-medium text-blue-700 truncate">{{ $t->verifiedBy?->name ?? '—' }}</p>
+                            </div>
+                            {{-- Kanan (Final HR) --}}
+                            <div class="min-w-0 text-right">
+                                <p class="text-gray-400 mb-0.5">Final HR</p>
+                                <p class="font-medium text-emerald-700 truncate">{{ $t->hrVerifiedBy?->name ?? '—' }}</p>
                             </div>
                         </div>
                     </div>
                 @empty
-                    <div class="py-8 text-center text-sm text-gray-400">
-                        Belum ada tugas tercatat.
-                        @if(($taskSearch ?? '') !== '')
-                            <a href="{{ route('staff.sosmed.index', ['tab' => 'tasks']) }}" class="block mt-2 text-primary-600 hover:underline">Reset pencarian</a>
-                        @endif
-                    </div>
+                    <div class="py-8 text-center text-sm text-gray-400">Belum ada aktivitas tugas.</div>
                 @endforelse
-        </div>
+            </div>
+
+            {{-- Pagination --}}
+            @if($allTasks->hasPages())
+                <div class="px-4 py-3 border-t border-gray-100 bg-gray-50/50 mt-4">
+                    {{ $allTasks->links() }}
+                </div>
+            @endif
         </div>
     @endif
 
@@ -1638,6 +1725,38 @@
         </div>
     </div>
 
+    {{-- ── MODAL: DETAIL TUGAS (Monitoring) ───────────────────────────── --}}
+    <div id="modal-task-detail" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div class="absolute inset-0 bg-black/50 backdrop-blur-sm"
+            onclick="document.getElementById('modal-task-detail').classList.add('hidden')"></div>
+        <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-lg z-10 max-h-[85vh] flex flex-col">
+            <div class="flex items-center justify-between px-6 py-4 border-b border-gray-200 shrink-0">
+                <h3 class="text-base font-bold text-gray-800">Detail Tugas</h3>
+                <button onclick="document.getElementById('modal-task-detail').classList.add('hidden')"
+                    class="text-gray-400 hover:text-gray-600">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+            <div class="p-6 space-y-4 overflow-y-auto">
+                <div>
+                    <p id="td-title" class="text-sm font-bold text-gray-800 break-words"></p>
+                    <p id="td-desc" class="text-xs text-gray-500 mt-1 break-words"></p>
+                    <div class="flex items-center gap-2 mt-2">
+                        <span id="td-badge" class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium"></span>
+                        <span id="td-type" class="px-1.5 py-0.5 text-[10px] rounded font-medium bg-gray-100 text-gray-600"></span>
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-4 text-xs" id="td-grid"></div>
+                <div id="td-links-wrap" class="hidden">
+                    <p class="text-[11px] font-semibold text-gray-400 uppercase tracking-wider mb-1.5">Link Bukti Konten</p>
+                    <div id="td-links" class="space-y-1.5 max-h-40 overflow-y-auto"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     {{-- ── MODAL: DETAIL LINKS POPUP ────────────────────────────────── --}}
     <div id="modal-links" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4">
         <div class="absolute inset-0 bg-black/50 backdrop-blur-sm"
@@ -2191,6 +2310,66 @@
                 });
             });
         });
+
+        function openTaskDetail(d) {
+            const esc = (v) => (v === null || v === undefined || v === '') ? '—' : v;
+            document.getElementById('td-title').textContent = d.title || '';
+            const desc = document.getElementById('td-desc');
+            desc.textContent = d.desc || '';
+            desc.classList.toggle('hidden', !d.desc);
+            const badge = document.getElementById('td-badge');
+            badge.textContent = d.status || '';
+            badge.className = 'inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium ' + (d.badgeClass || 'bg-gray-100 text-gray-600');
+            document.getElementById('td-type').textContent = d.type || '';
+
+            const grid = document.getElementById('td-grid');
+            grid.innerHTML = '';
+            const rows = [
+                ['Tanggal', d.date],
+                ['Akun', d.account ? d.account + (d.platform ? ' (' + d.platform + ')' : '') : null],
+                ['PJ PM', d.pmPic],
+                ['Pelaksana', d.executor],
+                ['Verifikasi PM', d.pmVerified ? d.pmVerified + (d.pmAt ? ' • ' + d.pmAt : '') : null],
+                ['Final HR', d.hrVerified ? d.hrVerified + (d.hrAt ? ' • ' + d.hrAt : '') : null],
+            ];
+            rows.forEach(([label, val]) => {
+                const cell = document.createElement('div');
+                cell.className = 'min-w-0';
+                const l = document.createElement('p');
+                l.className = 'text-[10px] font-semibold text-gray-400 uppercase tracking-wider';
+                l.textContent = label;
+                const v = document.createElement('p');
+                v.className = 'text-xs text-gray-700 font-medium break-words';
+                v.textContent = esc(val);
+                cell.appendChild(l);
+                cell.appendChild(v);
+                grid.appendChild(cell);
+            });
+
+            const wrap = document.getElementById('td-links-wrap');
+            const box = document.getElementById('td-links');
+            box.innerHTML = '';
+            const links = Array.isArray(d.links) ? d.links : [];
+            wrap.classList.toggle('hidden', links.length === 0);
+            links.forEach((url, i) => {
+                const a = document.createElement('a');
+                a.href = url;
+                a.target = '_blank';
+                a.rel = 'noopener noreferrer';
+                a.className = 'flex items-center gap-2 p-2.5 rounded-lg border border-gray-100 hover:border-primary-300 hover:bg-primary-50/50 transition';
+                const n = document.createElement('span');
+                n.className = 'flex-shrink-0 w-5 h-5 rounded-full bg-primary-100 text-primary-700 text-[10px] font-bold flex items-center justify-center';
+                n.textContent = i + 1;
+                const s = document.createElement('span');
+                s.className = 'text-xs text-primary-700 break-all leading-relaxed';
+                s.textContent = url;
+                a.appendChild(n);
+                a.appendChild(s);
+                box.appendChild(a);
+            });
+
+            document.getElementById('modal-task-detail').classList.remove('hidden');
+        }
 
         function openVerifyModal(taskId, title) {
             document.getElementById('verify-task-title').textContent = title;
