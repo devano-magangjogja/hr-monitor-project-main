@@ -54,6 +54,66 @@ if (! function_exists('linkify')) {
     }
 }
 
+if (! function_exists('sosmed_account_rows')) {
+    /**
+     * Pipihkan daftar akun menjadi daftar BARIS (satu baris per pengelola) lalu urutkan
+     * berdasar waktu delegasi baris itu sendiri.
+     *
+     * Penting:urut per baris, bukan per akun. Kalau urutan memakai waktu delegasi
+     * terbaru dari sebuah akun, semua pengelola lama akun tersebut ikut terangkat
+     * ke atas hanya karena satu orang baru ditambahkan.
+     *
+     * @param  iterable<\App\Models\SosmedAccount>  $accounts
+     * @return \Illuminate\Support\Collection<int, array{acc:\App\Models\SosmedAccount, stUser:?\App\Models\User}>
+     */
+    function sosmed_account_rows(iterable $accounts, ?string $search = null, ?string $searchType = 'all'): Illuminate\Support\Collection
+    {
+        $search = trim((string) $search);
+        $rows = collect();
+
+        foreach ($accounts as $acc) {
+            $managers = $acc->staffUsers;
+            $list = $managers;
+            $needle = mb_strtolower($search);
+
+            if ($search !== '') {
+                $matchesUser = fn($u) => str_contains(mb_strtolower($u->name), $needle);
+                if ($searchType === 'manager') {
+                    // Hanya pengelola yang namanya cocok yang menjadi baris.
+                    $list = $managers->filter($matchesUser);
+                } elseif ($searchType === 'all') {
+                    $accNameMatch = str_contains(mb_strtolower((string) $acc->name), $needle)
+                        || str_contains(mb_strtolower((string) $acc->username), $needle);
+                    if (! $accNameMatch) {
+                        $filtered = $managers->filter($matchesUser);
+                        $list = $filtered->isNotEmpty() ? $filtered : $managers;
+                    }
+                }
+            }
+
+            if ($list->isEmpty()) {
+                // Akun tanpa pengelola (atau semua pengelolanya tersaring) tetap tampil 1 baris kosong.
+                $rows->push(['acc' => $acc, 'stUser' => null]);
+                continue;
+            }
+
+            foreach ($list as $u) {
+                $rows->push(['acc' => $acc, 'stUser' => $u]);
+            }
+        }
+
+        return $rows->sortByDesc(function ($row) {
+            $assignedAt = $row['stUser']?->pivot->assigned_at ?? null;
+            if ($assignedAt) {
+                return $assignedAt instanceof \DateTimeInterface
+                    ? $assignedAt->format('Y-m-d H:i:s')
+                    : (string) $assignedAt;
+            }
+            return optional($row['acc']->created_at)->format('Y-m-d H:i:s') ?? '1970-01-01 00:00:00';
+        })->values();
+    }
+}
+
 if (! function_exists('store_image_as_webp')) {
     /**
      * Simpan gambar upload sebagai WebP ke disk public agar ukuran file hemat.

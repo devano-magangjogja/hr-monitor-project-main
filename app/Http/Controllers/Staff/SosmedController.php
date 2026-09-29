@@ -55,7 +55,14 @@ class SosmedController extends Controller
             });
         }
 
-        $accounts = $accountsQuery->orderBy('created_at', 'desc')
+        // Halaman pertama = akun yang paling baru disentuh (didelegasikan/dibuat), supaya baris
+        // delegasi terbaru selalu tampil lebih dulu — sama seperti daftar admin.
+        $lastAssignedSql = '(SELECT MAX(sau.assigned_at) FROM sosmed_account_users sau
+                             WHERE sau.sosmed_account_id = sosmed_accounts.id)';
+        $accounts = $accountsQuery
+            ->orderByRaw("GREATEST(COALESCE({$lastAssignedSql}, '1970-01-01'),
+                                   COALESCE(sosmed_accounts.created_at, sosmed_accounts.updated_at, '1970-01-01')) DESC")
+            ->orderBy('sosmed_accounts.id', 'desc')
             ->paginate(15)
             ->appends($request->all());
 
