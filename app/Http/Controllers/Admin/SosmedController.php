@@ -31,34 +31,9 @@ class SosmedController extends Controller
             $accountsQuery->where('brand', $brand);
         }
 
-        if ($accountSearch) {
-            $term = trim($accountSearch);
-            $accountsQuery->where(function ($q) use ($term, $searchType) {
-                if ($searchType === 'account') {
-                    $q->where('name', 'like', '%' . $term . '%')
-                      ->orWhere('username', 'like', '%' . $term . '%');
-                } elseif ($searchType === 'brand') {
-                    $q->where('brand', 'like', '%' . $term . '%');
-                } elseif ($searchType === 'manager') {
-                    $q->whereHas('staffUsers', fn($sq) => $sq->where('users.name', 'like', '%' . $term . '%'));
-                } elseif ($searchType === 'pm') {
-                    $q->whereHas('pmUser', fn($pq) => $pq->where('users.name', 'like', '%' . $term . '%'));
-                } elseif ($searchType === 'assistant') {
-                    $q->whereHas('assistantUser', fn($aq) => $aq->where('users.name', 'like', '%' . $term . '%'));
-                } elseif ($searchType === 'staff') {
-                    $q->whereHas('supervisorStaff', fn($sq) => $sq->where('users.name', 'like', '%' . $term . '%'));
-                } else {
-                    // 'all': Cari di nama akun, username, brand, pengelola/eksekutor, PM, asisten, maupun staff pengawas
-                    $q->where('name', 'like', '%' . $term . '%')
-                      ->orWhere('username', 'like', '%' . $term . '%')
-                      ->orWhere('brand', 'like', '%' . $term . '%')
-                      ->orWhereHas('staffUsers', fn($sq) => $sq->where('users.name', 'like', '%' . $term . '%'))
-                      ->orWhereHas('pmUser', fn($pq) => $pq->where('users.name', 'like', '%' . $term . '%'))
-                      ->orWhereHas('assistantUser', fn($aq) => $aq->where('users.name', 'like', '%' . $term . '%'))
-                      ->orWhereHas('supervisorStaff', fn($sq) => $sq->where('users.name', 'like', '%' . $term . '%'));
-                }
-            });
-        }
+        // Kata kunci dipecah per spasi; kriteria 'all' diprioritaskan ke kolom akun sehingga
+        // search "fashion" hanya menghasilkan akun yang mengandung kata itu (lihat helper).
+        $accountsQuery = sosmed_filter_account_search($accountsQuery, $accountSearch, $searchType);
 
         // Get counts before pagination
         $totalAccountsCount = $accountsQuery->count();
@@ -294,6 +269,16 @@ class SosmedController extends Controller
         ));
     }
 
+    /**
+     * Setelah sebuah aksi, kembali ke daftar persis seperti yang sedang dibuka: tab, nomor
+     * halaman, dan kata kunci pencarian ikut terbawa (referer / URL GET terakhir di sesi),
+     * supaya Admin tidak kembali lagi ke halaman 1.
+     */
+    private function backToList(string $tab = 'accounts')
+    {
+        return redirect()->back(302, [], route('admin.sosmed.index', ['tab' => $tab]));
+    }
+
     public function storeAccount(Request $request)
     {
         $validated = $request->validate([
@@ -333,7 +318,7 @@ class SosmedController extends Controller
 
         $this->logActivity('sosmed.created', 'Sosmed', "Menambahkan akun sosial media '{$validated['name']}' ({$validated['platform']})" . (!empty($validated['brand']) ? " [Brand: {$validated['brand']}]" : ''), $account);
 
-        return redirect()->route('admin.sosmed.index', ['tab' => 'accounts'])
+        return $this->backToList()
             ->with('success', 'Akun sosial media baru berhasil ditambahkan.');
     }
 
@@ -375,7 +360,7 @@ class SosmedController extends Controller
 
         $this->logActivity('sosmed.updated', 'Sosmed', "Memperbarui akun sosial media '{$account->name}'", $account);
 
-        return redirect()->route('admin.sosmed.index', ['tab' => 'accounts'])
+        return $this->backToList()
             ->with('success', 'Akun sosial media berhasil diperbarui.');
     }
 
@@ -451,7 +436,7 @@ class SosmedController extends Controller
             ? "Tugas pengelolaan akun '{$account->name}' berhasil diberikan."
             : "Akun '{$account->name}' berhasil ditambahkan ke daftar pengelolaan sosmed.";
 
-        return redirect()->route('admin.sosmed.index', ['tab' => 'accounts'])
+        return $this->backToList()
             ->with('success', $msg);
     }
 
@@ -617,7 +602,7 @@ class SosmedController extends Controller
 
         $this->logActivity('sosmed.assigned', 'Sosmed', $logMsg, $targetAccount);
 
-        return redirect()->route('admin.sosmed.index', ['tab' => 'accounts'])
+        return $this->backToList()
             ->with('success', $flashMsg . ($isSwitched ? ' Akun telah dialihkan ke ' . $targetAccount->name . '.' : ''));
     }
 
@@ -646,7 +631,7 @@ class SosmedController extends Controller
 
             $this->logActivity('sosmed.unassigned', 'Sosmed', "Melepas akses user '{$userName}' dari akun '{$name}' ({$platform})", $account);
 
-            return redirect()->route('admin.sosmed.index', ['tab' => 'accounts'])
+            return $this->backToList()
                 ->with('success', $removed
                     ? "Akses user '{$userName}' dilepas. Akun '{$name}' ikut hilang dari daftar kelola sosmed karena sudah tidak ada yang mengelola."
                     : "Akses user '{$userName}' untuk akun '{$name}' berhasil dilepas.");
@@ -666,7 +651,7 @@ class SosmedController extends Controller
 
         $this->logActivity('sosmed.unassigned', 'Sosmed', "Melepas seluruh penugasan akun '{$name}' ({$platform})", $account);
 
-        return redirect()->route('admin.sosmed.index', ['tab' => 'accounts'])
+        return $this->backToList()
             ->with('success', "Seluruh penugasan akun '{$name}' berhasil dilepas. Akun dihapus dari daftar kelola sosmed karena sudah tidak ada yang mengelola.");
     }
 
@@ -686,7 +671,7 @@ class SosmedController extends Controller
             ->delete();
 
         $this->logActivity('sosmed.deleted', 'Sosmed', "Menghapus akun '{$name}' dari daftar kelola sosmed");
-        return redirect()->route('admin.sosmed.index', ['tab' => 'accounts'])
+        return $this->backToList()
             ->with('success', "Akun '{$name}' berhasil dihapus dari daftar pengelolaan sosmed. Data akun tetap tersimpan di Manajemen Akun.");
     }
 
@@ -709,7 +694,7 @@ class SosmedController extends Controller
         $query->delete();
         $this->logActivity('sosmed.deleted', 'Sosmed', "Menghapus {$count} tugas sosmed lama (filter: {$range})");
 
-        return redirect()->route('admin.sosmed.index', ['tab' => 'tasks'])
+        return $this->backToList('tasks')
             ->with('success', "Berhasil menghapus {$count} tugas lama.");
     }
 
@@ -732,7 +717,7 @@ class SosmedController extends Controller
         $query->delete();
         $this->logActivity('sosmed.deleted', 'Sosmed', "Menghapus {$count} log persetujuan lama (filter: {$range})");
 
-        return redirect()->route('admin.sosmed.index', ['tab' => 'logs'])
+        return $this->backToList('logs')
             ->with('success', "Berhasil menghapus {$count} log persetujuan lama.");
     }
 

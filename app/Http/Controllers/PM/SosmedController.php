@@ -174,6 +174,15 @@ class SosmedController extends Controller
     }
 
     /**
+     * Kembali ke daftar persis seperti yang sedang dibuka: tab, nomor halaman, dan kata kunci
+     * pencarian ikut terbawa, jadi tidak jatuh lagi ke halaman 1 setelah sebuah aksi.
+     */
+    private function backToList(string $tab = 'accounts')
+    {
+        return redirect()->back(302, [], route('pm.sosmed.index', ['tab' => $tab]));
+    }
+
+    /**
      * PM submits proof for an account they manage directly as Executor.
      * Goes straight to verified_by_pm (level-1 passed) and awaits final HR approval.
      */
@@ -228,7 +237,7 @@ class SosmedController extends Controller
 
         $this->logActivity('sosmed.submitted', 'Sosmed', "Submit bukti laporan sosmed untuk akun '{$account->name}'", $task);
 
-        return redirect()->route('pm.sosmed.index', ['tab' => 'accounts'])
+        return $this->backToList()
             ->with('success', 'Bukti konten untuk ' . $account->name . ' berhasil dikirim. Menunggu approval final HR Staff.');
     }
 
@@ -279,7 +288,7 @@ class SosmedController extends Controller
 
             $this->logActivity('sosmed.verified', 'Sosmed', "Memverifikasi tugas sosmed '{$task->title}' dari tim", $task);
 
-            return redirect()->route('pm.sosmed.index', ['tab' => 'oversight'])
+            return $this->backToList('oversight')
                 ->with('success', 'Tugas berhasil diverifikasi dan diteruskan ke HR Staff.');
         } else {
             $task->update([
@@ -300,7 +309,7 @@ class SosmedController extends Controller
 
             $this->logActivity('sosmed.verified', 'Sosmed', "Menolak tugas sosmed '{$task->title}' dari tim", $task);
 
-            return redirect()->route('pm.sosmed.index', ['tab' => 'oversight'])
+            return $this->backToList('oversight')
                 ->with('success', 'Tugas ditolak dan dikembalikan ke staff.');
         }
     }
@@ -342,7 +351,7 @@ class SosmedController extends Controller
         $query->delete();
         $this->logActivity('sosmed.deleted', 'Sosmed', "Menghapus {$deleted} riwayat persetujuan sosmed (filter: {$validated['period']})");
 
-        return redirect()->route('pm.sosmed.index', ['tab' => 'approvals'])
+        return $this->backToList('approvals')
             ->with('success', "Berhasil menghapus {$deleted} riwayat approval.");
     }
 }

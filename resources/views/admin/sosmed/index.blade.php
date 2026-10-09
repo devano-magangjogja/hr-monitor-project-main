@@ -225,41 +225,16 @@
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-gray-100">
-                                @forelse($accounts as $acc)
+                                @php $accountRows = sosmed_account_rows($accounts, $accountSearch, $searchType ?? 'all'); @endphp
+                                @forelse($accountRows as $row)
                                     @php
-                                        $managers = $acc->staffUsers;
-                                        $hasManagers = $managers->count() > 0;
-
-                                        // Ketika search berdasarkan nama pengelola, filter baris agar
-                                        // hanya pengelola yang namanya cocok yang ditampilkan
-                                        if ($accountSearch && $searchType === 'manager') {
-                                            $filteredManagers = $managers->filter(
-                                                fn($u) => str_contains(strtolower($u->name), strtolower(trim($accountSearch)))
-                                            );
-                                            $rows = $filteredManagers->count() > 0 ? $filteredManagers : collect([null]);
-                                        } elseif ($accountSearch && $searchType === 'all') {
-                                            // Mode 'all': jika pencariannya karena pengelola, filter baris ke pengelola yg cocok
-                                            // Jika akun itu sendiri yg cocok (by name), tampilkan semua pengelolanya
-                                            $accNameMatch = str_contains(strtolower($acc->name), strtolower(trim($accountSearch)))
-                                                || str_contains(strtolower($acc->username ?? ''), strtolower(trim($accountSearch)));
-                                            if (!$accNameMatch) {
-                                                $filteredManagers = $managers->filter(
-                                                    fn($u) => str_contains(strtolower($u->name), strtolower(trim($accountSearch)))
-                                                );
-                                                $rows = $filteredManagers->count() > 0 ? $filteredManagers : ($hasManagers ? $managers : collect([null]));
-                                            } else {
-                                                $rows = $hasManagers ? $managers : collect([null]);
-                                            }
-                                        } else {
-                                            // Kalau belum ada pengelola, tetap tampilkan 1 baris kosong
-                                            $rows = $hasManagers ? $managers : collect([null]);
-                                        }
+                                        $acc = $row['acc'];
+                                        $stUser = $row['stUser'];
                                     @endphp
 
-                                    @foreach($rows as $stUser)
-                                        @php
-                                            $staffRoleTag = $stUser ? match ($stUser->role) {
-                                                'pm' => 'PM Mandiri',
+                                    @php
+                                        $staffRoleTag = $stUser ? match ($stUser->role) {
+                                            'pm' => 'PM Mandiri',
                                                 'sosmed' => 'Staff Sosmed',
                                                 'digital_marketing' => 'Digital Marketing',
                                                 'hr_assistant' => 'HR Assistant',
@@ -440,7 +415,6 @@
                                                 </div>
                                             </td>
                                         </tr>
-                                    @endforeach
                                 @empty
                                     <tr>
                                         <td colspan="8" class="px-4 py-8 text-center text-sm text-gray-400">
@@ -460,34 +434,13 @@
                     </div>
 
                     {{-- Mobile Cards (< md) --}} <div class="md:hidden space-y-3">
-                    @forelse($accounts as $acc)
+                    @php $accountRows = sosmed_account_rows($accounts, $accountSearch, $searchType ?? 'all'); @endphp
+                    @forelse($accountRows as $row)
                         @php
-                            $managers = $acc->staffUsers;
-                            $hasManagers = $managers->count() > 0;
-                            if ($accountSearch && $searchType === 'manager') {
-                                $filteredManagers = $managers->filter(
-                                    fn($u) => str_contains(strtolower($u->name), strtolower(trim($accountSearch)))
-                                );
-                                $rows = $filteredManagers->count() > 0 ? $filteredManagers : collect([null]);
-                            } elseif ($accountSearch && $searchType === 'all') {
-                                $accNameMatch = str_contains(strtolower($acc->name), strtolower(trim($accountSearch)))
-                                    || str_contains(strtolower($acc->username ?? ''), strtolower(trim($accountSearch)));
-                                if (!$accNameMatch) {
-                                    $filteredManagers = $managers->filter(
-                                        fn($u) => str_contains(strtolower($u->name), strtolower(trim($accountSearch)))
-                                    );
-                                    $rows = $filteredManagers->count() > 0 ? $filteredManagers : ($hasManagers ? $managers : collect([null]));
-                                } else {
-                                    $rows = $hasManagers ? $managers : collect([null]);
-                                }
-                            } else {
-                                $rows = $hasManagers ? $managers : collect([null]);
-                            }
-                        @endphp
+                            $acc = $row['acc'];
+                            $stUser = $row['stUser'];
 
-                        @foreach($rows as $stUser)
-                            @php
-                                $staffRoleTag = $stUser ? match ($stUser->role) {
+                            $staffRoleTag = $stUser ? match ($stUser->role) {
                                     'pm' => 'PM Mandiri',
                                     'sosmed' => 'Staff Sosmed',
                                     'digital_marketing' => 'Digital Marketing',
@@ -631,7 +584,6 @@
                                     </span>
                                 </div>
                             </div>
-                        @endforeach
                     @empty
                         <div class="py-8 text-center text-sm text-gray-400">
                             @if($accountSearch)

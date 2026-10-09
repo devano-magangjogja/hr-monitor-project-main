@@ -110,7 +110,7 @@ class SosmedController extends Controller
             'notes'          => 'Bukti disubmit (' . count($links) . ' item). Menunggu verifikasi ' . ($account->levelOneVerifier()?->name ?? $account->finalVerifierLabel()) . '.',
         ]);
 
-        return redirect()->route('sosmed.sosmed.index')
+        return redirect()->back(302, [], route('sosmed.sosmed.index'))
             ->with('success', $account->name . ' berhasil ditandai selesai. Menunggu verifikasi ' . ($account->levelOneVerifier()?->name ?? $account->finalVerifierLabel()) . '.');
     }
 }
