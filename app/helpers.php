@@ -54,6 +54,108 @@ if (! function_exists('linkify')) {
     }
 }
 
+if (! function_exists('sosmed_search_terms')) {
+    /**
+     * Pecah kata kunci per spasi. Semua kata harus cocok (urutan bebas), jadi
+     * "fashion pria" tetap menemukan akun bernama "Fashion Pria Official".
+     *
+     * @return array<int, string>
+     */
+    function sosmed_search_terms(?string $search): array
+    {
+        $search = trim((string) $search);
+
+        return $search === '' ? [] : (preg_split('/\s+/u', $search) ?: []);
+    }
+}
+
+if (! function_exists('sosmed_text_matches')) {
+    /** Semua kata kunci terdapat di dalam teks (case-insensitive). */
+    function sosmed_text_matches(?string $text, array $terms): bool
+    {
+        if ($terms === []) {
+            return false;
+        }
+
+        $haystack = mb_strtolower((string) $text);
+        foreach ($terms as $term) {
+            if (! str_contains($haystack, mb_strtolower($term))) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+}
+
+if (! function_exists('sosmed_filter_account_search')) {
+    /**
+     * Filter pencarian daftar akun sosmed (tab akun, Staff & Admin).
+     *
+     * Tipe 'wide' dipakai daftar "Akun Sosmed Saya": hanya kolom akun, tanpa fallback nama orang.
+     *
+     * Untuk kriteria 'all': kalau ada akun yang nama/username/platform/brand-nya cocok dengan
+     * kata kunci, hanya akun-akun itu yang diambil. Nama orang (pengelola/PM/asisten/staff
+     * pengawas) baru dipakai ketika kata kunci tidak cocok dengan akun mana pun — jadi search
+     * "fashion" hanya menampilkan akun berisi kata itu, bukan akun yang kebetulan dikelola
+     * orang bernama mirip.
+     *
+     * @param  \Illuminate\Contracts\Database\Eloquent\Builder  $query
+     * @return \Illuminate\Contracts\Database\Eloquent\Builder
+     */
+    function sosmed_filter_account_search($query, ?string $search, ?string $searchType = 'all')
+    {
+        $terms = sosmed_search_terms($search);
+        if ($terms === []) {
+            return $query;
+        }
+
+        $columns = [
+            'account' => ['name', 'username'],
+            'wide'    => ['name', 'username', 'platform', 'brand'],
+            'brand'   => ['brand'],
+        ];
+
+        $byFields = function ($q, array $cols) use ($terms) {
+            foreach ($terms as $term) {
+                $like = '%' . $term . '%';
+                $q->where(function ($qq) use ($cols, $like) {
+                    foreach ($cols as $col) {
+                        $qq->orWhere($col, 'like', $like);
+                    }
+                });
+            }
+        };
+
+        $byPeople = function ($q, array $relations) use ($terms) {
+            foreach ($relations as $relation) {
+                $q->orWhereHas($relation, function ($sq) use ($terms) {
+                    foreach ($terms as $term) {
+                        $sq->where('users.name', 'like', '%' . $term . '%');
+                    }
+                });
+            }
+        };
+
+        $personRelations = ['staffUsers', 'pmUser', 'assistantUser', 'supervisorStaff'];
+
+        $filter = match ($searchType) {
+            'account'   => fn($q) => $byFields($q, $columns['account']),
+            'wide'      => fn($q) => $byFields($q, $columns['wide']),
+            'brand'     => fn($q) => $byFields($q, $columns['brand']),
+            'manager'   => fn($q) => $byPeople($q, ['staffUsers']),
+            'pm'        => fn($q) => $byPeople($q, ['pmUser']),
+            'assistant' => fn($q) => $byPeople($q, ['assistantUser']),
+            'staff'     => fn($q) => $byPeople($q, ['supervisorStaff']),
+            default     => (clone $query)->where(fn($q) => $byFields($q, $columns['wide']))->exists()
+                ? fn($q) => $byFields($q, $columns['wide'])
+                : fn($q) => $byPeople($q, $personRelations),
+        };
+
+        return $query->where($filter);
+    }
+}
+
 if (! function_exists('sosmed_account_rows')) {
     /**
      * Pipihkan daftar akun menjadi daftar BARIS (satu baris per pengelola) lalu urutkan
@@ -68,23 +170,26 @@ if (! function_exists('sosmed_account_rows')) {
      */
     function sosmed_account_rows(iterable $accounts, ?string $search = null, ?string $searchType = 'all'): Illuminate\Support\Collection
     {
-        $search = trim((string) $search);
+        $terms = sosmed_search_terms($search);
         $rows = collect();
 
         foreach ($accounts as $acc) {
             $managers = $acc->staffUsers;
             $list = $managers;
-            $needle = mb_strtolower($search);
 
-            if ($search !== '') {
-                $matchesUser = fn($u) => str_contains(mb_strtolower($u->name), $needle);
+            if ($terms !== []) {
+                $matchesUser = fn($u) => sosmed_text_matches($u->name, $terms);
                 if ($searchType === 'manager') {
                     // Hanya pengelola yang namanya cocok yang menjadi baris.
                     $list = $managers->filter($matchesUser);
-                } elseif ($searchType === 'all') {
-                    $accNameMatch = str_contains(mb_strtolower((string) $acc->name), $needle)
-                        || str_contains(mb_strtolower((string) $acc->username), $needle);
-                    if (! $accNameMatch) {
+                } elseif (! in_array($searchType, ['account', 'brand', 'pm', 'assistant', 'staff'], true)) {
+                    // Kriteria 'all': kalau akunnya sendiri yang cocok, semua pengelolanya tampil;
+                    // kalau yang cocok nama orangnya, hanya baris orang itu yang tersisa.
+                    $accMatch = sosmed_text_matches($acc->name, $terms)
+                        || sosmed_text_matches($acc->username, $terms)
+                        || sosmed_text_matches($acc->platform, $terms)
+                        || sosmed_text_matches($acc->brand, $terms);
+                    if (! $accMatch) {
                         $filtered = $managers->filter($matchesUser);
                         $list = $filtered->isNotEmpty() ? $filtered : $managers;
                     }

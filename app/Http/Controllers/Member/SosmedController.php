@@ -51,6 +51,15 @@ class SosmedController extends Controller
         ));
     }
 
+    /**
+     * Kembali ke daftar persis seperti yang sedang dibuka: tab, nomor halaman, dan kata kunci
+     * pencarian ikut terbawa, jadi tidak jatuh lagi ke halaman 1 setelah sebuah aksi.
+     */
+    private function backToList(string $tab = 'tasks')
+    {
+        return redirect()->back(302, [], route('member.sosmed.index', ['tab' => $tab]));
+    }
+
     // Sosmed menyelesaikan tugas dan submit link konten
     public function submitTask(Request $request, SosmedTask $task)
     {
@@ -80,7 +89,7 @@ class SosmedController extends Controller
             'notes'          => 'Tugas selesai dikerjakan. Bukti URL: ' . $proof,
         ]);
 
-        return redirect()->route('member.sosmed.index', ['tab' => 'tasks'])
+        return $this->backToList()
             ->with('success', 'Tugas berhasil diselesaikan dan diteruskan ke PM untuk verifikasi.');
     }
 }

@@ -29,31 +29,9 @@ class SosmedController extends Controller
                   ->orWhereHas('staffUsers', fn($u) => $u->where('role', '!=', 'hr_staff'));
             });
 
-        if ($accountSearch) {
-            $term = trim($accountSearch);
-            $accountsQuery->where(function ($q) use ($term, $searchType) {
-                if ($searchType === 'account') {
-                    $q->where('name', 'like', '%' . $term . '%')
-                      ->orWhere('username', 'like', '%' . $term . '%');
-                } elseif ($searchType === 'manager') {
-                    $q->whereHas('staffUsers', fn($sq) => $sq->where('users.name', 'like', '%' . $term . '%'));
-                } elseif ($searchType === 'pm') {
-                    $q->whereHas('pmUser', fn($pq) => $pq->where('users.name', 'like', '%' . $term . '%'));
-                } elseif ($searchType === 'assistant') {
-                    $q->whereHas('assistantUser', fn($aq) => $aq->where('users.name', 'like', '%' . $term . '%'));
-                } elseif ($searchType === 'staff') {
-                    $q->whereHas('supervisorStaff', fn($sq) => $sq->where('users.name', 'like', '%' . $term . '%'));
-                } else {
-                    // 'all': Cari di nama akun, username, pengelola/eksekutor, PM, asisten, maupun staff pengawas
-                    $q->where('name', 'like', '%' . $term . '%')
-                      ->orWhere('username', 'like', '%' . $term . '%')
-                      ->orWhereHas('staffUsers', fn($sq) => $sq->where('users.name', 'like', '%' . $term . '%'))
-                      ->orWhereHas('pmUser', fn($pq) => $pq->where('users.name', 'like', '%' . $term . '%'))
-                      ->orWhereHas('assistantUser', fn($aq) => $aq->where('users.name', 'like', '%' . $term . '%'))
-                      ->orWhereHas('supervisorStaff', fn($sq) => $sq->where('users.name', 'like', '%' . $term . '%'));
-                }
-            });
-        }
+        // Kata kunci dipecah per spasi; kriteria 'all' diprioritaskan ke kolom akun sehingga
+        // search "fashion" hanya menghasilkan akun yang mengandung kata itu (lihat helper).
+        $accountsQuery = sosmed_filter_account_search($accountsQuery, $accountSearch, $searchType);
 
         // Halaman pertama = akun yang paling baru disentuh (didelegasikan/dibuat), supaya baris
         // delegasi terbaru selalu tampil lebih dulu — sama seperti daftar admin.
@@ -141,14 +119,7 @@ class SosmedController extends Controller
         $myAccountSearch = trim((string) $request->query('my_account_search', ''));
         $myAccounts = SosmedAccount::with(['creator'])
             ->whereHas('staffUsers', fn($q) => $q->where('users.id', Auth::id()))
-            ->when($myAccountSearch !== '', function ($q) use ($myAccountSearch) {
-                $q->where(function ($qq) use ($myAccountSearch) {
-                    $qq->where('name', 'like', '%' . $myAccountSearch . '%')
-                      ->orWhere('username', 'like', '%' . $myAccountSearch . '%')
-                      ->orWhere('platform', 'like', '%' . $myAccountSearch . '%')
-                      ->orWhere('brand', 'like', '%' . $myAccountSearch . '%');
-                });
-            })
+            ->when($myAccountSearch !== '', fn($q) => sosmed_filter_account_search($q, $myAccountSearch, 'wide'))
             ->orderBy('platform')
             ->paginate(15)
             ->appends($request->all());
@@ -263,6 +234,16 @@ class SosmedController extends Controller
     }
 
     /**
+     * Setelah sebuah aksi, kembali ke daftar persis seperti yang sedang dibuka: tab, nomor
+     * halaman, dan kata kunci pencarian ikut terbawa (referer / URL GET terakhir di sesi),
+     * supaya Staff tidak kembali lagi ke halaman 1.
+     */
+    private function backToList(string $tab = 'accounts')
+    {
+        return redirect()->back(302, [], route('staff.sosmed.index', ['tab' => $tab]));
+    }
+
+    /**
      * Staff submit bukti pengerjaan konten sosmed mandiri.
      * Status menjadi 'done_by_staff', dan diverifikasi langsung oleh Admin.
      */
@@ -313,7 +294,7 @@ class SosmedController extends Controller
 
         $this->logActivity('sosmed.submitted', 'Sosmed', "Submit bukti laporan sosmed untuk akun '{$account->name}'", $task);
 
-        return redirect()->route('staff.sosmed.index', ['tab' => 'my_accounts'])
+        return $this->backToList('my_accounts')
             ->with('success', 'Bukti konten untuk ' . $account->name . ' berhasil dikirim. Menunggu verifikasi ' . $account->finalVerifierLabel() . '.');
     }
 
@@ -400,7 +381,7 @@ class SosmedController extends Controller
             ? "Tugas pengelolaan akun '{$account->name}' berhasil diberikan."
             : "Akun '{$account->name}' berhasil ditambahkan ke daftar pengelolaan sosmed.";
 
-        return redirect()->route('staff.sosmed.index', ['tab' => 'accounts'])
+        return $this->backToList()
             ->with('success', $msg);
     }
 
@@ -592,7 +573,7 @@ class SosmedController extends Controller
 
         $this->logActivity('sosmed.assigned', 'Sosmed', $logMsg, $targetAccount);
 
-        return redirect()->route('staff.sosmed.index', ['tab' => 'accounts'])
+        return $this->backToList()
             ->with('success', $flashMsg . ($isSwitched ? ' Akun telah dialihkan ke ' . $targetAccount->name . '.' : ''));
     }
 
@@ -621,7 +602,7 @@ class SosmedController extends Controller
 
             $this->logActivity('sosmed.unassigned', 'Sosmed', "Melepas akses user '{$userName}' dari akun '{$name}' ({$platform})", $account);
 
-            return redirect()->route('staff.sosmed.index', ['tab' => 'accounts'])
+            return $this->backToList()
                 ->with('success', $removed
                     ? "Akses user '{$userName}' dilepas. Akun '{$name}' ikut hilang dari daftar kelola sosmed karena sudah tidak ada yang mengelola."
                     : "Akses user '{$userName}' untuk akun '{$name}' berhasil dilepas.");
@@ -641,7 +622,7 @@ class SosmedController extends Controller
 
         $this->logActivity('sosmed.unassigned', 'Sosmed', "Melepas seluruh penugasan akun '{$name}' ({$platform})", $account);
 
-        return redirect()->route('staff.sosmed.index', ['tab' => 'accounts'])
+        return $this->backToList()
             ->with('success', "Seluruh penugasan akun '{$name}' berhasil dilepas. Akun dihapus dari daftar kelola sosmed karena sudah tidak ada yang mengelola.");
     }
 
@@ -665,7 +646,7 @@ class SosmedController extends Controller
             ->delete();
 
         $this->logActivity('sosmed.deleted', 'Sosmed', "Menghapus akun '{$name}' dari daftar kelola sosmed");
-        return redirect()->route('staff.sosmed.index', ['tab' => 'accounts'])
+        return $this->backToList()
             ->with('success', "Akun '{$name}' berhasil dihapus dari daftar pengelolaan sosmed.");
     }
 
@@ -707,7 +688,7 @@ class SosmedController extends Controller
                   : "Menghapus oversight PM untuk sosmed '{$sosmedUser?->name}'"
         );
 
-        return redirect()->route('staff.sosmed.index', ['tab' => 'oversight'])
+        return $this->backToList('oversight')
             ->with('success', 'Pengaturan oversight PM berhasil disimpan.');
     }
 
@@ -751,7 +732,7 @@ class SosmedController extends Controller
 
             $this->logActivity('sosmed.verified', 'Sosmed', "Menyetujui tugas sosmed '{$task->title}'", $task);
 
-            return redirect()->route('staff.sosmed.index', ['tab' => 'approvals'])
+            return $this->backToList('approvals')
                 ->with('success', $isSupervisorDirect
                     ? 'Tugas berhasil diverifikasi & disetujui langsung oleh Staff Pengawas.'
                     : 'Tugas berhasil disetujui secara final oleh HR Staff.');
@@ -776,7 +757,7 @@ class SosmedController extends Controller
 
             $this->logActivity('sosmed.verified', 'Sosmed', "Menolak tugas sosmed '{$task->title}' dengan catatan: {$validated['rejection_note']}", $task);
 
-            return redirect()->route('staff.sosmed.index', ['tab' => 'approvals'])
+            return $this->backToList('approvals')
                 ->with('success', 'Tugas ditolak dan dikembalikan untuk perbaikan.');
         }
     }

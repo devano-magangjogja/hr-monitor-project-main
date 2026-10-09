@@ -88,6 +88,15 @@ class SosmedController extends Controller
     }
 
     /**
+     * Kembali ke daftar persis seperti yang sedang dibuka: tab, nomor halaman, dan kata kunci
+     * pencarian ikut terbawa, jadi tidak jatuh lagi ke halaman 1 setelah sebuah aksi.
+     */
+    private function backToList(string $tab = 'pending')
+    {
+        return redirect()->back(302, [], route('assistant.sosmed.index', ['tab' => $tab]));
+    }
+
+    /**
      * Asisten melakukan verifikasi Level-1 (pengganti PM).
      * Status berubah ke verified_by_pm, lalu diteruskan ke HR Staff untuk persetujuan final.
      */
@@ -124,7 +133,7 @@ class SosmedController extends Controller
                 'notes'          => 'Diverifikasi oleh HR Assistant sebagai pengganti PM. Menunggu persetujuan final HR Staff.',
             ]);
 
-            return redirect()->route('assistant.sosmed.index', ['tab' => 'pending'])
+            return $this->backToList()
                 ->with('success', 'Tugas berhasil diverifikasi dan diteruskan ke HR Staff untuk persetujuan final.');
         } else {
             $task->update([
@@ -143,7 +152,7 @@ class SosmedController extends Controller
                 'notes'          => $validated['rejection_note'] ?? 'Ditolak oleh HR Assistant (Pengganti PM)',
             ]);
 
-            return redirect()->route('assistant.sosmed.index', ['tab' => 'pending'])
+            return $this->backToList()
                 ->with('success', 'Tugas ditolak dan dikembalikan ke staff untuk diperbaiki.');
         }
     }
@@ -199,7 +208,7 @@ class SosmedController extends Controller
             'notes'          => 'HR Assistant submit bukti laporan sosmed (' . count($links) . ' link). Menunggu verifikasi oleh HR Staff.',
         ]);
 
-        return redirect()->route('assistant.sosmed.index', ['tab' => 'my_accounts'])
+        return $this->backToList('my_accounts')
             ->with('success', 'Bukti konten untuk ' . $account->name . ' berhasil dikirim. Menunggu verifikasi oleh HR Staff.');
     }
 }
