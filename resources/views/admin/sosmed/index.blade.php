@@ -25,7 +25,7 @@
     {{-- ═══════════════════════════════════════════════════════════════ --}}
     {{-- STAT CARDS --}}
     {{-- ═══════════════════════════════════════════════════════════════ --}}
-    <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
+    <div class="grid grid-cols-2 sm:grid-cols-5 lg:grid-cols-5 gap-3 mb-6">
         <a href="{{ route('admin.sosmed.index', ['tab' => 'accounts']) }}"
             class="block bg-white rounded-xl border {{ $tab === 'accounts' && !$accFilter ? 'border-gray-400 ring-2 ring-gray-300/40' : 'border-gray-200 hover:border-gray-300' }} p-4 shadow-sm transition">
             <p class="text-xs font-medium text-gray-500 mb-1">Total Akun</p>
@@ -49,6 +49,18 @@
             <p class="text-xs font-medium text-gray-500 mb-1">Total Tugas</p>
             <p class="text-2xl font-bold text-indigo-600">{{ $stats['total_tasks'] }}</p>
             <p class="text-[11px] text-gray-400 mt-0.5">harian & custom</p>
+        </a>
+        <a href="{{ route('admin.sosmed.index', ['tab' => 'tasks', 'task_status' => 'pending']) }}"
+            class="block bg-white rounded-xl border {{ $taskStatus === 'pending' ? 'border-rose-400 bg-rose-50/40 ring-2 ring-gray-300/40' : ($stats['pending_tasks'] > 0 ? 'border-rose-300 bg-rose-50/20 hover:border-gray-300' : 'border-gray-200 hover:border-gray-300') }} p-4 shadow-sm transition">
+            <p class="text-xs font-medium text-gray-500 mb-1">Belum Dikerjakan</p>
+            <p class="text-2xl font-bold text-rose-600">{{ $stats['pending_tasks'] }}</p>
+            <p class="text-[11px] text-gray-400 mt-0.5">tugas menunggu dikerjakan</p>
+        </a>
+        <a href="{{ route('admin.sosmed.index', ['tab' => 'tasks', 'task_status' => 'no_task']) }}"
+            class="block bg-white rounded-xl border {{ $taskStatus === 'no_task' ? 'border-gray-400 bg-gray-50/50 ring-2 ring-gray-300/40' : ($noTaskCount > 0 ? 'border-gray-300 bg-gray-50/50' : 'border-gray-200 hover:border-gray-300') }} p-4 shadow-sm transition">
+            <p class="text-xs font-medium text-gray-500 mb-1">Belum Ada Tugas</p>
+            <p class="text-2xl font-bold text-gray-500">{{ $noTaskCount }}</p>
+            <p class="text-[11px] text-gray-400 mt-0.5">akun dikelola, belum pernah ditugaskan</p>
         </a>
         <a href="{{ route('admin.sosmed.index', ['tab' => 'tasks', 'task_status' => 'done_by_staff']) }}"
             class="block bg-white rounded-xl border {{ $taskStatus === 'done_by_staff' ? 'border-blue-400 bg-blue-50/30 ring-2 ring-blue-300/50' : 'border-gray-200 hover:border-blue-300' }} p-4 shadow-sm transition">
@@ -749,21 +761,26 @@
                     @endif
                 </form>
 
-                @if($taskStatus)
-                    <span
-                        class="inline-flex items-center gap-1.5 px-2.5 h-9 rounded-lg text-[11px] font-semibold bg-indigo-100 text-indigo-700 w-fit">
-                        Filter status:
-                        {{ match ($taskStatus) {
-                            'pending' => 'Belum Dikerjakan',
-                            'done_by_staff' => 'Menunggu Verifikasi PM/Asisten',
-                            'verified_by_pm' => 'Menunggu HR Staff',
-                            'approved_hr' => 'Disetujui Final',
-                            'rejected' => 'Ditolak',
-                        } }}
-                        <a href="{{ route('admin.sosmed.index', array_filter(['tab' => 'tasks', 'task_date' => $taskDateFilter, 'task_search' => $taskSearch])) }}"
-                            class="hover:underline" title="Hapus filter">&times;</a>
-                    </span>
-                @endif
+                {{-- Filter Status Tugas --}}
+                <form action="{{ route('admin.sosmed.index') }}" method="GET" class="w-full sm:w-auto">
+                    <input type="hidden" name="tab" value="tasks">
+                    @if($taskDateFilter)
+                        <input type="hidden" name="task_date" value="{{ $taskDateFilter }}">
+                    @endif
+                    @if($taskSearch !== '')
+                        <input type="hidden" name="task_search" value="{{ $taskSearch }}">
+                    @endif
+                    <select name="task_status" title="Filter status tugas"
+                        class="w-full sm:w-auto h-9 pl-3 pr-8 text-xs bg-white border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 text-gray-700 transition cursor-pointer"
+                        onchange="this.form.submit()">
+                        <option value="">Semua Status</option>
+                        @foreach($taskStatusLabels as $statusValue => $statusLabel)
+                            <option value="{{ $statusValue }}" @selected($taskStatus === $statusValue)>
+                                {{ $statusLabel }}@if($statusValue === 'no_task') ({{ $noTaskCount }})@endif
+                            </option>
+                        @endforeach
+                    </select>
+                </form>
 
                 {{-- Filter Tanggal --}}
                 <form action="{{ route('admin.sosmed.index') }}" method="GET" class="w-full sm:w-auto">
@@ -876,10 +893,16 @@
                                 <td class="px-2.5 py-2.5 min-w-0">
                                     <p class="font-semibold text-gray-800 truncate" title="{{ $t->title }}">{{ $t->title }}</p>
                                     <div class="flex items-center gap-1.5 mt-0.5 min-w-0">
-                                        <span class="shrink-0 px-1.5 py-0.5 text-[10px] rounded font-medium {{ $t->type === 'daily' ? 'bg-gray-100 text-gray-600' : 'bg-purple-50 text-purple-700' }}">
-                                            {{ $t->type === 'daily' ? 'Harian' : 'Custom' }}
-                                        </span>
+                                        @if($t->id)
+                                            <span class="shrink-0 px-1.5 py-0.5 text-[10px] rounded font-medium {{ $t->type === 'daily' ? 'bg-gray-100 text-gray-600' : 'bg-purple-50 text-purple-700' }}">
+                                                {{ $t->type === 'daily' ? 'Harian' : 'Custom' }}
+                                            </span>
+                                        @endif
                                         <span class="text-[10px] text-gray-400 shrink-0">{{ $t->task_date->translatedFormat('d M Y') }}</span>
+                                        @if($t->id && $t->task_date->toDateString() < $taskDateFilter)
+                                            <span class="shrink-0 px-1.5 py-0.5 text-[10px] rounded font-medium bg-amber-50 text-amber-700"
+                                                title="Masih belum selesai sejak {{ $t->task_date->translatedFormat('d M Y') }}">tertahan</span>
+                                        @endif
                                     </div>
                                 </td>
                                 <td class="px-2.5 py-2.5 text-xs min-w-0">
@@ -894,8 +917,14 @@
                                     @endif
                                 </td>
                                 <td class="px-2.5 py-2.5 text-xs min-w-0">
-                                    @if($t->assignedUser)
-                                        <span class="font-medium text-gray-800 truncate block" title="{{ $t->assignedUser->name }}">{{ $t->assignedUser->name }}</span>
+                                    @php
+                                        // Akun tanpa record tugas tetap tampil (status 'Belum Ada Tugas'), jadi
+                                        // pelaksananya diambil dari daftar pengelola akun.
+                                        $executorNames = $t->assignedUser?->name
+                                            ?? $t->account?->staffUsers?->pluck('name')->join(', ');
+                                    @endphp
+                                    @if($executorNames)
+                                        <span class="font-medium text-gray-800 truncate block" title="{{ $executorNames }}">{{ $executorNames }}</span>
                                     @else
                                         <span class="text-gray-300">—</span>
                                     @endif
@@ -921,8 +950,14 @@
                                         class="inline-flex items-center justify-center px-2 py-0.5 rounded-full text-[11px] font-medium max-w-full {{ $t->status_badge_class }}">
                                         <span class="truncate">{{ $t->status_label }}</span>
                                     </span>
+                                    @if($t->rejection_note)
+                                        <p class="text-[10px] text-rose-600 mt-1 truncate" title="{{ $t->rejection_note }}">
+                                            Catatan: {{ $t->rejection_note }}
+                                        </p>
+                                    @endif
                                 </td>
                                 <td class="px-2.5 py-2.5 text-center">
+                                    @if($t->id)
                                     @php
                                         $taskDetail = [
                                             'title'       => $t->title,
@@ -949,11 +984,18 @@
                                         title="Lihat detail tugas">
                                         Detail
                                     </button>
+                                    @else
+                                        <span class="text-[11px] text-gray-400">Belum ditugaskan</span>
+                                    @endif
                                 </td>
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="8" class="px-4 py-8 text-center text-sm text-gray-400">Belum ada aktivitas tugas.</td>
+                                <td colspan="8" class="px-4 py-8 text-center text-sm text-gray-400">
+                                    {{ $taskStatus === 'no_task'
+                                        ? 'Semua akun yang dikelola sudah pernah mendapat tugas sampai tanggal ini.'
+                                        : 'Belum ada aktivitas tugas.' }}
+                                </td>
                             </tr>
                         @endforelse
                     </tbody>
@@ -982,7 +1024,7 @@
                             {{-- Kanan (Pelaksana) --}}
                             <div class="min-w-0 text-right">
                                 <p class="text-gray-400 mb-0.5">Pelaksana</p>
-                                <p class="font-medium text-gray-800 truncate">{{ $t->assignedUser?->name ?? '—' }}</p>
+                                <p class="font-medium text-gray-800 truncate">{{ $t->assignedUser?->name ?? $t->account?->staffUsers?->pluck('name')->join(', ') ?? '—' }}</p>
                             </div>
                             {{-- Kiri --}}
                             <div class="min-w-0">
@@ -997,7 +1039,11 @@
                         </div>
                     </div>
                 @empty
-                    <div class="py-8 text-center text-sm text-gray-400">Belum ada aktivitas tugas.</div>
+                    <div class="py-8 text-center text-sm text-gray-400">
+                        {{ $taskStatus === 'no_task'
+                            ? 'Semua akun yang dikelola sudah pernah mendapat tugas sampai tanggal ini.'
+                            : 'Belum ada aktivitas tugas.' }}
+                    </div>
                 @endforelse
         </div>
 

@@ -172,6 +172,15 @@
         /* Badge role Programmer — kelas Tailwind cyan belum ada di bundle build */
         .bg-cyan-50 { background-color: #ecfeff; }
         .text-cyan-700 { color: #0e7490; }
+
+        /* ── Ruang untuk panah dropdown yang digambar CSS ──
+           app.css menggambar chevron di `right .6rem` dan menyisakan padding kanan 2.25rem,
+           tetapi kelas seperti .px-2.5 lebih spesifik dari selector `select` hasil build,
+           sehingga padding itu tertimpa dan panah muncul menempel di teks. Butuh !important
+           karena CSS build dimuat setelah blok style ini. */
+        select {
+            padding-right: 2.25rem !important;
+        }
     </style>
     
     @vite(['resources/css/app.css', 'resources/js/app.js'])

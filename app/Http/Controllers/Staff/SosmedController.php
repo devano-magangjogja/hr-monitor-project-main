@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Staff;
 
 use App\Http\Controllers\Controller;
 use App\Http\Traits\LogsActivity;
+use App\Http\Traits\SosmedMonitoringTasks;
 use App\Models\PmSosmedOversight;
 use App\Models\SosmedAccount;
 use App\Models\SosmedApprovalLog;
@@ -14,7 +15,7 @@ use Illuminate\Support\Facades\Auth;
 
 class SosmedController extends Controller
 {
-    use LogsActivity;
+    use LogsActivity, SosmedMonitoringTasks;
     public function index(Request $request)
     {
         $tab = $request->query('tab', 'accounts');
@@ -32,6 +33,12 @@ class SosmedController extends Controller
         // Kata kunci dipecah per spasi; kriteria 'all' diprioritaskan ke kolom akun sehingga
         // search "fashion" hanya menghasilkan akun yang mengandung kata itu (lihat helper).
         $accountsQuery = sosmed_filter_account_search($accountsQuery, $accountSearch, $searchType);
+
+        // Angka kartu dihitung dari query penuh, bukan dari halaman yang sedang tampil.
+        $accountsStats = [
+            'total' => (clone $accountsQuery)->count(),
+            'unassigned_pm' => (clone $accountsQuery)->whereNull('pm_id')->count(),
+        ];
 
         // Halaman pertama = akun yang paling baru disentuh (didelegasikan/dibuat), supaya baris
         // delegasi terbaru selalu tampil lebih dulu — sama seperti daftar admin.
@@ -87,33 +94,49 @@ class SosmedController extends Controller
             $taskDateFilter = now()->toDateString(); // default: tanggal hari ini
         }
 
+        // Label + filter status, bentuknya disamakan dengan Admin.
+        $taskStatusLabels = $this->taskStatusLabels();
         $taskStatus = $request->query('task_status');
-        if (!in_array($taskStatus, ['pending', 'done_by_staff', 'verified_by_pm', 'approved_hr', 'rejected'], true)) {
+        if (! in_array($taskStatus, array_keys($taskStatusLabels), true)) {
             $taskStatus = null;
         }
 
         $taskSearch = trim((string) $request->query('task_search', ''));
 
-        $allTasks = SosmedTask::with(['account', 'assignedUser', 'assignedBy', 'verifiedBy', 'hrVerifiedBy'])
-            ->when($taskDateFilter, function ($q) use ($taskDateFilter) {
-                $q->whereDate('task_date', $taskDateFilter);
-            })
-            ->when($taskStatus, function ($q) use ($taskStatus) {
-                $q->where('status', $taskStatus);
-            })
-            ->when($taskSearch !== '', function ($q) use ($taskSearch) {
-                $q->where(function ($qq) use ($taskSearch) {
-                    $qq->where('title', 'like', '%' . $taskSearch . '%')
-                      ->orWhere('description', 'like', '%' . $taskSearch . '%')
-                      ->orWhereHas('account', fn($a) => $a->where('name', 'like', '%' . $taskSearch . '%')
-                          ->orWhere('platform', 'like', '%' . $taskSearch . '%')
-                          ->orWhere('brand', 'like', '%' . $taskSearch . '%'))
-                      ->orWhereHas('assignedUser', fn($u) => $u->where('name', 'like', '%' . $taskSearch . '%'));
-                });
-            })
-            ->orderBy('task_date', 'desc')
-            ->paginate(15)
-            ->appends($request->all());
+        // Akun yang dikelola tapi sampai tanggal ini belum pernah dapat tugas (status 'no_task').
+        $noTaskCount = $this->accountsWithoutTaskQuery($taskDateFilter)->count();
+
+        // Termasuk tugas lama yang masih menggantung, jadi status 'Belum Dikerjakan' tetap terbaca
+        // di tanggal yang sedang dipantau (sama seperti Admin).
+        $tasksBase = $this->monitoringTasksQuery($taskDateFilter);
+
+        // Angka kartu statistik dihitung dari daftar aktif ini, bukan dari kolom tabel.
+        $tasksStats = [
+            'total'           => $tasksBase->count(),
+            'pending'         => (clone $tasksBase)->where('status', 'pending')->count(),
+            'done_by_staff'   => (clone $tasksBase)->where('status', 'done_by_staff')->count(),
+            'verified_by_pm'  => (clone $tasksBase)->where('status', 'verified_by_pm')->count(),
+            'approved_hr'     => (clone $tasksBase)->where('status', 'approved_hr')->count(),
+        ];
+
+        $allTasks = $taskStatus === 'no_task'
+            ? $this->noTaskPaginator($request, $taskDateFilter, $taskSearch, 'staff.sosmed.index')
+            : $tasksBase
+                ->when($taskStatus, function ($q) use ($taskStatus) {
+                    $q->where('status', $taskStatus);
+                })
+                ->when($taskSearch !== '', function ($q) use ($taskSearch) {
+                    $q->where(function ($qq) use ($taskSearch) {
+                        $qq->where('title', 'like', '%' . $taskSearch . '%')
+                          ->orWhere('description', 'like', '%' . $taskSearch . '%')
+                          ->orWhereHas('account', fn($a) => $a->where('name', 'like', '%' . $taskSearch . '%')
+                              ->orWhere('platform', 'like', '%' . $taskSearch . '%')
+                              ->orWhere('brand', 'like', '%' . $taskSearch . '%'))
+                          ->orWhereHas('assignedUser', fn($u) => $u->where('name', 'like', '%' . $taskSearch . '%'));
+                    });
+                })
+                ->paginate(15)
+                ->appends($request->all());
 
         // Akun Mandiri yang Dikelola oleh Staff yang sedang login
         $myAccountSearch = trim((string) $request->query('my_account_search', ''));
@@ -177,12 +200,15 @@ class SosmedController extends Controller
         $managedMap = SosmedAccount::managedCountsMap();
 
         $stats = [
-            'total_accounts'   => $accounts->count(),
+            'total_accounts'   => $accountsStats['total'],
             'my_accounts'      => $myAccounts->total(),
-            'unassigned_pm'    => $accounts->whereNull('pm_id')->count(),
+            'unassigned_pm'    => $accountsStats['unassigned_pm'],
             'need_hr_verify'   => $needHrApproval->total(),
-            'total_tasks'      => $allTasks->total(),
-            'completed'        => $allTasks->where('status', 'approved_hr')->count(),
+            'total_tasks'      => $tasksStats['total'],
+            'pending_tasks'    => $tasksStats['pending'],
+            'need_pm_verify'   => $tasksStats['done_by_staff'],
+            'no_task_accounts' => $noTaskCount,
+            'completed'        => $tasksStats['approved_hr'],
             'my_pending_today' => $myAccounts->filter(function ($acc) use ($todayTasks) {
                 if (!isset($todayTasks[$acc->id])) return true;
                 return in_array($todayTasks[$acc->id]->status, ['pending', 'rejected']);
@@ -218,6 +244,8 @@ class SosmedController extends Controller
             'myAccounts',
             'taskSearch',
             'taskStatus',
+            'taskStatusLabels',
+            'noTaskCount',
             'taskDateFilter',
             'myAccountSearch',
             'todayTasks',
