@@ -9,9 +9,6 @@ use App\Services\TaskService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Validation\ValidationException;
-use App\Models\SosmedTask;
-use App\Models\SosmedAccount;
-use App\Models\User;
 
 class TaskController extends Controller
 {
@@ -152,7 +149,6 @@ class TaskController extends Controller
     public function roleTasks(Request $request, \App\Models\Role $role)
     {
         $date = $request->query('date', Carbon::today()->toDateString());
-        $tab = in_array($request->query('tab'), ['tasks', 'sosmed'], true) ? $request->query('tab') : 'tasks';
         $search = trim((string) $request->query('search', ''));
 
         // Pastikan tugas default harian sudah ter-generate untuk tanggal yang dipantau
@@ -163,134 +159,7 @@ class TaskController extends Controller
         }
         $tasks = $this->taskService->getAllTasksForRole($role->name, 20, $date, $search !== '' ? $search : null);
 
-        // ── Tugas Sosmed: gunakan SosmedAccount sebagai sumber utama ────────
-        $roleUserIds = User::where('role', $role->name)->where('is_active', true)->pluck('id');
-
-        // Helper: bangun baris sosmed per akun (dengan atau tanpa record SosmedTask)
-        $buildSosmedRows = function (\Illuminate\Support\Collection $accounts, string $forDate) {
-            $rows = collect();
-            foreach ($accounts as $acc) {
-                $task = SosmedTask::with(['assignedUser', 'verifiedBy', 'hrVerifiedBy'])
-                    ->where('sosmed_account_id', $acc->id)
-                    ->whereDate('task_date', $forDate)
-                    ->first();
-                // Pastikan relasi account ter-load agar accessor status_label bisa membaca pm_id/assistant_id
-                if ($task) {
-                    $task->setRelation('account', $acc);
-                }
-
-                $rows->push((object)[
-                    'account'        => $acc,
-                    'task'           => $task,
-                    'executor_name'  => $acc->staffUsers->pluck('name')->join(', ') ?: ($acc->staffUser?->name ?? '—'),
-                    'executor_role'  => $acc->staffUsers->pluck('role_label')->filter()->join(', ') ?: ($acc->staffUser?->role_label ?? ''),
-                    'task_date'      => $forDate,
-                    'status'         => $task?->status ?? 'no_task',
-                    'status_label'   => $task ? $task->status_label : 'Belum Ada Tugas',
-                    'status_class'   => $task ? $task->status_badge_class : 'bg-gray-100 text-gray-500 border border-gray-200',
-                    'rejection_note' => $task?->rejection_note,
-                    'is_verif_row'   => false,
-                ]);
-            }
-            return $rows;
-        };
-
-        switch ($role->name) {
-            case 'hr_staff':
-                // 1. Akun yang di-assign langsung ke hr_staff sebagai eksekutor
-                $executorAccounts = SosmedAccount::with(['staffUsers', 'pmUser'])
-                    ->whereHas('staffUsers', fn($q) => $q->whereIn('users.id', $roleUserIds))->get();
-                $sosmedExecRows = $buildSosmedRows($executorAccounts, $date);
-
-                // 2. Semua tugas yang sudah lolos PM dan butuh final approval HR
-                $finalApprovalTasks = SosmedTask::with(['account.staffUsers', 'assignedUser'])
-                    ->where('status', 'verified_by_pm')
-                    ->whereDate('task_date', $date)
-                    ->get()
-                    ->map(fn($t) => (object)[
-                        'account'        => $t->account,
-                        'task'           => $t,
-                        'executor_name'  => $t->assignedUser?->name ?? '—',
-                        'executor_role'  => $t->assignedUser?->role_label ?? '',
-                        'task_date'      => $date,
-                        'status'         => $t->status,
-                        'status_label'   => $t->status_label,
-                        'status_class'   => $t->status_badge_class,
-                        'rejection_note' => null,
-                        'is_verif_row'   => true,
-                    ]);
-                $sosmedPending = $sosmedExecRows->merge($finalApprovalTasks)
-                    ->sortBy('task_date');
-                break;
-
-            case 'hr_assistant':
-                // Semua tugas sosmed di akun yang diawasi asisten ini (butuh verifikasi asisten)
-                $assistantAccounts = SosmedAccount::with(['staffUsers', 'pmUser'])
-                    ->whereIn('assistant_id', $roleUserIds)->get();
-                $sosmedPending = $buildSosmedRows($assistantAccounts, $date);
-                break;
-
-            case 'pm':
-                // Akun yang dikelola PM sebagai eksekutor mandiri
-                $pmExecAccounts = SosmedAccount::with(['staffUsers', 'pmUser'])
-                    ->whereHas('staffUsers', fn($q) => $q->whereIn('users.id', $roleUserIds))->get();
-                $pmExecRows = $buildSosmedRows($pmExecAccounts, $date);
-
-                // Akun yang diawasi PM (butuh verifikasi PM)
-                $pmVerifTasks = SosmedTask::with(['account.staffUsers', 'assignedUser'])
-                    ->whereHas('account', fn($q) => $q->whereIn('pm_id', $roleUserIds))
-                    ->where('status', 'done_by_staff')
-                    ->whereDate('task_date', $date)
-                    ->get()
-                    ->map(fn($t) => (object)[
-                        'account'        => $t->account,
-                        'task'           => $t,
-                        'executor_name'  => $t->assignedUser?->name ?? '—',
-                        'executor_role'  => $t->assignedUser?->role_label ?? '',
-                        'task_date'      => $date,
-                        'status'         => $t->status,
-                        'status_label'   => $t->status_label,
-                        'status_class'   => 'bg-blue-50 text-blue-700 border border-blue-200',
-                        'rejection_note' => null,
-                        'is_verif_row'   => true,
-                    ]);
-                $sosmedPending = $pmExecRows->merge($pmVerifTasks)->sortBy('task_date');
-                break;
-
-            case 'sosmed':
-            case 'digital_marketing':
-                // Akun yang dikelola oleh user role ini
-                $execAccounts = SosmedAccount::with(['staffUsers', 'pmUser'])
-                    ->whereHas('staffUsers', fn($q) => $q->whereIn('users.id', $roleUserIds))->get();
-                $sosmedPending = $buildSosmedRows($execAccounts, $date);
-                break;
-
-            default:
-                $sosmedPending = collect();
-                break;
-        }
-
-        // Pencarian pada tabel Monitoring Sosmed (nama akun, platform, brand, pelaksana, status)
-        if ($search !== '') {
-            $needle = mb_strtolower($search);
-            $sosmedPending = $sosmedPending->filter(function ($row) use ($needle) {
-                $haystacks = [
-                    $row->account?->name,
-                    $row->account?->platform,
-                    $row->account?->brand,
-                    $row->executor_name,
-                    $row->status_label,
-                ];
-                foreach ($haystacks as $v) {
-                    if ($v !== null && str_contains(mb_strtolower((string) $v), $needle)) {
-                        return true;
-                    }
-                }
-                return false;
-            })->values();
-        }
-
-        return view('admin.tasks.role-tasks', compact('tasks', 'role', 'date', 'sosmedPending', 'tab', 'search'));
+        return view('admin.tasks.role-tasks', compact('tasks', 'role', 'date', 'search'));
     }
 
     // ── Force Destroy (Admin hapus task siapapun) ────────

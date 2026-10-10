@@ -37,39 +37,46 @@
     {{-- ═══════════════════════════════════════════════════════════════ --}}
     {{-- STAT CARDS --}}
     {{-- ═══════════════════════════════════════════════════════════════ --}}
-    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4 mb-6">
+    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4 mb-6">
         {{-- Card 1: Total Akun --}}
         <x-responsive-card :padding="'p-3 sm:p-4'">
             <p class="text-xs font-medium text-gray-500">Total Akun</p>
-            <p class="text-xl sm:text-2xl font-bold text-gray-800 mt-1">3</p>
+            <p class="text-xl sm:text-2xl font-bold text-gray-800 mt-1">{{ $stats['total_accounts'] }}</p>
             <p class="text-[10px] sm:text-xs text-gray-400 mt-0.5">dibuat oleh Admin</p>
         </x-responsive-card>
 
         {{-- Card 2: Belum Terbagi ke PM --}}
         <x-responsive-card :padding="'p-3 sm:p-4'">
             <p class="text-xs font-medium text-gray-500">Belum Terbagi ke PM</p>
-            <p class="text-xl sm:text-2xl font-bold text-amber-600 mt-1">0</p>
+            <p class="text-xl sm:text-2xl font-bold text-amber-600 mt-1">{{ $stats['unassigned_pm'] }}</p>
             <p class="text-[10px] sm:text-xs text-amber-500 mt-0.5">siap didistribusikan</p>
         </x-responsive-card>
 
-        {{-- Card 3: Perlu Final Approval HR --}}
+        {{-- Card 3: Belum Dikerjakan --}}
+        <x-responsive-card :padding="'p-3 sm:p-4'">
+            <p class="text-xs font-medium text-gray-500">Belum Dikerjakan</p>
+            <p class="text-xl sm:text-2xl font-bold text-rose-600 mt-1">{{ $stats['pending_tasks'] }}</p>
+            <p class="text-[10px] sm:text-xs text-gray-400 mt-0.5">menunggu dikerjakan</p>
+        </x-responsive-card>
+
+        {{-- Card 4: Menunggu Verifikasi PM --}}
+        <x-responsive-card :padding="'p-3 sm:p-4'">
+            <p class="text-xs font-medium text-gray-500">Menunggu Verifikasi PM</p>
+            <p class="text-xl sm:text-2xl font-bold text-blue-600 mt-1">{{ $stats['need_pm_verify'] }}</p>
+            <p class="text-[10px] sm:text-xs text-gray-400 mt-0.5">sudah submit bukti</p>
+        </x-responsive-card>
+
+        {{-- Card 5: Perlu Final Approval HR --}}
         <x-responsive-card :padding="'p-3 sm:p-4'" class="border-purple-200 bg-purple-50/20">
             <p class="text-xs font-medium text-purple-700">Perlu Final Approval HR</p>
-            <p class="text-xl sm:text-2xl font-bold text-purple-600 mt-1">1</p>
+            <p class="text-xl sm:text-2xl font-bold text-purple-600 mt-1">{{ $stats['need_hr_verify'] }}</p>
             <p class="text-[10px] sm:text-xs text-purple-500 mt-0.5">sudah lolos PM</p>
         </x-responsive-card>
 
-        {{-- Card 4: Total Tugas --}}
+        {{-- Card 6: Selesai Approved --}}
         <x-responsive-card :padding="'p-3 sm:p-4'">
-            <p class="text-xs font-medium text-gray-500">Total Tugas</p>
-            <p class="text-xl sm:text-2xl font-bold text-indigo-600 mt-1">1</p>
-            <p class="text-[10px] sm:text-xs text-gray-400 mt-0.5">seluruh divisi</p>
-        </x-responsive-card>
-
-        {{-- Card 5: Selesai Approved (Ditambahkan col-span-2 agar penuh di mobile) --}}
-        <x-responsive-card :padding="'p-3 sm:p-4'" class="col-span-2 sm:col-span-1">
             <p class="text-xs font-medium text-gray-500">Selesai Approved</p>
-            <p class="text-xl sm:text-2xl font-bold text-emerald-600 mt-1">0</p>
+            <p class="text-xl sm:text-2xl font-bold text-emerald-600 mt-1">{{ $stats['completed'] }}</p>
             <p class="text-[10px] sm:text-xs text-emerald-500 mt-0.5">final selesai</p>
         </x-responsive-card>
     </div>
@@ -109,7 +116,7 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                         d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
                 </svg>
-                Laporan Tugas & Monitoring
+                Monitoring Seluruh Tugas ({{ $allTasks->total() }})
             </a>
             <a href="{{ route('staff.sosmed.index', ['tab' => 'my_accounts']) }}"
                 class="flex items-center gap-2 px-5 py-3.5 text-sm font-medium whitespace-nowrap border-b-2 transition
@@ -744,21 +751,26 @@
                     @endif
                 </form>
 
-                @if($taskStatus)
-                    <span
-                        class="inline-flex items-center gap-1.5 px-2.5 h-9 rounded-lg text-[11px] font-semibold bg-indigo-100 text-indigo-700 w-fit">
-                        Filter status:
-                        {{ match ($taskStatus) {
-                            'pending' => 'Belum Dikerjakan',
-                            'done_by_staff' => 'Menunggu Verifikasi PM/Asisten',
-                            'verified_by_pm' => 'Menunggu HR Staff',
-                            'approved_hr' => 'Disetujui Final',
-                            'rejected' => 'Ditolak',
-                        } }}
-                        <a href="{{ route('staff.sosmed.index', array_filter(['tab' => 'tasks', 'task_date' => $taskDateFilter, 'task_search' => $taskSearch])) }}"
-                            class="hover:underline" title="Hapus filter">&times;</a>
-                    </span>
-                @endif
+                {{-- Filter Status Tugas --}}
+                <form action="{{ route('staff.sosmed.index') }}" method="GET" class="w-full sm:w-auto">
+                    <input type="hidden" name="tab" value="tasks">
+                    @if($taskDateFilter)
+                        <input type="hidden" name="task_date" value="{{ $taskDateFilter }}">
+                    @endif
+                    @if($taskSearch !== '')
+                        <input type="hidden" name="task_search" value="{{ $taskSearch }}">
+                    @endif
+                    <select name="task_status" title="Filter status tugas"
+                        class="w-full sm:w-auto h-9 pl-3 pr-8 text-xs bg-white border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 text-gray-700 transition cursor-pointer"
+                        onchange="this.form.submit()">
+                        <option value="">Semua Status</option>
+                        @foreach($taskStatusLabels as $statusValue => $statusLabel)
+                            <option value="{{ $statusValue }}" @selected($taskStatus === $statusValue)>
+                                {{ $statusLabel }}@if($statusValue === 'no_task') ({{ $noTaskCount }})@endif
+                            </option>
+                        @endforeach
+                    </select>
+                </form>
 
                 {{-- Filter Tanggal --}}
                 <form action="{{ route('staff.sosmed.index') }}" method="GET" class="w-full sm:w-auto">
@@ -778,7 +790,7 @@
                 {{-- Action Buttons --}}
                 <div class="sm:flex sm:items-center gap-2">
                     {{-- Cetak PDF --}}
-                    <button type="button" onclick="printTableOnly('tasksPrintArea', 'Monitoring Tugas Sosmed')"
+                    <button type="button" onclick="printTableOnly('tasksPrintArea', 'Monitoring Seluruh Tugas Sosmed')"
                         class="w-full sm:w-auto inline-flex items-center justify-center gap-2 h-9 px-3.5 bg-primary-600 hover:bg-primary-700 active:bg-primary-800
                             text-white text-xs font-medium rounded-lg transition shadow-sm">
                         <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -821,10 +833,16 @@
                                 <td class="px-2.5 py-2.5 min-w-0">
                                     <p class="font-semibold text-gray-800 truncate" title="{{ $t->title }}">{{ $t->title }}</p>
                                     <div class="flex items-center gap-1.5 mt-0.5 min-w-0">
-                                        <span class="shrink-0 px-1.5 py-0.5 text-[10px] rounded font-medium {{ $t->type === 'daily' ? 'bg-gray-100 text-gray-600' : 'bg-purple-50 text-purple-700' }}">
-                                            {{ $t->type === 'daily' ? 'Harian' : 'Custom' }}
-                                        </span>
+                                        @if($t->id)
+                                            <span class="shrink-0 px-1.5 py-0.5 text-[10px] rounded font-medium {{ $t->type === 'daily' ? 'bg-gray-100 text-gray-600' : 'bg-purple-50 text-purple-700' }}">
+                                                {{ $t->type === 'daily' ? 'Harian' : 'Custom' }}
+                                            </span>
+                                        @endif
                                         <span class="text-[10px] text-gray-400 shrink-0">{{ $t->task_date->translatedFormat('d M Y') }}</span>
+                                        @if($t->id && $t->task_date->toDateString() < $taskDateFilter)
+                                            <span class="shrink-0 px-1.5 py-0.5 text-[10px] rounded font-medium bg-amber-50 text-amber-700"
+                                                title="Masih belum selesai sejak {{ $t->task_date->translatedFormat('d M Y') }}">tertahan</span>
+                                        @endif
                                     </div>
                                 </td>
                                 <td class="px-2.5 py-2.5 text-xs min-w-0">
@@ -839,8 +857,14 @@
                                     @endif
                                 </td>
                                 <td class="px-2.5 py-2.5 text-xs min-w-0">
-                                    @if($t->assignedUser)
-                                        <span class="font-medium text-gray-800 truncate block" title="{{ $t->assignedUser->name }}">{{ $t->assignedUser->name }}</span>
+                                    @php
+                                        // Akun tanpa record tugas tetap tampil (status 'Belum Ada Tugas'), jadi
+                                        // pelaksananya diambil dari daftar pengelola akun.
+                                        $executorNames = $t->assignedUser?->name
+                                            ?? $t->account?->staffUsers?->pluck('name')->join(', ');
+                                    @endphp
+                                    @if($executorNames)
+                                        <span class="font-medium text-gray-800 truncate block" title="{{ $executorNames }}">{{ $executorNames }}</span>
                                     @else
                                         <span class="text-gray-300">—</span>
                                     @endif
@@ -866,8 +890,14 @@
                                         class="inline-flex items-center justify-center px-2 py-0.5 rounded-full text-[11px] font-medium max-w-full {{ $t->status_badge_class }}">
                                         <span class="truncate">{{ $t->status_label }}</span>
                                     </span>
+                                    @if($t->rejection_note)
+                                        <p class="text-[10px] text-rose-600 mt-1 truncate" title="{{ $t->rejection_note }}">
+                                            Catatan: {{ $t->rejection_note }}
+                                        </p>
+                                    @endif
                                 </td>
                                 <td class="px-2.5 py-2.5 text-center">
+                                    @if($t->id)
                                     @php
                                         $taskDetail = [
                                             'title'       => $t->title,
@@ -894,11 +924,18 @@
                                         title="Lihat detail tugas">
                                         Detail
                                     </button>
+                                    @else
+                                        <span class="text-[11px] text-gray-400">Belum ditugaskan</span>
+                                    @endif
                                 </td>
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="8" class="px-4 py-8 text-center text-sm text-gray-400">Belum ada aktivitas tugas.</td>
+                                <td colspan="8" class="px-4 py-8 text-center text-sm text-gray-400">
+                                    {{ $taskStatus === 'no_task'
+                                        ? 'Semua akun yang dikelola sudah pernah mendapat tugas sampai tanggal ini.'
+                                        : 'Belum ada aktivitas tugas.' }}
+                                </td>
                             </tr>
                         @endforelse
                     </tbody>
@@ -927,7 +964,7 @@
                             {{-- Kanan (Pelaksana) --}}
                             <div class="min-w-0 text-right">
                                 <p class="text-gray-400 mb-0.5">Pelaksana</p>
-                                <p class="font-medium text-gray-800 truncate">{{ $t->assignedUser?->name ?? '—' }}</p>
+                                <p class="font-medium text-gray-800 truncate">{{ $t->assignedUser?->name ?? $t->account?->staffUsers?->pluck('name')->join(', ') ?? '—' }}</p>
                             </div>
                             {{-- Kiri (Verif PM) --}}
                             <div class="min-w-0">
@@ -942,7 +979,11 @@
                         </div>
                     </div>
                 @empty
-                    <div class="py-8 text-center text-sm text-gray-400">Belum ada aktivitas tugas.</div>
+                    <div class="py-8 text-center text-sm text-gray-400">
+                        {{ $taskStatus === 'no_task'
+                            ? 'Semua akun yang dikelola sudah pernah mendapat tugas sampai tanggal ini.'
+                            : 'Belum ada aktivitas tugas.' }}
+                    </div>
                 @endforelse
             </div>
 

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Http\Traits\LogsActivity;
+use App\Http\Traits\SosmedMonitoringTasks;
 use App\Models\Brand;
 use App\Models\SosmedAccount;
 use App\Models\SosmedApprovalLog;
@@ -14,7 +15,7 @@ use Illuminate\Support\Facades\Auth;
 
 class SosmedController extends Controller
 {
-    use LogsActivity;
+    use LogsActivity, SosmedMonitoringTasks;
     public function index(Request $request)
     {
         $tab = $request->query('tab', 'accounts');
@@ -69,12 +70,9 @@ class SosmedController extends Controller
             $taskDateFilter = now()->toDateString(); // By default, current date
         }
 
-        // Seluruh Tugas Sosmed
-        $tasksQuery = SosmedTask::with(['account', 'assignedUser', 'assignedBy', 'verifiedBy', 'hrVerifiedBy'])
-            ->when($taskDateFilter, function ($q) use ($taskDateFilter) {
-                $q->whereDate('task_date', $taskDateFilter);
-            })
-            ->orderBy('task_date', 'desc');
+        // Seluruh Tugas Sosmed — termasuk tugas lama yang masih menggantung (belum dikerjakan /
+        // belum diverifikasi) supaya status pengelola terbaca sampai tanggal yang sedang dilihat.
+        $tasksQuery = $this->monitoringTasksQuery($taskDateFilter);
 
         // Get counts before pagination
         $totalTasksCount = $tasksQuery->count();
@@ -86,13 +84,19 @@ class SosmedController extends Controller
             'approved_hr' => (clone $tasksQuery)->where('status', 'approved_hr')->count(),
         ];
 
-        // Filter cepat status tugas dari klik kartu statistik
+        // Label status: sumber pilihan dropdown filter di tab monitoring.
+        $taskStatusLabels = $this->taskStatusLabels();
+
+        // Filter cepat status tugas dari klik kartu statistik atau dropdown status
         $taskStatus = $request->query('task_status');
-        if (! in_array($taskStatus, ['pending', 'done_by_staff', 'verified_by_pm', 'approved_hr', 'rejected'], true)) {
+        if (! in_array($taskStatus, array_keys($taskStatusLabels), true)) {
             $taskStatus = null;
-        } else {
+        } elseif ($taskStatus !== 'no_task') {
             $tasksQuery->where('status', $taskStatus);
         }
+
+        // Akun yang dikelola tapi sampai tanggal ini belum pernah dapat tugas (status 'no_task').
+        $noTaskCount = $this->accountsWithoutTaskQuery($taskDateFilter)->count();
 
         // Pencarian tugas (diterapkan setelah angka kartu dihitung agar statistik stabil)
         $taskSearch = trim((string) $request->query('task_search', ''));
@@ -107,7 +111,9 @@ class SosmedController extends Controller
             });
         }
 
-        $tasks = $tasksQuery->paginate(15)->appends($request->all());
+        $tasks = $taskStatus === 'no_task'
+            ? $this->noTaskPaginator($request, $taskDateFilter, $taskSearch, 'admin.sosmed.index')
+            : $tasksQuery->paginate(15)->appends($request->all());
 
         // Date filter and time ranges for audit logs
         $logDateFilter = $request->query('log_date');
@@ -202,6 +208,7 @@ class SosmedController extends Controller
             'unassigned_staff'  => $accountsStats['unassigned_staff'],
             'total_tasks'       => $tasksStats['total'],
             'pending_tasks'     => $tasksStats['pending'],
+            'no_task_accounts'  => $noTaskCount,
             'need_pm_verify'    => $tasksStats['done_by_staff'],
             'need_admin_verify' => SosmedTask::whereIn('status', ['done_by_staff', 'verified_by_pm'])->count(),
             'need_hr_verify'    => $tasksStats['verified_by_pm'],
@@ -254,7 +261,9 @@ class SosmedController extends Controller
             'staffPendingTasks',
             'taskDateFilter',
             'taskStatus',
+            'taskStatusLabels',
             'taskSearch',
+            'noTaskCount',
             'accFilter',
             'verifySearch',
             'logs',
